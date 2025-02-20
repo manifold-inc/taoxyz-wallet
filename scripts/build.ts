@@ -20,12 +20,13 @@ async function copyAssets() {
     await copyFile("./public/manifest.json", "./dist/manifest.json");
     await copyFile("./public/popup.html", "./dist/popup.html");
     await copyFile("./public/icons/tao.png", "./dist/icons/tao.png");
-    await copyFile("./public/globals.css", "./dist/globals.css");
+    await copyFile("./src/ui/globals.css", "./dist/globals.css");
 
     // No need to move files since they're already in the right place
     // thanks to the build config naming setting
   } catch (error) {
     console.error("Error copying assets:", error);
+    throw error; // Rethrow to see the full error chain
   }
 }
 
@@ -33,12 +34,19 @@ async function main() {
   try {
     await cleanDist();
     const result = await build(config);
+    
+    // Log more details about the build result
     if (!result.success) {
-      throw new Error("Build failed");
+      console.error("Build logs:", result.logs);
+      throw new Error(`Build failed with errors: ${result.logs}`);
     }
+    
     await copyAssets();
   } catch (error) {
     console.error("Build error:", error);
+    if (error instanceof Error) {
+      console.error("Error stack:", error.stack);
+    }
     process.exit(1);
   }
 }

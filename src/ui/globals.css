@@ -17,3 +17,5 @@ html, body, #root {
 body {
   font-family: "Inconsolata", monospace;
 }
+
+/* Copy the contents from public/globals.css to this new file */ 

@@ -1,4 +1,4 @@
-// Basic background service worker
+// Basic background script
 chrome.runtime.onInstalled.addListener(() => {
   console.log('Extension installed');
 });

@@ -1,11 +1,15 @@
 const Home = () => {
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center space-y-4">
       <h1 className="text-2xl font-bold text-gray-800">Taoxyz Wallet</h1>
-      <div className="mt-8 w-full">
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <p className="text-gray-600">Welcome to your wallet</p>
-        </div>
+      <p className="text-gray-600">Welcome to your secure crypto wallet</p>
+      <div className="flex space-x-4">
+        <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+          Create Wallet
+        </button>
+        <button className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+          Import Wallet
+        </button>
       </div>
     </div>
   );
