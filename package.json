@@ -12,7 +12,9 @@
     "tailwindcss": "^4.0.7",
     "typescript": "^5.0.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@fontsource/inconsolata": "^5.1.1"
+  },
   "scripts": {
     "dev": "bun run scripts/build.ts --watch",
     "build": "NODE_ENV=production bun run scripts/build.ts"

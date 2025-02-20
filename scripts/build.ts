@@ -13,9 +13,9 @@ async function cleanDist() {
 async function copyAssets() {
   try {
     await mkdir("./dist/public", { recursive: true });
-    await copyFile("./manifest.json", "./dist/manifest.json");
-    await copyFile("./src/ui/popup.html", "./dist/popup.html");
-    await copyFile("./public/tao.png", "./dist/public/tao.png");
+    await copyFile("./public/manifest.json", "./dist/manifest.json");
+    await copyFile("./public/index.html", "./dist/index.html");
+    await copyFile("./public/icons/tao.png", "./dist/public/tao.png");
     await copyFile("./public/globals.css", "./dist/public/globals.css");
   } catch (error) {
     console.error("Error copying assets:", error);
