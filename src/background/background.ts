@@ -74,15 +74,26 @@
  */
 
 import { Bittensor } from "./services/bittensor";
+import { KeyringService } from "./services/keyring";
+import { cryptoWaitReady } from "@polkadot/util-crypto";
+
 // Service initialization
 const initializeServices = async () => {
+  await cryptoWaitReady();
+
   // Initialize core services in order:
   // 1. Storage service (needed by other services)
-  // 2. Bittensor service (network connectivity)
+  // 2. Keyring service (for crypto operations)
+  const keyring = new KeyringService();
+  // 3. Bittensor service (network connectivity)
   const bittensor = new Bittensor();
-  console.log(bittensor);
-  // 3. Wallet handler (account management)
-  // 4. Messaging handler (communication)
+  // 4. Wallet handler (account management)
+  // 5. Messaging handler (communication)
+
+  return {
+    keyring,
+    bittensor,
+  };
 };
 
 // Message routing setup
@@ -102,13 +113,11 @@ const setupState = () => {
   // - Monitor account states
 };
 
-// Basic background script
+// Initialize extension
 chrome.runtime.onInstalled.addListener(() => {
-  // Initialize extension
   initializeServices();
   setupMessageListeners();
   setupState();
 });
 
-// This is required for service workers
 export {};

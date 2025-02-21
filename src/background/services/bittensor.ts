@@ -1,6 +1,3 @@
-// Bittensor network service
-// Handles all direct blockchain interactions
-
 import { ApiPromise, WsProvider } from "@polkadot/api";
 
 // Handles blockchain-specific operations:
@@ -32,7 +29,7 @@ export class Bittensor {
         throwOnConnect: true,
       });
       await this.api.isReady;
-      console.log("Connected to the Bittensor chain");
+      console.log(`Connected to the endpoint: ${this.endpoint.test}`);
     } catch (error) {
       console.error("Failed to initialize the Bittensor API:", error);
       throw error;
@@ -47,6 +44,7 @@ export class Bittensor {
   }
 
   // RPC Calls
+  // TODO: Abstract conversion?
   public async getBalance(address: string): Promise<string> {
     const api = await this.getApi();
     const accountBalance = await api.query["system"]["account"](address);
