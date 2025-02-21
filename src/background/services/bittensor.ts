@@ -12,7 +12,6 @@ import { ApiPromise, WsProvider } from "@polkadot/api";
 // - Network-specific formatting
 // - Handle network responses/errors
 export class Bittensor {
-  private static instance: Bittensor;
   private api: ApiPromise | null = null;
   private provider: WsProvider | null = null;
 
@@ -21,15 +20,8 @@ export class Bittensor {
     main: "wss://entrypoint-finney.opentensor.ai:443",
   };
 
-  private constructor() {
+  constructor() {
     this.initializeApi();
-  }
-
-  static getInstance(): Bittensor {
-    if (!Bittensor.instance) {
-      Bittensor.instance = new Bittensor();
-    }
-    return Bittensor.instance;
   }
 
   private async initializeApi(): Promise<void> {
@@ -66,6 +58,3 @@ export class Bittensor {
     return balanceInTao;
   }
 }
-
-// Export a singleton instance
-export const bittensor = Bittensor.getInstance();
