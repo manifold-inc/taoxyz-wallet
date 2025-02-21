@@ -3,6 +3,8 @@
   "module": "index.ts",
   "type": "module",
   "devDependencies": {
+    "@tailwindcss/cli": "^4.0.8",
+    "@tailwindcss/postcss": "^4.0.8",
     "@types/bun": "latest",
     "@types/chrome": "^0.0.304",
     "@types/react": "^19.0.10",

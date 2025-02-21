@@ -32,16 +32,16 @@ export class Bittensor {
         throwOnConnect: true,
       });
       await this.api.isReady;
-      console.log("Connected to Bittensor network");
+      console.log("Connected to the Bittensor chain");
     } catch (error) {
-      console.error("Failed to initiali~ze Bittensor API:", error);
+      console.error("Failed to initialize the Bittensor API:", error);
       throw error;
     }
   }
 
-  getApi(): ApiPromise {
+  public getApi(): ApiPromise {
     if (!this.api) {
-      throw new Error("Bittensor API not initialized.");
+      throw new Error("The Bittensor service API is not initialized");
     }
     return this.api;
   }

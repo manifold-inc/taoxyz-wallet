@@ -14,20 +14,6 @@ const config: BuildConfig = {
   naming: {
     entry: "[dir]/[name].[ext]",
   },
-  plugins: [
-    {
-      name: "css",
-      setup(build) {
-        build.onResolve({ filter: /\.css$/ }, (args) => {
-          return {
-            path: args.path,
-            namespace: "css",
-            external: true,
-          };
-        });
-      },
-    },
-  ],
 };
 
 export default config;

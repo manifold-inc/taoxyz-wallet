@@ -1,7 +1,8 @@
-import { HashRouter, Routes, Route, Link } from 'react-router-dom';
+import { HashRouter, Routes, Route, Link } from "react-router-dom";
 import Home from "./pages/Home";
 import Sign from "./pages/Sign";
 import Signin from "./pages/Signin";
+import ImportWallet from "./pages/ImportWallet";
 
 const App = () => {
   return (
@@ -9,13 +10,19 @@ const App = () => {
       <nav className="p-4 bg-gray-100">
         <ul className="flex space-x-4">
           <li>
-            <Link to="/" className="text-blue-600 hover:text-blue-800">Home</Link>
+            <Link to="/" className="text-blue-600 hover:text-blue-800">
+              Home
+            </Link>
           </li>
           <li>
-            <Link to="/sign" className="text-blue-600 hover:text-blue-800">Sign</Link>
+            <Link to="/sign" className="text-blue-600 hover:text-blue-800">
+              Sign
+            </Link>
           </li>
           <li>
-            <Link to="/signin" className="text-blue-600 hover:text-blue-800">Sign In</Link>
+            <Link to="/signin" className="text-blue-600 hover:text-blue-800">
+              Sign In
+            </Link>
           </li>
         </ul>
       </nav>
@@ -25,6 +32,7 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/sign" element={<Sign />} />
           <Route path="/signin" element={<Signin />} />
+          <Route path="/import" element={<ImportWallet />} />
         </Routes>
       </main>
     </HashRouter>
