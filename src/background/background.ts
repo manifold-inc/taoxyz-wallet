@@ -73,51 +73,46 @@
  * - Keys never leave background script
  */
 
-import { Bittensor } from "./services/bittensor";
-import { KeyringService } from "./services/keyring";
 import { cryptoWaitReady } from "@polkadot/util-crypto";
+import { BittensorService } from "./services/bittensor";
+import { KeyringService } from "./services/keyring";
+import { MessageHandler } from "./handlers/messages";
 
-// Service initialization
 const initializeServices = async () => {
-  await cryptoWaitReady();
-
-  // Initialize core services in order:
-  // 1. Storage service (needed by other services)
-  // 2. Keyring service (for crypto operations)
   const keyring = new KeyringService();
-  // 3. Bittensor service (network connectivity)
-  const bittensor = new Bittensor();
-  // 4. Wallet handler (account management)
-  // 5. Messaging handler (communication)
+  const bittensor = new BittensorService();
+  const messageHandler = new MessageHandler();
 
-  return {
-    keyring,
-    bittensor,
-  };
+  messageHandler.registerHandler("pub(import.wallet)", async (payload: any) => {
+    keyring.validateMnemonic(payload.mnemonic);
+    keyring.addAccount(payload.mnemonic, payload.username, payload.password);
+  });
+  setupMessageListeners(messageHandler);
 };
 
-// Message routing setup
-const setupMessageListeners = () => {
-  // Listen for:
-  // - Content script messages (from provider)
-  // - Popup messages (user interface)
-  // - Extension lifecycle events
-  // - Connection management
+const setupMessageListeners = (messageHandler: MessageHandler) => {
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    console.log(`Message Received: ${JSON.stringify(message)}`);
+    messageHandler
+      .handleMessage(message)
+      .then((result) => sendResponse(result))
+      .catch((error) => sendResponse({ success: false, error: error.message }));
+    return true;
+  });
 };
 
-// State management
-const setupState = () => {
-  // - Manage global extension state
-  // - Handle service worker lifecycle
-  // - Maintain network connection
-  // - Monitor account states
-};
-
-// Initialize extension
 chrome.runtime.onInstalled.addListener(() => {
-  initializeServices();
-  setupMessageListeners();
-  setupState();
+  cryptoWaitReady().then(() => {
+    initializeServices();
+  });
 });
 
-export {};
+chrome.runtime.onStartup.addListener(() => {
+  cryptoWaitReady().then(() => {
+    initializeServices();
+  });
+});
+
+cryptoWaitReady().then(() => {
+  initializeServices();
+});

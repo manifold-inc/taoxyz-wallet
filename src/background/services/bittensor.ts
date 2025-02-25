@@ -8,7 +8,8 @@ import { ApiPromise, WsProvider } from "@polkadot/api";
 // - Staking operations
 // - Network-specific formatting
 // - Handle network responses/errors
-export class Bittensor {
+
+export class BittensorService {
   private api: ApiPromise | null = null;
   private provider: WsProvider | null = null;
 
