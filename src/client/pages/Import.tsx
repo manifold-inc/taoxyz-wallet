@@ -2,12 +2,12 @@ import { useState } from "react";
 import { useKeyring } from "../hooks/useKeyring";
 
 const Import = () => {
+  const { addAccount } = useKeyring();
   const [mnemonic, setMnemonic] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { addAccount } = useKeyring();
 
   const handleImport = async () => {
     try {

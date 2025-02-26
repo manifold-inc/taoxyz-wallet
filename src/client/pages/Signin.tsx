@@ -3,20 +3,22 @@ import { useKeyring } from "../hooks/useKeyring";
 import { useNavigate } from "react-router-dom";
 
 const Signin = () => {
+  const navigate = useNavigate();
+  const { unlockAccount, getAddress } = useKeyring();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const { unlockAccount } = useKeyring();
-  const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const isUnlocked = await unlockAccount(username, password);
       if (isUnlocked) {
-        navigate("/dashboard");
+        const address = await getAddress(username);
+        navigate("/dashboard", { state: { address } });
       }
     } catch (error) {
-      console.error("Error during unlock:", error);
+      setError("Invalid username or password");
     }
   };
 
@@ -57,6 +59,7 @@ const Signin = () => {
           >
             Unlock
           </button>
+          {error && <div className="text-red-500">{error}</div>}
         </form>
       </div>
     </div>

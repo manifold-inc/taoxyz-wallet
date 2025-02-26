@@ -41,12 +41,17 @@ export class BittensorService {
   }
 
   public async getBalance(address: string): Promise<string> {
-    const accountBalance = await this.api.query["system"]["account"](address);
-    const {
-      data: { free },
-    } = accountBalance.toJSON() as any;
+    try {
+      const accountBalance = await this.api.query["system"]["account"](address);
+      const {
+        data: { free },
+      } = accountBalance.toJSON() as any;
 
-    const balanceInTao = (free / 1e9).toFixed(4);
-    return balanceInTao;
+      const balanceInTao = (free / 1e9).toFixed(4);
+      return balanceInTao;
+    } catch (error) {
+      console.error("Error in getBalance:", error);
+      throw error;
+    }
   }
 }

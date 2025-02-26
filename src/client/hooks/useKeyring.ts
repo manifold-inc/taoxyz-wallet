@@ -17,11 +17,8 @@ export const useKeyring = () => {
     username: string,
     password: string
   ): Promise<boolean> => {
-    const pairs = keyring.getPairs();
-    const pair = pairs.find((pair) => pair.meta.username === username);
-    if (!pair) {
-      throw new Error("Account not found");
-    }
+    const address = await getAddress(username);
+    const pair = keyring.getPair(address);
     pair.decodePkcs8(password);
     if (!pair.isLocked) {
       return true;
@@ -33,9 +30,19 @@ export const useKeyring = () => {
     return validateMnemonic(mnemonic);
   };
 
+  const getAddress = async (username: string): Promise<string> => {
+    const pairs = keyring.getPairs();
+    const pair = pairs.find((pair) => pair.meta.username === username);
+    if (!pair) {
+      throw new Error("Account not found");
+    }
+    return pair.address;
+  };
+
   return {
     addAccount,
     unlockAccount,
     validateMnemonic,
+    getAddress,
   };
 };

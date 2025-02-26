@@ -79,6 +79,12 @@ import { MessageHandler } from "./handlers/messages";
 const initializeServices = async () => {
   const bittensor = new BittensorService();
   const messageHandler = new MessageHandler();
+
+  messageHandler.registerHandler("ext(getBalance)", async (payload: any) => {
+    const balance = await bittensor.getBalance(payload.address);
+    return balance;
+  });
+
   setupMessageListeners(messageHandler);
 };
 

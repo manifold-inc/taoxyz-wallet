@@ -1,20 +1,10 @@
 export type MessageListeners = (payload: any) => Promise<any>;
 
-export type ImportWalletRequest = {
-  type: "pub(import.wallet)";
+export type GetBalanceRequest = {
+  type: "ext(getBalance)";
   payload: {
-    name: string;
-    password: string;
-    mnemonic: string;
+    address: string;
   };
 };
 
-export type UnlockAccountRequest = {
-  type: "pub(unlock.account)";
-  payload: {
-    name: string;
-    password: string;
-  };
-};
-
-export type Message = ImportWalletRequest | UnlockAccountRequest;
+export type Message = GetBalanceRequest;
