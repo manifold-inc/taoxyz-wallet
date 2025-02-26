@@ -73,20 +73,27 @@
  * - Keys never leave background script
  */
 
-import { cryptoWaitReady } from "@polkadot/util-crypto";
+import { initializeGlobals } from "../utils/polyfills";
 import { BittensorService } from "./services/bittensor";
 import { KeyringService } from "./services/keyring";
 import { MessageHandler } from "./handlers/messages";
 
 const initializeServices = async () => {
-  const keyring = new KeyringService();
   const bittensor = new BittensorService();
+  const keyring = new KeyringService();
   const messageHandler = new MessageHandler();
 
   messageHandler.registerHandler("pub(import.wallet)", async (payload: any) => {
     keyring.validateMnemonic(payload.mnemonic);
-    keyring.addAccount(payload.mnemonic, payload.username, payload.password);
+    return keyring.addAccount(payload.mnemonic, payload.name, payload.password);
   });
+  messageHandler.registerHandler(
+    "pub(unlock.account)",
+    async (payload: any) => {
+      return keyring.unlockAccount(payload.name, payload.password);
+    }
+  );
+
   setupMessageListeners(messageHandler);
 };
 
@@ -96,23 +103,22 @@ const setupMessageListeners = (messageHandler: MessageHandler) => {
     messageHandler
       .handleMessage(message)
       .then((result) => sendResponse(result))
-      .catch((error) => sendResponse({ success: false, error: error.message }));
+      .catch((error) => sendResponse(error));
     return true;
   });
 };
 
 chrome.runtime.onInstalled.addListener(() => {
-  cryptoWaitReady().then(() => {
-    initializeServices();
-  });
+  initializeGlobals();
+  initializeServices();
 });
 
 chrome.runtime.onStartup.addListener(() => {
-  cryptoWaitReady().then(() => {
-    initializeServices();
-  });
+  initializeGlobals();
+  initializeServices();
 });
 
-cryptoWaitReady().then(() => {
+chrome.runtime.onConnect.addListener(() => {
+  initializeGlobals();
   initializeServices();
 });

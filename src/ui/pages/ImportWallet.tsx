@@ -2,14 +2,14 @@ import { useState } from "react";
 
 const ImportWallet = () => {
   const [mnemonic, setMnemonic] = useState("");
-  const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleImport = async () => {
     try {
-      if (!username.trim() || !password.trim()) {
+      if (!name.trim() || !password.trim()) {
         throw new Error("Username and password are required");
       }
 
@@ -20,7 +20,7 @@ const ImportWallet = () => {
         type: "pub(import.wallet)",
         payload: {
           mnemonic: mnemonic.trim().toLowerCase(),
-          username: username.trim(),
+          name: name.trim(),
           password: password.trim(),
         },
       });
@@ -47,8 +47,8 @@ const ImportWallet = () => {
         <input
           type="text"
           className="w-full p-3 bg-transparent border border-gray-700 rounded focus:outline-none"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
           placeholder="Enter username"
         />
 
@@ -75,7 +75,7 @@ const ImportWallet = () => {
           className="w-1/2 py-3 bg-gray-800 text-white rounded"
           onClick={() => {
             setMnemonic("");
-            setUsername("");
+            setName("");
             setPassword("");
           }}
         >
@@ -85,10 +85,7 @@ const ImportWallet = () => {
           className="w-1/2 py-3 bg-white text-black rounded"
           onClick={handleImport}
           disabled={
-            isLoading ||
-            !mnemonic.trim() ||
-            !username.trim() ||
-            !password.trim()
+            isLoading || !mnemonic.trim() || !name.trim() || !password.trim()
           }
         >
           {isLoading ? "Importing..." : "Import"}

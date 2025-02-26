@@ -3,10 +3,18 @@ export type MessageListeners = (payload: any) => Promise<any>;
 export type ImportWalletRequest = {
   type: "pub(import.wallet)";
   payload: {
-    username: string;
+    name: string;
     password: string;
     mnemonic: string;
   };
 };
 
-export type Message = ImportWalletRequest;
+export type UnlockAccountRequest = {
+  type: "pub(unlock.account)";
+  payload: {
+    name: string;
+    password: string;
+  };
+};
+
+export type Message = ImportWalletRequest | UnlockAccountRequest;

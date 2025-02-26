@@ -36,7 +36,9 @@ export class MessageHandler {
       console.log(`Message Result: ${JSON.stringify(response)}`);
       return response;
     } catch (error) {
-      return { success: false, error: (error as Error).message };
+      const response = { success: false, error: (error as Error).message };
+      console.log(`Message Error: ${JSON.stringify(response)}`);
+      return response;
     }
   }
 }

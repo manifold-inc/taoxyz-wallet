@@ -1,7 +1,4 @@
 export interface Account {
+  name: string;
   address: string;
-  isLocked: boolean;
-  metadata: {
-    username: string;
-  };
 }

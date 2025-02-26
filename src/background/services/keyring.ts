@@ -1,45 +1,66 @@
+import keyring from "@polkadot/ui-keyring";
+import { cryptoWaitReady } from "@polkadot/util-crypto";
 import { validateMnemonic } from "@polkadot/util-crypto/mnemonic/bip39";
-import { Keyring } from "@polkadot/api";
-
-import type { Account } from "../../types/account";
 
 export class KeyringService {
-  private keyring: Keyring;
-
   constructor() {
-    this.keyring = new Keyring({ type: "sr25519" });
+    this.initializeKeyring();
+  }
+
+  private async initializeKeyring(): Promise<void> {
+    try {
+      await cryptoWaitReady();
+      keyring.loadAll({ type: "sr25519" });
+      console.log(`Keyring Pairs: ${JSON.stringify(keyring.getPairs())}`);
+    } catch (error) {
+      console.error("Failed to initialize keyring:", error);
+      throw error;
+    }
   }
 
   public async validateMnemonic(mnemonic: string): Promise<boolean> {
     return validateMnemonic(mnemonic);
   }
 
+  // public async getAccounts() {
+  //   const accounts = JSON.parse(localStorage.getItem("accounts") || "[]");
+  //   return accounts;
+  // }
+
+  // public async getAccount(name: string) {
+  //   const accounts = await this.getAccounts();
+  //   const account = accounts.find((account: Account) => account.name === name);
+  //   return account;
+  // }
+
   public async addAccount(
     mnemonic: string,
     username: string,
     password: string
   ) {
-    const account = this.keyring.addFromUri(mnemonic, {
-      name: username,
-      username: username,
-      password: password,
-    });
+    const result = keyring.addUri(mnemonic, password, { name: username });
+    //keyring.saveAccount(result.pair, password);
+    console.log(JSON.stringify(keyring.getPairs()));
+    // const account = {
+    //   name: username,
+    //   address: result.json.address,
+    // };
 
-    const serializedAccount: Account = {
-      address: account.address,
-      isLocked: true,
-      metadata: {
-        username: username,
-      },
-    };
-    const existingAccounts = await this.loadAccounts();
-    const updatedAccounts = [...existingAccounts, serializedAccount];
-    await chrome.storage.local.set({ accounts: updatedAccounts });
-    return account;
+    // const accounts = JSON.parse(localStorage.getItem("accounts") || "[]");
+    // accounts.push(account);
+    // localStorage.setItem("accounts", JSON.stringify(accounts));
+    return result;
   }
 
-  public async loadAccounts() {
-    const result = await chrome.storage.local.get("accounts");
-    return result.accounts || [];
+  public async unlockAccount(name: string, password: string) {
+    //grab account from name or address
+    const pair = keyring.getPair(name);
+    console.log(pair);
+    pair.decodePkcs8(password);
+
+    if (!pair.isLocked) {
+      return pair;
+    }
+    throw new Error("Invalid password");
   }
 }

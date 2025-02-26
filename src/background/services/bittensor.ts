@@ -8,10 +8,9 @@ import { ApiPromise, WsProvider } from "@polkadot/api";
 // - Staking operations
 // - Network-specific formatting
 // - Handle network responses/errors
-
 export class BittensorService {
-  private api: ApiPromise | null = null;
-  private provider: WsProvider | null = null;
+  private api!: ApiPromise;
+  private provider!: WsProvider;
 
   private readonly endpoint = {
     test: "wss://test.finney.opentensor.ai:443",
@@ -38,17 +37,11 @@ export class BittensorService {
   }
 
   public getApi(): ApiPromise {
-    if (!this.api) {
-      throw new Error("The Bittensor service API is not initialized");
-    }
     return this.api;
   }
 
-  // RPC Calls
-  // TODO: Abstract conversion?
   public async getBalance(address: string): Promise<string> {
-    const api = await this.getApi();
-    const accountBalance = await api.query["system"]["account"](address);
+    const accountBalance = await this.api.query["system"]["account"](address);
     const {
       data: { free },
     } = accountBalance.toJSON() as any;
