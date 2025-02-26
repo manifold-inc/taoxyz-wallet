@@ -1,19 +1,20 @@
 import React, { useState } from "react";
+import { useKeyring } from "../hooks/useKeyring";
+import { useNavigate } from "react-router-dom";
 
 const Signin = () => {
-  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const { unlockAccount } = useKeyring();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await chrome.runtime.sendMessage({
-        type: "pub(unlock.account)",
-        payload: {
-          name,
-          password,
-        },
-      });
+      const isUnlocked = await unlockAccount(username, password);
+      if (isUnlocked) {
+        navigate("/dashboard");
+      }
     } catch (error) {
       console.error("Error during unlock:", error);
     }
@@ -30,8 +31,8 @@ const Signin = () => {
             </label>
             <input
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
               placeholder="Enter your username"
               required

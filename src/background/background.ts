@@ -73,27 +73,12 @@
  * - Keys never leave background script
  */
 
-import { initializeGlobals } from "../utils/polyfills";
 import { BittensorService } from "./services/bittensor";
-import { KeyringService } from "./services/keyring";
 import { MessageHandler } from "./handlers/messages";
 
 const initializeServices = async () => {
   const bittensor = new BittensorService();
-  const keyring = new KeyringService();
   const messageHandler = new MessageHandler();
-
-  messageHandler.registerHandler("pub(import.wallet)", async (payload: any) => {
-    keyring.validateMnemonic(payload.mnemonic);
-    return keyring.addAccount(payload.mnemonic, payload.name, payload.password);
-  });
-  messageHandler.registerHandler(
-    "pub(unlock.account)",
-    async (payload: any) => {
-      return keyring.unlockAccount(payload.name, payload.password);
-    }
-  );
-
   setupMessageListeners(messageHandler);
 };
 
@@ -109,16 +94,13 @@ const setupMessageListeners = (messageHandler: MessageHandler) => {
 };
 
 chrome.runtime.onInstalled.addListener(() => {
-  initializeGlobals();
   initializeServices();
 });
 
 chrome.runtime.onStartup.addListener(() => {
-  initializeGlobals();
   initializeServices();
 });
 
 chrome.runtime.onConnect.addListener(() => {
-  initializeGlobals();
   initializeServices();
 });

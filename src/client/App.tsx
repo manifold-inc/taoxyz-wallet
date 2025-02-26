@@ -1,8 +1,8 @@
 import { HashRouter, Routes, Route, Link } from "react-router-dom";
 import Home from "./pages/Home";
-import Sign from "./pages/Sign";
 import Signin from "./pages/Signin";
-import ImportWallet from "./pages/ImportWallet";
+import Import from "./pages/Import";
+import Dashboard from "./pages/Dashboard";
 
 const App = () => {
   return (
@@ -12,11 +12,6 @@ const App = () => {
           <li>
             <Link to="/" className="text-blue-600 hover:text-blue-800">
               Home
-            </Link>
-          </li>
-          <li>
-            <Link to="/sign" className="text-blue-600 hover:text-blue-800">
-              Sign
             </Link>
           </li>
           <li>
@@ -30,9 +25,9 @@ const App = () => {
       <main className="p-4">
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/sign" element={<Sign />} />
           <Route path="/signin" element={<Signin />} />
-          <Route path="/import" element={<ImportWallet />} />
+          <Route path="/import" element={<Import />} />
+          <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
       </main>
     </HashRouter>
