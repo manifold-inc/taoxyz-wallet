@@ -4,6 +4,7 @@ import Signin from "./pages/Signin";
 import Import from "./pages/Import";
 import Dashboard from "./pages/Dashboard";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { StakingPage } from "./pages/Stake";
 
 const App = () => {
   return (
@@ -33,6 +34,14 @@ const App = () => {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/stake"
+            element={
+              <ProtectedRoute>
+                <StakingPage />
               </ProtectedRoute>
             }
           />

@@ -85,6 +85,16 @@ const initializeServices = async () => {
     return balance;
   });
 
+  messageHandler.registerHandler("ext(getSubnets)", async () => {
+    const subnets = await bittensor.getSubnets();
+    return subnets;
+  });
+
+  messageHandler.registerHandler("ext(getValidators)", async (payload: any) => {
+    const validators = await bittensor.getValidators(payload.netuid);
+    return validators;
+  });
+
   setupMessageListeners(messageHandler);
 };
 

@@ -8,6 +8,10 @@ import { ApiPromise, WsProvider } from "@polkadot/api";
 // - Staking operations
 // - Network-specific formatting
 // - Handle network responses/errors
+
+// Move interface outside the class
+import type { SubnetInfo, ValidatorInfo } from "../../types/subnets";
+
 export class BittensorService {
   private api!: ApiPromise;
   private provider!: WsProvider;
@@ -42,7 +46,7 @@ export class BittensorService {
 
   public async getBalance(address: string): Promise<string> {
     try {
-      const accountBalance = await this.api.query["system"]["account"](address);
+      const accountBalance = await this.api.query.system.account(address);
       const {
         data: { free },
       } = accountBalance.toJSON() as any;
@@ -51,6 +55,69 @@ export class BittensorService {
       return balanceInTao;
     } catch (error) {
       console.error("Error in getBalance:", error);
+      throw error;
+    }
+  }
+
+  public async getSubnets(): Promise<SubnetInfo[]> {
+    try {
+      const allSubnetsInfo =
+        await this.api.call.subnetInfoRuntimeApi.getAllDynamicInfo();
+
+      const subnets = (allSubnetsInfo.toJSON() as any[])
+        .map((info) => {
+          if (!info) return null;
+          const subnetName = info.subnetName
+            ? String.fromCharCode(...info.subnetName)
+            : `Subnet ${info.netuid}`;
+
+          const price =
+            info.netuid === 0
+              ? 1
+              : info.taoIn && info.alphaIn && info.alphaIn > 0
+              ? Number((info.taoIn / info.alphaIn).toFixed(4))
+              : 0;
+
+          const subnet: SubnetInfo = {
+            netuid: info.netuid,
+            name: subnetName,
+            price: price,
+          };
+          return subnet;
+        })
+        .filter((subnet): subnet is SubnetInfo => subnet !== null);
+
+      return subnets;
+    } catch (error) {
+      console.error("Error in getSubnets:", error);
+      throw error;
+    }
+  }
+
+  public async getValidators(subnetId: number): Promise<ValidatorInfo[]> {
+    try {
+      const metagraph = await this.api.call.subnetInfoRuntimeApi.getMetagraph(
+        subnetId
+      );
+      const data = metagraph.toJSON() as any;
+      if (!data || !data.coldkeys || !data.active || !data.validatorPermit) {
+        throw new Error("Invalid metagraph data structure");
+      }
+
+      const validators: ValidatorInfo[] = [];
+      for (let i = 0; i < data.coldkeys.length; i++) {
+        if (data.active[i] === true && data.validatorPermit[i] === true) {
+          validators.push({
+            index: i,
+            hotkey: data.hotkeys[i] || "unknown",
+            coldkey: data.coldkeys[i] || "unknown",
+          });
+        }
+      }
+
+      return validators;
+    } catch (error) {
+      console.error("Error in getValidators:", error);
       throw error;
     }
   }
