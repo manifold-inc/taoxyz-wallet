@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { SubnetSelection } from "../components/staking/SubnetSelection";
 import { ValidatorSelection } from "../components/staking/ValidatorSelection";
 import { StakeConfirmation } from "../components/staking/StakeConfirmation";
-import type { SubnetInfo, ValidatorInfo } from "../../types/subnets";
+import type { Subnet, Validator } from "../../types/subnets";
 
 enum Step {
   SELECT_SUBNET,
@@ -12,11 +12,12 @@ enum Step {
 
 export const Stake = () => {
   const [step, setStep] = useState<Step>(Step.SELECT_SUBNET);
-  const [subnets, setSubnets] = useState<SubnetInfo[]>([]);
-  const [selectedSubnet, setSelectedSubnet] = useState<SubnetInfo | null>(null);
-  const [validators, setValidators] = useState<ValidatorInfo[]>([]);
-  const [selectedValidator, setSelectedValidator] =
-    useState<ValidatorInfo | null>(null);
+  const [subnets, setSubnets] = useState<Subnet[]>([]);
+  const [selectedSubnet, setSelectedSubnet] = useState<Subnet | null>(null);
+  const [validators, setValidators] = useState<Validator[]>([]);
+  const [selectedValidator, setSelectedValidator] = useState<Validator | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -65,12 +66,12 @@ export const Stake = () => {
     }
   };
 
-  const handleSubnetSelect = (subnet: SubnetInfo) => {
+  const handleSubnetSelect = (subnet: Subnet) => {
     setSelectedSubnet(subnet);
     setStep(Step.SELECT_VALIDATOR);
   };
 
-  const handleValidatorSelect = (validator: ValidatorInfo) => {
+  const handleValidatorSelect = (validator: Validator) => {
     setSelectedValidator(validator);
     setStep(Step.CONFIRM_STAKE);
   };

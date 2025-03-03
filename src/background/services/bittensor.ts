@@ -119,30 +119,4 @@ export class BittensorService {
       throw error;
     }
   }
-  // public async createStake({
-  //   mnemonic,
-  //   subnetId,
-  //   validatorHotkey,
-  //   amount,
-  // }: {
-  //   mnemonic: string;
-  //   address: string;
-  //   subnetId: number;
-  //   validatorHotkey: string;
-  //   amount: number;
-  // }) {
-  //   try {
-  //     const amountInRao = BigInt(Math.floor(amount * 1e9));
-  //     const account = await this.createAccount({
-  //       mnemonic,
-  //     });
-  //     const stake = await this.api.tx.subtensorModule
-  //       .addStake(validatorHotkey, subnetId, amountInRao)
-  //       .signAndSend(account);
-  //     return stake.hash;
-  //   } catch (error) {
-  //     console.error("Error in createStake:", error);
-  //     throw error;
-  //   }
-  // }
 }

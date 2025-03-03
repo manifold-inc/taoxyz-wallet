@@ -1,11 +1,12 @@
-import type { SubnetInfo, ValidatorInfo } from "../../../types/subnets";
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
+
 import { useRpcApi } from "../../contexts/RpcApiContext";
+import type { Subnet, Validator } from "../../../types/subnets";
 
 interface StakeConfirmationProps {
-  subnet: SubnetInfo;
-  validator: ValidatorInfo;
+  subnet: Subnet;
+  validator: Validator;
   onBack: () => void;
 }
 

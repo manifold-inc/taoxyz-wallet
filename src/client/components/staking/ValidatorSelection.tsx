@@ -1,10 +1,10 @@
-import type { SubnetInfo, ValidatorInfo } from "../../../types/subnets";
+import type { Subnet, Validator } from "../../../types/subnets";
 
 interface ValidatorSelectionProps {
-  subnet: SubnetInfo;
-  validators: ValidatorInfo[];
+  subnet: Subnet;
+  validators: Validator[];
   isLoading: boolean;
-  onSelect: (validator: ValidatorInfo) => void;
+  onSelect: (validator: Validator) => void;
   onBack: () => void;
 }
 

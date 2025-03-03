@@ -1,10 +1,10 @@
-export interface SubnetInfo {
+export interface Subnet {
   subnetId: number;
   name: string;
   price: number;
 }
 
-export interface ValidatorInfo {
+export interface Validator {
   index: number;
   hotkey: string;
   coldkey: string;

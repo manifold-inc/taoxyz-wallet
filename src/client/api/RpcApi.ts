@@ -33,9 +33,21 @@ export class RpcApi {
   public async getApi(): Promise<ApiPromise> {
     await this.initPromise;
     if (!this.api) {
+      console.error("[Client] API not initialized");
       throw new Error("API not initialized");
     }
     return this.api;
+  }
+
+  public async getStake(address: string) {
+    try {
+      const stake =
+        await this.api.call.stakeInfoRuntimeApi.getStakeInfoForColdkey(address);
+      return stake.toJSON();
+    } catch (error) {
+      console.error("[Client] Failed to get stake:", error);
+      throw error;
+    }
   }
 
   public async createStake({
@@ -50,16 +62,33 @@ export class RpcApi {
     amount: number;
   }) {
     try {
-      console.log(`[Client] Creating stake for address: ${address}`);
       const amountInRao = BigInt(Math.floor(amount * 1e9));
       const account = await KeyringService.getAccount(address);
       const stake = await this.api.tx.subtensorModule
         .addStake(validatorHotkey, subnetId, amountInRao)
         .signAndSend(account);
-      console.log(`[Client] Stake created with hash: ${stake.hash}`);
       return stake.hash;
     } catch (error) {
       console.error("[Client] Failed to create stake:", error);
+      throw error;
+    }
+  }
+
+  public async removeStake(
+    address: string,
+    validatorHotkey: string,
+    subnetId: number,
+    amount: number
+  ) {
+    try {
+      const amountInRao = BigInt(Math.floor(amount * 1e9));
+      const account = await KeyringService.getAccount(address);
+      const stake = await this.api.tx.subtensorModule
+        .removeStake(validatorHotkey, subnetId, amountInRao)
+        .signAndSend(account);
+      return stake.hash;
+    } catch (error) {
+      console.error("[Client] Failed to remove stake:", error);
       throw error;
     }
   }
