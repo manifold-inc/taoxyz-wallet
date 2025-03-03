@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import type { SubnetInfo, ValidatorInfo } from "../../types/subnets";
 import { SubnetSelection } from "../components/staking/SubnetSelection";
 import { ValidatorSelection } from "../components/staking/ValidatorSelection";
 import { StakeConfirmation } from "../components/staking/StakeConfirmation";
+import type { SubnetInfo, ValidatorInfo } from "../../types/subnets";
 
 enum Step {
   SELECT_SUBNET,
@@ -10,7 +10,7 @@ enum Step {
   CONFIRM_STAKE,
 }
 
-export const StakingPage = () => {
+export const Stake = () => {
   const [step, setStep] = useState<Step>(Step.SELECT_SUBNET);
   const [subnets, setSubnets] = useState<SubnetInfo[]>([]);
   const [selectedSubnet, setSelectedSubnet] = useState<SubnetInfo | null>(null);
@@ -25,7 +25,7 @@ export const StakingPage = () => {
 
   useEffect(() => {
     if (selectedSubnet) {
-      getValidators(selectedSubnet.netuid);
+      getValidators(selectedSubnet.subnetId);
     }
   }, [selectedSubnet]);
 
@@ -124,4 +124,4 @@ export const StakingPage = () => {
   );
 };
 
-export default StakingPage;
+export default Stake;

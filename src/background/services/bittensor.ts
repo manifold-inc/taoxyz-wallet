@@ -1,5 +1,3 @@
-import { ApiPromise, WsProvider } from "@polkadot/api";
-
 // Handles blockchain-specific operations:
 // - RPC calls to nodes
 // - Query account balances/nonces
@@ -9,7 +7,7 @@ import { ApiPromise, WsProvider } from "@polkadot/api";
 // - Network-specific formatting
 // - Handle network responses/errors
 
-// Move interface outside the class
+import { ApiPromise, WsProvider, Keyring } from "@polkadot/api";
 import type { SubnetInfo, ValidatorInfo } from "../../types/subnets";
 
 export class BittensorService {
@@ -79,7 +77,7 @@ export class BittensorService {
               : 0;
 
           const subnet: SubnetInfo = {
-            netuid: info.netuid,
+            subnetId: info.netuid,
             name: subnetName,
             price: price,
           };
@@ -121,4 +119,30 @@ export class BittensorService {
       throw error;
     }
   }
+  // public async createStake({
+  //   mnemonic,
+  //   subnetId,
+  //   validatorHotkey,
+  //   amount,
+  // }: {
+  //   mnemonic: string;
+  //   address: string;
+  //   subnetId: number;
+  //   validatorHotkey: string;
+  //   amount: number;
+  // }) {
+  //   try {
+  //     const amountInRao = BigInt(Math.floor(amount * 1e9));
+  //     const account = await this.createAccount({
+  //       mnemonic,
+  //     });
+  //     const stake = await this.api.tx.subtensorModule
+  //       .addStake(validatorHotkey, subnetId, amountInRao)
+  //       .signAndSend(account);
+  //     return stake.hash;
+  //   } catch (error) {
+  //     console.error("Error in createStake:", error);
+  //     throw error;
+  //   }
+  // }
 }

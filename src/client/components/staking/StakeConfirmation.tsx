@@ -1,5 +1,7 @@
-import React, { useState } from "react";
 import type { SubnetInfo, ValidatorInfo } from "../../../types/subnets";
+import { useState } from "react";
+import { useLocation } from "react-router-dom";
+import { useRpcApi } from "../../contexts/RpcApiContext";
 
 interface StakeConfirmationProps {
   subnet: SubnetInfo;
@@ -12,35 +14,37 @@ export const StakeConfirmation = ({
   validator,
   onBack,
 }: StakeConfirmationProps) => {
+  const { api, isLoading } = useRpcApi();
+  const location = useLocation();
+  const address = location.state?.address;
   const [amount, setAmount] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async () => {
-    if (!amount || isSubmitting) return;
-
+    if (!api || !amount || isSubmitting) return;
+    setIsSubmitting(true);
     try {
-      setIsSubmitting(true);
-      const response = await chrome.runtime.sendMessage({
-        type: "ext(stake)",
-        payload: {
-          amount: parseFloat(amount),
-          subnetId: subnet.netuid,
-          validatorHotkey: validator.hotkey,
-        },
+      await api.createStake({
+        address,
+        subnetId: subnet.subnetId,
+        validatorHotkey: validator.hotkey,
+        amount: parseFloat(amount),
       });
-
-      if (response.success) {
-        // TODO: Show success message and redirect
-        console.log("Staking successful");
-      } else {
-        console.error("Staking failed:", response.error);
-      }
     } catch (error) {
-      console.error("Error while staking:", error);
+      setError(error instanceof Error ? error.message : "Failed to stake");
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  if (isLoading) {
+    return <div>Loading API...</div>;
+  }
+
+  if (!api) {
+    return <div>API not initialized</div>;
+  }
 
   return (
     <div>
@@ -90,11 +94,13 @@ export const StakeConfirmation = ({
             />
           </div>
 
+          {error && <div className="text-red-600 text-sm">{error}</div>}
+
           <button
             onClick={handleSubmit}
-            disabled={!amount || isSubmitting}
+            disabled={!amount || isSubmitting || !api}
             className={`w-full py-2 px-4 rounded text-white transition-colors ${
-              !amount || isSubmitting
+              !amount || isSubmitting || !api
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-blue-500 hover:bg-blue-600"
             }`}

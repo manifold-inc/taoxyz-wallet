@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { useKeyring } from "../hooks/useKeyring";
+import { KeyringService } from "../services/KeyringService";
 
 const Import = () => {
-  const { addAccount } = useKeyring();
   const [mnemonic, setMnemonic] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -25,11 +24,7 @@ const Import = () => {
       }
 
       setIsLoading(true);
-      const pair = await addAccount(mnemonic, username, password);
-
-      if (!pair) {
-        throw new Error("Failed to import wallet");
-      }
+      await KeyringService.addAccount(mnemonic, username, password);
 
       setMnemonic("");
       setUsername("");

@@ -1,10 +1,9 @@
-import React, { useState } from "react";
-import { useKeyring } from "../hooks/useKeyring";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { KeyringService } from "../services/KeyringService";
 
 const Signin = () => {
   const navigate = useNavigate();
-  const { unlockAccount, getAddress } = useKeyring();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -12,13 +11,13 @@ const Signin = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const isUnlocked = await unlockAccount(username, password);
+      const isUnlocked = await KeyringService.unlockAccount(username, password);
       if (isUnlocked) {
-        const address = await getAddress(username);
+        const address = await KeyringService.getAddress(username);
         navigate("/dashboard", { state: { address } });
       }
     } catch (error) {
-      setError("Invalid username or password");
+      setError(error instanceof Error ? error.message : "Failed to sign in");
     }
   };
 

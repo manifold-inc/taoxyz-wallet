@@ -1,5 +1,5 @@
 export interface SubnetInfo {
-  netuid: number;
+  subnetId: number;
   name: string;
   price: number;
 }

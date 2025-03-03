@@ -33,11 +33,11 @@ export class MessageHandler {
     try {
       const result = await handler(message.payload);
       const response = { success: true, data: result };
-      console.log(`Message Result: ${JSON.stringify(response)}`);
+      console.log(`[Background] Message Result: ${JSON.stringify(response)}`);
       return response;
     } catch (error) {
       const response = { success: false, error: (error as Error).message };
-      console.log(`Message Error: ${JSON.stringify(response)}`);
+      console.log(`[Background] Message Error: ${JSON.stringify(response)}`);
       return response;
     }
   }
