@@ -1,31 +1,11 @@
-import { BittensorService } from "./services/bittensor";
 import { MessageHandler } from "./handlers/messages";
 
-// Potentially Refactor this to handle messages from external dapps and move functionality of querying the RPC to the rpcapi.ts
-
 let isInitialized = false;
-
-const initializeOnce = async () => {
+const initialize = async () => {
   if (isInitialized) return;
   isInitialized = true;
 
-  const bittensor = new BittensorService();
   const messageHandler = new MessageHandler();
-
-  messageHandler.registerHandler("ext(getBalance)", async (payload: any) => {
-    const balance = await bittensor.getBalance(payload.address);
-    return balance;
-  });
-
-  messageHandler.registerHandler("ext(getSubnets)", async () => {
-    const subnets = await bittensor.getSubnets();
-    return subnets;
-  });
-
-  messageHandler.registerHandler("ext(getValidators)", async (payload: any) => {
-    const validators = await bittensor.getValidators(payload.subnetId);
-    return validators;
-  });
 
   setupMessageListeners(messageHandler);
 };
@@ -79,5 +59,5 @@ const setupMessageListeners = (messageHandler: MessageHandler) => {
   });
 };
 
-chrome.runtime.onInstalled.addListener(initializeOnce);
-chrome.runtime.onStartup.addListener(initializeOnce);
+chrome.runtime.onInstalled.addListener(initialize);
+chrome.runtime.onStartup.addListener(initialize);

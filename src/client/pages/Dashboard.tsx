@@ -19,11 +19,8 @@ export const Dashboard = () => {
     const fetchBalance = async () => {
       setIsLoading(true);
       try {
-        const result = await chrome.runtime.sendMessage({
-          type: "ext(getBalance)",
-          payload: { address },
-        });
-        setBalance(result.data);
+        const balance = await api?.getBalance(address);
+        setBalance(balance ?? "0");
       } catch (error) {
         setError(
           error instanceof Error ? error.message : "Failed to fetch balance"

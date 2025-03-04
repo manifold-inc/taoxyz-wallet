@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { SubnetSelection } from "../components/staking/SubnetSelection";
 import { ValidatorSelection } from "../components/staking/ValidatorSelection";
 import { StakeConfirmation } from "../components/staking/StakeConfirmation";
+import { useRpcApi } from "../contexts/RpcApiContext";
 import type { Subnet, Validator } from "../../types/subnets";
 
 enum Step {
@@ -11,6 +12,7 @@ enum Step {
 }
 
 export const Stake = () => {
+  const { api } = useRpcApi();
   const [step, setStep] = useState<Step>(Step.SELECT_SUBNET);
   const [subnets, setSubnets] = useState<Subnet[]>([]);
   const [selectedSubnet, setSelectedSubnet] = useState<Subnet | null>(null);
@@ -32,14 +34,8 @@ export const Stake = () => {
 
   const getSubnets = async () => {
     try {
-      const response = await chrome.runtime.sendMessage({
-        type: "ext(getSubnets)",
-      });
-      if (response.success) {
-        setSubnets(response.data);
-      } else {
-        console.error("Failed to load subnets:", response.error);
-      }
+      const subnets = await api?.getSubnets();
+      setSubnets(subnets ?? []);
     } catch (error) {
       console.error("Error loading subnets:", error);
     } finally {
@@ -50,15 +46,8 @@ export const Stake = () => {
   const getValidators = async (subnetId: number) => {
     try {
       setIsLoading(true);
-      const response = await chrome.runtime.sendMessage({
-        type: "ext(getValidators)",
-        payload: { subnetId },
-      });
-      if (response.success) {
-        setValidators(response.data);
-      } else {
-        console.error("Failed to load validators:", response.error);
-      }
+      const validators = await api?.getValidators(subnetId);
+      setValidators(validators ?? []);
     } catch (error) {
       console.error("Error loading validators:", error);
     } finally {
