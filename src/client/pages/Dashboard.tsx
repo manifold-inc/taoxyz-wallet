@@ -74,7 +74,7 @@ export const Dashboard = () => {
           <p className="mt-2">Balance: {balance} τ</p>
         </div>
 
-        <Portfolio stakes={stakes} />
+        <Portfolio stakes={stakes} address={address} />
 
         {isLoading && (
           <div className="text-center">

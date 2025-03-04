@@ -43,6 +43,7 @@ export class RpcApi {
     try {
       const stake =
         await this.api.call.stakeInfoRuntimeApi.getStakeInfoForColdkey(address);
+      console.log("[Client] Stake:", stake.toJSON());
       return stake.toJSON();
     } catch (error) {
       console.error("[Client] Failed to get stake:", error);
