@@ -1,8 +1,7 @@
 import keyring from "@polkadot/ui-keyring";
 import type { KeyringPair } from "@polkadot/keyring/types";
+import { mnemonicGenerate } from "@polkadot/util-crypto";
 import { validateMnemonic } from "bip39";
-
-// TODO: error handling
 
 export const KeyringService = {
   async addAccount(
@@ -21,6 +20,10 @@ export const KeyringService = {
     const pair = keyring.getPair(address);
     pair.decodePkcs8(password);
     return !pair.isLocked;
+  },
+
+  createMnemonic(): string {
+    return mnemonicGenerate(12);
   },
 
   validateMnemonic(mnemonic: string): boolean {

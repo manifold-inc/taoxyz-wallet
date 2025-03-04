@@ -23,6 +23,11 @@ const Import = () => {
         return;
       }
 
+      if (!KeyringService.validateMnemonic(mnemonic)) {
+        setError("Invalid mnemonic");
+        return;
+      }
+
       setIsLoading(true);
       await KeyringService.addAccount(mnemonic, username, password);
 

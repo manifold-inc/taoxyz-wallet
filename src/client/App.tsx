@@ -5,6 +5,7 @@ import Signin from "./pages/Signin";
 import Import from "./pages/Import";
 import Dashboard from "./pages/Dashboard";
 import Stake from "./pages/Stake";
+import Create from "./pages/Create";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { RpcApiProvider } from "./contexts/RpcApiContext";
 
@@ -31,6 +32,7 @@ const App = () => {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/signin" element={<Signin />} />
+            <Route path="/create" element={<Create />} />
             <Route path="/import" element={<Import />} />
             <Route
               path="/dashboard"
