@@ -17,11 +17,11 @@ const Connect = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const init = async () => {
+    const requestConnect = async () => {
       try {
-        const result = await chrome.storage.local.get(["pendingRequest"]);
-        if (result.pendingRequest) {
-          setRequest(result.pendingRequest);
+        const result = await chrome.storage.local.get(["connectRequest"]);
+        if (result.connectRequest) {
+          setRequest(result.connectRequest);
         }
 
         const keyringAccounts = await KeyringService.getAccounts();
@@ -35,17 +35,15 @@ const Connect = () => {
           },
           selected: false,
         }));
-
-        console.log("Formatted accounts:", formattedAccounts);
         setAccounts(formattedAccounts);
       } catch (error) {
-        console.error("Failed to initialize:", error);
+        console.error("Failed to connect:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    init();
+    requestConnect();
   }, []);
 
   const toggleAccount = (address: string) => {
@@ -62,27 +60,25 @@ const Connect = () => {
     if (!request) return;
     const selectedAccounts = accounts
       .filter((acc) => acc.selected)
-      .map(({ selected, ...acc }) => ({
-        address: acc.address,
-        genesisHash: acc.genesisHash,
-        name: acc.name,
-        type: acc.type,
-        meta: {
-          source: "taoxyz-wallet",
-        },
-      }));
+      .map(({ selected, ...acc }) => acc);
 
-    console.log("[Client] Sending Accounts:", selectedAccounts);
-    await chrome.runtime.sendMessage({
-      type: "AUTHORIZATION_RESPONSE",
-      payload: {
-        approved,
-        accounts: selectedAccounts,
-        requestId: request.requestId,
-        origin: request.origin,
-      },
-    });
-    window.close();
+    try {
+      const response = await chrome.runtime.sendMessage({
+        type: "ext(connectResponse)",
+        payload: {
+          approved,
+          accounts: selectedAccounts,
+          requestId: request.requestId,
+          origin: request.origin,
+        },
+      });
+
+      if (response?.success) {
+        window.close();
+      }
+    } catch (error) {
+      console.error("[Client] Error sending response:", error);
+    }
   };
 
   if (loading) return <div className="p-4">Loading...</div>;

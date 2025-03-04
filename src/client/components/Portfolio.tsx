@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { useRpcApi } from "../contexts/RpcApiContext";
 import type { Stake } from "../../types/stake";
 
@@ -8,6 +9,7 @@ interface PortfolioProps {
 
 export const Portfolio = ({ stakes, address }: PortfolioProps) => {
   const { api } = useRpcApi();
+  const navigate = useNavigate();
 
   const handleUnstake = async (stake: Stake) => {
     try {
@@ -18,7 +20,7 @@ export const Portfolio = ({ stakes, address }: PortfolioProps) => {
         stake.netuid,
         convertedStake
       );
-      console.log("[Client] Unstaked Successful");
+      navigate("/dashboard");
     } catch (error) {
       console.error("[Client] Failed to unstake:", error);
     }

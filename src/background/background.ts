@@ -1,33 +1,19 @@
-import { MessageHandler } from "./handlers/messages";
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  console.log("[Background] Message Received:", message);
 
-let isInitialized = false;
-const initialize = async () => {
-  if (isInitialized) return;
-  isInitialized = true;
-
-  const messageHandler = new MessageHandler();
-
-  setupMessageListeners(messageHandler);
-};
-
-const setupMessageListeners = (messageHandler: MessageHandler) => {
-  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    console.log("[Background] Message received:", message);
-
-    if (message.type === "AUTHORIZATION_REQUEST") {
+  switch (message.type) {
+    case "dapp(connectRequest)": {
       const requestId = Math.random().toString(36).slice(2);
-      console.log("[Background] Creating request with ID:", requestId);
+      console.log("[Background] Authorization Request:", requestId);
 
-      // Store request info
       chrome.storage.local.set({
-        pendingRequest: {
+        connectRequest: {
           origin: message.payload.origin,
           requestId,
           tabId: sender.tab?.id,
         },
       });
 
-      // Open popup and wait for user interaction
       chrome.windows.create({
         url: chrome.runtime.getURL("index.html#/connect"),
         type: "popup",
@@ -35,29 +21,66 @@ const setupMessageListeners = (messageHandler: MessageHandler) => {
         height: 600,
       });
 
-      return true;
+      sendResponse({ success: true });
+      break;
     }
 
-    // Handle response from popup
-    if (message.type === "AUTHORIZATION_RESPONSE") {
-      chrome.storage.local.get(["pendingRequest"], (result) => {
-        const { tabId } = result.pendingRequest;
+    case "ext(connectResponse)": {
+      chrome.storage.local.get(["connectRequest"], (result) => {
+        const { tabId } = result.connectRequest;
         if (tabId) {
           chrome.tabs.sendMessage(tabId, {
-            type: "AUTHORIZATION_RESPONSE",
+            type: "ext(connectResponse)",
             payload: message.payload,
           });
+          chrome.storage.local.remove("connectRequest");
         }
+        sendResponse({ success: true });
       });
+      break;
     }
 
-    messageHandler
-      .handleMessage(message)
-      .then((result) => sendResponse(result))
-      .catch((error) => sendResponse(error));
-    return true; // Keep the message channel open for sendResponse
-  });
-};
+    case "dapp(signRequest)": {
+      chrome.storage.local.set({
+        signRequest: {
+          id: message.payload.id,
+          address: message.payload.address,
+          data: message.payload.data,
+          tabId: sender.tab?.id,
+          origin: sender.origin || sender.url,
+        },
+      });
 
-chrome.runtime.onInstalled.addListener(initialize);
-chrome.runtime.onStartup.addListener(initialize);
+      chrome.windows.create({
+        url: chrome.runtime.getURL("index.html#/sign"),
+        type: "popup",
+        width: 400,
+        height: 600,
+      });
+
+      sendResponse({ success: true });
+      break;
+    }
+
+    case "ext(signResponse)": {
+      chrome.storage.local.get(["signRequest"], (result) => {
+        const { tabId } = result.signRequest;
+        if (tabId) {
+          chrome.tabs.sendMessage(tabId, {
+            type: "ext(signResponse)",
+            payload: message.payload,
+          });
+          chrome.storage.local.remove("signRequest");
+        }
+        sendResponse({ success: true });
+      });
+      break;
+    }
+
+    default:
+      console.log("[Background] Unknown message type:", message.type);
+      sendResponse({ error: "Unknown message type" });
+  }
+
+  return true;
+});

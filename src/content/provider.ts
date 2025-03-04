@@ -12,7 +12,7 @@ export const TaoxyzWalletProvider: InjectedWindowProvider = {
       const handler = (event: MessageEvent) => {
         if (
           event.data.source === "taoxyz-content" &&
-          event.data.type === "AUTHORIZATION_RESPONSE"
+          event.data.type === "ext(connectResponse)"
         ) {
           window.removeEventListener("message", handler);
 
@@ -37,7 +37,7 @@ export const TaoxyzWalletProvider: InjectedWindowProvider = {
       window.postMessage(
         {
           source: "taoxyz-page",
-          type: "AUTHORIZATION_REQUEST",
+          type: "dapp(connectRequest)",
           payload: { origin: originName },
         },
         "*"

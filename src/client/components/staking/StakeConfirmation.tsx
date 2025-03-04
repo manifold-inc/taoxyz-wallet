@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import { useRpcApi } from "../../contexts/RpcApiContext";
 import type { Subnet, Validator } from "../../../types/subnets";
@@ -16,6 +16,7 @@ export const StakeConfirmation = ({
   onBack,
 }: StakeConfirmationProps) => {
   const { api, isLoading } = useRpcApi();
+  const navigate = useNavigate();
   const location = useLocation();
   const address = location.state?.address;
   const [amount, setAmount] = useState<string>("");
@@ -32,6 +33,7 @@ export const StakeConfirmation = ({
         validatorHotkey: validator.hotkey,
         amount: parseFloat(amount),
       });
+      navigate("/dashboard");
     } catch (error) {
       setError(error instanceof Error ? error.message : "Failed to stake");
     } finally {

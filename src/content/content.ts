@@ -1,9 +1,3 @@
-/**
- * Connect wallets
- * Sign transactions
- * Display wallet info - balance, address
- */
-
 // This is the content script that Chrome actually injects
 const script = document.createElement("script");
 script.src = chrome.runtime.getURL("content/inject.js");
@@ -35,11 +29,11 @@ window.addEventListener("message", (event) => {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log("[Content] Message received from background:", message);
 
-  if (message.type === "AUTHORIZATION_RESPONSE") {
+  if (message.type === "ext(connectResponse)") {
     window.postMessage(
       {
         source: "taoxyz-content",
-        type: "AUTHORIZATION_RESPONSE",
+        type: "ext(connectResponse)",
         payload: message.payload,
       },
       window.location.origin
