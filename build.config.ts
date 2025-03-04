@@ -5,6 +5,7 @@ const config: BuildConfig = {
     "./src/client/index.tsx",
     "./src/background/background.ts",
     "./src/content/content.ts",
+    "./src/content/inject.ts",
   ],
   outdir: "./dist",
   target: "browser",

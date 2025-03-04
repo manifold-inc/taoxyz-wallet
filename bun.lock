@@ -13,6 +13,7 @@
         "react-router-dom": "^7.2.0",
       },
       "devDependencies": {
+        "@polkadot/extension-inject": "^0.58.4",
         "@tailwindcss/cli": "^4.0.8",
         "@tailwindcss/postcss": "^4.0.8",
         "@types/bun": "latest",

@@ -48,7 +48,7 @@ export const KeyringService = {
     return pair;
   },
 
-  getPairs(): KeyringPair[] {
+  getAccounts(): KeyringPair[] {
     return keyring.getPairs();
   },
 };

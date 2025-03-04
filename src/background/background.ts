@@ -1,84 +1,14 @@
-// Main background script - Extension's core orchestrator
-// Initializes and coordinates all services/handlers
-
-/**
- * DUAL-ROLE ARCHITECTURE OVERVIEW
- *
- * 1. PROVIDER ROLE - Serving External Dapps
- * ========================================
- *
- * [External Dapp] <-> [Content Script + Provider] <-> [Background Script] <-> [Storage/Keys]
- *                                                          ^
- *                                                          |
- *                                                     [Popup UI]
- *
- * Flow Example (External Dapp):
- * - Dapp calls provider.sendTransaction()
- * - Provider relays to background
- * - Popup opens for approval
- * - Background handles signing
- * - Result returns to dapp
- *
- * 2. WALLET ROLE - Direct Wallet Operations
- * ========================================
- *
- * [Popup UI (Wallet Dapp)] <-> [Background Script] <-> [Storage/Keys]
- *                                     |
- *                              [Bittensor Service]
- *                                     |
- *                              [Network/Chain]
- *
- * Flow Example (Direct Wallet):
- * - User initiates transfer in popup
- * - Popup UI sends directly to background
- * - Background validates and signs
- * - Bittensor service submits to network
- *
- * Component Responsibilities:
- * =========================
- *
- * 1. Popup UI:
- *    AS WALLET:
- *    - Full wallet interface
- *    - Transfer/stake operations
- *    - Account management
- *    - Network operations
- *    AS PROVIDER UI:
- *    - Transaction approval
- *    - Connection requests
- *    - Signature requests
- *
- * 2. Background Script:
- *    - Core wallet logic
- *    - Key management
- *    - Transaction signing
- *    - State management
- *    - Message routing
- *
- * 3. Content Script & Provider:
- *    - Injected provider interface
- *    - External dapp integration
- *    - Request relay
- *
- * 4. Bittensor Service:
- *    - Network interactions
- *    - Chain-specific operations
- *    - RPC handling
- *
- * Security Boundaries:
- * ==================
- * - Sensitive operations only in background
- * - Popup has direct background access
- * - External dapps isolated via provider
- * - Keys never leave background script
- */
-
 import { BittensorService } from "./services/bittensor";
 import { MessageHandler } from "./handlers/messages";
 
 // Potentially Refactor this to handle messages from external dapps and move functionality of querying the RPC to the rpcapi.ts
 
-const initializeServices = async () => {
+let isInitialized = false;
+
+const initializeOnce = async () => {
+  if (isInitialized) return;
+  isInitialized = true;
+
   const bittensor = new BittensorService();
   const messageHandler = new MessageHandler();
 
@@ -102,23 +32,52 @@ const initializeServices = async () => {
 
 const setupMessageListeners = (messageHandler: MessageHandler) => {
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    console.log(`[Background] Message Received: ${JSON.stringify(message)}`);
+    console.log("[Background] Message received:", message);
+
+    if (message.type === "AUTHORIZATION_REQUEST") {
+      const requestId = Math.random().toString(36).slice(2);
+      console.log("[Background] Creating request with ID:", requestId);
+
+      // Store request info
+      chrome.storage.local.set({
+        pendingRequest: {
+          origin: message.payload.origin,
+          requestId,
+          tabId: sender.tab?.id,
+        },
+      });
+
+      // Open popup and wait for user interaction
+      chrome.windows.create({
+        url: chrome.runtime.getURL("index.html#/connect"),
+        type: "popup",
+        width: 400,
+        height: 600,
+      });
+
+      return true;
+    }
+
+    // Handle response from popup
+    if (message.type === "AUTHORIZATION_RESPONSE") {
+      chrome.storage.local.get(["pendingRequest"], (result) => {
+        const { tabId } = result.pendingRequest;
+        if (tabId) {
+          chrome.tabs.sendMessage(tabId, {
+            type: "AUTHORIZATION_RESPONSE",
+            payload: message.payload,
+          });
+        }
+      });
+    }
+
     messageHandler
       .handleMessage(message)
       .then((result) => sendResponse(result))
       .catch((error) => sendResponse(error));
-    return true;
+    return true; // Keep the message channel open for sendResponse
   });
 };
 
-chrome.runtime.onInstalled.addListener(() => {
-  initializeServices();
-});
-
-chrome.runtime.onStartup.addListener(() => {
-  initializeServices();
-});
-
-chrome.runtime.onConnect.addListener(() => {
-  initializeServices();
-});
+chrome.runtime.onInstalled.addListener(initializeOnce);
+chrome.runtime.onStartup.addListener(initializeOnce);

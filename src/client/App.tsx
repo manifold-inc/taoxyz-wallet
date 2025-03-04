@@ -6,6 +6,7 @@ import Import from "./pages/Import";
 import Dashboard from "./pages/Dashboard";
 import Stake from "./pages/Stake";
 import Create from "./pages/Create";
+import Connect from "./pages/Connect";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { RpcApiProvider } from "./contexts/RpcApiContext";
 
@@ -50,6 +51,7 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
+            <Route path="/connect" element={<Connect />} />
           </Routes>
         </main>
       </HashRouter>
