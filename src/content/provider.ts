@@ -3,6 +3,11 @@ import type {
   InjectedAccount,
   Injected,
 } from "@polkadot/extension-inject/types";
+import type {
+  SignerPayloadJSON,
+  SignerPayloadRaw,
+  SignerResult,
+} from "@polkadot/types/types";
 
 interface DappMessage {
   source: string;
@@ -14,6 +19,15 @@ interface ConnectResponse {
   approved: boolean;
   accounts: InjectedAccount[];
 }
+
+interface SignResponse {
+  id: number;
+  signature: `0x${string}`;
+}
+
+const generateId = (): number => {
+  return Math.floor(Math.random() * 1000000);
+};
 
 const createMessageHandler = (
   messageType: string,
@@ -40,11 +54,68 @@ const createAccounts = (accounts: InjectedAccount[]) => ({
 });
 
 const createSigner = () => ({
-  signPayload: async () => {
-    throw new Error("Signing not implemented");
+  signPayload: async (payload: SignerPayloadJSON): Promise<SignerResult> => {
+    return new Promise((resolve, reject) => {
+      const id = generateId();
+
+      const handleSignResponse = createMessageHandler(
+        "ext(signResponse)",
+        (response: SignResponse) => {
+          if (response.signature) {
+            resolve({
+              id: response.id,
+              signature: response.signature,
+            });
+          } else {
+            reject(new Error("Signing failed"));
+          }
+        }
+      );
+
+      window.addEventListener("message", handleSignResponse);
+
+      sendMessage({
+        source: "taoxyz-wallet-dapp",
+        type: "dapp(signRequest)",
+        payload: {
+          id,
+          address: payload.address,
+          data: payload,
+        },
+      });
+    });
   },
-  signRaw: async () => {
-    throw new Error("Raw signing not implemented");
+
+  signRaw: async (payload: SignerPayloadRaw): Promise<SignerResult> => {
+    return new Promise((resolve, reject) => {
+      const id = generateId();
+
+      const handleSignResponse = createMessageHandler(
+        "ext(signResponse)",
+        (response: SignResponse) => {
+          if (response.signature) {
+            resolve(response);
+          } else {
+            reject(new Error("Signing failed"));
+          }
+        }
+      );
+
+      window.addEventListener("message", handleSignResponse);
+
+      sendMessage({
+        source: "taoxyz-wallet-dapp",
+        type: "dapp(signRequest)",
+        payload: {
+          id,
+          address: payload.address,
+          data: {
+            data: payload.data,
+            type: "bytes",
+          },
+        },
+      });
+    });
   },
 });
 

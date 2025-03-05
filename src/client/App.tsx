@@ -7,6 +7,8 @@ import Dashboard from "./pages/Dashboard";
 import Stake from "./pages/Stake";
 import Create from "./pages/Create";
 import Connect from "./pages/Connect";
+import Sign from "./pages/Sign";
+
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { RpcApiProvider } from "./contexts/RpcApiContext";
 
@@ -52,6 +54,7 @@ const App = () => {
               }
             />
             <Route path="/connect" element={<Connect />} />
+            <Route path="/sign" element={<Sign />} />
           </Routes>
         </main>
       </HashRouter>
