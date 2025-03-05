@@ -17,14 +17,14 @@ export class RpcApi {
 
   private async initialize(): Promise<void> {
     console.log("[Client] Starting initialization");
-    const provider = new WsProvider(this.endpoint.test);
+    const provider = new WsProvider(this.endpoint.main);
     try {
       this.api = await ApiPromise.create({
         provider,
         throwOnConnect: true,
       });
       await this.api.isReady;
-      console.log(`[Client] Connected to the endpoint: ${this.endpoint.test}`);
+      console.log(`[Client] Connected to the endpoint: ${this.endpoint.main}`);
     } catch (error) {
       console.error("[Client] Failed to initialize the Bittensor API:", error);
       throw error;
@@ -130,7 +130,7 @@ export class RpcApi {
               : 0;
 
           const subnet: Subnet = {
-            subnetId: info.netuid,
+            id: info.netuid,
             name: subnetName,
             price: price,
           };
@@ -141,6 +141,17 @@ export class RpcApi {
       return subnets;
     } catch (error) {
       console.error("Error in getSubnets:", error);
+      throw error;
+    }
+  }
+
+  public async getSubnetInfo(subnetId: number): Promise<any> {
+    try {
+      const subnetData =
+        await this.api.call.subnetInfoRuntimeApi.getDynamicInfo(subnetId);
+      return subnetData.toJSON() as any;
+    } catch (error) {
+      console.error("Error in getSubnetInfo:", error);
       throw error;
     }
   }

@@ -57,10 +57,10 @@ export const Dashboard = () => {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold">Dashboard</h1>
         <button
-          onClick={() => navigate("/stake", { state: { address } })}
+          onClick={() => navigate("/swap", { state: { balance, address } })}
           className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition-colors"
         >
-          Stake
+          Swap
         </button>
       </div>
 

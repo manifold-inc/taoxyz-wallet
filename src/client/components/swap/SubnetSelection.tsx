@@ -25,7 +25,7 @@ export const SubnetSelection = ({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {subnets.map((subnet) => (
           <div
-            key={subnet.subnetId}
+            key={subnet.id}
             className="border rounded-lg p-4 hover:border-blue-500 cursor-pointer transition-colors"
             onClick={() => onSelect(subnet)}
           >

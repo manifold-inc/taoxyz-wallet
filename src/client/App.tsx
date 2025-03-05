@@ -4,7 +4,7 @@ import Home from "./pages/Home";
 import Signin from "./pages/Signin";
 import Import from "./pages/Import";
 import Dashboard from "./pages/Dashboard";
-import Stake from "./pages/Stake";
+import Swap from "./pages/Swap";
 import Create from "./pages/Create";
 import Connect from "./pages/Connect";
 import Sign from "./pages/Sign";
@@ -46,10 +46,10 @@ const App = () => {
               }
             />
             <Route
-              path="/stake"
+              path="/swap"
               element={
                 <ProtectedRoute>
-                  <Stake />
+                  <Swap />
                 </ProtectedRoute>
               }
             />

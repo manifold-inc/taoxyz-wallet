@@ -1,5 +1,5 @@
 export interface Subnet {
-  subnetId: number;
+  id: number;
   name: string;
   price: number;
 }

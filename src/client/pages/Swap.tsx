@@ -1,18 +1,21 @@
 import { useState, useEffect } from "react";
-import { SubnetSelection } from "../components/staking/SubnetSelection";
-import { ValidatorSelection } from "../components/staking/ValidatorSelection";
-import { StakeConfirmation } from "../components/staking/StakeConfirmation";
+import { useLocation } from "react-router-dom";
+import { SubnetSelection } from "../components/swap/SubnetSelection";
+import { ValidatorSelection } from "../components/swap/ValidatorSelection";
+import { ConfirmSwap } from "../components/swap/ConfirmSwap";
 import { useRpcApi } from "../contexts/RpcApiContext";
 import type { Subnet, Validator } from "../../types/subnets";
 
 enum Step {
   SELECT_SUBNET,
   SELECT_VALIDATOR,
-  CONFIRM_STAKE,
+  CONFIRM_SWAP,
 }
 
-export const Stake = () => {
+export const Swap = () => {
   const { api } = useRpcApi();
+  const location = useLocation();
+  const { balance, address } = location.state || {};
   const [step, setStep] = useState<Step>(Step.SELECT_SUBNET);
   const [subnets, setSubnets] = useState<Subnet[]>([]);
   const [selectedSubnet, setSelectedSubnet] = useState<Subnet | null>(null);
@@ -28,7 +31,7 @@ export const Stake = () => {
 
   useEffect(() => {
     if (selectedSubnet) {
-      getValidators(selectedSubnet.subnetId);
+      getValidators(selectedSubnet.id);
     }
   }, [selectedSubnet]);
 
@@ -62,14 +65,14 @@ export const Stake = () => {
 
   const handleValidatorSelect = (validator: Validator) => {
     setSelectedValidator(validator);
-    setStep(Step.CONFIRM_STAKE);
+    setStep(Step.CONFIRM_SWAP);
   };
 
   const handleBack = () => {
     if (step === Step.SELECT_VALIDATOR) {
       setStep(Step.SELECT_SUBNET);
       setSelectedSubnet(null);
-    } else if (step === Step.CONFIRM_STAKE) {
+    } else if (step === Step.CONFIRM_SWAP) {
       setStep(Step.SELECT_VALIDATOR);
       setSelectedValidator(null);
     }
@@ -95,12 +98,14 @@ export const Stake = () => {
             isLoading={isLoading}
           />
         );
-      case Step.CONFIRM_STAKE:
+      case Step.CONFIRM_SWAP:
         return (
-          <StakeConfirmation
+          <ConfirmSwap
             subnet={selectedSubnet!}
             validator={selectedValidator!}
             onBack={handleBack}
+            balance={balance}
+            address={address}
           />
         );
     }
@@ -108,10 +113,10 @@ export const Stake = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Stake TAO</h1>
+      <h1 className="text-2xl font-bold mb-6">Swap</h1>
       {renderStep()}
     </div>
   );
 };
 
-export default Stake;
+export default Swap;
