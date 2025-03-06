@@ -27,9 +27,9 @@ export const Swap = () => {
   );
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
+  useState(() => {
     getSubnets();
-  }, []);
+  });
 
   useEffect(() => {
     if (selectedSubnet) {

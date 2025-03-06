@@ -51,6 +51,38 @@ export class RpcApi {
     }
   }
 
+  public async transfer({
+    fromAddress,
+    toAddress,
+    amount,
+    password,
+  }: {
+    fromAddress: string;
+    toAddress: string;
+    amount: number;
+    password: string;
+  }) {
+    try {
+      const account = await KeyringService.getAccount(fromAddress);
+      if (!account) throw new Error("Account not found");
+
+      account.decodePkcs8(password);
+      if (account.isLocked) {
+        throw new Error("Invalid password");
+      }
+
+      const amountInRao = BigInt(Math.floor(amount * 1e9));
+      const transaction = await this.api.tx.balances
+        .transferAllowDeath(toAddress, amountInRao)
+        .signAndSend(account);
+
+      return transaction.hash;
+    } catch (error) {
+      console.error("Error in transfer:", error);
+      throw error;
+    }
+  }
+
   public async createStake({
     address,
     subnetId,

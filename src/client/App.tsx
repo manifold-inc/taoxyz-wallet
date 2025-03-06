@@ -9,6 +9,7 @@ import Create from "./pages/Create";
 import Connect from "./pages/Connect";
 import Sign from "./pages/Sign";
 import Stake from "./pages/Stake";
+import Transfer from "./pages/Transfer";
 
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { RpcApiProvider } from "./contexts/RpcApiContext";
@@ -59,6 +60,14 @@ const App = () => {
               element={
                 <ProtectedRoute>
                   <Stake />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/transfer"
+              element={
+                <ProtectedRoute>
+                  <Transfer />
                 </ProtectedRoute>
               }
             />
