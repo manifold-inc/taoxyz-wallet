@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { KeyringService } from "../services/KeyringService";
+import { useNavigate } from "react-router-dom";
 
 const Import = () => {
+  const navigate = useNavigate();
   const [mnemonic, setMnemonic] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -24,7 +26,13 @@ const Import = () => {
       }
 
       setIsLoading(true);
-      await KeyringService.addAccount(mnemonic, username, password);
+      const account = await KeyringService.addAccount(
+        mnemonic,
+        username,
+        password
+      );
+
+      navigate("/dashboard", { state: { address: account.address } });
 
       setMnemonic("");
       setUsername("");
