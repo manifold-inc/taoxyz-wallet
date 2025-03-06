@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { SubnetSelection } from "../components/swap/SubnetSelection";
-import { ValidatorSelection } from "../components/swap/ValidatorSelection";
-import { ConfirmSwap } from "../components/swap/ConfirmSwap";
+
+import SubnetSelection from "../components/swap/SubnetSelection";
+import ValidatorSelection from "../components/swap/ValidatorSelection";
+import ConfirmSwap from "../components/swap/ConfirmSwap";
+
 import { useRpcApi } from "../contexts/RpcApiContext";
 import type { Subnet, Validator } from "../../types/subnets";
 

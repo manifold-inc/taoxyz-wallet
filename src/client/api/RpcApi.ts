@@ -17,16 +17,16 @@ export class RpcApi {
 
   private async initialize(): Promise<void> {
     console.log("[Client] Starting initialization");
-    const provider = new WsProvider(this.endpoint.main);
+    const provider = new WsProvider(this.endpoint.test);
     try {
       this.api = await ApiPromise.create({
         provider,
         throwOnConnect: true,
       });
       await this.api.isReady;
-      console.log(`[Client] Connected to the endpoint: ${this.endpoint.main}`);
+      console.log(`[Client] Connected to the endpoint: ${this.endpoint.test}`);
     } catch (error) {
-      console.error("[Client] Failed to initialize the Bittensor API:", error);
+      console.error("Error in initialize:", error);
       throw error;
     }
   }
@@ -34,7 +34,7 @@ export class RpcApi {
   public async getApi(): Promise<ApiPromise> {
     await this.initPromise;
     if (!this.api) {
-      console.error("[Client] API not initialized");
+      console.error("Error in getApi");
       throw new Error("API not initialized");
     }
     return this.api;
@@ -44,10 +44,9 @@ export class RpcApi {
     try {
       const stake =
         await this.api.call.stakeInfoRuntimeApi.getStakeInfoForColdkey(address);
-      console.log("[Client] Stake:", stake.toJSON());
       return stake.toJSON();
     } catch (error) {
-      console.error("[Client] Failed to get stake:", error);
+      console.error("Error in getStake:", error);
       throw error;
     }
   }
@@ -71,17 +70,22 @@ export class RpcApi {
         .signAndSend(account);
       return stake.hash;
     } catch (error) {
-      console.error("[Client] Failed to create stake:", error);
+      console.error("Error in createStake:", error);
       throw error;
     }
   }
 
-  public async removeStake(
-    address: string,
-    validatorHotkey: string,
-    subnetId: number,
-    amount: number
-  ) {
+  public async removeStake({
+    address,
+    validatorHotkey,
+    subnetId,
+    amount,
+  }: {
+    address: string;
+    validatorHotkey: string;
+    subnetId: number;
+    amount: number;
+  }) {
     try {
       const amountInRao = BigInt(Math.floor(amount * 1e9));
       const account = await KeyringService.getAccount(address);
@@ -90,7 +94,35 @@ export class RpcApi {
         .signAndSend(account);
       return stake.hash;
     } catch (error) {
-      console.error("[Client] Failed to remove stake:", error);
+      console.error("Error in removeStake:", error);
+      throw error;
+    }
+  }
+
+  public async moveStake({
+    address,
+    fromHotkey,
+    toHotkey,
+    fromSubnetId,
+    toSubnetId,
+    amount,
+  }: {
+    address: string;
+    fromHotkey: string;
+    toHotkey: string;
+    fromSubnetId: number;
+    toSubnetId: number;
+    amount: number;
+  }) {
+    try {
+      const amountInRao = BigInt(Math.floor(amount * 1e9));
+      const account = await KeyringService.getAccount(address);
+      const stake = await this.api.tx.subtensorModule
+        .moveStake(fromHotkey, toHotkey, fromSubnetId, toSubnetId, amountInRao)
+        .signAndSend(account);
+      return stake.hash;
+    } catch (error) {
+      console.error("Error in moveStake:", error);
       throw error;
     }
   }
@@ -112,27 +144,33 @@ export class RpcApi {
 
   public async getSubnets(): Promise<Subnet[]> {
     try {
-      const allSubnetsInfo =
+      const subnetsData =
         await this.api.call.subnetInfoRuntimeApi.getAllDynamicInfo();
 
-      const subnets = (allSubnetsInfo.toJSON() as any[])
-        .map((info) => {
-          if (!info) return null;
-          const subnetName = info.subnetName
-            ? String.fromCharCode(...info.subnetName)
-            : `Subnet ${info.netuid}`;
+      const subnets = (subnetsData.toJSON() as any[])
+        .map((data) => {
+          if (!data) return null;
+          const subnetName = data.subnetName
+            ? String.fromCharCode(...data.subnetName)
+            : `Subnet ${data.netuid}`;
 
           const price =
-            info.netuid === 0
+            data.netuid === 0
               ? 1
-              : info.taoIn && info.alphaIn && info.alphaIn > 0
-              ? Number((info.taoIn / info.alphaIn).toFixed(4))
+              : data.taoIn && data.alphaIn && data.alphaIn > 0
+              ? Number((data.taoIn / data.alphaIn).toFixed(4))
               : 0;
 
+          const tokenSymbol = data.tokenSymbol
+            ? String.fromCharCode(...data.tokenSymbol)
+            : "TAO";
+
           const subnet: Subnet = {
-            id: info.netuid,
+            id: data.netuid,
             name: subnetName,
             price: price,
+            tokenSymbol: tokenSymbol,
+            ...data,
           };
           return subnet;
         })
@@ -145,13 +183,39 @@ export class RpcApi {
     }
   }
 
-  public async getSubnetInfo(subnetId: number): Promise<any> {
+  public async getSubnet(subnetId: number): Promise<Subnet> {
     try {
-      const subnetData =
-        await this.api.call.subnetInfoRuntimeApi.getDynamicInfo(subnetId);
-      return subnetData.toJSON() as any;
+      const result = await this.api.call.subnetInfoRuntimeApi.getDynamicInfo(
+        subnetId
+      );
+      const subnetData = result.toJSON() as any;
+      if (!subnetData) throw new Error("Could not find subnet");
+
+      const subnetName = subnetData.subnetName
+        ? String.fromCharCode(...subnetData.subnetName)
+        : `Subnet ${subnetData.netuid}`;
+
+      const price =
+        subnetData.netuid === 0
+          ? 1
+          : subnetData.taoIn && subnetData.alphaIn && subnetData.alphaIn > 0
+          ? Number((subnetData.taoIn / subnetData.alphaIn).toFixed(4))
+          : 0;
+
+      const tokenSymbol = subnetData.tokenSymbol
+        ? String.fromCharCode(...subnetData.tokenSymbol)
+        : "TAO";
+
+      const subnet: Subnet = {
+        id: subnetData.netuid,
+        name: subnetName,
+        price: price,
+        tokenSymbol: tokenSymbol,
+        ...subnetData,
+      };
+      return subnet;
     } catch (error) {
-      console.error("Error in getSubnetInfo:", error);
+      console.error("Error in getSubnet:", error);
       throw error;
     }
   }

@@ -18,10 +18,12 @@ export const Create = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
-    setIsLoading(true);
     try {
+      setIsLoading(true);
+
       const generatedMnemonic = KeyringService.createMnemonic();
       setMnemonic(generatedMnemonic);
+
       const account = await KeyringService.addAccount(
         generatedMnemonic,
         username,

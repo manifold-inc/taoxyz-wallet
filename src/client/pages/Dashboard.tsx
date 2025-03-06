@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 import { Portfolio } from "../components/Portfolio";
 import { useRpcApi } from "../contexts/RpcApiContext";
-import type { Stake } from "../../types/stake";
+import type { StakeTransaction } from "../../types/stakeTransaction";
 
 export const Dashboard = () => {
   const { api } = useRpcApi();
@@ -11,15 +11,16 @@ export const Dashboard = () => {
   const location = useLocation();
   const address = location.state?.address;
   const [balance, setBalance] = useState("");
-  const [stakes, setStakes] = useState<Stake[]>([]);
+  const [stakes, setStakes] = useState<StakeTransaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchBalance = async () => {
-      setIsLoading(true);
+      if (!api) return;
       try {
-        const balance = await api?.getBalance(address);
+        setIsLoading(true);
+        const balance = await api.getBalance(address);
         setBalance(balance ?? "0");
       } catch (error) {
         setError(
@@ -31,13 +32,14 @@ export const Dashboard = () => {
     };
 
     const fetchStake = async () => {
+      if (!api) return;
       try {
-        const stake = await api?.getStake(address);
+        const stake = await api.getStake(address);
         if (stake) {
           const formattedStakes = (stake as any[]).map((stake) => ({
-            netuid: stake.netuid,
-            hotkey: stake.hotkey,
-            stake: stake.stake,
+            subnetId: stake.netuid,
+            validatorHotkey: stake.hotkey,
+            tokens: stake.stake,
           }));
           setStakes(formattedStakes);
         }
@@ -62,6 +64,12 @@ export const Dashboard = () => {
         >
           Swap
         </button>
+        <button
+          onClick={() => navigate("/stake", { state: { address } })}
+          className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition-colors"
+        >
+          Stake
+        </button>
       </div>
 
       <div className="space-y-6">
@@ -70,15 +78,12 @@ export const Dashboard = () => {
           <p className="text-gray-600 break-all">{address}</p>
           <p className="mt-2">Balance: {balance} τ</p>
         </div>
-
         <Portfolio stakes={stakes} address={address} />
-
         {isLoading && (
           <div className="text-center">
             <p>Loading...</p>
           </div>
         )}
-
         {error && (
           <div className="bg-red-50 text-red-600 p-4 rounded">{error}</div>
         )}

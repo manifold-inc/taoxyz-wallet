@@ -1,94 +1,82 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 import { useRpcApi } from "../../contexts/RpcApiContext";
-import type { Subnet, Validator } from "../../../types/subnets";
+import type { Validator, Subnet } from "../../../types/subnets";
+import type { StakeTransaction } from "../../../types/stakeTransaction";
 
-interface ConfirmSwapProps {
-  subnet: Subnet;
+interface ConfirmStakeProps {
+  stake: StakeTransaction;
   validator: Validator;
-  onBack: () => void;
-  balance: string;
+  subnet: Subnet;
   address: string;
+  onBack: () => void;
 }
 
-export const ConfirmSwap = ({
-  subnet,
+const ConfirmStake = ({
+  stake,
   validator,
-  onBack,
-  balance,
+  subnet,
   address,
-}: ConfirmSwapProps) => {
+  onBack,
+}: ConfirmStakeProps) => {
   const { api, isLoading } = useRpcApi();
   const navigate = useNavigate();
   const [amount, setAmount] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const calculateSlippage = (taoAmount: number) => {
+  const calculateSlippage = (alphaAmount: number) => {
     if (!subnet.alphaIn || !subnet.taoIn) return null;
 
-    // Convert TAO amount to RAO (1 TAO = 1e9 RAO)
-    const taoAmountInRao = taoAmount * 1e9;
+    // Calculate the TAO cost for this amount of alpha
+    const taoPrice = subnet.taoIn / subnet.alphaIn;
+    const taoCost = alphaAmount * taoPrice;
+    const raoCost = taoCost * 1e9;
 
-    // Calculate expected alpha tokens without slippage (simple division)
-    const expectedAlpha = (taoAmountInRao * subnet.alphaIn) / subnet.taoIn;
-
-    // Calculate actual alpha tokens using constant product formula from docs
-    // Stake = αin - (τin * αin) / (τin + cost)
     const actualAlpha =
       subnet.alphaIn -
-      (subnet.taoIn * subnet.alphaIn) / (subnet.taoIn + taoAmountInRao);
+      (subnet.taoIn * subnet.alphaIn) / (subnet.taoIn + raoCost);
 
-    // Convert to human readable numbers
-    const expectedAlphaHuman = expectedAlpha / 1e9;
     const actualAlphaHuman = actualAlpha / 1e9;
-
-    // Calculate slippage
-    const slippageAmount = expectedAlphaHuman - actualAlphaHuman;
-    const slippagePercentage = (slippageAmount / expectedAlphaHuman) * 100;
-
-    // Calculate fee in TAO
-    const feeInTao = (taoAmount * slippagePercentage) / 100;
+    const slippageAmount = alphaAmount - actualAlphaHuman;
+    const slippagePercentage = (slippageAmount / alphaAmount) * 100;
 
     return {
-      expectedAlpha: expectedAlphaHuman,
-      actualAlpha: actualAlphaHuman,
+      originalAmount: alphaAmount,
+      finalAmount: actualAlphaHuman,
       slippageAmount,
       slippagePercentage,
-      feeInTao,
+      taoCost,
     };
   };
 
+  const currentTokens = stake.tokens / 1e9;
+  const newTokens = parseFloat(amount);
+  const slippageCalculation =
+    newTokens > 0 ? calculateSlippage(newTokens) : null;
+
   const handleSubmit = async () => {
-    if (!api || !amount || isSubmitting) return;
+    if (!api || !amount || isSubmitting || newTokens > currentTokens) return;
     setIsSubmitting(true);
     try {
-      await api.createStake({
+      await api.moveStake({
         address,
-        subnetId: subnet.id,
-        validatorHotkey: validator.hotkey,
-        amount: parseFloat(amount),
+        fromHotkey: stake.validatorHotkey,
+        toHotkey: validator.hotkey,
+        fromSubnetId: stake.subnetId,
+        toSubnetId: stake.subnetId,
+        amount: newTokens,
       });
       navigate("/dashboard");
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Failed to stake");
+      setError(error instanceof Error ? error.message : "Failed to move stake");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const taoAmount = parseFloat(amount) || 0;
-  const slippageCalculation =
-    subnet.alphaIn && subnet.taoIn ? calculateSlippage(taoAmount) : null;
-  const totalCost = taoAmount;
-
   if (isLoading) {
     return <div>Loading API...</div>;
-  }
-
-  if (!api) {
-    return <div>API not initialized</div>;
   }
 
   return (
@@ -100,23 +88,22 @@ export const ConfirmSwap = ({
         >
           ← Back
         </button>
-        <h2 className="text-xl font-semibold">Confirm Staking</h2>
+        <h2 className="text-xl font-semibold">Confirm Restaking</h2>
       </div>
 
       <div className="bg-white rounded-lg p-6 shadow-sm border">
         <div className="space-y-4">
           <div>
-            <h3 className="font-medium text-gray-700">Selected Subnet</h3>
-            <p className="mt-1">{subnet.name}</p>
+            <h3 className="font-medium text-gray-700">Current Stake</h3>
+            <p className="mt-1">
+              Validator: {stake.validatorHotkey.slice(0, 8)}...
+              {stake.validatorHotkey.slice(-8)}
+            </p>
+            <p className="mt-1">Available: {currentTokens.toFixed(4)} α</p>
           </div>
 
           <div>
-            <h3 className="font-medium text-gray-700">Token Price</h3>
-            <p className="mt-1">{subnet.price} TAO</p>
-          </div>
-
-          <div>
-            <h3 className="font-medium text-gray-700">Selected Validator</h3>
+            <h3 className="font-medium text-gray-700">New Validator</h3>
             <p className="mt-1">
               Hotkey: {validator.hotkey.slice(0, 8)}...
               {validator.hotkey.slice(-8)}
@@ -125,34 +112,35 @@ export const ConfirmSwap = ({
 
           <div>
             <label htmlFor="amount" className="block font-medium text-gray-700">
-              Stake Amount (TAO)
+              Amount to Move (α)
             </label>
             <input
               type="number"
               id="amount"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              placeholder="Enter amount to stake"
+              placeholder="Enter amount to move"
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               min="0"
+              max={currentTokens}
               step="0.0001"
             />
             <p className="mt-1 text-sm text-gray-500">
-              Available balance: {balance} TAO
+              Available to move: {currentTokens.toFixed(4)} α
             </p>
           </div>
 
-          {taoAmount > 0 && slippageCalculation && (
+          {newTokens > 0 && slippageCalculation && (
             <div className="bg-gray-50 p-4 rounded-lg space-y-2">
               <h3 className="font-medium text-gray-700">Transaction Summary</h3>
               <div className="flex justify-between items-center whitespace-nowrap">
-                <span className="text-gray-600">From:</span>
-                <span className="font-medium">{taoAmount.toFixed(4)} τ</span>
+                <span className="text-gray-600">Moving:</span>
+                <span className="font-medium">{newTokens.toFixed(4)} α</span>
               </div>
               <div className="flex justify-between items-center whitespace-nowrap">
-                <span className="text-gray-600">To:</span>
+                <span className="text-gray-600">You will receive:</span>
                 <span className="font-medium">
-                  {slippageCalculation.actualAlpha.toFixed(6)} α
+                  {slippageCalculation.finalAmount.toFixed(4)} α
                 </span>
               </div>
               <div className="flex justify-between items-center whitespace-nowrap text-gray-600">
@@ -167,17 +155,19 @@ export const ConfirmSwap = ({
               </div>
               <div className="flex justify-between items-center whitespace-nowrap text-gray-600">
                 <span>Fee:</span>
-                <span>{slippageCalculation.feeInTao.toFixed(4)} τ</span>
+                <span>{slippageCalculation.slippageAmount.toFixed(4)} α</span>
               </div>
               {slippageCalculation.slippagePercentage > 1 && (
                 <div className="text-red-600 text-sm mt-2">
-                  ⚠️ High slippage warning: The price impact of this trade is
-                  high
+                  ⚠️ High slippage warning: Moving this amount of tokens will
+                  result in significant slippage
                 </div>
               )}
-              <div className="flex justify-between items-center whitespace-nowrap font-semibold border-t pt-2">
-                <span>Total Cost:</span>
-                <span>{totalCost.toFixed(4)} τ</span>
+              <div className="flex justify-between items-center whitespace-nowrap">
+                <span className="text-gray-600">Remaining:</span>
+                <span className="font-medium">
+                  {(currentTokens - newTokens).toFixed(4)} α
+                </span>
               </div>
             </div>
           )}
@@ -190,17 +180,15 @@ export const ConfirmSwap = ({
               !amount ||
               isSubmitting ||
               !api ||
-              totalCost > parseFloat(balance) ||
-              !subnet.alphaIn ||
-              !subnet.taoIn
+              newTokens > currentTokens ||
+              newTokens <= 0
             }
             className={`w-full py-2 px-4 rounded text-white transition-colors ${
               !amount ||
               isSubmitting ||
               !api ||
-              totalCost > parseFloat(balance) ||
-              !subnet.alphaIn ||
-              !subnet.taoIn
+              newTokens > currentTokens ||
+              newTokens <= 0
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-blue-500 hover:bg-blue-600"
             }`}
@@ -208,10 +196,10 @@ export const ConfirmSwap = ({
             {isSubmitting ? (
               <div className="flex items-center justify-center">
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                Staking...
+                Moving Stake...
               </div>
             ) : (
-              "Confirm Swap"
+              "Confirm Move"
             )}
           </button>
         </div>
@@ -220,4 +208,4 @@ export const ConfirmSwap = ({
   );
 };
 
-export default ConfirmSwap;
+export default ConfirmStake;

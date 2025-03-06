@@ -8,6 +8,7 @@ import Swap from "./pages/Swap";
 import Create from "./pages/Create";
 import Connect from "./pages/Connect";
 import Sign from "./pages/Sign";
+import Stake from "./pages/Stake";
 
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { RpcApiProvider } from "./contexts/RpcApiContext";
@@ -50,6 +51,14 @@ const App = () => {
               element={
                 <ProtectedRoute>
                   <Swap />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/stake"
+              element={
+                <ProtectedRoute>
+                  <Stake />
                 </ProtectedRoute>
               }
             />

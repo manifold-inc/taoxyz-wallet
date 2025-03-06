@@ -8,12 +8,12 @@ interface ValidatorSelectionProps {
   onBack: () => void;
 }
 
-export const ValidatorSelection = ({
+const ValidatorSelection = ({
   subnet,
   validators,
+  isLoading,
   onSelect,
   onBack,
-  isLoading,
 }: ValidatorSelectionProps) => {
   if (isLoading) {
     return (

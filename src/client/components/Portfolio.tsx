@@ -1,9 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { useRpcApi } from "../contexts/RpcApiContext";
-import type { Stake } from "../../types/stake";
+import type { StakeTransaction } from "../../types/stakeTransaction";
 
 interface PortfolioProps {
-  stakes: Stake[];
+  stakes: StakeTransaction[];
   address: string;
 }
 
@@ -11,15 +11,16 @@ export const Portfolio = ({ stakes, address }: PortfolioProps) => {
   const { api } = useRpcApi();
   const navigate = useNavigate();
 
-  const handleUnstake = async (stake: Stake) => {
+  const handleUnstake = async (stake: StakeTransaction) => {
+    if (!api) return;
     try {
-      const convertedStake = stake.stake / 1e9;
-      await api?.removeStake(
+      const convertedStake = stake.tokens / 1e9;
+      await api.removeStake({
         address,
-        stake.hotkey,
-        stake.netuid,
-        convertedStake
-      );
+        validatorHotkey: stake.validatorHotkey,
+        subnetId: stake.subnetId,
+        amount: convertedStake,
+      });
       navigate("/dashboard");
     } catch (error) {
       console.error("[Client] Failed to unstake:", error);
@@ -34,14 +35,15 @@ export const Portfolio = ({ stakes, address }: PortfolioProps) => {
           {stakes.map((stake, index) => (
             <div key={index} className="border-b pb-4 last:border-0">
               <p>
-                <span className="font-medium">Subnet:</span> {stake.netuid}
+                <span className="font-medium">Subnet:</span> {stake.subnetId}
               </p>
               <p className="break-all">
-                <span className="font-medium">Validator:</span> {stake.hotkey}
+                <span className="font-medium">Validator:</span>{" "}
+                {stake.validatorHotkey}
               </p>
               <p>
                 <span className="font-medium">Tokens:</span>{" "}
-                {(stake.stake / 1e9).toFixed(4)}
+                {(stake.tokens / 1e9).toFixed(4)}
               </p>
               <button
                 onClick={() => handleUnstake(stake)}

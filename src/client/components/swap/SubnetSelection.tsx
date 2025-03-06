@@ -6,7 +6,7 @@ interface SubnetSelectionProps {
   onSelect: (subnet: Subnet) => void;
 }
 
-export const SubnetSelection = ({
+const SubnetSelection = ({
   subnets,
   isLoading,
   onSelect,
