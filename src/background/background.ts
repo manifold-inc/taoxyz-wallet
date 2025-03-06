@@ -138,13 +138,41 @@ async function handleSignRequest(
   sendResponse: (response: any) => void
 ) {
   try {
-    const requestId = generateId();
-    console.log("[Background] New sign request:", requestId);
+    const origin = message.payload.origin || "";
+    const address = message.payload.address;
 
+    const permissionCheck: { approved: boolean } | undefined =
+      await chrome.runtime.sendMessage({
+        type: "auth(checkPermission)",
+        payload: {
+          address,
+          origin,
+          requestId: message.payload.id,
+        },
+      });
+
+    if (!permissionCheck?.approved) {
+      console.log(
+        `[Background] Permission denied for ${origin} to sign with ${address}`
+      );
+      if (sender.tab?.id) {
+        await sendMessageToTab(sender.tab.id, {
+          type: "ext(signResponse)",
+          payload: {
+            id: message.payload.id || 0,
+            approved: false,
+          },
+        });
+      }
+      sendResponse({ success: false });
+      return;
+    }
+
+    const requestId = generateId();
     await storeRequest("signRequest", {
-      address: message.payload.address || "",
+      address: address || "",
       data: message.payload.data,
-      origin: sender.origin || sender.url || "",
+      origin: origin,
       requestId: requestId.toString(),
       tabId: sender.tab?.id || 0,
     });

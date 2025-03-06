@@ -53,6 +53,8 @@ const createAccounts = (accounts: InjectedAccount[]) => ({
   },
 });
 
+let connectedOrigin: string | null = null;
+
 const createSigner = () => ({
   signPayload: async (payload: SignerPayloadJSON): Promise<SignerResult> => {
     return new Promise((resolve, reject) => {
@@ -81,6 +83,7 @@ const createSigner = () => ({
           id,
           address: payload.address,
           data: payload,
+          origin: connectedOrigin,
         },
       });
     });
@@ -126,6 +129,7 @@ const sendMessage = (message: DappMessage) => {
 export const TaoxyzWalletProvider: InjectedWindowProvider = {
   enable: async (originName: string): Promise<Injected> => {
     console.log(`[Provider] Enable requested from: ${originName}`);
+    connectedOrigin = originName;
 
     return new Promise((resolve, reject) => {
       const handleAuthResponse = createMessageHandler(

@@ -2,12 +2,17 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { KeyringService } from "../services/KeyringService";
 import { useRpcApi } from "../contexts/RpcApiContext";
-import { Trash2 } from "lucide-react";
+import { Trash2, ChevronDown, ChevronUp } from "lucide-react";
+import type { KeyringPair } from "@polkadot/keyring/types";
 
-interface WebsiteAccess {
+interface WebsiteStats {
   [website: string]: {
-    hasAccess: boolean;
     accountCount: number;
+    accounts: {
+      address: string;
+      username: string;
+      hasAccess: boolean;
+    }[];
   };
 }
 
@@ -17,29 +22,61 @@ const Settings = () => {
   const [selectedNetwork, setSelectedNetwork] = useState<"test" | "main">(
     "test"
   );
-  const [websiteAccess, setWebsiteAccess] = useState<WebsiteAccess>({});
-  const [newWebsite, setNewWebsite] = useState("");
+  const [websiteStats, setWebsiteStats] = useState<WebsiteStats>({});
+  const [expandedWebsite, setExpandedWebsite] = useState<string | null>(null);
+  const [accounts, setAccounts] = useState<KeyringPair[]>([]);
 
   useEffect(() => {
-    const loadWebsiteAccess = async () => {
-      const result = await chrome.storage.local.get("websitePermissions");
-      const permissions = result.websitePermissions || {};
-
-      const access: WebsiteAccess = {};
-      Object.entries(permissions).forEach(([website, accounts]) => {
-        const accountCount = Object.values(
-          accounts as { [key: string]: boolean }
-        ).filter((hasAccess) => hasAccess).length;
-        access[website] = {
-          hasAccess: accountCount > 0,
-          accountCount,
-        };
-      });
-      setWebsiteAccess(access);
-    };
-
-    loadWebsiteAccess();
+    loadWebsiteStats();
   }, []);
+
+  const loadWebsiteStats = async () => {
+    try {
+      const keyringAccounts = await KeyringService.getAccounts();
+      console.log(
+        "[Settings] All accounts:",
+        keyringAccounts.map((acc) => ({
+          address: acc.address,
+          username: acc.meta.username,
+          websitePermissions: acc.meta.websitePermissions,
+          fullMeta: acc.meta, // Log full metadata to see everything
+        }))
+      );
+
+      setAccounts(keyringAccounts);
+      const stats: WebsiteStats = {};
+
+      for (const account of keyringAccounts) {
+        const permissions =
+          (account.meta.websitePermissions as { [key: string]: boolean }) || {};
+
+        // Include all websites, even those with false permissions
+        Object.entries(permissions).forEach(([website, hasAccess]) => {
+          if (!stats[website]) {
+            stats[website] = {
+              accountCount: 0,
+              accounts: [],
+            };
+          }
+
+          if (hasAccess) {
+            stats[website].accountCount++;
+          }
+
+          stats[website].accounts.push({
+            address: account.address,
+            username: (account.meta.username as string) || "Unnamed Account",
+            hasAccess: hasAccess,
+          });
+        });
+      }
+
+      console.log("[Settings] Final website stats:", stats);
+      setWebsiteStats(stats);
+    } catch (error) {
+      console.error("Failed to load website stats:", error);
+    }
+  };
 
   const handleNetworkChange = (network: "test" | "main") => {
     if (
@@ -56,58 +93,37 @@ const Settings = () => {
 
   const handleWebsiteAccessToggle = async (
     website: string,
+    address: string,
     allowed: boolean
   ) => {
-    const updatedAccess = {
-      ...websiteAccess,
-      [website]: {
-        ...websiteAccess[website],
-        hasAccess: allowed,
-        accountCount: allowed ? 1 : 0,
-      },
-    };
-    setWebsiteAccess(updatedAccess);
-
-    const result = await chrome.storage.local.get("websitePermissions");
-    const permissions = result.websitePermissions || {};
-    const accounts = await KeyringService.getAccounts();
-
-    permissions[website] = accounts.reduce(
-      (acc: { [key: string]: boolean }, account) => {
-        acc[account.address] = allowed;
-        return acc;
-      },
-      {}
-    );
-
-    await chrome.storage.local.set({ websitePermissions: permissions });
-  };
-
-  const handleRemoveWebsite = async (website: string) => {
-    if (window.confirm(`Remove access for ${website}?`)) {
-      const updatedAccess = { ...websiteAccess };
-      delete updatedAccess[website];
-      setWebsiteAccess(updatedAccess);
-
-      const result = await chrome.storage.local.get("websitePermissions");
-      const permissions = result.websitePermissions || {};
-      delete permissions[website];
-      await chrome.storage.local.set({ websitePermissions: permissions });
+    try {
+      await KeyringService.updatePermissions(website, address, allowed);
+      loadWebsiteStats();
+    } catch (error) {
+      console.error("Failed to update permissions:", error);
     }
   };
 
-  const handleAddWebsite = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newWebsite) return;
+  const handleRemoveWebsite = async (website: string) => {
+    if (!window.confirm(`Remove access for ${website}?`)) return;
 
-    setWebsiteAccess((prev) => ({
-      ...prev,
-      [newWebsite]: {
-        hasAccess: true,
-        accountCount: 0,
-      },
-    }));
-    setNewWebsite("");
+    try {
+      const accountsWithAccess = accounts.filter(
+        (account) =>
+          (account.meta.websitePermissions as { [key: string]: boolean })[
+            website
+          ] === true
+      );
+
+      for (const account of accountsWithAccess) {
+        await KeyringService.updatePermissions(website, account.address, false);
+      }
+
+      // Reload stats
+      loadWebsiteStats();
+    } catch (error) {
+      console.error("Failed to remove website:", error);
+    }
   };
 
   return (
@@ -154,54 +170,75 @@ const Settings = () => {
         <div className="bg-white rounded-lg p-6 shadow-sm border">
           <h2 className="text-lg font-semibold mb-4">Manage Website Access</h2>
 
-          {/* Add new website */}
-          <form onSubmit={handleAddWebsite} className="mb-6">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={newWebsite}
-                onChange={(e) => setNewWebsite(e.target.value)}
-                placeholder="example.com"
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
-            </div>
-          </form>
-
-          {/* Website list */}
           <div className="space-y-4">
-            {Object.entries(websiteAccess).map(
-              ([website, { hasAccess, accountCount }]) => (
-                <div
-                  key={website}
-                  className="flex items-center justify-between py-2 border-b"
-                >
-                  <div className="flex items-center space-x-2">
-                    <span className="text-gray-600">{website}</span>
-                    {accountCount > 0 && (
+            {Object.entries(websiteStats).map(
+              ([website, { accountCount, accounts }]) => (
+                <div key={website} className="border rounded-lg">
+                  <div
+                    className="flex items-center justify-between p-4 cursor-pointer"
+                    onClick={() =>
+                      setExpandedWebsite(
+                        expandedWebsite === website ? null : website
+                      )
+                    }
+                  >
+                    <div className="flex items-center space-x-2">
+                      <span className="text-gray-600">{website}</span>
                       <span className="bg-orange-500 text-white text-xs px-2 py-1 rounded-full">
                         {accountCount} accounts
                       </span>
-                    )}
+                    </div>
+                    <div className="flex items-center space-x-4">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveWebsite(website);
+                        }}
+                        className="text-gray-500 hover:text-red-500"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                      {expandedWebsite === website ? (
+                        <ChevronUp size={16} />
+                      ) : (
+                        <ChevronDown size={16} />
+                      )}
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-4">
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={hasAccess}
-                        onChange={(e) =>
-                          handleWebsiteAccessToggle(website, e.target.checked)
-                        }
-                        className="sr-only peer"
-                      />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                    </label>
-                    <button
-                      onClick={() => handleRemoveWebsite(website)}
-                      className="text-gray-500 hover:text-red-500"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
+
+                  {expandedWebsite === website && (
+                    <div className="border-t px-4 py-2">
+                      <div className="space-y-2">
+                        {accounts.map((account) => (
+                          <div
+                            key={account.address}
+                            className="flex items-center justify-between py-2"
+                          >
+                            <span className="text-sm">
+                              {account.username} ({account.address.slice(0, 6)}
+                              ...
+                              {account.address.slice(-6)})
+                            </span>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={account.hasAccess}
+                                onChange={(e) =>
+                                  handleWebsiteAccessToggle(
+                                    website,
+                                    account.address,
+                                    e.target.checked
+                                  )
+                                }
+                                className="sr-only peer"
+                              />
+                              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )
             )}

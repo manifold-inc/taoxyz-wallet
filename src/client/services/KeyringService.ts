@@ -1,10 +1,15 @@
 import keyring from "@polkadot/ui-keyring";
-import type { KeyringPair } from "@polkadot/keyring/types";
 import { mnemonicGenerate } from "@polkadot/util-crypto";
 import { TypeRegistry } from "@polkadot/types";
+
+import type { KeyringPair, KeyringPair$Meta } from "@polkadot/keyring/types";
 import type { SignerPayloadJSON } from "@polkadot/types/types";
 
 const registry = new TypeRegistry();
+
+interface WebsitePermissions {
+  [origin: string]: boolean;
+}
 
 export const KeyringService = {
   async addAccount(
@@ -14,7 +19,8 @@ export const KeyringService = {
   ): Promise<KeyringPair> {
     const result = await keyring.addUri(mnemonic, password, {
       username,
-    });
+      websitePermissions: {} as WebsitePermissions,
+    } as KeyringPair$Meta);
     return result.pair;
   },
 
@@ -61,13 +67,9 @@ export const KeyringService = {
       if (!account) {
         throw new Error("Unable to find account");
       }
-
       account.decodePkcs8(password);
 
-      // Set up the registry with the signed extensions
       registry.setSignedExtensions(payload.signedExtensions);
-
-      // Create the extrinsic payload
       const extrinsicPayload = registry.createType(
         "ExtrinsicPayload",
         payload,
@@ -76,16 +78,48 @@ export const KeyringService = {
         }
       );
 
-      // Sign the payload
       const { signature } = extrinsicPayload.sign(account);
-
-      // Lock the account again
       account.lock();
-
       return signature;
     } catch (error) {
       console.error("[KeyringService] Signing failed:", error);
       throw error;
+    }
+  },
+
+  async getPermissions(address: string): Promise<WebsitePermissions> {
+    const account = await this.getAccount(address);
+    return (account.meta.websitePermissions as WebsitePermissions) || {};
+  },
+
+  async updatePermissions(
+    origin: string,
+    address: string,
+    allowAccess: boolean
+  ): Promise<boolean> {
+    try {
+      const account = await this.getAccount(address);
+
+      if (!account) {
+        console.error("[KeyringService] Account not found");
+        return false;
+      }
+
+      const meta = { ...account.meta };
+      const permissions = (meta.websitePermissions as WebsitePermissions) || {};
+      permissions[origin] = allowAccess;
+
+      meta.websitePermissions = permissions;
+      keyring.saveAccountMeta(account, meta);
+
+      console.log("[KeyringService] Updated permissions:", {
+        address: account.address,
+        permissions: permissions,
+      });
+      return true;
+    } catch (error) {
+      console.error("[KeyringService] Updating permissions failed:", error);
+      return false;
     }
   },
 };

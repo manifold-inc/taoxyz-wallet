@@ -74,7 +74,11 @@ const Connect = () => {
       });
 
       if (response?.success) {
-        window.close();
+        await KeyringService.updatePermissions(
+          request.origin,
+          selectedAccounts[0].address,
+          approved
+        );
       }
     } catch (error) {
       console.error("[Client] Error sending response:", error);

@@ -1,4 +1,5 @@
 import { HashRouter, Routes, Route, Link, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 
 import Home from "./pages/Home";
 import Signin from "./pages/Signin";
@@ -14,6 +15,7 @@ import Settings from "./pages/Settings";
 
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { RpcApiProvider } from "./contexts/RpcApiContext";
+import { KeyringService } from "./services/KeyringService";
 
 const Navigation = () => {
   const location = useLocation();
@@ -75,6 +77,50 @@ const Navigation = () => {
 };
 
 const App = () => {
+  useEffect(() => {
+    const handleAuthMessage = async (
+      message: any,
+      sender: chrome.runtime.MessageSender,
+      sendResponse: (response: any) => void
+    ) => {
+      if (message.type === "auth(checkPermission)") {
+        try {
+          const { address, origin } = message.payload;
+          console.log(
+            `[App] Checking permission for ${origin} to access ${address}`
+          );
+
+          const account = await KeyringService.getAccount(address);
+          const permissions =
+            (account.meta.websitePermissions as { [key: string]: boolean }) ||
+            {};
+          const approved = permissions[origin] === true;
+
+          console.log(`[App] Permission check result:`, {
+            address,
+            origin,
+            approved,
+            permissions,
+          });
+
+          sendResponse({ approved });
+        } catch (error) {
+          console.error("[App] Error checking permissions:", error);
+          sendResponse({ approved: false });
+        }
+      }
+      return true; // Keep channel open for async response
+    };
+
+    // Add listener
+    chrome.runtime.onMessage.addListener(handleAuthMessage);
+
+    // Cleanup
+    return () => {
+      chrome.runtime.onMessage.removeListener(handleAuthMessage);
+    };
+  }, []);
+
   return (
     <RpcApiProvider>
       <HashRouter>
