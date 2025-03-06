@@ -5,26 +5,34 @@ import type { Subnet, Validator } from "../../types/types";
 export class RpcApi {
   private api!: ApiPromise;
   private initPromise: Promise<void>;
+  private endpoint: "test" | "main";
 
-  private readonly endpoint = {
+  private readonly endpoints = {
     test: "wss://test.finney.opentensor.ai:443",
     main: "wss://entrypoint-finney.opentensor.ai:443",
   };
 
-  constructor() {
+  constructor(endpoint: "test" | "main" = "test") {
+    this.endpoint = endpoint;
     this.initPromise = this.initialize();
   }
 
   private async initialize(): Promise<void> {
     console.log("[Client] Starting initialization");
-    const provider = new WsProvider(this.endpoint.test);
+    const provider = new WsProvider(this.endpoints[this.endpoint]);
     try {
+      if (this.api) {
+        await this.api.disconnect();
+      }
+
       this.api = await ApiPromise.create({
         provider,
         throwOnConnect: true,
       });
       await this.api.isReady;
-      console.log(`[Client] Connected to the endpoint: ${this.endpoint.test}`);
+      console.log(
+        `[Client] Connected to the endpoint: ${this.endpoints[this.endpoint]}`
+      );
     } catch (error) {
       console.error("Error in initialize:", error);
       throw error;
@@ -38,6 +46,11 @@ export class RpcApi {
       throw new Error("API not initialized");
     }
     return this.api;
+  }
+
+  public async changeEndpoint(newEndpoint: "test" | "main"): Promise<void> {
+    this.endpoint = newEndpoint;
+    await this.initialize();
   }
 
   public async getStake(address: string) {
