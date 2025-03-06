@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRpcApi } from "../../contexts/RpcApiContext";
-import type { Validator, Subnet } from "../../../types/subnets";
-import type { StakeTransaction } from "../../../types/stakeTransaction";
+import type { Validator, Subnet, StakeTransaction } from "../../../types/types";
 
 interface ConfirmStakeProps {
   stake: StakeTransaction;

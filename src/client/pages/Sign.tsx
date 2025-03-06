@@ -1,12 +1,6 @@
 import { useState, useEffect } from "react";
 import { KeyringService } from "../services/KeyringService";
-import type { SignerPayloadJSON } from "@polkadot/types/types";
-
-interface SignRequest {
-  data: SignerPayloadJSON;
-  address: string;
-  requestId: string;
-}
+import type { SignRequest } from "../../types/types";
 
 const Sign = () => {
   const [request, setRequest] = useState<SignRequest | null>(null);

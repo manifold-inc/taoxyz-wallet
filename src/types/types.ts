@@ -1,3 +1,5 @@
+import type { SignerPayloadJSON } from "@polkadot/types/types";
+
 export interface Subnet {
   id: number;
   name: string;
@@ -27,4 +29,21 @@ export interface Validator {
   index: number;
   hotkey: string;
   coldkey: string;
+}
+
+export interface StakeTransaction {
+  subnetId: number;
+  validatorHotkey: string;
+  tokens: number;
+}
+
+export interface Account {
+  name: string;
+  address: string;
+}
+
+export interface SignRequest {
+  data: SignerPayloadJSON;
+  address: string;
+  requestId: string;
 }

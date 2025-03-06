@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useRpcApi } from "../contexts/RpcApiContext";
-import type { StakeTransaction } from "../../types/stakeTransaction";
+import type { StakeTransaction } from "../../types/types";
 
 interface PortfolioProps {
   stakes: StakeTransaction[];

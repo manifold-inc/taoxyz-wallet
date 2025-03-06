@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 import { Portfolio } from "../components/Portfolio";
 import { useRpcApi } from "../contexts/RpcApiContext";
-import type { StakeTransaction } from "../../types/stakeTransaction";
+import type { StakeTransaction } from "../../types/types";
 
 export const Dashboard = () => {
   const { api } = useRpcApi();

@@ -1,6 +1,6 @@
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { KeyringService } from "../services/KeyringService";
-import type { Subnet, Validator } from "../../types/subnets";
+import type { Subnet, Validator } from "../../types/types";
 
 export class RpcApi {
   private api!: ApiPromise;

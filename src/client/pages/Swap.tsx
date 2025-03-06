@@ -6,7 +6,7 @@ import ValidatorSelection from "../components/swap/ValidatorSelection";
 import ConfirmSwap from "../components/swap/ConfirmSwap";
 
 import { useRpcApi } from "../contexts/RpcApiContext";
-import type { Subnet, Validator } from "../../types/subnets";
+import type { Subnet, Validator } from "../../types/types";
 
 enum Step {
   SELECT_SUBNET,

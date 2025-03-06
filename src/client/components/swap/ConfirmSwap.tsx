@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useRpcApi } from "../../contexts/RpcApiContext";
-import type { Subnet, Validator } from "../../../types/subnets";
+import type { Subnet, Validator } from "../../../types/types";
 
 interface ConfirmSwapProps {
   subnet: Subnet;

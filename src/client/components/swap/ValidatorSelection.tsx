@@ -1,4 +1,4 @@
-import type { Subnet, Validator } from "../../../types/subnets";
+import type { Subnet, Validator } from "../../../types/types";
 
 interface ValidatorSelectionProps {
   subnet: Subnet;

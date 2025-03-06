@@ -1,4 +1,4 @@
-import type { Subnet } from "../../../types/subnets";
+import type { Subnet } from "../../../types/types";
 
 interface SubnetSelectionProps {
   subnets: Subnet[];
