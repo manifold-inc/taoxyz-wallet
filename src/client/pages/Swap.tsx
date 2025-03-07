@@ -5,8 +5,8 @@ import SubnetSelection from "../components/swap/SubnetSelection";
 import ValidatorSelection from "../components/swap/ValidatorSelection";
 import ConfirmSwap from "../components/swap/ConfirmSwap";
 
-import { useRpcApi } from "../contexts/RpcApiContext";
-import type { Subnet, Validator } from "../../types/types";
+import { usePolkadotApi } from "../contexts/PolkadotApiContext";
+import type { Subnet, Validator } from "../../types/client";
 
 enum Step {
   SELECT_SUBNET,
@@ -15,7 +15,7 @@ enum Step {
 }
 
 export const Swap = () => {
-  const { api } = useRpcApi();
+  const { api } = usePolkadotApi();
   const location = useLocation();
   const { address } = location.state || {};
   const [step, setStep] = useState<Step>(Step.SELECT_SUBNET);

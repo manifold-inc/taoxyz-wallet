@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import { Portfolio } from "../components/Portfolio";
-import { useRpcApi } from "../contexts/RpcApiContext";
-import type { StakeTransaction } from "../../types/types";
+import { usePolkadotApi } from "../contexts/PolkadotApiContext";
+import type { StakeTransaction } from "../../types/client";
 
 export const Dashboard = () => {
-  const { api } = useRpcApi();
+  const { api } = usePolkadotApi();
   const navigate = useNavigate();
   const location = useLocation();
   const address = location.state?.address;

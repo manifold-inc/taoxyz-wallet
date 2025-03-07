@@ -16,8 +16,9 @@ import Settings from "./pages/Settings";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Navigation from "./components/Navigation";
 
-import { RpcApiProvider } from "./contexts/RpcApiContext";
+import { PolkadotApiProvider } from "./contexts/PolkadotApiContext";
 import { KeyringService } from "./services/KeyringService";
+import { MESSAGE_TYPES } from "../types/messages";
 
 const App = () => {
   useEffect(() => {
@@ -26,7 +27,7 @@ const App = () => {
       sender: chrome.runtime.MessageSender,
       sendResponse: (response: any) => void
     ) => {
-      if (message.type === "auth(checkPermission)") {
+      if (message.type === MESSAGE_TYPES.AUTHENTICATE) {
         try {
           const { address, origin } = message.payload;
           console.log(
@@ -58,7 +59,7 @@ const App = () => {
   }, []);
 
   return (
-    <RpcApiProvider>
+    <PolkadotApiProvider>
       <HashRouter>
         <Navigation />
         <main className="pt-16">
@@ -112,7 +113,7 @@ const App = () => {
           </Routes>
         </main>
       </HashRouter>
-    </RpcApiProvider>
+    </PolkadotApiProvider>
   );
 };
 

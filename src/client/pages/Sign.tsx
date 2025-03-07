@@ -1,15 +1,24 @@
 import { useState, useEffect } from "react";
+import type {
+  SignerPayloadJSON,
+  SignerPayloadRaw,
+} from "@polkadot/types/types";
+
 import { KeyringService } from "../services/KeyringService";
-import type { SignRequest } from "../../types/types";
+import { MESSAGE_TYPES } from "../../types/messages";
+import type {
+  StoredSignRequest,
+  SignResponsePayload,
+} from "../../types/messages";
 
 const Sign = () => {
-  const [request, setRequest] = useState<SignRequest | null>(null);
+  const [request, setRequest] = useState<StoredSignRequest | null>(null);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    chrome.storage.local.get("signRequest", (result) => {
+    void chrome.storage.local.get("signRequest", (result) => {
       if (result.signRequest) {
         setRequest(result.signRequest);
       }
@@ -17,26 +26,34 @@ const Sign = () => {
   }, []);
 
   const handleSign = async () => {
-    try {
-      setLoading(true);
-      setError("");
+    setLoading(true);
+    setError("");
+    if (!request) {
+      throw new Error("No signing request found");
+    }
 
-      if (!request) {
-        throw new Error("No signing request found");
+    try {
+      const type = checkPayloadType(request.data);
+      if (type === "INVALID") {
+        throw new Error("Invalid payload format");
       }
 
-      const signature = await KeyringService.sign(
+      let signature: `0x${string}`;
+      signature = await KeyringService.sign(
         request.address,
-        request.data,
+        request.data as SignerPayloadJSON,
         password
       );
+      // TODO: Handle raw payload
+
+      const response: SignResponsePayload = {
+        id: parseInt(request.requestId),
+        signature,
+      };
 
       await chrome.runtime.sendMessage({
-        type: "ext(signResponse)",
-        payload: {
-          id: request.requestId,
-          signature,
-        },
+        type: MESSAGE_TYPES.SIGN_RESPONSE,
+        payload: response,
       });
 
       window.close();
@@ -50,43 +67,75 @@ const Sign = () => {
   };
 
   const handleCancel = async () => {
+    if (!request) return;
+
+    const response: SignResponsePayload = {
+      id: parseInt(request.requestId, 10),
+      approved: false,
+    };
+
     await chrome.runtime.sendMessage({
-      type: "ext(signResponse)",
-      payload: {
-        approved: false,
-        id: request?.requestId,
-      },
+      type: MESSAGE_TYPES.SIGN_RESPONSE,
+      payload: response,
     });
     window.close();
+  };
+
+  const checkPayloadType = (data: SignerPayloadJSON | SignerPayloadRaw) => {
+    if ("method" in data) {
+      return "JSON";
+    } else if ("data" in data) {
+      return "RAW";
+    } else {
+      return "INVALID";
+    }
   };
 
   if (!request) {
     return <div className="p-4">Loading...</div>;
   }
 
+  const renderPayload = () => {
+    const type = checkPayloadType(request.data);
+    if (type === "JSON") {
+      const payload = request.data as SignerPayloadJSON;
+      return (
+        <div className="grid grid-cols-[100px,1fr] gap-2">
+          <div className="text-gray-500">Method:</div>
+          <div className="text-gray-900 truncate">{payload.method}</div>
+          <div className="text-gray-500">Nonce:</div>
+          <div className="text-gray-900 truncate">{payload.nonce}</div>
+          <div className="text-gray-500">Tip:</div>
+          <div className="text-gray-900 truncate">{payload.tip}</div>
+          <div className="text-gray-500">Block Hash:</div>
+          <div className="text-gray-900 truncate">{payload.blockHash}</div>
+          <div className="text-gray-500">Genesis Hash:</div>
+          <div className="text-gray-900 truncate">{payload.genesisHash}</div>
+        </div>
+      );
+    }
+
+    if (type === "RAW") {
+      const payload = request.data as SignerPayloadRaw;
+      return (
+        <div className="grid grid-cols-[100px,1fr] gap-2">
+          <div className="text-gray-500">Data:</div>
+          <div className="text-gray-900 truncate">{payload.data}</div>
+          <div className="text-gray-500">Type:</div>
+          <div className="text-gray-900 truncate">Raw Signature</div>
+        </div>
+      );
+    }
+
+    return <div>Invalid payload format</div>;
+  };
+
   return (
     <div className="p-4 max-w-lg w-full">
       <div className="bg-white rounded-lg p-4 shadow-sm border">
         <div className="mb-4">
           <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 space-y-1.5 text-xs">
-            <div className="grid grid-cols-[100px,1fr] gap-2">
-              <div className="text-gray-500">Method:</div>
-              <div className="text-gray-900 truncate">
-                {request.data.method}
-              </div>
-              <div className="text-gray-500">Nonce:</div>
-              <div className="text-gray-900 truncate">{request.data.nonce}</div>
-              <div className="text-gray-500">Tip:</div>
-              <div className="text-gray-900 truncate">{request.data.tip}</div>
-              <div className="text-gray-500">Block Hash:</div>
-              <div className="text-gray-900 truncate">
-                {request.data.blockHash}
-              </div>
-              <div className="text-gray-500">Genesis Hash:</div>
-              <div className="text-gray-900 truncate">
-                {request.data.genesisHash}
-              </div>
-            </div>
+            {renderPayload()}
           </div>
         </div>
 

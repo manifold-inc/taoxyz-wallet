@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useRpcApi } from "../contexts/RpcApiContext";
+import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 import { KeyringService } from "../services/KeyringService";
-import type { StakeTransaction } from "../../types/types";
+import type { StakeTransaction } from "../../types/client";
 
 interface PortfolioProps {
   stakes: StakeTransaction[];
@@ -10,7 +10,7 @@ interface PortfolioProps {
 }
 
 export const Portfolio = ({ stakes, address }: PortfolioProps) => {
-  const { api } = useRpcApi();
+  const { api } = usePolkadotApi();
   const navigate = useNavigate();
   const [isSwapping, setIsSwapping] = useState(false);
   const [error, setError] = useState<string | null>(null);

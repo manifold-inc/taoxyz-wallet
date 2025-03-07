@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { useRpcApi } from "../../contexts/RpcApiContext";
-import type { Subnet, Validator } from "../../../types/types";
+import { usePolkadotApi } from "../../contexts/PolkadotApiContext";
+import type { Subnet, Validator } from "../../../types/client";
 
 interface ConfirmSwapProps {
   subnet: Subnet;
@@ -19,7 +19,7 @@ export const ConfirmSwap = ({
   balance,
   address,
 }: ConfirmSwapProps) => {
-  const { api, isLoading } = useRpcApi();
+  const { api, isLoading } = usePolkadotApi();
   const navigate = useNavigate();
   const [amount, setAmount] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);

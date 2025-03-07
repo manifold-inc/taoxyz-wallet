@@ -1,22 +1,26 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { RpcApi } from "../api/RpcApi";
+import PolkadotApi from "../api/polkadotApi";
 
-interface RpcApiContextType {
-  api: RpcApi | null;
+interface PolkadotApiContextType {
+  api: PolkadotApi | null;
   isLoading: boolean;
   error: Error | null;
   setEndpoint: (endpoint: "test" | "main") => void;
 }
 
-const RpcApiContext = createContext<RpcApiContextType>({
+const PolkadotApiContext = createContext<PolkadotApiContextType>({
   api: null,
   isLoading: true,
   error: null,
   setEndpoint: () => {},
 });
 
-export const RpcApiProvider = ({ children }: { children: React.ReactNode }) => {
-  const [api, setApi] = useState<RpcApi | null>(null);
+export const PolkadotApiProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
+  const [api, setApi] = useState<PolkadotApi | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [endpoint, setEndpoint] = useState<"test" | "main">("test");
@@ -24,7 +28,7 @@ export const RpcApiProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const initApi = async () => {
       setIsLoading(true);
-      const newApi = new RpcApi(endpoint);
+      const newApi = new PolkadotApi(endpoint);
       await newApi.getApi();
       setApi(newApi);
       setIsLoading(false);
@@ -48,18 +52,18 @@ export const RpcApiProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <RpcApiContext.Provider
+    <PolkadotApiContext.Provider
       value={{ api, isLoading, error, setEndpoint: handleEndpointChange }}
     >
       {children}
-    </RpcApiContext.Provider>
+    </PolkadotApiContext.Provider>
   );
 };
 
-export const useRpcApi = () => {
-  const context = useContext(RpcApiContext);
+export const usePolkadotApi = () => {
+  const context = useContext(PolkadotApiContext);
   if (context === undefined) {
-    throw new Error("useRpcApi must be used within a RpcApiProvider");
+    throw new Error("usePolkadotApi must be used within a PolkadotApiProvider");
   }
   return context;
 };

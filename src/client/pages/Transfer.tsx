@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useRpcApi } from "../contexts/RpcApiContext";
+import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 
 const Transfer = () => {
-  const { api } = useRpcApi();
+  const { api } = usePolkadotApi();
   const location = useLocation();
   const navigate = useNavigate();
   const { address } = location.state || {};

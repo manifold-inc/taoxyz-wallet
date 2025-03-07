@@ -5,8 +5,8 @@ import StakeSelection from "../components/stake/StakeSelection";
 import ConfirmStake from "../components/stake/ConfirmStake";
 import ValidatorSelection from "../components/swap/ValidatorSelection";
 
-import { useRpcApi } from "../contexts/RpcApiContext";
-import type { Validator, Subnet, StakeTransaction } from "../../types/types";
+import { usePolkadotApi } from "../contexts/PolkadotApiContext";
+import type { Validator, Subnet, StakeTransaction } from "../../types/client";
 
 enum Step {
   SELECT_STAKE,
@@ -15,7 +15,7 @@ enum Step {
 }
 
 const Stake = () => {
-  const { api } = useRpcApi();
+  const { api } = usePolkadotApi();
   const location = useLocation();
   const { address } = location.state || {};
   const [step, setStep] = useState<Step>(Step.SELECT_STAKE);

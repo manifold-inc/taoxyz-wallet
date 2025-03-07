@@ -1,4 +1,4 @@
-import type { StakeTransaction } from "../../../types/types";
+import type { StakeTransaction } from "../../../types/client";
 
 interface StakeSelectionProps {
   stakes: StakeTransaction[];

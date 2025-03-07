@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { KeyringService } from "../services/KeyringService";
-import { useRpcApi } from "../contexts/RpcApiContext";
+import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import type { KeyringPair } from "@polkadot/keyring/types";
 
@@ -18,7 +18,7 @@ interface WebsiteStats {
 
 const Settings = () => {
   const navigate = useNavigate();
-  const { setEndpoint } = useRpcApi();
+  const { setEndpoint } = usePolkadotApi();
   const [selectedNetwork, setSelectedNetwork] = useState<"test" | "main">(
     "test"
   );

@@ -1,43 +1,20 @@
-import type { SignerPayloadJSON } from "@polkadot/types/types";
+import { MESSAGE_TYPES, ERROR_TYPES } from "../types/messages";
+import type {
+  StoredRequest,
+  StoredSignRequest,
+  DappMessage,
+  ExtensionMessage,
+  MessagePayloadMap,
+  ResponseMessage,
+} from "../types/messages";
+import { generateId } from "../utils/utils";
 
-interface StoredRequest {
-  tabId: number;
-  origin: string;
-  requestId: string;
-}
-
-interface StoredSignRequest extends StoredRequest {
-  address: string;
-  data: SignerPayloadJSON;
-}
-
-interface RequestMessage {
-  type: string;
-  payload: {
-    origin?: string;
-    id?: number;
-    address?: string;
-    data?: any;
-  };
-}
-
-interface ResponseMessage {
-  type: string;
-  payload: {
-    id: number;
-    signature?: string;
-    accounts?: any[];
-    approved?: boolean;
-  };
-}
-
-const generateId = (): number => {
-  return Math.floor(Math.random() * 1000000);
-};
-
-const getStoredRequest = async (key: string): Promise<StoredRequest | null> => {
+const getStoredRequest = async (key: string): Promise<StoredRequest> => {
   const result = await chrome.storage.local.get(key);
-  return result[key] || null;
+  if (!result[key]) {
+    throw new Error(`[Background] No stored ${key} found`);
+  }
+  return result[key];
 };
 
 const storeRequest = async (
@@ -48,13 +25,17 @@ const storeRequest = async (
   console.log(`[Background] Stored ${key}:`, data);
 };
 
-const sendMessageToTab = async (
+const sendMessageToTab = async <T extends keyof MessagePayloadMap>(
   tabId: number,
-  message: ResponseMessage
+  message: ExtensionMessage & { type: T }
 ): Promise<void> => {
   try {
     await chrome.tabs.sendMessage(tabId, message);
-    console.log(`[Background] Response sent to tab ${tabId}`);
+    console.log(
+      `[Background] Response sent to tab ${tabId}, message: ${JSON.stringify(
+        message
+      )}`
+    );
   } catch (error) {
     console.error(
       `[Background] Failed to send message to tab ${tabId}:`,
@@ -78,125 +59,147 @@ const openPopup = async (route: string): Promise<chrome.windows.Window> => {
   });
 };
 
-// Request handlers
+const sendErrorResponse = (
+  sendResponse: (response: ResponseMessage) => void,
+  error: string,
+  details?: unknown
+) => {
+  console.error(`[Background] ${error}`, details || "");
+  sendResponse({ success: false, error, details });
+};
+
 async function handleConnectRequest(
-  message: RequestMessage,
+  message: DappMessage & { type: typeof MESSAGE_TYPES.CONNECT_REQUEST },
   sender: chrome.runtime.MessageSender,
-  sendResponse: (response: any) => void
+  sendResponse: (response: { success: boolean; error?: string }) => void
 ) {
+  if (!sender.tab?.id) {
+    sendErrorResponse(sendResponse, ERROR_TYPES.NO_TAB);
+    return;
+  }
+
+  if (!message.payload.origin) {
+    sendErrorResponse(sendResponse, ERROR_TYPES.NO_ORIGIN);
+    return;
+  }
+
   try {
     const requestId = generateId();
-    console.log("[Background] New connect request:", requestId);
-
     await storeRequest("connectRequest", {
-      origin: message.payload.origin || "",
+      origin: message.payload.origin,
       requestId: requestId.toString(),
-      tabId: sender.tab?.id || 0,
+      tabId: sender.tab.id,
     });
 
     await openPopup("connect");
     sendResponse({ success: true });
+    console.log("[Background] New connect request:", requestId);
   } catch (error) {
     console.error("[Background] Error handling connect request:", error);
-    sendResponse({ success: false, error: "Failed to process request" });
+    sendErrorResponse(sendResponse, ERROR_TYPES.UNKNOWN_ERROR, error);
   }
 }
 
 async function handleConnectResponse(
-  message: ResponseMessage,
-  sendResponse: (response: any) => void
+  message: ExtensionMessage & { type: typeof MESSAGE_TYPES.CONNECT_RESPONSE },
+  sendResponse: (response: { success: boolean; error?: string }) => void
 ) {
+  const request = await getStoredRequest("connectRequest");
+  if (!request) {
+    sendErrorResponse(sendResponse, ERROR_TYPES.NO_REQUEST);
+    return;
+  }
+
+  if (!request.tabId) {
+    sendErrorResponse(sendResponse, ERROR_TYPES.NO_TAB);
+    return;
+  }
+
   try {
-    const request = await getStoredRequest("connectRequest");
-
-    if (!request) {
-      console.error("[Background] No stored connect request found");
-      sendResponse({ success: false, error: "No pending request" });
-      return;
-    }
-
-    if (request.tabId) {
-      await sendMessageToTab(request.tabId, {
-        type: "ext(connectResponse)",
-        payload: message.payload,
-      });
-    }
+    await sendMessageToTab(request.tabId, {
+      type: MESSAGE_TYPES.CONNECT_RESPONSE,
+      payload: message.payload,
+    });
 
     await cleanupRequest("connectRequest");
     sendResponse({ success: true });
-
     console.log("[Background] Connect response handled successfully");
   } catch (error) {
     console.error("[Background] Error handling connect response:", error);
-    sendResponse({ success: false, error: "Failed to process response" });
+    sendErrorResponse(sendResponse, ERROR_TYPES.UNKNOWN_ERROR, error);
   }
 }
 
 async function handleSignRequest(
-  message: RequestMessage,
+  message: DappMessage & { type: typeof MESSAGE_TYPES.SIGN_REQUEST },
   sender: chrome.runtime.MessageSender,
-  sendResponse: (response: any) => void
+  sendResponse: (response: ResponseMessage) => void
 ) {
+  if (!sender.tab?.id) {
+    sendErrorResponse(sendResponse, ERROR_TYPES.NO_TAB);
+    return;
+  }
+
+  if (!message.payload.origin) {
+    sendErrorResponse(sendResponse, ERROR_TYPES.NO_ORIGIN);
+    return;
+  }
+
   try {
-    const origin = message.payload.origin || "";
+    const origin = message.payload.origin;
     const address = message.payload.address;
 
-    const permissionCheck: { approved: boolean } | undefined =
-      await chrome.runtime.sendMessage({
-        type: "auth(checkPermission)",
-        payload: {
-          address,
-          origin,
-          requestId: message.payload.id,
-        },
-      });
+    const permissionCheck = await chrome.runtime.sendMessage({
+      type: MESSAGE_TYPES.AUTHENTICATE,
+      payload: { address, origin, requestId: message.payload.id },
+    });
 
-    if (!permissionCheck?.approved) {
+    if (!permissionCheck.approved) {
       console.log(
         `[Background] Permission denied for ${origin} to sign with ${address}`
       );
-      if (sender.tab?.id) {
-        await sendMessageToTab(sender.tab.id, {
-          type: "ext(signResponse)",
-          payload: {
-            id: message.payload.id || 0,
-            approved: false,
-          },
-        });
-      }
-      sendResponse({ success: false });
+      await sendMessageToTab(sender.tab.id, {
+        type: MESSAGE_TYPES.SIGN_RESPONSE,
+        payload: { id: message.payload.id, approved: false },
+      });
+      sendErrorResponse(sendResponse, ERROR_TYPES.PERMISSION_DENIED);
       return;
     }
 
     const requestId = generateId();
     await storeRequest("signRequest", {
-      address: address || "",
+      address,
       data: message.payload.data,
-      origin: origin,
+      origin,
       requestId: requestId.toString(),
-      tabId: sender.tab?.id || 0,
+      tabId: sender.tab.id,
     });
 
     await openPopup("sign");
     sendResponse({ success: true });
+    console.log("[Background] Sign request initiated:", {
+      requestId,
+      origin,
+      tabId: sender.tab.id,
+    });
   } catch (error) {
-    console.error("[Background] Error handling sign request:", error);
-    sendResponse({ success: false, error: "Failed to process request" });
+    sendErrorResponse(sendResponse, ERROR_TYPES.UNKNOWN_ERROR, error);
   }
 }
 
 async function handleSignResponse(
-  message: ResponseMessage,
-  sendResponse: (response: any) => void
+  message: ExtensionMessage & { type: typeof MESSAGE_TYPES.SIGN_RESPONSE },
+  sendResponse: (response: { success: boolean; error?: string }) => void
 ) {
-  try {
-    const request = await getStoredRequest("signRequest");
-    if (!request?.tabId) {
-      throw new Error("Invalid request");
-    }
+  const request = await getStoredRequest("signRequest");
+  if (!request.tabId) {
+    sendErrorResponse(sendResponse, ERROR_TYPES.NO_TAB);
+    return;
+  }
 
+  try {
     await sendMessageToTab(request.tabId, {
-      type: "ext(signResponse)",
+      type: MESSAGE_TYPES.SIGN_RESPONSE,
       payload: {
         id: parseInt(request.requestId),
         signature: message.payload.signature,
@@ -205,36 +208,36 @@ async function handleSignResponse(
 
     await cleanupRequest("signRequest");
     sendResponse({ success: true });
+    console.log("[Background] Sign response handled successfully");
   } catch (error) {
     console.error("[Background] Error handling sign response:", error);
-    sendResponse({ success: false });
+    sendErrorResponse(sendResponse, ERROR_TYPES.UNKNOWN_ERROR, error);
   }
 }
 
-// Main message listener
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log("[Background] Message received:", message);
 
   switch (message.type) {
-    case "dapp(connectRequest)":
+    case MESSAGE_TYPES.CONNECT_REQUEST:
       handleConnectRequest(message, sender, sendResponse);
       break;
 
-    case "ext(connectResponse)":
+    case MESSAGE_TYPES.CONNECT_RESPONSE:
       handleConnectResponse(message, sendResponse);
       break;
 
-    case "dapp(signRequest)":
+    case MESSAGE_TYPES.SIGN_REQUEST:
       handleSignRequest(message, sender, sendResponse);
       break;
 
-    case "ext(signResponse)":
+    case MESSAGE_TYPES.SIGN_RESPONSE:
       handleSignResponse(message, sendResponse);
       break;
 
     default:
       console.log("[Background] Unknown message type:", message.type);
-      sendResponse({ success: false, error: "Unknown message type" });
+      sendErrorResponse(sendResponse, ERROR_TYPES.UNKNOWN_ERROR);
   }
 
   return true;

@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useRpcApi } from "../../contexts/RpcApiContext";
-import type { Validator, Subnet, StakeTransaction } from "../../../types/types";
+import { usePolkadotApi } from "../../contexts/PolkadotApiContext";
+import type {
+  Validator,
+  Subnet,
+  StakeTransaction,
+} from "../../../types/client";
 
 interface ConfirmStakeProps {
   stake: StakeTransaction;
@@ -18,7 +22,7 @@ const ConfirmStake = ({
   address,
   onBack,
 }: ConfirmStakeProps) => {
-  const { api, isLoading } = useRpcApi();
+  const { api, isLoading } = usePolkadotApi();
   const navigate = useNavigate();
   const [amount, setAmount] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);

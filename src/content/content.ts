@@ -1,79 +1,84 @@
+import type {
+  DappMessage,
+  ExtensionMessage,
+  ResponseMessage,
+} from "../types/messages";
+import { MESSAGE_TYPES, ERROR_TYPES } from "../types/messages";
+
 const script = document.createElement("script");
 script.src = chrome.runtime.getURL("content/inject.js");
 script.type = "module";
 (document.head || document.documentElement).appendChild(script);
 
+const handleError = (error: Error, context: string) => {
+  console.error(`[Content] ${context}:`, error.message);
+  return { success: false, error: error.message } as ResponseMessage;
+};
+
+// Listens for messages from the dApp and forwards them to the background service worker
 window.addEventListener("message", (event) => {
   if (event.origin !== window.location.origin) return;
   if (event.data.source?.startsWith("react-devtools")) return;
-  if (event.data.source === "taoxyz-wallet-dapp") {
-    console.log("[Content] Received message from dApp:", event.data);
 
-    if (!event.data.type || !event.data.payload) {
-      console.error("[Content] Invalid message format:", event.data);
-      return;
-    }
+  console.log("[Content] Received message:", event.data);
+  const message = event.data;
 
-    // Forward to background and keep channel open for response
+  if (!message || typeof message !== "object") {
+    handleError(
+      new Error(ERROR_TYPES.INVALID_MESSAGE),
+      "Message is not an object"
+    );
+    return;
+  }
+
+  if (!message.type || typeof message.type !== "string") {
+    handleError(
+      new Error(ERROR_TYPES.INVALID_MESSAGE),
+      "Invalid message from dApp"
+    );
+    return;
+  }
+
+  if (
+    message.type === MESSAGE_TYPES.CONNECT_REQUEST ||
+    message.type === MESSAGE_TYPES.SIGN_REQUEST
+  ) {
     chrome.runtime
-      .sendMessage(event.data)
-      .then((response) => {
-        // Forward response back to webpage
-        window.postMessage(
-          {
-            source: "taoxyz-wallet-content",
-            type: event.data.type,
-            payload: response,
-          },
-          window.location.origin
-        );
+      .sendMessage(message as DappMessage)
+      .then((response: ResponseMessage) => {
+        if (!response.success) {
+          handleError(
+            new Error(ERROR_TYPES.UNKNOWN_ERROR),
+            "Error from background"
+          );
+          return;
+        }
       })
-      .catch((error) => {
-        console.error("[Content] Error forwarding message:", error);
-        window.postMessage(
-          {
-            source: "taoxyz-wallet-content",
-            type: `${event.data.type}_error`,
-            payload: { error: error.message },
-          },
-          window.location.origin
+      .catch((error) => handleError(error, ERROR_TYPES.UNKNOWN_ERROR));
+  }
+});
+
+// Forwards messages from the background to the dApp
+chrome.runtime.onMessage.addListener(
+  (message: ExtensionMessage, sender, sendResponse) => {
+    if (sender.id === chrome.runtime.id) {
+      if (
+        message.type !== MESSAGE_TYPES.CONNECT_RESPONSE &&
+        message.type !== MESSAGE_TYPES.SIGN_RESPONSE
+      ) {
+        handleError(
+          new Error(ERROR_TYPES.INVALID_MESSAGE),
+          "Invalid message from background"
         );
-      });
+        return true;
+      }
+
+      console.log("[Content] Forwarding background response to dApp:", message);
+      window.postMessage(message, window.location.origin);
+      sendResponse();
+    }
+    return true;
   }
-});
-
-// Handle messages from background script
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log("[Content] Received message from background:", message);
-
-  if (message.type === "ext(signResponse)") {
-    window.postMessage(
-      {
-        source: "taoxyz-wallet-content",
-        type: message.type,
-        payload: {
-          id: message.payload.id,
-          signature: message.payload.signature,
-        },
-      },
-      window.location.origin
-    );
-    sendResponse();
-  }
-
-  if (message.type === "ext(connectResponse)") {
-    window.postMessage(
-      {
-        source: "taoxyz-wallet-content",
-        type: message.type,
-        payload: message.payload,
-      },
-      window.location.origin
-    );
-    sendResponse();
-  }
-
-  return true;
-});
+);
 
 export {};
