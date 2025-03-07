@@ -70,7 +70,7 @@ export const ConfirmSwap = ({
         validatorHotkey: validator.hotkey,
         amount: parseFloat(amount),
       });
-      navigate("/dashboard");
+      navigate("/dashboard", { state: { address } });
     } catch (error) {
       setError(error instanceof Error ? error.message : "Failed to stake");
     } finally {
@@ -92,72 +92,84 @@ export const ConfirmSwap = ({
   }
 
   return (
-    <div>
-      <div className="flex items-center mb-6">
+    <div className="p-4">
+      <div className="flex items-center mb-4">
         <button
           onClick={onBack}
-          className="mr-4 text-gray-600 hover:text-gray-900"
+          className="mr-3 text-[10px] text-gray-400 hover:text-gray-300"
         >
           ← Back
         </button>
-        <h2 className="text-xl font-semibold">Confirm Staking</h2>
+        <h2 className="text-[11px] font-medium">Confirm Staking</h2>
       </div>
 
-      <div className="bg-white rounded-lg p-6 shadow-sm border">
-        <div className="space-y-4">
+      <div className="bg-white rounded-lg p-4">
+        <div className="space-y-2">
           <div>
-            <h3 className="font-medium text-gray-700">Selected Subnet</h3>
-            <p className="mt-1">{subnet.name}</p>
-          </div>
-
-          <div>
-            <h3 className="font-medium text-gray-700">Token Price</h3>
-            <p className="mt-1">{subnet.price} TAO</p>
-          </div>
-
-          <div>
-            <h3 className="font-medium text-gray-700">Selected Validator</h3>
-            <p className="mt-1">
-              Hotkey: {validator.hotkey.slice(0, 8)}...
-              {validator.hotkey.slice(-8)}
+            <label className="block text-[10px] text-gray-600 mb-1">
+              Selected Subnet
+            </label>
+            <p className="text-[13px] font-semibold text-gray-900">
+              {subnet.name}
             </p>
           </div>
 
           <div>
-            <label htmlFor="amount" className="block font-medium text-gray-700">
-              Stake Amount (TAO)
+            <label className="block text-[10px] text-gray-600 mb-1">
+              Token Price
+            </label>
+            <p className="text-[13px] font-semibold text-gray-900">
+              {subnet.price} τ
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-[10px] text-gray-600 mb-1">
+              Selected Validator
+            </label>
+            <p className="text-[10px] text-gray-600">
+              {validator.hotkey.slice(0, 8)}...{validator.hotkey.slice(-8)}
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-[10px] text-gray-600 mb-1">
+              Swap Amount (τ)
             </label>
             <input
               type="number"
-              id="amount"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              placeholder="Enter amount to stake"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter amount to swap"
+              className="w-full px-3 py-2 text-[10px] rounded-lg border border-gray-200 hover:border-blue-500 focus:outline-none focus:border-blue-500"
               min="0"
               step="0.0001"
             />
-            <p className="mt-1 text-sm text-gray-500">
-              Available balance: {balance} TAO
+            <p className="mt-1 text-[10px] text-gray-600">
+              Available Balance: {balance} τ
             </p>
           </div>
 
           {taoAmount > 0 && slippageCalculation && (
-            <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-              <h3 className="font-medium text-gray-700">Transaction Summary</h3>
-              <div className="flex justify-between items-center whitespace-nowrap">
-                <span className="text-gray-600">From:</span>
-                <span className="font-medium">{taoAmount.toFixed(4)} τ</span>
+            <div className="rounded-lg border border-gray-200 p-3 space-y-2">
+              <h3 className="text-[11px] font-medium text-gray-900">
+                Transaction Summary
+              </h3>
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] text-gray-600">From:</span>
+                <span className="text-[10px] font-medium text-gray-900">
+                  {taoAmount.toFixed(4)} τ
+                </span>
               </div>
-              <div className="flex justify-between items-center whitespace-nowrap">
-                <span className="text-gray-600">To:</span>
-                <span className="font-medium">
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] text-gray-600">To:</span>
+                <span className="text-[10px] font-medium text-gray-900">
                   {slippageCalculation.actualAlpha.toFixed(6)} α
                 </span>
               </div>
-              <div className="flex justify-between items-center whitespace-nowrap text-gray-600">
-                <span>Slippage:</span>
-                <span>
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] text-gray-600">Slippage:</span>
+                <span className="text-[10px] text-gray-600">
                   {(
                     Math.round(slippageCalculation.slippagePercentage * 100) /
                     100
@@ -165,53 +177,48 @@ export const ConfirmSwap = ({
                   %
                 </span>
               </div>
-              <div className="flex justify-between items-center whitespace-nowrap text-gray-600">
-                <span>Fee:</span>
-                <span>{slippageCalculation.feeInTao.toFixed(4)} τ</span>
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] text-gray-600">Fee:</span>
+                <span className="text-[10px] text-gray-600">
+                  {slippageCalculation.feeInTao.toFixed(4)} τ
+                </span>
               </div>
               {slippageCalculation.slippagePercentage > 1 && (
-                <div className="text-red-600 text-sm mt-2">
-                  ⚠️ High slippage warning: The price impact of this trade is
-                  high
+                <div className="p-2 bg-red-50 text-red-500 text-[10px] rounded-lg border border-red-100">
+                  ⚠️ High Slippage ⚠️
                 </div>
               )}
-              <div className="flex justify-between items-center whitespace-nowrap font-semibold border-t pt-2">
-                <span>Total Cost:</span>
-                <span>{totalCost.toFixed(4)} τ</span>
+              <div className="flex justify-between items-center pt-2 border-t border-gray-200">
+                <span className="text-[10px] font-medium text-gray-900">
+                  Total Cost:
+                </span>
+                <span className="text-[10px] font-medium text-gray-900">
+                  {totalCost.toFixed(4)} τ
+                </span>
               </div>
             </div>
           )}
 
-          {error && <div className="text-red-600 text-sm">{error}</div>}
+          {error && (
+            <div className="p-3 bg-red-50 text-red-500 text-[10px] rounded-lg border border-red-100">
+              {error}
+            </div>
+          )}
 
           <button
             onClick={handleSubmit}
             disabled={
-              !amount ||
-              isSubmitting ||
-              !api ||
-              totalCost > parseFloat(balance) ||
-              !subnet.alphaIn ||
-              !subnet.taoIn
+              !amount || isSubmitting || !api || totalCost > parseFloat(balance)
             }
-            className={`w-full py-2 px-4 rounded text-white transition-colors ${
-              !amount ||
-              isSubmitting ||
-              !api ||
-              totalCost > parseFloat(balance) ||
-              !subnet.alphaIn ||
-              !subnet.taoIn
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-500 hover:bg-blue-600"
-            }`}
+            className="w-full text-[10px] px-4 py-3 rounded-lg border border-gray-200 hover:bg-blue-50 hover:text-blue-500 hover:border-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? (
-              <div className="flex items-center justify-center">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                Staking...
+              <div className="flex items-center justify-center space-x-2">
+                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-current"></div>
+                <span>Swapping...</span>
               </div>
             ) : (
-              "Confirm Swap"
+              "Confirm"
             )}
           </button>
         </div>

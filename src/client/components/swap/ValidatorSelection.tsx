@@ -24,48 +24,43 @@ const ValidatorSelection = ({
   }
 
   return (
-    <div>
-      <div className="flex items-center mb-6">
+    <div className="p-4">
+      <div className="flex items-center mb-4">
         <button
           onClick={onBack}
-          className="mr-4 text-gray-600 hover:text-gray-900"
+          className="mr-3 text-[10px] text-gray-400 hover:text-gray-300"
         >
           ← Back
         </button>
-        <h2 className="text-xl font-semibold">
+        <h2 className="text-[11px] font-medium">
           Select a Validator in {subnet.name}
         </h2>
       </div>
 
-      <div className="grid grid-cols-1 gap-4">
+      <div className="space-y-2">
         {validators.map((validator) => (
           <div
             key={validator.hotkey}
-            className="border rounded-lg p-4 hover:border-blue-500 cursor-pointer transition-colors"
+            className="bg-white/5 rounded-lg p-3 outline outline-1 outline-black/20"
             onClick={() => onSelect(validator)}
           >
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="text-lg font-medium mb-1">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <h3 className="text-[13px] font-semibold">
                   Validator {validator.index + 1}
                 </h3>
-                <p className="text-sm text-gray-600">
-                  Hotkey: {validator.hotkey.slice(0, 8)}...
-                  {validator.hotkey.slice(-8)}
-                </p>
-                <p className="text-sm text-gray-600">
-                  Coldkey: {validator.coldkey.slice(0, 8)}...
-                  {validator.coldkey.slice(-8)}
+                <p className="text-[10px] text-gray-400">
+                  {validator.hotkey.slice(0, 8)}...{validator.hotkey.slice(-8)}
                 </p>
               </div>
               <button
-                className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition-colors"
+                className="text-[10px] text-blue-500 px-4 py-1 rounded hover:bg-blue-500/10 hover:outline hover:outline-1 hover:outline-blue-500/50"
                 onClick={(e) => {
                   e.stopPropagation();
                   onSelect(validator);
                 }}
               >
-                Select Validator
+                Select
               </button>
             </div>
           </div>

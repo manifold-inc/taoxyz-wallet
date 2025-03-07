@@ -62,104 +62,86 @@ export const Create = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Create New Wallet
-          </h2>
-        </div>
+    <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center p-4">
+      <div className="w-full max-w-md bg-white rounded-lg p-4">
+        <h2 className="text-[13px] font-semibold mb-4 text-gray-900">
+          Create New Wallet
+        </h2>
+
         {!mnemonic ? (
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-            <div className="rounded-md shadow-sm space-y-4">
-              <div>
-                <label
-                  htmlFor="username"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Username
-                </label>
-                <input
-                  id="username"
-                  name="username"
-                  type="text"
-                  required
-                  value={username}
-                  onChange={handleChange}
-                  className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  placeholder="Enter username"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Password
-                </label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                  value={password}
-                  onChange={handleChange}
-                  className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  placeholder="Enter password"
-                />
-              </div>
+          <form className="space-y-2" onSubmit={handleSubmit}>
+            <div>
+              <label className="block text-[10px] text-gray-600 mb-1">
+                Username
+              </label>
+              <input
+                type="text"
+                name="username"
+                required
+                value={username}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-[10px] rounded-lg border border-gray-200 hover:border-blue-500 focus:outline-none focus:border-blue-500"
+                placeholder="Enter username"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] text-gray-600 mb-1">
+                Password
+              </label>
+              <input
+                type="password"
+                name="password"
+                required
+                value={password}
+                onChange={handleChange}
+                className="w-full px-3 py-2 text-[10px] rounded-lg border border-gray-200 hover:border-blue-500 focus:outline-none focus:border-blue-500"
+                placeholder="Enter password"
+              />
             </div>
 
             {error && (
-              <div className="text-red-600 text-sm text-center">{error}</div>
+              <div className="p-3 bg-red-50 text-red-500 text-[10px] rounded-lg border border-red-100">
+                {error}
+              </div>
             )}
 
-            <div>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-400"
-              >
-                {isLoading ? "Creating..." : "Create Wallet"}
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full text-[10px] px-4 py-3 rounded-lg border border-gray-200 hover:bg-blue-50 hover:text-blue-500 hover:border-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? "Creating..." : "Create Wallet"}
+            </button>
           </form>
         ) : (
-          <div className="mt-8 space-y-6">
+          <div className="space-y-4">
             <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
+              <h3 className="text-[11px] font-medium mb-2 text-gray-900">
                 Your Recovery Phrase
               </h3>
-              <p className="text-xs text-gray-500 mb-4">
+              <p className="text-[10px] text-gray-600 mb-2">
                 Write down these words in the right order and store them safely.
-                You'll need them to recover your wallet.
               </p>
               <div className="relative">
-                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 break-all">
+                <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-[10px] break-all text-gray-900">
                   {mnemonic}
                 </div>
                 <button
                   onClick={handleCopyMnemonic}
-                  className="absolute top-2 right-2 p-2 text-gray-500 hover:text-gray-700"
-                  title="Copy to clipboard"
+                  className="absolute top-2 right-2 p-1 text-gray-400 hover:text-blue-500"
                 >
-                  <Copy size={12} />
+                  <Copy size={14} />
                 </button>
-                {copied && (
-                  <span className="absolute -top-8 right-0 text-sm text-green-600">
-                    Copied
-                  </span>
-                )}
               </div>
             </div>
-            <div>
-              <button
-                onClick={handleContinue}
-                className="w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                I've Saved My Recovery Phrase
-              </button>
-            </div>
+
+            <button
+              onClick={handleContinue}
+              className="w-full text-[10px] px-4 py-3 rounded-lg border border-gray-200 hover:bg-blue-50 hover:text-blue-500 hover:border-blue-500 transition-colors"
+            >
+              I've Saved My Recovery Phrase
+            </button>
           </div>
         )}
       </div>

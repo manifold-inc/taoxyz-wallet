@@ -40,7 +40,7 @@ const Transfer = () => {
         amount: parseFloat(amount),
         password,
       });
-      navigate("/dashboard");
+      navigate("/dashboard", { state: { address } });
     } catch (error) {
       setError(error instanceof Error ? error.message : "Failed to transfer");
     } finally {
@@ -49,61 +49,54 @@ const Transfer = () => {
   };
 
   if (!address) {
-    return <div>Unauthorized access</div>;
+    return (
+      <div className="p-4">
+        <div className="bg-white/5 rounded-lg p-3 outline outline-1 outline-black/20">
+          <p className="text-[10px] text-gray-400">Unauthorized Access</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex items-center mb-6">
-        <button
-          onClick={() => navigate("/dashboard")}
-          className="mr-4 text-gray-600 hover:text-gray-900"
-        >
-          ← Back
-        </button>
-        <h1 className="text-2xl font-bold">Transfer TAO</h1>
-      </div>
-
-      <div className="bg-white rounded-lg p-6 shadow-sm border max-w-md mx-auto">
-        <div className="space-y-4">
+    <div className="p-4">
+      <div className="bg-white rounded-lg p-4">
+        <div className="space-y-2">
           <div>
-            <label
-              htmlFor="balance"
-              className="block font-medium text-gray-700"
-            >
+            <label className="block text-[10px] text-gray-600 mb-1">
               Available Balance
             </label>
-            <p className="mt-1 text-gray-600">{balance} τ</p>
+            <div className="flex items-baseline space-x-1">
+              <span className="text-[13px] font-semibold text-gray-900">
+                {balance}
+              </span>
+              <span className="text-[10px] text-gray-600">τ</span>
+            </div>
           </div>
 
           <div>
-            <label
-              htmlFor="toAddress"
-              className="block font-medium text-gray-700"
-            >
+            <label className="block text-[10px] text-gray-600 mb-1">
               Recipient Address
             </label>
             <input
               type="text"
-              id="toAddress"
               value={toAddress}
               onChange={(e) => setToAddress(e.target.value)}
               placeholder="Enter recipient's address"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 text-[10px] rounded-lg border border-gray-200 hover:border-blue-500 focus:outline-none focus:border-blue-500"
             />
           </div>
 
           <div>
-            <label htmlFor="amount" className="block font-medium text-gray-700">
+            <label className="block text-[10px] text-gray-600 mb-1">
               Amount (τ)
             </label>
             <input
               type="number"
-              id="amount"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="Enter amount to transfer"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 text-[10px] rounded-lg border border-gray-200 hover:border-blue-500 focus:outline-none focus:border-blue-500"
               min="0"
               max={parseFloat(balance)}
               step="0.0001"
@@ -111,23 +104,23 @@ const Transfer = () => {
           </div>
 
           <div>
-            <label
-              htmlFor="password"
-              className="block font-medium text-gray-700"
-            >
-              Wallet Password
+            <label className="block text-[10px] text-gray-600 mb-1">
+              Password
             </label>
             <input
               type="password"
-              id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your wallet password"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 text-[10px] rounded-lg border border-gray-200 hover:border-blue-500 focus:outline-none focus:border-blue-500"
             />
           </div>
 
-          {error && <div className="text-red-600 text-sm">{error}</div>}
+          {error && (
+            <div className="p-3 bg-red-50 text-red-500 text-[10px] rounded-lg border border-red-100">
+              {error}
+            </div>
+          )}
 
           <button
             onClick={handleSubmit}
@@ -138,23 +131,23 @@ const Transfer = () => {
               isSubmitting ||
               parseFloat(amount) > parseFloat(balance)
             }
-            className={`w-full py-2 px-4 rounded text-white transition-colors ${
+            className={`w-full text-[10px] px-4 py-3 rounded-lg border border-gray-200 ${
               !toAddress ||
               !amount ||
               !password ||
               isSubmitting ||
               parseFloat(amount) > parseFloat(balance)
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-500 hover:bg-blue-600"
+                ? "text-gray-400 cursor-not-allowed"
+                : "hover:bg-blue-50 hover:text-blue-500 hover:border-blue-500 transition-colors"
             }`}
           >
             {isSubmitting ? (
-              <div className="flex items-center justify-center">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                Transferring...
+              <div className="flex items-center justify-center space-x-2">
+                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-current"></div>
+                <span>Transferring...</span>
               </div>
             ) : (
-              "Confirm Transfer"
+              "Confirm"
             )}
           </button>
         </div>

@@ -23,43 +23,53 @@ const Signin = () => {
   };
 
   return (
-    <div className="flex flex-col items-center space-y-4">
-      <h2 className="text-xl font-semibold text-gray-800">Sign In</h2>
-      <div className="w-full max-w-md p-4 border rounded-lg">
-        <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center p-4">
+      <div className="w-full max-w-md bg-white rounded-lg p-4">
+        <h2 className="text-[13px] font-semibold mb-4 text-gray-900">
+          Sign In
+        </h2>
+
+        <form onSubmit={handleSubmit} className="space-y-2">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-[10px] text-gray-600 mb-1">
               Username
             </label>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+              className="w-full px-3 py-2 text-[10px] rounded-lg border border-gray-200 hover:border-blue-500 focus:outline-none focus:border-blue-500"
               placeholder="Enter your username"
               required
             />
           </div>
+
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-[10px] text-gray-600 mb-1">
               Password
             </label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+              className="w-full px-3 py-2 text-[10px] rounded-lg border border-gray-200 hover:border-blue-500 focus:outline-none focus:border-blue-500"
               placeholder="Enter your password"
               required
             />
           </div>
+
+          {error && (
+            <div className="p-3 bg-red-50 text-red-500 text-[10px] rounded-lg border border-red-100">
+              {error}
+            </div>
+          )}
+
           <button
             type="submit"
-            className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            className="w-full text-[10px] px-4 py-3 rounded-lg border border-gray-200 hover:bg-blue-50 hover:text-blue-500 hover:border-blue-500 transition-colors"
           >
-            Unlock
+            Sign In
           </button>
-          {error && <div className="text-red-500">{error}</div>}
         </form>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { HashRouter, Routes, Route, Link, useLocation } from "react-router-dom";
+import { HashRouter, Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
 
 import Home from "./pages/Home";
@@ -13,68 +13,11 @@ import Stake from "./pages/Stake";
 import Transfer from "./pages/Transfer";
 import Settings from "./pages/Settings";
 
-import { ProtectedRoute } from "./components/ProtectedRoute";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Navigation from "./components/Navigation";
+
 import { RpcApiProvider } from "./contexts/RpcApiContext";
 import { KeyringService } from "./services/KeyringService";
-
-const Navigation = () => {
-  const location = useLocation();
-  const address = location.state?.address;
-
-  if (!address) return null;
-
-  return (
-    <nav className="p-4 bg-gray-100">
-      <ul className="flex space-x-4">
-        <li>
-          <Link
-            to="/dashboard"
-            state={{ address }}
-            className="text-blue-600 hover:text-blue-800"
-          >
-            Dashboard
-          </Link>
-        </li>
-        <li>
-          <Link
-            to="/swap"
-            state={{ address }}
-            className="text-blue-600 hover:text-blue-800"
-          >
-            Swap
-          </Link>
-        </li>
-        <li>
-          <Link
-            to="/stake"
-            state={{ address }}
-            className="text-blue-600 hover:text-blue-800"
-          >
-            Stake
-          </Link>
-        </li>
-        <li>
-          <Link
-            to="/transfer"
-            state={{ address }}
-            className="text-blue-600 hover:text-blue-800"
-          >
-            Transfer
-          </Link>
-        </li>
-        <li>
-          <Link
-            to="/settings"
-            state={{ address }}
-            className="text-blue-600 hover:text-blue-800"
-          >
-            Settings
-          </Link>
-        </li>
-      </ul>
-    </nav>
-  );
-};
 
 const App = () => {
   useEffect(() => {
@@ -96,20 +39,13 @@ const App = () => {
             {};
           const approved = permissions[origin] === true;
 
-          console.log(`[App] Permission check result:`, {
-            address,
-            origin,
-            approved,
-            permissions,
-          });
-
           sendResponse({ approved });
         } catch (error) {
           console.error("[App] Error checking permissions:", error);
           sendResponse({ approved: false });
         }
       }
-      return true; // Keep channel open for async response
+      return true;
     };
 
     // Add listener
@@ -125,7 +61,7 @@ const App = () => {
     <RpcApiProvider>
       <HashRouter>
         <Navigation />
-        <main className="p-4">
+        <main className="pt-16">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/signin" element={<Signin />} />

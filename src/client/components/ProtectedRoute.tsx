@@ -4,7 +4,7 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
-export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const location = useLocation();
   const address = location.state?.address;
 
@@ -14,3 +14,5 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   return children;
 };
+
+export default ProtectedRoute;

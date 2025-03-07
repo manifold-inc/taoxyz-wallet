@@ -47,95 +47,90 @@ const Import = () => {
   };
 
   return (
-    <div className="flex flex-col items-center space-y-6 p-4">
-      <h1 className="text-2xl font-bold">Import Account</h1>
+    <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center p-4">
+      <div className="w-full max-w-md bg-white rounded-lg p-4">
+        <h2 className="text-[13px] font-semibold mb-4 text-gray-900">
+          Import Account
+        </h2>
 
-      <div className="w-full max-w-2xl space-y-4">
-        <input
-          type="text"
-          className="w-full p-3 bg-transparent border border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent transition-all"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          placeholder="Enter username"
-        />
+        <div className="space-y-2">
+          <div>
+            <label className="block text-[10px] text-gray-600 mb-1">
+              Username
+            </label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full px-3 py-2 text-[10px] rounded-lg border border-gray-200 hover:border-blue-500 focus:outline-none focus:border-blue-500"
+              placeholder="Enter username"
+            />
+          </div>
 
-        <input
-          type="password"
-          className="w-full p-3 bg-transparent border border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent transition-all"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Enter password"
-        />
+          <div>
+            <label className="block text-[10px] text-gray-600 mb-1">
+              Password
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-3 py-2 text-[10px] rounded-lg border border-gray-200 hover:border-blue-500 focus:outline-none focus:border-blue-500"
+              placeholder="Enter password"
+            />
+          </div>
 
-        <textarea
-          className="w-full h-32 p-3 bg-transparent border border-gray-700 rounded focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent transition-all"
-          value={mnemonic}
-          onChange={(e) => setMnemonic(e.target.value)}
-          placeholder="Enter your 12 or 24-word recovery phrase"
-        />
-      </div>
+          <div>
+            <label className="block text-[10px] text-gray-600 mb-1">
+              Recovery Phrase
+            </label>
+            <textarea
+              value={mnemonic}
+              onChange={(e) => setMnemonic(e.target.value)}
+              className="w-full h-24 px-3 py-2 text-[10px] rounded-lg border border-gray-200 hover:border-blue-500 focus:outline-none focus:border-blue-500"
+              placeholder="Enter your 12 or 24-word recovery phrase"
+            />
+          </div>
 
-      {error && (
-        <div className="text-red-500 text-center bg-red-500/10 px-4 py-2 rounded-lg">
-          {error}
-        </div>
-      )}
-
-      <div className="flex space-x-4 w-full max-w-md">
-        <button
-          className="w-1/2 py-3 px-6 bg-gray-800 text-white rounded-lg hover:bg-gray-700 active:bg-gray-900 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
-          onClick={() => {
-            setMnemonic("");
-            setUsername("");
-            setPassword("");
-            setError(null);
-          }}
-        >
-          Clear
-        </button>
-        <button
-          className={`w-1/2 py-3 px-6 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 
-            ${
-              isLoading
-                ? "bg-gray-400 text-gray-700 cursor-not-allowed"
-                : "bg-white text-black hover:bg-gray-100 active:bg-gray-200 focus:ring-white/50"
-            }`}
-          onClick={handleImport}
-          disabled={
-            isLoading ||
-            !mnemonic.trim() ||
-            !username.trim() ||
-            !password.trim()
-          }
-        >
-          {isLoading ? (
-            <span className="flex items-center justify-center">
-              <svg
-                className="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-700"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-              Importing...
-            </span>
-          ) : (
-            "Import"
+          {error && (
+            <div className="p-3 bg-red-50 text-red-500 text-[10px] rounded-lg border border-red-100">
+              {error}
+            </div>
           )}
-        </button>
+
+          <div className="flex space-x-2 mt-2">
+            <button
+              onClick={() => {
+                setMnemonic("");
+                setUsername("");
+                setPassword("");
+                setError(null);
+              }}
+              className="flex-1 text-[10px] px-4 py-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+            >
+              Clear
+            </button>
+            <button
+              onClick={handleImport}
+              disabled={
+                isLoading ||
+                !mnemonic.trim() ||
+                !username.trim() ||
+                !password.trim()
+              }
+              className="flex-1 text-[10px] px-4 py-3 rounded-lg border border-gray-200 hover:bg-blue-50 hover:text-blue-500 hover:border-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? (
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-current"></div>
+                  <span>Importing...</span>
+                </div>
+              ) : (
+                "Import"
+              )}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

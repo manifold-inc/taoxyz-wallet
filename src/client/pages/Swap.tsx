@@ -17,29 +17,32 @@ enum Step {
 export const Swap = () => {
   const { api } = useRpcApi();
   const location = useLocation();
-  const { balance, address } = location.state || {};
+  const { address } = location.state || {};
   const [step, setStep] = useState<Step>(Step.SELECT_SUBNET);
   const [subnets, setSubnets] = useState<Subnet[]>([]);
   const [selectedSubnet, setSelectedSubnet] = useState<Subnet | null>(null);
   const [validators, setValidators] = useState<Validator[]>([]);
+  const [balance, setBalance] = useState<string>("");
   const [selectedValidator, setSelectedValidator] = useState<Validator | null>(
     null
   );
   const [isLoading, setIsLoading] = useState(true);
 
-  useState(() => {
+  useEffect(() => {
     getSubnets();
-  });
+    getBalance();
+  }, [api]);
 
   useEffect(() => {
     if (selectedSubnet) {
       getValidators(selectedSubnet.id);
     }
-  }, [selectedSubnet]);
+  }, [selectedSubnet, api]);
 
   const getSubnets = async () => {
+    if (!api) return;
     try {
-      const subnets = await api?.getSubnets();
+      const subnets = await api.getSubnets();
       setSubnets(subnets ?? []);
     } catch (error) {
       console.error("Error loading subnets:", error);
@@ -57,6 +60,16 @@ export const Swap = () => {
       console.error("Error loading validators:", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const getBalance = async () => {
+    if (!api || !address) return;
+    try {
+      const balance = await api.getBalance(address);
+      setBalance(balance);
+    } catch (error) {
+      console.error("Error fetching balance:", error);
     }
   };
 
@@ -114,9 +127,8 @@ export const Swap = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Swap</h1>
-      {renderStep()}
+    <div className="container mx-auto px-4 py-4">
+      <div className="bg-white rounded-lg shadow-sm">{renderStep()}</div>
     </div>
   );
 };

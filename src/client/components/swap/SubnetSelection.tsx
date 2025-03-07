@@ -20,29 +20,30 @@ const SubnetSelection = ({
   }
 
   return (
-    <div>
-      <h2 className="text-xl font-semibold mb-4">Select a Subnet</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="p-4">
+      <h2 className="text-[11px] font-medium mb-4">Select a Subnet</h2>
+      <div className="space-y-2">
         {subnets.map((subnet) => (
           <div
             key={subnet.id}
-            className="border rounded-lg p-4 hover:border-blue-500 cursor-pointer transition-colors"
+            className="bg-white/5 rounded-lg p-3 outline outline-1 outline-black/20"
             onClick={() => onSelect(subnet)}
           >
-            <h3 className="text-lg font-medium mb-2">{subnet.name}</h3>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Price</span>
-              <span className="font-medium">{subnet.price} TAO</span>
-            </div>
-            <div className="mt-4">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <h3 className="text-[13px] font-semibold">{subnet.name}</h3>
+                <p className="text-[10px] text-gray-400">
+                  Price: {subnet.price} TAO
+                </p>
+              </div>
               <button
-                className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition-colors"
+                className="text-[10px] text-blue-500 px-4 py-1 rounded hover:bg-blue-500/10 hover:outline hover:outline-1 hover:outline-blue-500/50"
                 onClick={(e) => {
                   e.stopPropagation();
                   onSelect(subnet);
                 }}
               >
-                Select Subnet
+                Select
               </button>
             </div>
           </div>

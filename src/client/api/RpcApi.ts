@@ -21,15 +21,11 @@ export class RpcApi {
     console.log("[Client] Starting initialization");
     const provider = new WsProvider(this.endpoints[this.endpoint]);
     try {
-      if (this.api) {
+      if (this.api?.isConnected) {
         await this.api.disconnect();
       }
 
-      this.api = await ApiPromise.create({
-        provider,
-        throwOnConnect: true,
-      });
-      await this.api.isReady;
+      this.api = await ApiPromise.create({ provider });
       console.log(
         `[Client] Connected to the endpoint: ${this.endpoints[this.endpoint]}`
       );
