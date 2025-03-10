@@ -203,6 +203,7 @@ async function handleSignResponse(
       payload: {
         id: parseInt(request.requestId),
         signature: message.payload.signature,
+        approved: message.payload.approved,
       },
     });
 

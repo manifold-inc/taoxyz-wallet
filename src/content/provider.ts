@@ -73,6 +73,12 @@ const signerHandler = () => ({
       const handleSignResponse = dappMessageHandler(
         MESSAGE_TYPES.SIGN_RESPONSE,
         (response: SignResponsePayload) => {
+          if (response.approved === false) {
+            console.log("[Provider] Sign payload: Signing rejected");
+            reject();
+            return;
+          }
+
           if (!response.signature) {
             errorHandler(new Error(ERROR_TYPES.SIGNING_FAILED), "Sign Payload");
             reject();

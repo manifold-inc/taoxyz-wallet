@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { usePolkadotApi } from "../../contexts/PolkadotApiContext";
+import { calculateSlippage } from "../../../utils/utils";
 import type { Subnet, Validator } from "../../../types/client";
 
 interface ConfirmSwapProps {
@@ -25,39 +26,17 @@ export const ConfirmSwap = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const calculateSlippage = (taoAmount: number) => {
-    if (!subnet.alphaIn || !subnet.taoIn) return null;
+  const taoAmount = parseFloat(amount) || 0;
+  const slippageCalculation = useMemo(() => {
+    if (!subnet.alphaIn || !subnet.taoIn || !taoAmount) return null;
+    return calculateSlippage(subnet.alphaIn, subnet.taoIn, taoAmount, true);
+  }, [subnet.alphaIn, subnet.taoIn, taoAmount]);
 
-    // Convert TAO amount to RAO (1 TAO = 1e9 RAO)
-    const taoAmountInRao = taoAmount * 1e9;
-
-    // Calculate expected alpha tokens without slippage (simple division)
-    const expectedAlpha = (taoAmountInRao * subnet.alphaIn) / subnet.taoIn;
-
-    // Calculate actual alpha tokens using constant product formula from docs
-    // Stake = αin - (τin * αin) / (τin + cost)
-    const actualAlpha =
-      subnet.alphaIn -
-      (subnet.taoIn * subnet.alphaIn) / (subnet.taoIn + taoAmountInRao);
-
-    // Convert to human readable numbers
-    const expectedAlphaHuman = expectedAlpha / 1e9;
-    const actualAlphaHuman = actualAlpha / 1e9;
-
-    // Calculate slippage
-    const slippageAmount = expectedAlphaHuman - actualAlphaHuman;
-    const slippagePercentage = (slippageAmount / expectedAlphaHuman) * 100;
-
-    // Calculate fee in TAO
-    const feeInTao = (taoAmount * slippagePercentage) / 100;
-
-    return {
-      expectedAlpha: expectedAlphaHuman,
-      actualAlpha: actualAlphaHuman,
-      slippageAmount,
-      slippagePercentage,
-      feeInTao,
-    };
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === "" || /^\d*\.?\d*$/.test(value)) {
+      setAmount(value);
+    }
   };
 
   const handleSubmit = async () => {
@@ -78,9 +57,6 @@ export const ConfirmSwap = ({
     }
   };
 
-  const taoAmount = parseFloat(amount) || 0;
-  const slippageCalculation =
-    subnet.alphaIn && subnet.taoIn ? calculateSlippage(taoAmount) : null;
   const totalCost = taoAmount;
 
   if (isLoading) {
@@ -139,7 +115,7 @@ export const ConfirmSwap = ({
             <input
               type="number"
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onChange={handleAmountChange}
               placeholder="Enter amount to swap"
               className="w-full px-3 py-2 text-[10px] rounded-lg border border-gray-200 hover:border-blue-500 focus:outline-none focus:border-blue-500"
               min="0"
@@ -156,44 +132,33 @@ export const ConfirmSwap = ({
                 Transaction Summary
               </h3>
               <div className="flex justify-between items-center">
-                <span className="text-[10px] text-gray-600">From:</span>
+                <span className="text-[10px] text-gray-600">You pay:</span>
                 <span className="text-[10px] font-medium text-gray-900">
                   {taoAmount.toFixed(4)} τ
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-[10px] text-gray-600">To:</span>
+                <span className="text-[10px] text-gray-600">You receive:</span>
                 <span className="text-[10px] font-medium text-gray-900">
-                  {slippageCalculation.actualAlpha.toFixed(6)} α
+                  {slippageCalculation.tokens.toFixed(6)} α
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-[10px] text-gray-600">Slippage:</span>
-                <span className="text-[10px] text-gray-600">
-                  {(
-                    Math.round(slippageCalculation.slippagePercentage * 100) /
-                    100
-                  ).toFixed(2)}
-                  %
+                <span
+                  className={`text-[10px] ${
+                    slippageCalculation.slippagePercentage > 1
+                      ? "text-red-500"
+                      : "text-gray-600"
+                  }`}
+                >
+                  {slippageCalculation.slippagePercentage.toFixed(2)}%
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-[10px] text-gray-600">Fee:</span>
                 <span className="text-[10px] text-gray-600">
-                  {slippageCalculation.feeInTao.toFixed(4)} τ
-                </span>
-              </div>
-              {slippageCalculation.slippagePercentage > 1 && (
-                <div className="p-2 bg-red-50 text-red-500 text-[10px] rounded-lg border border-red-100">
-                  ⚠️ High Slippage ⚠️
-                </div>
-              )}
-              <div className="flex justify-between items-center pt-2 border-t border-gray-200">
-                <span className="text-[10px] font-medium text-gray-900">
-                  Total Cost:
-                </span>
-                <span className="text-[10px] font-medium text-gray-900">
-                  {totalCost.toFixed(4)} τ
+                  {slippageCalculation.slippage.toFixed(4)} τ
                 </span>
               </div>
             </div>

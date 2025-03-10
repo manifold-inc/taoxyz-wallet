@@ -39,3 +39,9 @@ export interface StakeTransaction {
   validatorHotkey: string;
   tokens: number;
 }
+
+export interface Slippage {
+  tokens: number;
+  slippagePercentage: number;
+  slippage: number;
+}
