@@ -1,6 +1,12 @@
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { KeyringService } from "../services/KeyringService";
-import type { Subnet, Validator } from "../../types/client";
+import type {
+  BittensorSubnet,
+  BittensorMetagraph,
+  Subnet,
+  Validator,
+  SubstrateAccount,
+} from "../../types/client";
 
 class PolkadotApi {
   private api!: ApiPromise;
@@ -170,12 +176,9 @@ class PolkadotApi {
 
   public async getBalance(address: string): Promise<string> {
     try {
-      const accountBalance = await this.api.query.system.account(address);
-      const {
-        data: { free },
-      } = accountBalance.toJSON();
-
-      const balanceInTao = (free / 1e9).toFixed(4);
+      const result = await this.api.query.system.account(address);
+      const account = result.toJSON() as unknown as SubstrateAccount;
+      const balanceInTao = (account.data.free / 1e9).toFixed(4);
       return balanceInTao;
     } catch (error) {
       console.error("Error in getBalance:", error);
@@ -185,39 +188,39 @@ class PolkadotApi {
 
   public async getSubnets(): Promise<Subnet[]> {
     try {
-      const subnetsData =
+      const result =
         await this.api.call.subnetInfoRuntimeApi.getAllDynamicInfo();
 
-      const subnets = (subnetsData.toJSON() as any[])
-        .map((data) => {
-          if (!data) return null;
-          const subnetName = data.subnetName
-            ? String.fromCharCode(...data.subnetName)
-            : `Subnet ${data.netuid}`;
+      const btSubnets = (result.toJSON() as unknown as BittensorSubnet[])
+        .map((btSubnet) => {
+          if (!btSubnet) return null;
+          const subnetName = btSubnet.subnetName
+            ? String.fromCharCode(...btSubnet.subnetName)
+            : `Subnet ${btSubnet.netuid}`;
 
           const price =
-            data.netuid === 0
+            btSubnet.netuid === 0
               ? 1
-              : data.taoIn && data.alphaIn && data.alphaIn > 0
-              ? Number((data.taoIn / data.alphaIn).toFixed(4))
+              : btSubnet.taoIn && btSubnet.alphaIn && btSubnet.alphaIn > 0
+              ? Number((btSubnet.taoIn / btSubnet.alphaIn).toFixed(4))
               : 0;
 
-          const tokenSymbol = data.tokenSymbol
-            ? String.fromCharCode(...data.tokenSymbol)
+          const tokenSymbol = btSubnet.tokenSymbol
+            ? String.fromCharCode(...btSubnet.tokenSymbol)
             : "TAO";
 
           const subnet: Subnet = {
-            id: data.netuid,
+            ...btSubnet,
+            id: btSubnet.netuid,
             name: subnetName,
             price: price,
             tokenSymbol: tokenSymbol,
-            ...data,
           };
           return subnet;
         })
         .filter((subnet): subnet is Subnet => subnet !== null);
 
-      return subnets;
+      return btSubnets;
     } catch (error) {
       console.error("Error in getSubnets:", error);
       throw error;
@@ -229,30 +232,30 @@ class PolkadotApi {
       const result = await this.api.call.subnetInfoRuntimeApi.getDynamicInfo(
         subnetId
       );
-      const subnetData = result.toJSON() as any;
-      if (!subnetData) throw new Error("Could not find subnet");
+      const btSubnet = result.toJSON() as unknown as BittensorSubnet;
+      if (!btSubnet) throw new Error("Could not find subnet");
 
-      const subnetName = subnetData.subnetName
-        ? String.fromCharCode(...subnetData.subnetName)
-        : `Subnet ${subnetData.netuid}`;
+      const subnetName = btSubnet.subnetName
+        ? String.fromCharCode(...btSubnet.subnetName)
+        : `Subnet ${btSubnet.netuid}`;
 
       const price =
-        subnetData.netuid === 0
+        btSubnet.netuid === 0
           ? 1
-          : subnetData.taoIn && subnetData.alphaIn && subnetData.alphaIn > 0
-          ? Number((subnetData.taoIn / subnetData.alphaIn).toFixed(4))
+          : btSubnet.taoIn && btSubnet.alphaIn && btSubnet.alphaIn > 0
+          ? Number((btSubnet.taoIn / btSubnet.alphaIn).toFixed(4))
           : 0;
 
-      const tokenSymbol = subnetData.tokenSymbol
-        ? String.fromCharCode(...subnetData.tokenSymbol)
+      const tokenSymbol = btSubnet.tokenSymbol
+        ? String.fromCharCode(...btSubnet.tokenSymbol)
         : "TAO";
 
       const subnet: Subnet = {
-        id: subnetData.netuid,
+        ...btSubnet,
+        id: btSubnet.netuid,
         name: subnetName,
         price: price,
         tokenSymbol: tokenSymbol,
-        ...subnetData,
       };
       return subnet;
     } catch (error) {
@@ -263,21 +266,29 @@ class PolkadotApi {
 
   public async getValidators(subnetId: number): Promise<Validator[]> {
     try {
-      const metagraph = await this.api.call.subnetInfoRuntimeApi.getMetagraph(
+      const result = await this.api.call.subnetInfoRuntimeApi.getMetagraph(
         subnetId
       );
-      const data = metagraph.toJSON() as any;
-      if (!data || !data.coldkeys || !data.active || !data.validatorPermit) {
+      const btMetagraph = result.toJSON() as unknown as BittensorMetagraph;
+      if (
+        !btMetagraph ||
+        !btMetagraph.coldkeys ||
+        !btMetagraph.active ||
+        !btMetagraph.validatorPermit
+      ) {
         throw new Error("Invalid metagraph data structure");
       }
 
       const validators: Validator[] = [];
-      for (let i = 0; i < data.coldkeys.length; i++) {
-        if (data.active[i] === true && data.validatorPermit[i] === true) {
+      for (let i = 0; i < btMetagraph.coldkeys.length; i++) {
+        if (
+          btMetagraph.active[i] === true &&
+          btMetagraph.validatorPermit[i] === true
+        ) {
           validators.push({
             index: i,
-            hotkey: data.hotkeys[i] || "unknown",
-            coldkey: data.coldkeys[i] || "unknown",
+            hotkey: btMetagraph.hotkeys[i] || "unknown",
+            coldkey: btMetagraph.coldkeys[i] || "unknown",
           });
         }
       }

@@ -47,3 +47,45 @@ export interface Slippage {
 }
 
 export type Permissions = Record<string, boolean>;
+
+// BLOCKCHAIN TYPES
+export interface BittensorSubnet {
+  netuid: number;
+  ownerHotkey: string;
+  ownerColdkey: string;
+  subnetName: number[];
+  tokenSymbol: number[];
+  tempo: number;
+  lastStep: number;
+  blocksSinceLastStep: number;
+  emission: number;
+  taoIn: number;
+  alphaIn: number;
+  alphaOut: number;
+  alphaOutEmission: number;
+  alphaInEmission: number;
+  taoInEmission: number;
+  pendingAlphaEmission: number;
+  pendingRootEmission: number;
+}
+
+export interface BittensorMetagraph {
+  hotkeys: string[];
+  coldkeys: string[];
+  active: boolean[];
+  validatorPermit: boolean[];
+  netuid: number;
+}
+
+export interface SubstrateAccount {
+  nonce: number;
+  consumers: number;
+  providers: number;
+  sufficients: number;
+  data: {
+    free: number;
+    reserved: number;
+    frozen: number;
+  };
+  flags: number[];
+}
