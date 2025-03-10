@@ -104,9 +104,10 @@ export const Swap = () => {
           />
         );
       case Step.SELECT_VALIDATOR:
+        if (!selectedSubnet) return null;
         return (
           <ValidatorSelection
-            subnet={selectedSubnet!}
+            subnet={selectedSubnet}
             validators={validators}
             onSelect={handleValidatorSelect}
             onBack={handleBack}
@@ -114,10 +115,11 @@ export const Swap = () => {
           />
         );
       case Step.CONFIRM_SWAP:
+        if (!selectedSubnet || !selectedValidator) return null;
         return (
           <ConfirmSwap
-            subnet={selectedSubnet!}
-            validator={selectedValidator!}
+            subnet={selectedSubnet}
+            validator={selectedValidator}
             onBack={handleBack}
             balance={balance}
             address={address}

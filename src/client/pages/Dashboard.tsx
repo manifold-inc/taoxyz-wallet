@@ -5,6 +5,12 @@ import { Portfolio } from "../components/Portfolio";
 import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 import type { StakeTransaction } from "../../types/client";
 
+interface StakeResponse {
+  netuid: number;
+  hotkey: string;
+  stake: number;
+}
+
 export const Dashboard = () => {
   const { api } = usePolkadotApi();
   const navigate = useNavigate();
@@ -36,11 +42,13 @@ export const Dashboard = () => {
       try {
         const stake = await api.getStake(address);
         if (stake) {
-          const formattedStakes = (stake as any[]).map((stake) => ({
-            subnetId: stake.netuid,
-            validatorHotkey: stake.hotkey,
-            tokens: stake.stake,
-          }));
+          const formattedStakes = (stake as unknown as StakeResponse[]).map(
+            (stake) => ({
+              subnetId: stake.netuid,
+              validatorHotkey: stake.hotkey,
+              tokens: stake.stake,
+            })
+          );
           setStakes(formattedStakes);
         }
       } catch (error) {

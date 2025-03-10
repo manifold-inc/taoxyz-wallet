@@ -67,6 +67,10 @@ const ConfirmStake = ({
     return <div>Loading API...</div>;
   }
 
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
   return (
     <div className="p-4">
       <div className="flex items-center mb-4">

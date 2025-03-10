@@ -173,7 +173,7 @@ class PolkadotApi {
       const accountBalance = await this.api.query.system.account(address);
       const {
         data: { free },
-      } = accountBalance.toJSON() as any;
+      } = accountBalance.toJSON();
 
       const balanceInTao = (free / 1e9).toFixed(4);
       return balanceInTao;

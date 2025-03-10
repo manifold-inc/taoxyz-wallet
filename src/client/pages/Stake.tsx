@@ -14,6 +14,12 @@ enum Step {
   CONFIRM_STAKE,
 }
 
+interface StakeResponse {
+  netuid: number;
+  hotkey: string;
+  stake: number;
+}
+
 const Stake = () => {
   const { api } = usePolkadotApi();
   const location = useLocation();
@@ -40,11 +46,13 @@ const Stake = () => {
       setIsLoading(true);
       const stakes = await api.getStake(address);
       if (stakes) {
-        const formattedStakes = (stakes as any[]).map((stake) => ({
-          subnetId: stake.netuid,
-          validatorHotkey: stake.hotkey,
-          tokens: stake.stake,
-        }));
+        const formattedStakes = (stakes as unknown as StakeResponse[]).map(
+          (stake) => ({
+            subnetId: stake.netuid,
+            validatorHotkey: stake.hotkey,
+            tokens: stake.stake,
+          })
+        );
         setStakes(formattedStakes);
       }
     } catch (error) {
@@ -118,9 +126,10 @@ const Stake = () => {
           />
         );
       case Step.SELECT_VALIDATOR:
+        if (!selectedSubnet) return null;
         return (
           <ValidatorSelection
-            subnet={selectedSubnet!}
+            subnet={selectedSubnet}
             validators={validators}
             onSelect={handleValidatorSelect}
             onBack={handleBack}
@@ -128,11 +137,13 @@ const Stake = () => {
           />
         );
       case Step.CONFIRM_STAKE:
+        if (!selectedStake || !selectedSubnet || !selectedValidator)
+          return null;
         return (
           <ConfirmStake
-            stake={selectedStake!}
-            subnet={selectedSubnet!}
-            validator={selectedValidator!}
+            stake={selectedStake}
+            subnet={selectedSubnet}
+            validator={selectedValidator}
             onBack={handleBack}
             address={address}
           />

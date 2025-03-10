@@ -20,15 +20,16 @@ import { PolkadotApiProvider } from "./contexts/PolkadotApiContext";
 import { KeyringService } from "./services/KeyringService";
 import { MESSAGE_TYPES } from "../types/messages";
 
-
-
 const App = () => {
   // TODO: refactor this
   useEffect(() => {
     const handleAuthMessage = async (
-      message: any,
+      message: {
+        type: typeof MESSAGE_TYPES.AUTHENTICATE;
+        payload: { address: string; origin: string };
+      },
       sender: chrome.runtime.MessageSender,
-      sendResponse: (response: any) => void
+      sendResponse: (response: { approved: boolean }) => void
     ) => {
       if (message.type === MESSAGE_TYPES.AUTHENTICATE) {
         try {
@@ -39,8 +40,7 @@ const App = () => {
 
           const account = await KeyringService.getAccount(address);
           const permissions =
-            (account.meta.websitePermissions as { [key: string]: boolean }) ||
-            {};
+            (account.meta.websitePermissions as Record<string, boolean>) || {};
           const approved = permissions[origin] === true;
 
           sendResponse({ approved });

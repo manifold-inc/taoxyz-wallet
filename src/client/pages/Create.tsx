@@ -133,6 +133,11 @@ export const Create = () => {
                 >
                   <Copy size={14} />
                 </button>
+                {copied && (
+                  <div className="absolute -top-8 right-0 bg-gray-800 text-white text-[10px] px-2 py-1 rounded">
+                    Copied!
+                  </div>
+                )}
               </div>
             </div>
 

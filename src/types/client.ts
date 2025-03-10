@@ -45,3 +45,5 @@ export interface Slippage {
   slippagePercentage: number;
   slippage: number;
 }
+
+export type Permissions = Record<string, boolean>;

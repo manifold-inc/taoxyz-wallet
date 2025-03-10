@@ -59,8 +59,8 @@ const Connect = () => {
   const handleResponse = async (approved: boolean) => {
     if (!request) return;
     const selectedAccounts = accounts
-      .filter((acc) => acc.selected)
-      .map(({ selected, ...acc }) => acc);
+      .filter((account) => account.selected)
+      .map(({ selected: _, ...account }) => account);
 
     try {
       const response = await chrome.runtime.sendMessage({

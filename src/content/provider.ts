@@ -102,6 +102,7 @@ const signerHandler = () => ({
           id,
           address: payload.address,
           data: payload,
+          origin: window.location.origin,
         },
       });
     });
@@ -142,25 +143,16 @@ const signerHandler = () => ({
           id,
           address: payload.address,
           data: payload,
+          origin: window.location.origin,
         },
       });
     });
   },
 });
 
-const sendMessage = (message: any) => {
-  const origin = window.location.origin;
-  const formattedMessage: DappMessage = {
-    ...message,
-    payload: {
-      ...message.payload,
-      origin,
-    },
-  };
-
-  console.log(`[Provider] Sending ${message.type}:`, formattedMessage);
-
-  window.postMessage(formattedMessage, origin);
+const sendMessage = (message: DappMessage) => {
+  console.log(`[Provider] Sending ${message.type}:`, message);
+  window.postMessage(message, message.payload.origin);
 };
 
 export const TaoxyzWalletProvider: InjectedWindowProvider = {

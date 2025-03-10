@@ -38,8 +38,7 @@ const Sign = () => {
         throw new Error("Invalid payload format");
       }
 
-      let signature: `0x${string}`;
-      signature = await KeyringService.sign(
+      const signature: `0x${string}` = await KeyringService.sign(
         request.address,
         request.data as SignerPayloadJSON,
         password

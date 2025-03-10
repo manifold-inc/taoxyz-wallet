@@ -5,14 +5,18 @@ interface PolkadotApiContextType {
   api: PolkadotApi | null;
   isLoading: boolean;
   error: Error | null;
-  setEndpoint: (endpoint: "test" | "main") => void;
+  setEndpoint: (endpoint: "test" | "main") => Promise<PolkadotApi>;
 }
 
 const PolkadotApiContext = createContext<PolkadotApiContextType>({
   api: null,
   isLoading: true,
   error: null,
-  setEndpoint: () => {},
+  setEndpoint: async (endpoint: "test" | "main") => {
+    const api = new PolkadotApi(endpoint);
+    await api.getApi();
+    return api;
+  },
 });
 
 export const PolkadotApiProvider = ({
@@ -37,15 +41,22 @@ export const PolkadotApiProvider = ({
   }, []);
 
   const handleEndpointChange = async (newEndpoint: "test" | "main") => {
-    if (!api) return;
+    if (!api) {
+      const newApi = new PolkadotApi(newEndpoint);
+      await newApi.getApi();
+      setApi(newApi);
+      return newApi;
+    }
     setIsLoading(true);
     try {
       await api.changeEndpoint(newEndpoint);
       setEndpoint(newEndpoint);
+      return api;
     } catch (error) {
       setError(
         error instanceof Error ? error : new Error("Failed to change endpoint")
       );
+      return api;
     } finally {
       setIsLoading(false);
     }

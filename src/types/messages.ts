@@ -26,12 +26,12 @@ export interface SignResponsePayload {
   approved?: boolean;
 }
 
-export type MessagePayloadMap = {
+export interface MessagePayloadMap {
   [MESSAGE_TYPES.CONNECT_REQUEST]: ConnectRequestPayload;
   [MESSAGE_TYPES.CONNECT_RESPONSE]: ConnectResponsePayload;
   [MESSAGE_TYPES.SIGN_REQUEST]: SignRequestPayload;
   [MESSAGE_TYPES.SIGN_RESPONSE]: SignResponsePayload;
-};
+}
 
 interface BaseMessage<T extends keyof MessagePayloadMap> {
   type: T;
@@ -57,16 +57,16 @@ export interface StoredSignRequest extends StoredRequest {
   data: SignerPayloadJSON | SignerPayloadRaw;
 }
 
-export type ErrorResponse = {
+export interface ErrorResponse {
   success: false;
   error: string;
   details?: unknown;
-};
+}
 
-export type SuccessResponse = {
+export interface SuccessResponse {
   success: true;
   data?: unknown;
-};
+}
 
 export type ResponseMessage = ErrorResponse | SuccessResponse;
 

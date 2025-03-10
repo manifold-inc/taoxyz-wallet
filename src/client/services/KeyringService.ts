@@ -3,16 +3,11 @@ import { mnemonicGenerate } from "@polkadot/util-crypto";
 import { TypeRegistry } from "@polkadot/types";
 
 import type { KeyringPair, KeyringPair$Meta } from "@polkadot/keyring/types";
-import type {
-  SignerPayloadJSON,
-  SignerPayloadRaw,
-} from "@polkadot/types/types";
+import type { SignerPayloadJSON } from "@polkadot/types/types";
 
 const registry = new TypeRegistry();
 
-interface WebsitePermissions {
-  [origin: string]: boolean;
-}
+type WebsitePermissions = Record<string, boolean>;
 
 export const KeyringService = {
   async addAccount(

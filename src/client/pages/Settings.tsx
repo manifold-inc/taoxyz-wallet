@@ -4,17 +4,19 @@ import { KeyringService } from "../services/KeyringService";
 import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import type { KeyringPair } from "@polkadot/keyring/types";
+import type { Permissions } from "../../types/client";
 
-interface WebsiteStats {
-  [website: string]: {
+type WebsiteStats = Record<
+  string,
+  {
     accountCount: number;
     accounts: {
       address: string;
       username: string;
       hasAccess: boolean;
     }[];
-  };
-}
+  }
+>;
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -39,7 +41,7 @@ const Settings = () => {
 
       for (const account of keyringAccounts) {
         const permissions =
-          (account.meta.websitePermissions as { [key: string]: boolean }) || {};
+          (account.meta.websitePermissions as Record<string, boolean>) || {};
 
         Object.entries(permissions).forEach(([website, hasAccess]) => {
           if (!stats[website]) {
@@ -104,9 +106,7 @@ const Settings = () => {
     try {
       const accountsWithAccess = accounts.filter(
         (account) =>
-          (account.meta.websitePermissions as { [key: string]: boolean })[
-            website
-          ] === true
+          (account.meta.websitePermissions as Permissions)[website] === true
       );
 
       for (const account of accountsWithAccess) {
@@ -171,6 +171,15 @@ const Settings = () => {
                     <span className="bg-blue-500/10 text-blue-500 text-[10px] px-2 rounded outline outline-1 outline-black/20">
                       {accountCount}
                     </span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveWebsite(website);
+                      }}
+                      className="text-red-500 text-[10px] hover:text-red-400"
+                    >
+                      Remove
+                    </button>
                   </div>
                   {expandedWebsite === website ? (
                     <ChevronUp size={14} className="text-gray-400" />
