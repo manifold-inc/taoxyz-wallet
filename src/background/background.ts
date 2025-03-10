@@ -9,6 +9,8 @@ import type {
 } from "../types/messages";
 import { generateId } from "../utils/utils";
 
+// This is Service Worker Code. 
+
 const getStoredRequest = async (key: string): Promise<StoredRequest> => {
   const result = await chrome.storage.local.get(key);
   if (!result[key]) {
@@ -23,6 +25,11 @@ const storeRequest = async (
 ): Promise<void> => {
   await chrome.storage.local.set({ [key]: data });
   console.log(`[Background] Stored ${key}:`, data);
+};
+
+const cleanupRequest = async (key: string): Promise<void> => {
+  await chrome.storage.local.remove(key);
+  console.log(`[Background] Cleaned up ${key}`);
 };
 
 const sendMessageToTab = async <T extends keyof MessagePayloadMap>(
@@ -45,9 +52,13 @@ const sendMessageToTab = async <T extends keyof MessagePayloadMap>(
   }
 };
 
-const cleanupRequest = async (key: string): Promise<void> => {
-  await chrome.storage.local.remove(key);
-  console.log(`[Background] Cleaned up ${key}`);
+const sendErrorResponse = (
+  sendResponse: (response: ResponseMessage) => void,
+  error: string,
+  details?: unknown
+) => {
+  console.error(`[Background] ${error}`, details || "");
+  sendResponse({ success: false, error, details });
 };
 
 const openPopup = async (route: string): Promise<chrome.windows.Window> => {
@@ -57,15 +68,6 @@ const openPopup = async (route: string): Promise<chrome.windows.Window> => {
     width: 400,
     height: 600,
   });
-};
-
-const sendErrorResponse = (
-  sendResponse: (response: ResponseMessage) => void,
-  error: string,
-  details?: unknown
-) => {
-  console.error(`[Background] ${error}`, details || "");
-  sendResponse({ success: false, error, details });
 };
 
 async function handleConnectRequest(

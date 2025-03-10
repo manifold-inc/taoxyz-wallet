@@ -18,6 +18,8 @@ import type {
 } from "../types/messages";
 import { generateId } from "../utils/utils";
 
+// Interface for the dApp, this holds the logic for the routing for content.ts.
+
 const dappMessageHandler = <T extends keyof MessagePayloadMap>(
   messageType: T,
   callback: (payload: MessagePayloadMap[T]) => void

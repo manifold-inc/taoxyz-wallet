@@ -5,6 +5,8 @@ import type {
 } from "../types/messages";
 import { MESSAGE_TYPES, ERROR_TYPES } from "../types/messages";
 
+// Routing from the dApp to Service Worker and Service Worker to dApp
+
 const script = document.createElement("script");
 script.src = chrome.runtime.getURL("content/inject.js");
 script.type = "module";
@@ -15,7 +17,6 @@ const handleError = (error: Error, context: string) => {
   return { success: false, error: error.message } as ResponseMessage;
 };
 
-// Listens for messages from the dApp and forwards them to the background service worker
 window.addEventListener("message", (event) => {
   if (event.origin !== window.location.origin) return;
   if (event.data.source?.startsWith("react-devtools")) return;

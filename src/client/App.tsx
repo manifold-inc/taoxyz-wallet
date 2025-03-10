@@ -20,7 +20,10 @@ import { PolkadotApiProvider } from "./contexts/PolkadotApiContext";
 import { KeyringService } from "./services/KeyringService";
 import { MESSAGE_TYPES } from "../types/messages";
 
+
+
 const App = () => {
+  // TODO: refactor this
   useEffect(() => {
     const handleAuthMessage = async (
       message: any,
