@@ -20,6 +20,8 @@ import { PolkadotApiProvider } from "./contexts/PolkadotApiContext";
 import { KeyringService } from "./services/KeyringService";
 import { MESSAGE_TYPES } from "../types/messages";
 
+import background from "../../public/images/background.png";
+
 const App = () => {
   // TODO: refactor this
   useEffect(() => {
@@ -64,57 +66,64 @@ const App = () => {
   return (
     <PolkadotApiProvider>
       <HashRouter>
-        <Navigation />
-        <main>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/signin" element={<Signin />} />
-            <Route path="/create" element={<Create />} />
-            <Route path="/import" element={<Import />} />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/swap"
-              element={
-                <ProtectedRoute>
-                  <Swap />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/stake"
-              element={
-                <ProtectedRoute>
-                  <Stake />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/transfer"
-              element={
-                <ProtectedRoute>
-                  <Transfer />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/settings"
-              element={
-                <ProtectedRoute>
-                  <Settings />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/connect" element={<Connect />} />
-            <Route path="/sign" element={<Sign />} />
-          </Routes>
-        </main>
+        <div
+          style={{ backgroundImage: `url(${background})` }}
+          className="bg-cover bg-center min-h-screen w-full"
+        >
+          <div className="bg-transparent">
+            <Navigation />
+            <main className="bg-transparent">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/signin" element={<Signin />} />
+                <Route path="/create" element={<Create />} />
+                <Route path="/import" element={<Import />} />
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/swap"
+                  element={
+                    <ProtectedRoute>
+                      <Swap />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/stake"
+                  element={
+                    <ProtectedRoute>
+                      <Stake />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/transfer"
+                  element={
+                    <ProtectedRoute>
+                      <Transfer />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/settings"
+                  element={
+                    <ProtectedRoute>
+                      <Settings />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/connect" element={<Connect />} />
+                <Route path="/sign" element={<Sign />} />
+              </Routes>
+            </main>
+          </div>
+        </div>
       </HashRouter>
     </PolkadotApiProvider>
   );

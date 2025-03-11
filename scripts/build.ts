@@ -29,9 +29,14 @@ async function copyAssets() {
   try {
     await mkdir("./dist", { recursive: true });
     await mkdir("./dist/icons", { recursive: true });
+    await mkdir("./dist/images", { recursive: true });
 
     await copyFile("./public/manifest.json", "./dist/manifest.json");
     await copyFile("./public/icons/taoxyz.png", "./dist/icons/taoxyz.png");
+    await copyFile(
+      "./public/images/background.png",
+      "./dist/images/background.png"
+    );
     await copyFile("./public/index.html", "./dist/index.html");
   } catch (error) {
     console.error("Error copying assets:", error);

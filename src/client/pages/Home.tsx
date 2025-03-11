@@ -1,9 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-
-import taoxyzLogo from "../../../public/icons/taoxyz.svg";
 import { UserPlus, FolderInput, SquareArrowLeft } from "lucide-react";
+
 import Disclaimer from "../components/Disclaimer";
+import taoxyzLogo from "../../../public/icons/taoxyz.svg";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -21,14 +21,16 @@ const Home = () => {
       {showDisclaimer ? (
         <Disclaimer onClose={() => setShowDisclaimer(false)} />
       ) : (
-        <div className="bg-mf-night-700 flex flex-col items-center justify-between min-h-screen">
-          <div className="flex-1" />
-          <div className="flex flex-col items-center">
-            <div className="mb-4">
-              <img src={taoxyzLogo} alt="Taoxyz Logo" className="w-16 h-16" />
-            </div>
+        <div className="flex flex-col items-center min-h-screen">
+          <div className="h-20" />
+          <div className="flex flex-col items-center flex-1">
+            <img
+              src={taoxyzLogo}
+              alt="Taoxyz Logo"
+              className="w-16 h-16 mb-8"
+            />
 
-            <div className="w-full max-w-md bg-mf-night-700">
+            <div className="w-full max-w-md">
               <div className="text-center mb-6">
                 <h1 className="text-[20px] font-semibold text-mf-silver-300">
                   Taoxyz Wallet
@@ -78,7 +80,7 @@ const Home = () => {
               </div>
             </div>
           </div>
-          <div className="flex-1" />
+          <div className="h-20" />
         </div>
       )}
     </>

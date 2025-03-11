@@ -25,6 +25,11 @@
   --color-mf-milk-300: oklch(0.94 0.05 240.77); /* #E5F0FF */
   --color-mf-milk-500: oklch(0.91 0.05 240.77); /* #DBE9FF */
   --color-mf-milk-700: oklch(0.86 0.05 240.77); /* #B9C4D6 */
+
+  /* Sybil Colors */
+  --color-mf-sybil-300: oklch(0.88 0.15 165); /* #7CEFC4 */
+  --color-mf-sybil-500: oklch(0.83 0.15 165); /* #56E8B4 */
+  --color-mf-sybil-700: oklch(0.78 0.15 165); /* #45B98D */
 }
 
 #root {
