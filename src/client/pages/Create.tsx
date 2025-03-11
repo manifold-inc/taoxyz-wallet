@@ -55,6 +55,7 @@ export const Create = () => {
       setAccount(account);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create wallet");
+      setPasswordStatus(null);
     } finally {
       setIsLoading(false);
     }
@@ -156,7 +157,9 @@ export const Create = () => {
                   onFocus={() => setPasswordSelected(true)}
                   onBlur={() => setPasswordSelected(false)}
                   className={`w-full px-4 py-3 text-[12px] rounded-lg bg-mf-ash-500 text-mf-milk-300 border-none focus:outline-none focus:ring-2 ${
-                    passwordStatus
+                    error
+                      ? "ring-2 ring-mf-safety-300"
+                      : passwordStatus
                       ? passwordStatus === "Password is valid"
                         ? passwordSelected
                           ? "ring-2 ring-mf-sybil-500"
@@ -167,27 +170,24 @@ export const Create = () => {
                   placeholder="Enter password"
                 />
                 <div className="h-5">
-                  {passwordStatus &&
+                  {(passwordStatus &&
                     (passwordSelected ||
-                      passwordStatus !== "Password is valid") && (
-                      <p
-                        className={`mt-1 text-[10px] ${
-                          passwordStatus === "Password is valid"
-                            ? "text-mf-sybil-500"
-                            : "text-mf-safety-300"
-                        }`}
-                      >
-                        {passwordStatus}
-                      </p>
-                    )}
+                      passwordStatus !== "Password is valid")) ||
+                  error ? (
+                    <p
+                      className={`mt-1 text-[10px] ${
+                        error
+                          ? "text-mf-safety-300"
+                          : passwordStatus === "Password is valid"
+                          ? "text-mf-sybil-500"
+                          : "text-mf-safety-300"
+                      }`}
+                    >
+                      {error || passwordStatus}
+                    </p>
+                  ) : null}
                 </div>
               </div>
-
-              {error && (
-                <div className="w-54 p-3 bg-mf-ash-500 text-mf-safety-300 text-[12px] rounded-lg">
-                  {error}
-                </div>
-              )}
 
               <div className="flex flex-col items-center w-54">
                 <button
