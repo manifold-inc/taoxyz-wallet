@@ -26,7 +26,7 @@ const CreateForm = ({
 
   const validateUsername = (username: string) => {
     if (username.trim().length < 3) {
-      setUsernameStatus("Username must be at least 3 characters long");
+      setUsernameStatus("Minimum 3 characters required");
       return false;
     }
     setUsernameStatus("Username is valid");
@@ -35,7 +35,7 @@ const CreateForm = ({
 
   const validatePassword = (password: string) => {
     if (password.trim().length < 8) {
-      setPasswordStatus("Password must be at least 8 characters long");
+      setPasswordStatus("Minimum 8 characters required");
       return false;
     }
     setPasswordStatus("Password is valid");
@@ -118,7 +118,7 @@ const CreateForm = ({
           {usernameStatus &&
             (usernameSelected || usernameStatus !== "Username is valid") && (
               <p
-                className={`mt-1 text-[10px] ${
+                className={`mt-2 text-[10px] ${
                   usernameStatus === "Username is valid"
                     ? "text-mf-sybil-500"
                     : "text-mf-safety-300"
@@ -161,7 +161,7 @@ const CreateForm = ({
             (passwordSelected || passwordStatus !== "Password is valid")) ||
           error ? (
             <p
-              className={`mt-1 text-[10px] ${
+              className={`mt-2 text-[10px] ${
                 error
                   ? "text-mf-safety-300"
                   : passwordStatus === "Password is valid"

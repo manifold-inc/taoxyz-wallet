@@ -19,7 +19,16 @@ const Signin = () => {
         navigate("/dashboard", { state: { address } });
       }
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Failed to sign in");
+      if (error instanceof Error && error.message === "Account not found") {
+        setError("Username is invalid");
+      } else if (
+        error instanceof Error &&
+        error.message === "Unable to decode using the supplied passphrase"
+      ) {
+        setError("Password is invalid");
+      } else {
+        setError(error instanceof Error ? error.message : "Failed to sign in");
+      }
     }
   };
 
@@ -68,7 +77,7 @@ const Signin = () => {
               />
               <div className="h-5">
                 {error && (
-                  <p className="mt-1 text-[10px] text-mf-safety-300">{error}</p>
+                  <p className="mt-2 text-[10px] text-mf-safety-300">{error}</p>
                 )}
               </div>
             </div>

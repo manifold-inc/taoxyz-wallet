@@ -28,7 +28,7 @@ const Import = () => {
 
     const wordCount = mnemonic.trim().split(/\s+/).length;
     if (wordCount !== 12) {
-      setError("Recovery phrase must be 12 or 24 words");
+      setError("Recovery phrase must be 12 words");
       return;
     }
 
@@ -99,7 +99,7 @@ const Import = () => {
                     ? "ring-2 ring-mf-safety-300"
                     : "focus:ring-mf-safety-300"
                 }`}
-                placeholder="Enter your 12 or 24-word recovery phrase"
+                placeholder="Enter your 12 word recovery phrase"
                 required
               />
               <div className="h-5">

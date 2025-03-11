@@ -13,7 +13,7 @@ const Mnemonic = ({ mnemonic, onContinue }: MnemonicProps) => {
     try {
       await navigator.clipboard.writeText(mnemonic);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setTimeout(() => setCopied(false), 5000);
     } catch (err) {
       console.error("Failed to copy mnemonic:", err);
     }
@@ -39,7 +39,7 @@ const Mnemonic = ({ mnemonic, onContinue }: MnemonicProps) => {
         </div>
         <div className="h-5">
           <p
-            className={`mt-1 text-[10px] ${
+            className={`mt-2 text-[10px] ${
               copied ? "text-mf-sybil-500" : "text-mf-safety-300"
             }`}
           >
