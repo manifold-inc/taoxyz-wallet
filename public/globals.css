@@ -22,9 +22,9 @@
   --color-mf-silver-700: oklch(0.8 0.05 240.77); /* #A3B5D6 */
 
   /* Milk Colors */
-  --color-mf-milk-300: oklch(0.92 0.05 240.77); /* #E0EBFF */
-  --color-mf-milk-500: oklch(0.88 0.05 240.77); /* #D2E3FF */
-  --color-mf-milk-700: oklch(0.83 0.05 240.77); /* #AEC0D6 */
+  --color-mf-milk-300: oklch(0.94 0.05 240.77); /* #E5F0FF */
+  --color-mf-milk-500: oklch(0.91 0.05 240.77); /* #DBE9FF */
+  --color-mf-milk-700: oklch(0.86 0.05 240.77); /* #B9C4D6 */
 }
 
 #root {
@@ -33,8 +33,5 @@
   height: 100%;
   margin: 0;
   padding: 0;
-}
-
-body {
   font-family: "Inconsolata", monospace;
 }

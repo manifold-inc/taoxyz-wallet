@@ -65,7 +65,7 @@ const App = () => {
     <PolkadotApiProvider>
       <HashRouter>
         <Navigation />
-        <main className="pt-16">
+        <main>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/signin" element={<Signin />} />
