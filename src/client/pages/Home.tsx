@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { UserPlus, FolderInput, SquareArrowLeft } from "lucide-react";
 
 import Disclaimer from "../components/Disclaimer";
@@ -9,12 +9,11 @@ const Home = () => {
   const navigate = useNavigate();
   const [showDisclaimer, setShowDisclaimer] = useState(false);
 
-  useEffect(() => {
-    const savedAddress = localStorage.getItem("currentAddress");
-    if (savedAddress) {
-      navigate("/dashboard", { state: { address: savedAddress } });
-    }
-  }, [navigate]);
+  const address = localStorage.getItem("currentAddress");
+  if (address) {
+    navigate("/dashboard", { state: { address } });
+    return null;
+  }
 
   return (
     <>
