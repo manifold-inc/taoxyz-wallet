@@ -1,155 +1,60 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Copy } from "lucide-react";
 import type { KeyringPair } from "@polkadot/keyring/types";
 
-import { KeyringService } from "../services/KeyringService";
+import taoxyzLogo from "../../../public/icons/taoxyz.svg";
+import CreateForm from "../components/CreateForm";
+import MnemonicDisplay from "../components/Mnemonic";
 
 export const Create = () => {
   const navigate = useNavigate();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
   const [mnemonic, setMnemonic] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [account, setAccount] = useState<KeyringPair | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError(null);
-    try {
-      setIsLoading(true);
-
-      const generatedMnemonic = KeyringService.createMnemonic();
-      setMnemonic(generatedMnemonic);
-
-      const account = await KeyringService.addAccount(
-        generatedMnemonic,
-        username,
-        password
-      );
-      setAccount(account);
-      console.log("[Client] Account Created:", account);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create wallet");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleCopyMnemonic = async () => {
-    try {
-      await navigator.clipboard.writeText(mnemonic);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error("Failed to copy mnemonic:", err);
-    }
+  const handleSuccess = (
+    newAccount: KeyringPair,
+    generatedMnemonic: string
+  ) => {
+    setAccount(newAccount);
+    setMnemonic(generatedMnemonic);
   };
 
   const handleContinue = () => {
     navigate("/dashboard", { state: { address: account?.address } });
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    if (name === "username") {
-      setUsername(value);
-    } else if (name === "password") {
-      setPassword(value);
-    }
-  };
-
   return (
-    <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white rounded-lg p-4">
-        <h2 className="text-[13px] font-semibold mb-4 text-gray-900">
-          Create New Wallet
-        </h2>
+    <div className="flex flex-col items-center min-h-screen">
+      <div className="h-20" />
+      <div className="flex flex-col items-center flex-1">
+        <img src={taoxyzLogo} alt="Taoxyz Logo" className="w-16 h-16 mb-8" />
 
         {!mnemonic ? (
-          <form className="space-y-2" onSubmit={handleSubmit}>
-            <div>
-              <label className="block text-[10px] text-gray-600 mb-1">
-                Username
-              </label>
-              <input
-                type="text"
-                name="username"
-                required
-                value={username}
-                onChange={handleChange}
-                className="w-full px-3 py-2 text-[10px] rounded-lg border border-gray-200 hover:border-blue-500 focus:outline-none focus:border-blue-500"
-                placeholder="Enter username"
-              />
+          <div className="w-full max-w-md">
+            <div className="text-center mb-6">
+              <h1 className="text-xl font-semibold text-mf-silver-300">
+                Create Wallet
+              </h1>
             </div>
-
-            <div>
-              <label className="block text-[10px] text-gray-600 mb-1">
-                Password
-              </label>
-              <input
-                type="password"
-                name="password"
-                required
-                value={password}
-                onChange={handleChange}
-                className="w-full px-3 py-2 text-[10px] rounded-lg border border-gray-200 hover:border-blue-500 focus:outline-none focus:border-blue-500"
-                placeholder="Enter password"
-              />
-            </div>
-
-            {error && (
-              <div className="p-3 bg-red-50 text-red-500 text-[10px] rounded-lg border border-red-100">
-                {error}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full text-[10px] px-4 py-3 rounded-lg border border-gray-200 hover:bg-blue-50 hover:text-blue-500 hover:border-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? "Creating..." : "Create Wallet"}
-            </button>
-          </form>
-        ) : (
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-[11px] font-medium mb-2 text-gray-900">
-                Your Recovery Phrase
-              </h3>
-              <p className="text-[10px] text-gray-600 mb-2">
-                Write down these words in the right order and store them safely.
-              </p>
-              <div className="relative">
-                <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-[10px] break-all text-gray-900">
-                  {mnemonic}
-                </div>
-                <button
-                  onClick={handleCopyMnemonic}
-                  className="absolute top-2 right-2 p-1 text-gray-400 hover:text-blue-500"
-                >
-                  <Copy size={14} />
-                </button>
-                {copied && (
-                  <div className="absolute -top-8 right-0 bg-gray-800 text-white text-[10px] px-2 py-1 rounded">
-                    Copied!
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <button
-              onClick={handleContinue}
-              className="w-full text-[10px] px-4 py-3 rounded-lg border border-gray-200 hover:bg-blue-50 hover:text-blue-500 hover:border-blue-500 transition-colors"
-            >
-              I've Saved My Recovery Phrase
-            </button>
+            <CreateForm onSuccess={handleSuccess} />
           </div>
+        ) : (
+          <>
+            <div className="text-center mb-6">
+              <h1 className="text-xl font-semibold text-mf-silver-300">
+                Recovery Phrase
+              </h1>
+            </div>
+            <div className="flex flex-col flex-1 w-full">
+              <MnemonicDisplay
+                mnemonic={mnemonic}
+                onContinue={handleContinue}
+              />
+            </div>
+          </>
         )}
       </div>
+      {!mnemonic && <div className="h-20" />}
     </div>
   );
 };

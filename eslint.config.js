@@ -20,22 +20,6 @@ export default tseslint.config(
       ],
     },
   },
-  {
-    languageOptions: {
-      formatter: {
-        format: (results) => {
-          if (
-            results.every(
-              (result) => result.errorCount === 0 && result.warningCount === 0
-            )
-          ) {
-            return "✅ All ESLint checks passed successfully!";
-          }
-          return undefined; // Use default formatter for errors/warnings
-        },
-      },
-    },
-  },
   eslint.configs.recommended,
   tseslint.configs.strict,
   tseslint.configs.stylistic

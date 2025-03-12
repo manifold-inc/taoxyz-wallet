@@ -1,13 +1,42 @@
 @import "tailwindcss";
 
+@theme {
+  /* Safety Colors */
+  --color-mf-safety-300: oklch(0.75 0.15 30.77); /* #FF9B7A */
+  --color-mf-safety-500: oklch(0.7 0.18 30.77); /* #FF8159 */
+  --color-mf-safety-700: oklch(0.65 0.15 30.77); /* #D96547 */
+
+  /* Ash Colors */
+  --color-mf-ash-300: oklch(0.35 0.02 262.77); /* #3A3C46 */
+  --color-mf-ash-500: oklch(0.25 0.02 262.77); /* #22242E */
+  --color-mf-ash-700: oklch(0.15 0.02 262.77); /* #17181F */
+
+  /* Night Colors */
+  --color-mf-night-300: oklch(0.3 0.02 262.77); /* #2A2C33 */
+  --color-mf-night-500: oklch(0.2 0.02 262.77); /* #191B20 */
+  --color-mf-night-700: oklch(0.1 0.02 262.77); /* #101114 */
+
+  /* Silver Colors */
+  --color-mf-silver-300: oklch(0.9 0.05 240.77); /* #D8E5FF */
+  --color-mf-silver-500: oklch(0.85 0.05 240.77); /* #C5DBFF */
+  --color-mf-silver-700: oklch(0.8 0.05 240.77); /* #A3B5D6 */
+
+  /* Milk Colors */
+  --color-mf-milk-300: oklch(0.94 0.05 240.77); /* #E5F0FF */
+  --color-mf-milk-500: oklch(0.91 0.05 240.77); /* #DBE9FF */
+  --color-mf-milk-700: oklch(0.86 0.05 240.77); /* #B9C4D6 */
+
+  /* Sybil Colors */
+  --color-mf-sybil-300: oklch(0.88 0.15 165); /* #7CEFC4 */
+  --color-mf-sybil-500: oklch(0.83 0.15 165); /* #56E8B4 */
+  --color-mf-sybil-700: oklch(0.78 0.15 165); /* #45B98D */
+}
+
 #root {
   width: 360px;
   min-height: 600px;
   height: 100%;
   margin: 0;
   padding: 0;
-}
-
-body {
   font-family: "Inconsolata", monospace;
 }

@@ -4,8 +4,5 @@ export default {
     "./dist/**/*.{js,jsx,ts,tsx,html}",
     "./public/**/*.{html,js,jsx,ts,tsx}",
   ],
-  theme: {
-    extend: {},
-  },
   plugins: [],
 };

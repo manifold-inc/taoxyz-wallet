@@ -1,47 +1,88 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useState } from "react";
+import { UserPlus, FolderInput, SquareArrowLeft } from "lucide-react";
+
+import Disclaimer from "../components/Disclaimer";
+import taoxyzLogo from "../../../public/icons/taoxyz.svg";
 
 const Home = () => {
   const navigate = useNavigate();
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
 
-  useEffect(() => {
-    const savedAddress = localStorage.getItem("currentAddress");
-    if (savedAddress) {
-      navigate("/dashboard", { state: { address: savedAddress } });
-    }
-  }, [navigate]);
+  const address = localStorage.getItem("currentAddress");
+  if (address) {
+    navigate("/dashboard", { state: { address } });
+    return null;
+  }
 
   return (
-    <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white rounded-lg p-4">
-        <div className="text-center mb-6">
-          <h1 className="text-[13px] font-semibold text-gray-900">
-            Taoxyz Wallet
-          </h1>
-        </div>
+    <>
+      {showDisclaimer ? (
+        <Disclaimer onClose={() => setShowDisclaimer(false)} />
+      ) : (
+        <div className="flex flex-col items-center min-h-screen">
+          <div className="h-20" />
+          <div className="flex flex-col items-center flex-1">
+            <img
+              src={taoxyzLogo}
+              alt="Taoxyz Logo"
+              className="w-16 h-16 mb-8"
+            />
 
-        <div className="space-y-2">
-          <button
-            onClick={() => navigate("/create")}
-            className="w-full text-[10px] text-left px-4 py-3 rounded-lg border border-gray-200 hover:bg-blue-50 hover:text-blue-500 hover:border-blue-500 transition-colors"
-          >
-            Create Wallet
-          </button>
-          <button
-            onClick={() => navigate("/import")}
-            className="w-full text-[10px] text-left px-4 py-3 rounded-lg border border-gray-200 hover:bg-blue-50 hover:text-blue-500 hover:border-blue-500 transition-colors"
-          >
-            Import Wallet
-          </button>
-          <button
-            onClick={() => navigate("/signin")}
-            className="w-full text-[10px] text-left px-4 py-3 rounded-lg border border-gray-200 hover:bg-blue-50 hover:text-blue-500 hover:border-blue-500 transition-colors"
-          >
-            Sign In
-          </button>
+            <div className="w-full max-w-md">
+              <div className="text-center mb-6">
+                <h1 className="text-xl font-semibold text-mf-silver-300">
+                  Taoxyz Wallet
+                </h1>
+              </div>
+
+              <div className="space-y-2 flex flex-col items-center">
+                <button
+                  onClick={() => navigate("/create")}
+                  className="w-54 text-sm flex items-center rounded-lg bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors mb-3 px-4 py-3"
+                >
+                  <div className="w-1/5 ml-2"></div>
+                  <div className="w-4/5 flex items-center gap-2">
+                    <UserPlus className="text-mf-safety-300 w-[20px] h-[20px]" />
+                    <span className="text-mf-milk-300">Create</span>
+                  </div>
+                </button>
+                <button
+                  onClick={() => navigate("/import")}
+                  className="w-54 text-sm flex items-center rounded-lg bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors mb-3 px-4 py-3"
+                >
+                  <div className="w-1/5 ml-2"></div>
+                  <div className="w-4/5 flex items-center gap-2">
+                    <FolderInput className="text-mf-safety-300 w-[20px] h-[20px]" />
+                    <span className="text-mf-milk-300">Import</span>
+                  </div>
+                </button>
+                <button
+                  onClick={() => navigate("/signin")}
+                  className="w-54 text-sm flex items-center rounded-lg bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors mb-3 px-4 py-3"
+                >
+                  <div className="w-1/5 ml-2"></div>
+                  <div className="w-4/5 flex items-center gap-2">
+                    <SquareArrowLeft className="text-mf-safety-300 w-[20px] h-[20px]" />
+                    <span className="text-mf-milk-300">Sign In</span>
+                  </div>
+                </button>
+
+                <div className="flex flex-col items-center mt-2">
+                  <button
+                    onClick={() => setShowDisclaimer(true)}
+                    className="text-xs text-mf-silver-300 hover:text-mf-silver-500 transition-colors underline underline-offset-2 decoration-mf-silver-300 hover:decoration-mf-silver-500"
+                  >
+                    Disclaimer
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="h-20" />
         </div>
-      </div>
-    </div>
+      )}
+    </>
   );
 };
 
