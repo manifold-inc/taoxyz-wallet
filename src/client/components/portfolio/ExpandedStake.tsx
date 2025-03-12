@@ -26,8 +26,8 @@ const ExpandedStake = ({
 
   return (
     <div className="bg-mf-ash-500 rounded-lg p-3">
-      <div className="flex items-center justify-between mb-3">
-        <div>
+      <div className="flex items-start justify-between mb-3">
+        <div className="space-y-1">
           <h3 className="text-lg font-semibold text-mf-milk-300">
             Subnet {stake.subnetId}
           </h3>
@@ -47,28 +47,30 @@ const ExpandedStake = ({
         </button>
       </div>
       <div className="space-y-3">
-        <div>
-          <p className="text-xs text-mf-silver-300 mb-1">Validator</p>
-          <div className="flex items-center space-x-2">
-            <p className="text-xs text-mf-milk-300">
-              {stake.validatorHotkey.slice(0, 8)}...
-              {stake.validatorHotkey.slice(-8)}
-            </p>
-            <button onClick={handleCopy} className="transition-colors">
-              <Copy
-                className={`w-3 h-3 ${
-                  copied ? "text-mf-sybil-300" : "text-mf-safety-300"
-                }`}
-              />
-            </button>
+        <div className="flex items-center space-x-6">
+          <div className="flex-1">
+            <p className="text-xs font-medium text-mf-milk-300">Validator</p>
+            <div className="flex items-center space-x-2">
+              <p className="text-xs text-mf-silver-300">
+                {stake.validatorHotkey.slice(0, 8)}...
+                {stake.validatorHotkey.slice(-8)}
+              </p>
+              <button onClick={handleCopy} className="transition-colors">
+                <Copy
+                  className={`w-3 h-3 ${
+                    copied ? "text-mf-sybil-300" : "text-mf-safety-300"
+                  }`}
+                />
+              </button>
+            </div>
           </div>
-        </div>
-        <div>
-          <p className="text-xs text-mf-silver-300">Stake</p>
-          <p className="text-xs text-mf-milk-300">
-            {(stake.tokens / 1e9).toFixed(6)}{" "}
-            <span className="text-mf-safety-300 text-sm">α</span>
-          </p>
+          <div>
+            <p className="text-xs font-medium text-mf-milk-300">Stake</p>
+            <p className="text-xs text-mf-silver-300">
+              {(stake.tokens / 1e9).toFixed(6)}{" "}
+              <span className="text-mf-safety-300">α</span>
+            </p>
+          </div>
         </div>
 
         <div className="mt-3 -mx-3">
