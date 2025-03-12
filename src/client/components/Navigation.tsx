@@ -1,25 +1,15 @@
-import { useEffect, useState } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { House, ArrowLeftRight, ListPlus, Redo, Settings2 } from "lucide-react";
 
 const Navigation = () => {
   const location = useLocation();
-  const [address, setAddress] = useState<string | null>(null);
 
-  useEffect(() => {
-    const savedAddress = localStorage.getItem("currentAddress");
-
-    if (location.state?.address) {
-      setAddress(location.state.address);
-      localStorage.setItem("currentAddress", location.state.address);
-    } else if (savedAddress) {
-      setAddress(savedAddress);
-    } else {
-      setAddress(null);
-    }
-  }, [location.state?.address]);
-
-  if (!localStorage.getItem("currentAddress")) return null;
+  const address = localStorage.getItem("currentAddress");
+  const currentAddress = location.state?.address || address;
+  if (location.state?.address) {
+    localStorage.setItem("currentAddress", location.state.address);
+  }
+  if (!currentAddress) return null;
 
   const navLinks = [
     { path: "/dashboard", icon: <House size={20} /> },
@@ -38,7 +28,7 @@ const Navigation = () => {
               <Link
                 to={link.path}
                 state={{ address }}
-                className="text-mf-milk-300 hover:text-mf-silver-300 transition-colors px-6"
+                className="text-mf-safety-300 px-6"
               >
                 {link.icon}
               </Link>
