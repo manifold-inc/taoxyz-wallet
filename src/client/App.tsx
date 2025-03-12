@@ -1,5 +1,5 @@
 import { HashRouter, Routes, Route } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import Home from "./pages/Home";
 import Signin from "./pages/Signin";
@@ -13,19 +13,46 @@ import Stake from "./pages/Stake";
 import Transfer from "./pages/Transfer";
 import Settings from "./pages/Settings";
 
+import LockScreen from "./components/LockScreen";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Navigation from "./components/Navigation";
 
+import MessageService from "./services/MessageService";
+import KeyringService from "./services/KeyringService";
 import { PolkadotApiProvider } from "./contexts/PolkadotApiContext";
-import MessageHandlers from "../utils/messageHandlers";
 
 import background from "../../public/images/background.png";
 
 const App = () => {
+  const [isLocked, setIsLocked] = useState<boolean>(true);
+
   useEffect(() => {
-    const cleanup = MessageHandlers.setupMessageListeners();
+    const cleanup = MessageService.setupMessageListeners();
+
+    const checkLockState = async () => {
+      const currentAddress = localStorage.getItem("currentAddress");
+      if (!currentAddress) {
+        setIsLocked(false);
+        return;
+      }
+
+      try {
+        const isLocked = await KeyringService.isLocked(currentAddress);
+        setIsLocked(isLocked);
+      } catch (error) {
+        console.error("[App] Error checking lock state:", error);
+        setIsLocked(true);
+      }
+    };
+
+    checkLockState();
     return cleanup;
   }, []);
+
+  const currentAddress = localStorage.getItem("currentAddress");
+  if (isLocked && currentAddress) {
+    return <LockScreen />;
+  }
 
   return (
     <PolkadotApiProvider>

@@ -14,6 +14,7 @@ const LockManager = {
       this.lockAccounts("timeout");
     }, LOCK_TIMEOUT_MS);
   },
+
   lockAccounts(event: "manual" | "timeout") {
     console.log(`[LockManager] Locking accounts due to ${event}`);
     KeyringService.lockAll();
@@ -25,7 +26,7 @@ const LockManager = {
 
     chrome.runtime.sendMessage({
       type: MESSAGE_TYPES.ACCOUNTS_LOCKED,
-      payload: {},
+      payload: { reason: event },
     });
   },
 };

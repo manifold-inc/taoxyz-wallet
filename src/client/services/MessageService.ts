@@ -1,8 +1,8 @@
-import { KeyringService } from "../client/services/KeyringService";
-import LockManager from "./lock";
-import { MESSAGE_TYPES, ERROR_TYPES } from "../types/messages";
-import type { ResponseMessage, ExtensionMessage } from "../types/messages";
-import type { Permissions } from "../types/client";
+import { KeyringService } from "./KeyringService";
+import LockManager from "../../utils/lock";
+import { MESSAGE_TYPES, ERROR_TYPES } from "../../types/messages";
+import type { ResponseMessage, ExtensionMessage } from "../../types/messages";
+import type { Permissions } from "../../types/client";
 
 const sendErrorResponse = (
   sendResponse: (response: ResponseMessage) => void,
@@ -13,7 +13,7 @@ const sendErrorResponse = (
   sendResponse({ success: false, error, details });
 };
 
-const MessageHandlers = {
+const MessageService = {
   async handleAuthMessage(
     message: ExtensionMessage & { type: typeof MESSAGE_TYPES.AUTHENTICATE },
     _sender: chrome.runtime.MessageSender,
@@ -92,4 +92,4 @@ const MessageHandlers = {
   },
 };
 
-export default MessageHandlers;
+export default MessageService;
