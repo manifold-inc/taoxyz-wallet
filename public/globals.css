@@ -8,6 +8,7 @@
 
   /* Ash Colors */
   --color-mf-ash-300: oklch(0.35 0.02 262.77); /* #3A3C46 */
+  --color-mf-ash-400: oklch(0.3 0.02 262.77); /* #32343E */
   --color-mf-ash-500: oklch(0.25 0.02 262.77); /* #22242E */
   --color-mf-ash-700: oklch(0.15 0.02 262.77); /* #17181F */
 
@@ -43,4 +44,25 @@ body {
   margin: 0;
   padding: 0;
   font-family: "Inconsolata", monospace;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-mf-ash-300);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-mf-ash-400);
+}
+
+.portfolio-container::-webkit-scrollbar {
+  width: 4px;
 }

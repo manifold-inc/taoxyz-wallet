@@ -138,7 +138,7 @@ export const Dashboard = () => {
 
           <div className="mt-3">
             <h2 className="text-xs text-mf-silver-300 mb-2">Portfolio</h2>
-            <div className="w-full rounded-lg bg-mf-ash-500 p-3 max-h-[calc(100vh-380px)] overflow-y-auto">
+            <div className="w-full rounded-lg bg-mf-ash-500 p-2 max-h-[calc(100vh-380px)] overflow-y-auto portfolio-container">
               <Portfolio stakes={stakes} address={address} />
               {isLoading && (
                 <div className="flex justify-center items-center h-16">
