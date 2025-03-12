@@ -77,11 +77,11 @@ export const Dashboard = () => {
 
   return (
     <div className="flex flex-col items-center min-h-screen">
-      <div className="h-5" />
-      <div className="flex flex-col items-center flex-1">
-        <div className="w-72 space-y-4">
+      <div className="h-4" />
+      <div className="flex flex-col items-center h-full w-full overflow-hidden">
+        <div className="w-80">
           <div>
-            <div className="w-full px-4 py-2 rounded-lg bg-mf-ash-500">
+            <div className="w-full px-3 py-2 rounded-lg bg-mf-ash-500">
               <div className="flex items-center space-x-2">
                 <span className="text-xl font-semibold text-mf-safety-300">
                   τ
@@ -110,47 +110,35 @@ export const Dashboard = () => {
             </div>
           </div>
 
-          <div>
-            <div className="space-y-2">
+          <div className="mt-3">
+            <div className="flex justify-between">
               <button
                 onClick={() => navigate("/swap", { state: { address } })}
-                className="w-full text-sm flex items-center rounded-lg bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors px-4 py-3"
+                className="w-25 text-xs flex flex-col items-center rounded-lg bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors px-2 py-2"
               >
-                <div className="w-2/5 flex justify-end">
-                  <ArrowLeftRight className="text-mf-safety-300 w-5 h-5" />
-                </div>
-                <div className="w-3/5 flex items-center ml-2">
-                  <span className="text-mf-milk-300">Swap</span>
-                </div>
+                <ArrowLeftRight className="text-mf-safety-300 w-4 h-4 mb-1" />
+                <span className="text-mf-milk-300">Swap</span>
               </button>
               <button
                 onClick={() => navigate("/stake", { state: { address } })}
-                className="w-full text-sm flex items-center rounded-lg bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors px-4 py-3"
+                className="w-25 text-xs flex flex-col items-center rounded-lg bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors px-2 py-2"
               >
-                <div className="w-2/5 flex justify-end">
-                  <ListPlus className="text-mf-safety-300 w-5 h-5" />
-                </div>
-                <div className="w-3/5 flex items-center ml-2">
-                  <span className="text-mf-milk-300">Stake</span>
-                </div>
+                <ListPlus className="text-mf-safety-300 w-4 h-4 mb-1" />
+                <span className="text-mf-milk-300">Stake</span>
               </button>
               <button
                 onClick={() => navigate("/transfer", { state: { address } })}
-                className="w-full text-sm flex items-center rounded-lg bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors px-4 py-3"
+                className="w-25 text-xs flex flex-col items-center rounded-lg bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors px-2 py-2"
               >
-                <div className="w-2/5 flex justify-end">
-                  <Redo className="text-mf-safety-300 w-5 h-5" />
-                </div>
-                <div className="w-3/5 flex items-center ml-2">
-                  <span className="text-mf-milk-300">Transfer</span>
-                </div>
+                <Redo className="text-mf-safety-300 w-4 h-4 mb-1" />
+                <span className="text-mf-milk-300">Transfer</span>
               </button>
             </div>
           </div>
 
-          <div>
+          <div className="mt-3">
             <h2 className="text-xs text-mf-silver-300 mb-2">Portfolio</h2>
-            <div className="w-full rounded-lg bg-mf-ash-500 p-4">
+            <div className="w-full rounded-lg bg-mf-ash-500 p-3 max-h-[calc(100vh-380px)] overflow-y-auto">
               <Portfolio stakes={stakes} address={address} />
               {isLoading && (
                 <div className="flex justify-center items-center h-16">
