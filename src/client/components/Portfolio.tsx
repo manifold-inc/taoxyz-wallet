@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 
 import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 import { KeyringService } from "../services/KeyringService";
+import StakeOverview from "./portfolio/StakeOverview";
+import ExpandedStake from "./portfolio/ExpandedStake";
 import type { StakeTransaction } from "../../types/client";
-import { SelectedStake } from "./portfolio/SelectedStake";
-import { ExpandedStake } from "./portfolio/ExpandedStake";
 
 interface PortfolioProps {
   stakes: StakeTransaction[];
@@ -15,12 +15,12 @@ interface PortfolioProps {
 const Portfolio = ({ stakes, address }: PortfolioProps) => {
   const { api } = usePolkadotApi();
   const navigate = useNavigate();
-  const [isSwapping, setIsSwapping] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [password, setPassword] = useState("");
   const [selectedStake, setSelectedStake] = useState<StakeTransaction | null>(
     null
   );
+  const [isSwapping, setIsSwapping] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSwap = async (stake: StakeTransaction) => {
     setSelectedStake(stake);
@@ -29,8 +29,9 @@ const Portfolio = ({ stakes, address }: PortfolioProps) => {
 
   const confirmSwap = async () => {
     if (!api || !selectedStake) return;
+    setError(null);
+
     try {
-      setError(null);
       const account = await KeyringService.getAccount(address);
       const username = account.meta.username as string;
       await KeyringService.unlockAccount(username, password);
@@ -46,7 +47,6 @@ const Portfolio = ({ stakes, address }: PortfolioProps) => {
       setPassword("");
       setSelectedStake(null);
       setIsSwapping(false);
-
       navigate("/dashboard", { state: { address } });
     } catch (error) {
       setError(error instanceof Error ? error.message : "Failed to swap");
@@ -56,7 +56,7 @@ const Portfolio = ({ stakes, address }: PortfolioProps) => {
   return (
     <div>
       {selectedStake ? (
-        <SelectedStake
+        <ExpandedStake
           stake={selectedStake}
           onClose={() => setSelectedStake(null)}
           onSwap={handleSwap}
@@ -66,7 +66,7 @@ const Portfolio = ({ stakes, address }: PortfolioProps) => {
           {stakes.length > 0 ? (
             <div className="space-y-1.5">
               {stakes.map((stake, index) => (
-                <ExpandedStake
+                <StakeOverview
                   key={index}
                   stake={stake}
                   onClick={() => setSelectedStake(stake)}
