@@ -32,7 +32,7 @@ const Home = () => {
 
             <div className="w-full max-w-md">
               <div className="text-center mb-6">
-                <h1 className="text-[20px] font-semibold text-mf-silver-300">
+                <h1 className="text-xl font-semibold text-mf-silver-300">
                   Taoxyz Wallet
                 </h1>
               </div>
@@ -40,7 +40,7 @@ const Home = () => {
               <div className="space-y-2 flex flex-col items-center">
                 <button
                   onClick={() => navigate("/create")}
-                  className="w-54 text-[14px] flex items-center rounded-lg bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors mb-3 px-4 py-3"
+                  className="w-54 text-sm flex items-center rounded-lg bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors mb-3 px-4 py-3"
                 >
                   <div className="w-1/5 ml-2"></div>
                   <div className="w-4/5 flex items-center gap-2">
@@ -50,7 +50,7 @@ const Home = () => {
                 </button>
                 <button
                   onClick={() => navigate("/import")}
-                  className="w-54 text-[14px] flex items-center rounded-lg bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors mb-3 px-4 py-3"
+                  className="w-54 text-sm flex items-center rounded-lg bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors mb-3 px-4 py-3"
                 >
                   <div className="w-1/5 ml-2"></div>
                   <div className="w-4/5 flex items-center gap-2">
@@ -60,7 +60,7 @@ const Home = () => {
                 </button>
                 <button
                   onClick={() => navigate("/signin")}
-                  className="w-54 text-[14px] flex items-center rounded-lg bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors mb-3 px-4 py-3"
+                  className="w-54 text-sm flex items-center rounded-lg bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors mb-3 px-4 py-3"
                 >
                   <div className="w-1/5 ml-2"></div>
                   <div className="w-4/5 flex items-center gap-2">
@@ -72,7 +72,7 @@ const Home = () => {
                 <div className="flex flex-col items-center mt-2">
                   <button
                     onClick={() => setShowDisclaimer(true)}
-                    className="text-[10px] text-mf-silver-300 hover:text-mf-silver-500 transition-colors underline underline-offset-2 decoration-mf-silver-300 hover:decoration-mf-silver-500"
+                    className="text-xs text-mf-silver-300 hover:text-mf-silver-500 transition-colors underline underline-offset-2 decoration-mf-silver-300 hover:decoration-mf-silver-500"
                   >
                     Disclaimer
                   </button>

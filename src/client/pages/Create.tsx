@@ -32,7 +32,7 @@ export const Create = () => {
         {!mnemonic ? (
           <div className="w-full max-w-md">
             <div className="text-center mb-6">
-              <h1 className="text-[20px] font-semibold text-mf-silver-300">
+              <h1 className="text-xl font-semibold text-mf-silver-300">
                 Create Wallet
               </h1>
             </div>
@@ -41,7 +41,7 @@ export const Create = () => {
         ) : (
           <>
             <div className="text-center mb-6">
-              <h1 className="text-[20px] font-semibold text-mf-silver-300">
+              <h1 className="text-xl font-semibold text-mf-silver-300">
                 Recovery Phrase
               </h1>
             </div>

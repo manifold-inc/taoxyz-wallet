@@ -91,10 +91,8 @@ const CreateForm = ({
       onSubmit={handleSubmit}
       autoComplete="off"
     >
-      <div className="w-54 h-[85px]">
-        <label className="block text-[12px] text-mf-silver-300 mb-2">
-          Username
-        </label>
+      <div className="w-54 h-20">
+        <label className="text-xs text-mf-silver-300 mb-2">Username</label>
         <input
           type="text"
           name="username"
@@ -104,7 +102,7 @@ const CreateForm = ({
           onChange={handleChange}
           onFocus={() => setUsernameSelected(true)}
           onBlur={() => setUsernameSelected(false)}
-          className={`w-full px-4 py-3 text-[12px] rounded-lg bg-mf-ash-500 text-mf-milk-300 border-none focus:outline-none focus:ring-2 ${
+          className={`w-full px-4 py-3 text-xs rounded-lg bg-mf-ash-500 text-mf-milk-300 border-none focus:outline-none focus:ring-2 ${
             usernameStatus
               ? usernameStatus === "Username is valid"
                 ? usernameSelected
@@ -119,7 +117,7 @@ const CreateForm = ({
           {usernameStatus &&
             (usernameSelected || usernameStatus !== "Username is valid") && (
               <p
-                className={`mt-2 text-[10px] ${
+                className={`mt-2 text-xs ${
                   usernameStatus === "Username is valid"
                     ? "text-mf-sybil-500"
                     : "text-mf-safety-300"
@@ -131,10 +129,8 @@ const CreateForm = ({
         </div>
       </div>
 
-      <div className="w-54 h-[85px]">
-        <label className="block text-[12px] text-mf-silver-300 mb-2">
-          Password
-        </label>
+      <div className="w-54 h-20">
+        <label className="text-xs text-mf-silver-300 mb-2">Password</label>
         <input
           type="password"
           name="password"
@@ -144,7 +140,7 @@ const CreateForm = ({
           onChange={handleChange}
           onFocus={() => setPasswordSelected(true)}
           onBlur={() => setPasswordSelected(false)}
-          className={`w-full px-4 py-3 text-[12px] rounded-lg bg-mf-ash-500 text-mf-milk-300 border-none focus:outline-none focus:ring-2 ${
+          className={`w-full px-4 py-3 text-xs rounded-lg bg-mf-ash-500 text-mf-milk-300 border-none focus:outline-none focus:ring-2 ${
             error
               ? "ring-2 ring-mf-safety-300"
               : passwordStatus
@@ -162,7 +158,7 @@ const CreateForm = ({
             (passwordSelected || passwordStatus !== "Password is valid")) ||
           error ? (
             <p
-              className={`mt-2 text-[10px] ${
+              className={`mt-2 text-xs ${
                 error
                   ? "text-mf-safety-300"
                   : passwordStatus === "Password is valid"
@@ -180,7 +176,7 @@ const CreateForm = ({
         <button
           type="button"
           onClick={() => navigate("/")}
-          className="w-full text-[14px] flex items-center justify-center rounded-lg border border-mf-ash-500 hover:bg-mf-ash-500 transition-colors px-4 py-3 mb-3"
+          className="w-full text-sm flex items-center justify-center rounded-lg border border-mf-ash-500 hover:bg-mf-ash-500 transition-colors px-4 py-3 mb-3"
         >
           <span className="text-mf-milk-300">Back</span>
         </button>
@@ -195,7 +191,7 @@ const CreateForm = ({
             usernameStatus !== "Username is valid" ||
             passwordStatus !== "Password is valid"
           }
-          className="w-full text-[14px] flex items-center justify-center rounded-lg bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors px-4 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full text-sm flex items-center justify-center rounded-lg bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors px-4 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <span className="text-mf-milk-300">
             {isLoading || isSubmitting ? "Creating..." : "Create Wallet"}

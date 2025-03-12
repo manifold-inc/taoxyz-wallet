@@ -40,7 +40,7 @@ const Signin = () => {
 
         <div className="w-full max-w-md">
           <div className="text-center mb-6">
-            <h1 className="text-[20px] font-semibold text-mf-silver-300">
+            <h1 className="text-xl font-semibold text-mf-silver-300">
               Sign In
             </h1>
           </div>
@@ -50,34 +50,34 @@ const Signin = () => {
             className="space-y-4 flex flex-col items-center"
           >
             <div className="w-54 mb-2">
-              <label className="block text-[12px] text-mf-silver-300 mb-2">
+              <label className="text-xs text-mf-silver-300 mb-2">
                 Username
               </label>
               <input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-4 py-3 text-[12px] rounded-lg bg-mf-ash-500 text-mf-milk-300 border-none focus:outline-none focus:ring-2 focus:ring-mf-safety-300"
+                className="w-full px-4 py-3 text-xs rounded-lg bg-mf-ash-500 text-mf-milk-300 border-none focus:outline-none focus:ring-2 focus:ring-mf-safety-300"
                 placeholder="Enter username"
                 required
               />
             </div>
 
-            <div className="w-54 h-[85px]">
-              <label className="block text-[12px] text-mf-silver-300 mb-2">
+            <div className="w-54 h-20 mb-2">
+              <label className="text-xs text-mf-silver-300 mb-2">
                 Password
               </label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 text-[12px] rounded-lg bg-mf-ash-500 text-mf-milk-300 border-none focus:outline-none focus:ring-2 focus:ring-mf-safety-300"
+                className="w-full px-4 py-3 text-xs rounded-lg bg-mf-ash-500 text-mf-milk-300 border-none focus:outline-none focus:ring-2 focus:ring-mf-safety-300"
                 placeholder="Enter password"
                 required
               />
               <div className="h-5">
                 {error && (
-                  <p className="mt-2 text-[10px] text-mf-safety-300">{error}</p>
+                  <p className="mt-2 text-xs text-mf-safety-300">{error}</p>
                 )}
               </div>
             </div>
@@ -86,14 +86,14 @@ const Signin = () => {
               <button
                 type="button"
                 onClick={() => navigate("/")}
-                className="w-full text-[14px] flex items-center justify-center rounded-lg border border-mf-ash-500 hover:bg-mf-ash-500 transition-colors px-4 py-3 mb-3"
+                className="w-full text-sm flex items-center justify-center rounded-lg border border-mf-ash-500 hover:bg-mf-ash-500 transition-colors px-4 py-3 mb-3"
               >
                 <span className="text-mf-milk-300">Back</span>
               </button>
 
               <button
                 type="submit"
-                className="w-full text-[14px] flex items-center justify-center rounded-lg bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors px-4 py-3"
+                className="w-full text-sm flex items-center justify-center rounded-lg bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors px-4 py-3"
               >
                 <span className="text-mf-milk-300">Sign In</span>
               </button>

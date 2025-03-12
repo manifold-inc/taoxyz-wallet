@@ -52,7 +52,7 @@ const Import = () => {
           <img src={taoxyzLogo} alt="Taoxyz Logo" className="w-16 h-16 mb-8" />
           <div className="w-full max-w-md">
             <div className="text-center mb-6">
-              <h1 className="text-[20px] font-semibold text-mf-silver-300">
+              <h1 className="text-xl font-semibold text-mf-silver-300">
                 Create Account
               </h1>
             </div>
@@ -74,7 +74,7 @@ const Import = () => {
 
         <div className="w-full max-w-md">
           <div className="text-center mb-6">
-            <h1 className="text-[20px] font-semibold text-mf-silver-300">
+            <h1 className="text-xl font-semibold text-mf-silver-300">
               Import Wallet
             </h1>
           </div>
@@ -83,7 +83,7 @@ const Import = () => {
             onSubmit={handleMnemonicSubmit}
             className="space-y-4 flex flex-col items-center"
           >
-            <div className="w-54 h-[120px]">
+            <div className="w-54 h-24">
               <textarea
                 name="mnemonic"
                 value={mnemonic}
@@ -94,7 +94,7 @@ const Import = () => {
                 }}
                 onFocus={() => setMnemonicSelected(true)}
                 onBlur={() => setMnemonicSelected(false)}
-                className={`w-full h-24 px-4 py-3 text-[12px] rounded-lg bg-mf-ash-500 text-mf-milk-300 border-none focus:outline-none focus:ring-2 ${
+                className={`w-full h-24 px-4 py-3 text-xs rounded-lg bg-mf-ash-500 text-mf-milk-300 border-none focus:outline-none focus:ring-2 ${
                   error
                     ? "ring-2 ring-mf-safety-300"
                     : "focus:ring-mf-safety-300"
@@ -104,7 +104,7 @@ const Import = () => {
               />
               <div className="h-5">
                 {error && (isSubmitted || mnemonicSelected) && (
-                  <p className="mt-1 text-[10px] text-mf-safety-300">{error}</p>
+                  <p className="mt-1 text-xs text-mf-safety-300">{error}</p>
                 )}
               </div>
             </div>
@@ -113,7 +113,7 @@ const Import = () => {
               <button
                 type="button"
                 onClick={() => navigate("/")}
-                className="w-full text-[14px] flex items-center justify-center rounded-lg border border-mf-ash-500 hover:bg-mf-ash-500 transition-colors px-4 py-3 mb-3"
+                className="w-full text-sm flex items-center justify-center rounded-lg border border-mf-ash-500 hover:bg-mf-ash-500 transition-colors px-4 py-3 mb-3"
               >
                 <span className="text-mf-milk-300">Back</span>
               </button>
@@ -121,7 +121,7 @@ const Import = () => {
               <button
                 type="submit"
                 disabled={!mnemonic.trim()}
-                className="w-full text-[14px] flex items-center justify-center rounded-lg bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors px-4 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full text-sm flex items-center justify-center rounded-lg bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors px-4 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span className="text-mf-milk-300">Continue</span>
               </button>

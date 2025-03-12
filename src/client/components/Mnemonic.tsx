@@ -21,9 +21,9 @@ const Mnemonic = ({ mnemonic, onContinue }: MnemonicProps) => {
 
   return (
     <div className="flex flex-col items-center flex-1">
-      <div className="px-6 max-w-[300px] mt-4">
+      <div className="px-6 w-80 mt-4">
         <div
-          className={`flex items-start justify-between p-4 bg-mf-ash-500 rounded-lg text-[12px] text-mf-milk-300 ring-2 ${
+          className={`flex items-start justify-between p-4 bg-mf-ash-500 rounded-lg text-xs text-mf-milk-300 ring-2 ${
             copied ? "ring-mf-sybil-500" : "ring-mf-safety-300"
           }`}
         >
@@ -39,7 +39,7 @@ const Mnemonic = ({ mnemonic, onContinue }: MnemonicProps) => {
         </div>
         <div className="h-5">
           <p
-            className={`mt-2 text-[10px] ${
+            className={`mt-2 text-xs ${
               copied ? "text-mf-sybil-500" : "text-mf-safety-300"
             }`}
           >
@@ -53,7 +53,7 @@ const Mnemonic = ({ mnemonic, onContinue }: MnemonicProps) => {
       <div className="w-54 mt-auto mb-16">
         <button
           onClick={onContinue}
-          className="w-full text-[14px] flex items-center justify-center rounded-lg bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors px-4 py-3"
+          className="w-full text-sm flex items-center justify-center rounded-lg bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors px-4 py-3"
         >
           <span className="text-mf-milk-300">Continue</span>
         </button>
