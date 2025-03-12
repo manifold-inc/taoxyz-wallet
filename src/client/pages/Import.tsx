@@ -41,7 +41,8 @@ const Import = () => {
   };
 
   const handleSuccess = (account: KeyringPair) => {
-    navigate("/dashboard", { state: { address: account.address } });
+    localStorage.setItem("currentAddress", account.address as string);
+    navigate("/dashboard");
   };
 
   if (validatedMnemonic) {

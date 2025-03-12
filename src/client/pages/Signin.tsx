@@ -17,7 +17,8 @@ const Signin = () => {
       const isUnlocked = await KeyringService.unlockAccount(username, password);
       if (isUnlocked) {
         const address = await KeyringService.getAddress(username);
-        navigate("/dashboard", { state: { address } });
+        localStorage.setItem("currentAddress", address);
+        navigate("/dashboard");
       }
     } catch (error) {
       if (error instanceof Error && error.message === "Account not found") {

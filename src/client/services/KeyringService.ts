@@ -86,7 +86,6 @@ export const KeyringService = {
       );
 
       const { signature } = extrinsicPayload.sign(account);
-      account.lock();
       return signature;
     } catch (error) {
       console.error("[KeyringService] Signing failed:", error);

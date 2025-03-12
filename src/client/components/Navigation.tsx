@@ -1,14 +1,9 @@
-import { useLocation, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { House, ArrowLeftRight, ListPlus, Redo, Settings2 } from "lucide-react";
 
 const Navigation = () => {
-  const location = useLocation();
+  const currentAddress = localStorage.getItem("currentAddress");
 
-  const address = localStorage.getItem("currentAddress");
-  const currentAddress = location.state?.address || address;
-  if (location.state?.address) {
-    localStorage.setItem("currentAddress", location.state.address);
-  }
   if (!currentAddress) return null;
 
   const navLinks = [
@@ -25,11 +20,7 @@ const Navigation = () => {
         <div className="flex justify-between h-14">
           {navLinks.map((link, index) => (
             <div key={link.path} className="flex items-center">
-              <Link
-                to={link.path}
-                state={{ address }}
-                className="text-mf-safety-300 px-6"
-              >
+              <Link to={link.path} className="text-mf-safety-300 px-6">
                 {link.icon}
               </Link>
               {index < navLinks.length - 1 && (

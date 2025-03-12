@@ -20,7 +20,8 @@ export const Create = () => {
   };
 
   const handleContinue = () => {
-    navigate("/dashboard", { state: { address: account?.address } });
+    localStorage.setItem("currentAddress", account?.address as string);
+    navigate("/dashboard");
   };
 
   return (

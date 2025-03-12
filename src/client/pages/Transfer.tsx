@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
 import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 
 const Transfer = () => {
   const { api } = usePolkadotApi();
-  const location = useLocation();
   const navigate = useNavigate();
-  const { address } = location.state || {};
+  const address = localStorage.getItem("currentAddress") as string;
   const [toAddress, setToAddress] = useState("");
   const [balance, setBalance] = useState<string>("0");
   const [amount, setAmount] = useState("");
@@ -40,7 +40,7 @@ const Transfer = () => {
         amount: parseFloat(amount),
         password,
       });
-      navigate("/dashboard", { state: { address } });
+      navigate("/dashboard");
     } catch (error) {
       setError(error instanceof Error ? error.message : "Failed to transfer");
     } finally {

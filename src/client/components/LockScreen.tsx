@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import KeyringService from "../services/KeyringService";
-import LockManager from "../../utils/lock";
 
 import taoxyzLogo from "../../../public/icons/taoxyz.svg";
 
@@ -26,7 +25,6 @@ const LockScreen = () => {
 
       if (unlocked) {
         navigate("/dashboard", { state: { address: currentAddress } });
-        LockManager.startLockTimer();
       } else {
         setError("Invalid password");
       }

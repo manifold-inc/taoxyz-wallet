@@ -1,5 +1,4 @@
 import { KeyringService } from "./KeyringService";
-import LockManager from "../../utils/lock";
 import { MESSAGE_TYPES, ERROR_TYPES } from "../../types/messages";
 import type { ResponseMessage, ExtensionMessage } from "../../types/messages";
 import type { Permissions } from "../../types/client";
@@ -85,7 +84,6 @@ const MessageService = {
     };
 
     chrome.runtime.onMessage.addListener(messageListener);
-    LockManager.startLockTimer();
     return () => {
       chrome.runtime.onMessage.removeListener(messageListener);
     };

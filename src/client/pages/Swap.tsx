@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
 
 import SubnetSelection from "../components/swap/SubnetSelection";
 import ValidatorSelection from "../components/swap/ValidatorSelection";
@@ -16,8 +15,7 @@ enum Step {
 
 export const Swap = () => {
   const { api } = usePolkadotApi();
-  const location = useLocation();
-  const { address } = location.state || {};
+  const address = localStorage.getItem("currentAddress") as string;
   const [step, setStep] = useState<Step>(Step.SELECT_SUBNET);
   const [subnets, setSubnets] = useState<Subnet[]>([]);
   const [selectedSubnet, setSelectedSubnet] = useState<Subnet | null>(null);

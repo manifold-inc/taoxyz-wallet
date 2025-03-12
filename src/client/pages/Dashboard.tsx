@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ArrowLeftRight, ListPlus, Redo, Copy } from "lucide-react";
 
 import { usePolkadotApi } from "../contexts/PolkadotApiContext";
@@ -16,8 +16,7 @@ interface StakeResponse {
 export const Dashboard = () => {
   const { api } = usePolkadotApi();
   const navigate = useNavigate();
-  const location = useLocation();
-  const address = location.state?.address;
+  const address = localStorage.getItem("currentAddress") as string;
   const [balance, setBalance] = useState("");
   const [stakes, setStakes] = useState<StakeTransaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);

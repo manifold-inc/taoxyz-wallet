@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
 
 import StakeSelection from "../components/stake/StakeSelection";
 import ConfirmStake from "../components/stake/ConfirmStake";
@@ -22,8 +21,7 @@ interface StakeResponse {
 
 const Stake = () => {
   const { api } = usePolkadotApi();
-  const location = useLocation();
-  const { address } = location.state || {};
+  const address = localStorage.getItem("currentAddress") as string;
   const [step, setStep] = useState<Step>(Step.SELECT_STAKE);
   const [selectedSubnet, setSelectedSubnet] = useState<Subnet | null>(null);
   const [stakes, setStakes] = useState<StakeTransaction[]>([]);

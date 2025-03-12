@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { KeyringService } from "../services/KeyringService";
-import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import type { KeyringPair } from "@polkadot/keyring/types";
+
+import KeyringService from "../services/KeyringService";
+import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 import type { Permissions } from "../../types/client";
 
+// TODO: Refactor
 type WebsiteStats = Record<
   string,
   {
@@ -35,13 +37,12 @@ const Settings = () => {
   const loadWebsiteStats = async () => {
     try {
       const keyringAccounts = await KeyringService.getAccounts();
-
       setAccounts(keyringAccounts);
       const stats: WebsiteStats = {};
 
       for (const account of keyringAccounts) {
         const permissions =
-          (account.meta.websitePermissions as Record<string, boolean>) || {};
+          (account.meta.websitePermissions as Permissions) || {};
 
         Object.entries(permissions).forEach(([website, hasAccess]) => {
           if (!stats[website]) {
@@ -58,7 +59,7 @@ const Settings = () => {
           stats[website].accounts.push({
             address: account.address,
             username: (account.meta.username as string) || "Unnamed Account",
-            hasAccess: hasAccess,
+            hasAccess: hasAccess as boolean,
           });
         });
       }
@@ -229,7 +230,6 @@ const Settings = () => {
         </div>
       </div>
 
-      {/* Logout Button */}
       <button
         onClick={handleLogout}
         className="text-[10px] text-red-500 px-4 py-1 rounded outline outline-1 outline-black/20"
