@@ -17,50 +17,14 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Navigation from "./components/Navigation";
 
 import { PolkadotApiProvider } from "./contexts/PolkadotApiContext";
-import { KeyringService } from "./services/KeyringService";
-import { MESSAGE_TYPES } from "../types/messages";
+import MessageHandlers from "../utils/messageHandlers";
 
 import background from "../../public/images/background.png";
 
 const App = () => {
-  // TODO: refactor this
   useEffect(() => {
-    const handleAuthMessage = async (
-      message: {
-        type: typeof MESSAGE_TYPES.AUTHENTICATE;
-        payload: { address: string; origin: string };
-      },
-      sender: chrome.runtime.MessageSender,
-      sendResponse: (response: { approved: boolean }) => void
-    ) => {
-      if (message.type === MESSAGE_TYPES.AUTHENTICATE) {
-        try {
-          const { address, origin } = message.payload;
-          console.log(
-            `[App] Checking permission for ${origin} to access ${address}`
-          );
-
-          const account = await KeyringService.getAccount(address);
-          const permissions =
-            (account.meta.websitePermissions as Record<string, boolean>) || {};
-          const approved = permissions[origin] === true;
-
-          sendResponse({ approved });
-        } catch (error) {
-          console.error("[App] Error checking permissions:", error);
-          sendResponse({ approved: false });
-        }
-      }
-      return true;
-    };
-
-    // Add listener
-    chrome.runtime.onMessage.addListener(handleAuthMessage);
-
-    // Cleanup
-    return () => {
-      chrome.runtime.onMessage.removeListener(handleAuthMessage);
-    };
+    const cleanup = MessageHandlers.setupMessageListeners();
+    return cleanup;
   }, []);
 
   return (

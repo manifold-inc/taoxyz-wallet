@@ -26,11 +26,22 @@ export interface SignResponsePayload {
   approved?: boolean;
 }
 
+export interface AuthenticatePayload {
+  address: string;
+  origin: string;
+}
+
+export interface AccountsLockedPayload {
+  reason: "manual" | "timeout";
+}
+
 export interface MessagePayloadMap {
   [MESSAGE_TYPES.CONNECT_REQUEST]: ConnectRequestPayload;
   [MESSAGE_TYPES.CONNECT_RESPONSE]: ConnectResponsePayload;
   [MESSAGE_TYPES.SIGN_REQUEST]: SignRequestPayload;
   [MESSAGE_TYPES.SIGN_RESPONSE]: SignResponsePayload;
+  [MESSAGE_TYPES.AUTHENTICATE]: AuthenticatePayload;
+  [MESSAGE_TYPES.ACCOUNTS_LOCKED]: AccountsLockedPayload;
 }
 
 interface BaseMessage<T extends keyof MessagePayloadMap> {
@@ -44,7 +55,9 @@ export type DappMessage =
 
 export type ExtensionMessage =
   | BaseMessage<typeof MESSAGE_TYPES.CONNECT_RESPONSE>
-  | BaseMessage<typeof MESSAGE_TYPES.SIGN_RESPONSE>;
+  | BaseMessage<typeof MESSAGE_TYPES.SIGN_RESPONSE>
+  | BaseMessage<typeof MESSAGE_TYPES.AUTHENTICATE>
+  | BaseMessage<typeof MESSAGE_TYPES.ACCOUNTS_LOCKED>;
 
 export interface StoredRequest {
   tabId: number;
@@ -76,6 +89,7 @@ export const MESSAGE_TYPES = {
   SIGN_REQUEST: "dapp(signRequest)",
   SIGN_RESPONSE: "ext(signResponse)",
   AUTHENTICATE: "bg(authPermission)",
+  ACCOUNTS_LOCKED: "ext(accountsLocked)",
 } as const;
 
 export const ERROR_TYPES = {

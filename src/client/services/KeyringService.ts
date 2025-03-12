@@ -1,13 +1,13 @@
 import keyring from "@polkadot/ui-keyring";
 import { mnemonicGenerate, mnemonicValidate } from "@polkadot/util-crypto";
 import { TypeRegistry } from "@polkadot/types";
-
 import type { KeyringPair, KeyringPair$Meta } from "@polkadot/keyring/types";
 import type { SignerPayloadJSON } from "@polkadot/types/types";
 
-const registry = new TypeRegistry();
+import LockManager from "../../utils/lock";
+import type { Permissions } from "../../types/client";
 
-type WebsitePermissions = Record<string, boolean>;
+const registry = new TypeRegistry();
 
 export const KeyringService = {
   async addAccount(
@@ -17,7 +17,7 @@ export const KeyringService = {
   ): Promise<KeyringPair> {
     const result = await keyring.addUri(mnemonic, password, {
       username,
-      websitePermissions: {} as WebsitePermissions,
+      websitePermissions: {} as Permissions,
     } as KeyringPair$Meta);
     return result.pair;
   },
@@ -25,8 +25,13 @@ export const KeyringService = {
   async unlockAccount(username: string, password: string): Promise<boolean> {
     const address = await this.getAddress(username);
     const pair = keyring.getPair(address);
+
     pair.decodePkcs8(password);
-    return !pair.isLocked;
+    if (!pair.isLocked) {
+      LockManager.startLockTimer();
+      return true;
+    }
+    return false;
   },
 
   createMnemonic(): string {
@@ -89,9 +94,9 @@ export const KeyringService = {
     }
   },
 
-  async getPermissions(address: string): Promise<WebsitePermissions> {
+  async getPermissions(address: string): Promise<Permissions> {
     const account = await this.getAccount(address);
-    return (account.meta.websitePermissions as WebsitePermissions) || {};
+    return (account.meta.websitePermissions as Permissions) || {};
   },
 
   async updatePermissions(
@@ -108,7 +113,7 @@ export const KeyringService = {
       }
 
       const meta = { ...account.meta };
-      const permissions = (meta.websitePermissions as WebsitePermissions) || {};
+      const permissions = (meta.websitePermissions as Permissions) || {};
       permissions[origin] = allowAccess;
 
       meta.websitePermissions = permissions;
@@ -124,4 +129,25 @@ export const KeyringService = {
       return false;
     }
   },
+
+  lockAll(): void {
+    const pairs = keyring.getPairs();
+    pairs.forEach((pair) => {
+      if (!pair.isLocked) {
+        pair.lock();
+      }
+    });
+  },
+
+  isLocked(address: string): boolean {
+    try {
+      const account = keyring.getPair(address);
+      return account.isLocked;
+    } catch (error) {
+      console.error("[KeyringService] Error checking lock status:", error);
+      return true;
+    }
+  },
 };
+
+export default KeyringService;
