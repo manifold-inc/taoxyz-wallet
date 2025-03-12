@@ -5,7 +5,7 @@ interface DisclaimerProps {
 const DisclaimerModal = ({ onClose }: DisclaimerProps) => {
   return (
     <div className="flex flex-col items-center min-h-screen py-4">
-      <div className="w-full mt-8 px-6 max-w-[300px]">
+      <div className="mt-8 px-6 max-w-[300px]">
         <h2 className="text-[18px] font-semibold text-mf-silver-300 mb-8 flex text-center">
           THIS IS A NON-CUSTODIAL WALLET CREATED BY MANIFOLD LABS INC.
         </h2>

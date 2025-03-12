@@ -79,6 +79,7 @@ const CreateForm = ({
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create wallet");
       setPasswordStatus(null);
+      setUsernameStatus(null);
     } finally {
       setIsSubmitting(false);
     }
