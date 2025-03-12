@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, Link } from "react-router-dom";
+import { House, ArrowLeftRight, ListPlus, Redo, Settings2 } from "lucide-react";
 
 const Navigation = () => {
   const location = useLocation();
@@ -21,29 +22,31 @@ const Navigation = () => {
   if (!localStorage.getItem("currentAddress")) return null;
 
   const navLinks = [
-    { path: "/dashboard", label: "Dashboard" },
-    { path: "/swap", label: "Swap" },
-    { path: "/stake", label: "Stake" },
-    { path: "/transfer", label: "Transfer" },
-    { path: "/settings", label: "Settings" },
+    { path: "/dashboard", icon: <House size={20} /> },
+    { path: "/swap", icon: <ArrowLeftRight size={20} /> },
+    { path: "/stake", icon: <ListPlus size={20} /> },
+    { path: "/transfer", icon: <Redo size={20} /> },
+    { path: "/settings", icon: <Settings2 size={20} /> },
   ];
 
   return (
-    <nav className="bg-white shadow-sm fixed top-0 left-0 right-0 z-50">
-      <div className="max-w-7xl mx-auto px-2">
-        <div className="flex justify-center h-10">
-          <div className="flex items-center space-x-6">
-            {navLinks.map((link) => (
+    <nav className="bg-mf-ash-500 fixed bottom-0 left-0 right-0 z-50">
+      <div className="w-full px-2">
+        <div className="flex justify-between h-14">
+          {navLinks.map((link, index) => (
+            <div key={link.path} className="flex items-center">
               <Link
-                key={link.path}
                 to={link.path}
                 state={{ address }}
-                className="text-gray-500 hover:text-blue-600 transition-colors text-[11px] uppercase tracking-tight"
+                className="text-mf-milk-300 hover:text-mf-silver-300 transition-colors px-6"
               >
-                {link.label}
+                {link.icon}
               </Link>
-            ))}
-          </div>
+              {index < navLinks.length - 1 && (
+                <div className="h-4 w-px bg-mf-ash-300/30" />
+              )}
+            </div>
+          ))}
         </div>
       </div>
     </nav>

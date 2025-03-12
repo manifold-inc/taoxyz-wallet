@@ -9,7 +9,7 @@ interface PortfolioProps {
   address: string;
 }
 
-export const Portfolio = ({ stakes, address }: PortfolioProps) => {
+const Portfolio = ({ stakes, address }: PortfolioProps) => {
   const { api } = usePolkadotApi();
   const navigate = useNavigate();
   const [isSwapping, setIsSwapping] = useState(false);
@@ -130,3 +130,5 @@ export const Portfolio = ({ stakes, address }: PortfolioProps) => {
     </div>
   );
 };
+
+export default Portfolio;
