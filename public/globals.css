@@ -32,6 +32,10 @@
   --color-mf-sybil-700: oklch(0.78 0.15 165); /* #45B98D */
 }
 
+body {
+  background-color: black;
+}
+
 #root {
   width: 360px;
   min-height: 600px;
