@@ -19,33 +19,24 @@ const tempStakeData = [
 
 interface StakeChartProps {
   subnetId: number;
-  expanded?: boolean;
 }
 
-const StakeChart = ({ subnetId, expanded = false }: StakeChartProps) => {
+const StakeChart = ({ subnetId }: StakeChartProps) => {
   return (
     <ResponsiveContainer width="100%" height="100%">
       <AreaChart
         data={tempStakeData}
-        margin={
-          expanded
-            ? { top: 10, right: 10, left: -5, bottom: 0 }
-            : { top: 5, right: 5, left: -5, bottom: 0 }
-        }
+        margin={{ top: 10, right: 10, left: -5, bottom: 0 }}
       >
         <defs>
           <linearGradient
-            id={`colorValue${subnetId}${expanded ? "Expanded" : ""}`}
+            id={`colorValue${subnetId}`}
             x1="0"
             y1="0"
             x2="0"
             y2="1"
           >
-            <stop
-              offset="5%"
-              stopColor="#FF6B00"
-              stopOpacity={expanded ? 0.3 : 0.2}
-            />
+            <stop offset="5%" stopColor="#FF6B00" stopOpacity={0.3} />
             <stop offset="95%" stopColor="#FF6B00" stopOpacity={0} />
           </linearGradient>
         </defs>
@@ -53,21 +44,21 @@ const StakeChart = ({ subnetId, expanded = false }: StakeChartProps) => {
           dataKey="timestamp"
           axisLine={false}
           tickLine={false}
-          tick={{ fill: "#9CA3AF", fontSize: expanded ? 10 : 8 }}
+          tick={{ fill: "#9CA3AF", fontSize: 10 }}
           tickSize={2}
-          tickMargin={expanded ? 2 : 0}
-          tickCount={expanded ? 6 : 3}
+          tickMargin={2}
+          tickCount={6}
           dy={5}
         />
         <YAxis
           axisLine={false}
           tickLine={false}
-          tick={{ fill: "#9CA3AF", fontSize: expanded ? 10 : 8 }}
+          tick={{ fill: "#9CA3AF", fontSize: 10 }}
           tickFormatter={(value) => `α${value}`}
-          width={expanded ? 45 : 35}
+          width={45}
           tickSize={2}
-          tickMargin={expanded ? 2 : 0}
-          tickCount={expanded ? 5 : 3}
+          tickMargin={2}
+          tickCount={5}
           dx={-5}
         />
         <Tooltip
@@ -75,13 +66,13 @@ const StakeChart = ({ subnetId, expanded = false }: StakeChartProps) => {
             backgroundColor: "#22242E",
             border: "none",
             borderRadius: "0.5rem",
-            fontSize: expanded ? "0.875rem" : "0.75rem",
-            padding: expanded ? "12px" : "8px",
+            fontSize: "0.875rem",
+            padding: "12px",
           }}
           itemStyle={{ color: "#E5F0FF" }}
           labelStyle={{
             color: "#D8E5FF",
-            marginBottom: expanded ? "6px" : "4px",
+            marginBottom: "6px",
           }}
           formatter={(value: number) => [`α${value}`, "Stake"]}
         />
@@ -89,9 +80,9 @@ const StakeChart = ({ subnetId, expanded = false }: StakeChartProps) => {
           type="monotone"
           dataKey="value"
           stroke="#FF6B00"
-          strokeWidth={expanded ? 2 : 1.5}
+          strokeWidth={2}
           fillOpacity={1}
-          fill={`url(#colorValue${subnetId}${expanded ? "Expanded" : ""})`}
+          fill={`url(#colorValue${subnetId})`}
         />
       </AreaChart>
     </ResponsiveContainer>

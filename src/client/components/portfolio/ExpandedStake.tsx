@@ -1,16 +1,21 @@
 import { Minimize2, Copy } from "lucide-react";
 import { useState } from "react";
-
 import StakeChart from "./StakeChart";
-import type { StakeTransaction } from "../../../types/client";
+import type { StakeTransaction, Subnet } from "../../../types/client";
 
 interface ExpandedStakeProps {
   stake: StakeTransaction;
+  subnet: Subnet | null;
   onClose: () => void;
   onSwap: (stake: StakeTransaction) => void;
 }
 
-const ExpandedStake = ({ stake, onClose, onSwap }: ExpandedStakeProps) => {
+const ExpandedStake = ({
+  stake,
+  subnet,
+  onClose,
+  onSwap,
+}: ExpandedStakeProps) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -26,14 +31,23 @@ const ExpandedStake = ({ stake, onClose, onSwap }: ExpandedStakeProps) => {
   return (
     <div className="bg-mf-ash-500 rounded-lg p-3">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-lg font-semibold text-mf-milk-300">
-          Subnet {stake.subnetId}
-        </h3>
+        <div>
+          <h3 className="text-lg font-semibold text-mf-milk-300">
+            Subnet {stake.subnetId}
+          </h3>
+          {subnet?.price && (
+            <p className="text-xs text-mf-silver-300">
+              <span className="text-mf-safety-300">τ</span> ={" "}
+              {(1 / subnet.price).toFixed(4)}
+              <span className="text-mf-safety-300"> α</span>
+            </p>
+          )}
+        </div>
         <button
           onClick={onClose}
           className="p-1 hover:bg-mf-ash-300 rounded transition-colors"
         >
-          <Minimize2 className="w-3 h-3 text-mf-milk-300" />
+          <Minimize2 className="w-4 h-4 text-mf-milk-300" />
         </button>
       </div>
       <div className="space-y-3">
@@ -63,7 +77,7 @@ const ExpandedStake = ({ stake, onClose, onSwap }: ExpandedStakeProps) => {
 
         <div className="mt-3 -mx-3">
           <div className="h-40">
-            <StakeChart subnetId={stake.subnetId} expanded={true} />
+            <StakeChart subnetId={stake.subnetId} />
           </div>
         </div>
 

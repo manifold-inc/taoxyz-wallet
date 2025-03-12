@@ -5,7 +5,7 @@ import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 import { KeyringService } from "../services/KeyringService";
 import StakeOverview from "./portfolio/StakeOverview";
 import ExpandedStake from "./portfolio/ExpandedStake";
-import type { StakeTransaction } from "../../types/client";
+import type { StakeTransaction, Subnet } from "../../types/client";
 
 interface PortfolioProps {
   stakes: StakeTransaction[];
@@ -19,8 +19,21 @@ const Portfolio = ({ stakes, address }: PortfolioProps) => {
   const [selectedStake, setSelectedStake] = useState<StakeTransaction | null>(
     null
   );
+  const [selectedSubnet, setSelectedSubnet] = useState<Subnet | null>(null);
   const [isSwapping, setIsSwapping] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const handleStakeSelect = async (stake: StakeTransaction) => {
+    try {
+      const subnetData = await api?.getSubnet(stake.subnetId);
+      if (subnetData) {
+        setSelectedSubnet(subnetData);
+        setSelectedStake(stake);
+      }
+    } catch (error) {
+      console.error("Error fetching subnet:", error);
+    }
+  };
 
   const handleSwap = async (stake: StakeTransaction) => {
     setSelectedStake(stake);
@@ -46,6 +59,7 @@ const Portfolio = ({ stakes, address }: PortfolioProps) => {
 
       setPassword("");
       setSelectedStake(null);
+      setSelectedSubnet(null);
       setIsSwapping(false);
       navigate("/dashboard", { state: { address } });
     } catch (error) {
@@ -58,7 +72,11 @@ const Portfolio = ({ stakes, address }: PortfolioProps) => {
       {selectedStake ? (
         <ExpandedStake
           stake={selectedStake}
-          onClose={() => setSelectedStake(null)}
+          subnet={selectedSubnet}
+          onClose={() => {
+            setSelectedStake(null);
+            setSelectedSubnet(null);
+          }}
           onSwap={handleSwap}
         />
       ) : (
@@ -69,7 +87,7 @@ const Portfolio = ({ stakes, address }: PortfolioProps) => {
                 <StakeOverview
                   key={index}
                   stake={stake}
-                  onClick={() => setSelectedStake(stake)}
+                  onClick={() => handleStakeSelect(stake)}
                 />
               ))}
             </div>
