@@ -25,15 +25,10 @@ const Portfolio = ({ stakes, address }: PortfolioProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleStakeSelect = async (stake: StakeTransaction) => {
-    if (!api) {
-      setError("No API found");
-      return;
-    }
     setError(null);
-
     try {
       setIsLoading(true);
-      const subnet = await api.getSubnet(stake.subnetId);
+      const subnet = await api?.getSubnet(stake.subnetId);
       if (subnet) {
         setSelectedSubnet(subnet);
         setSelectedStake(stake);
@@ -84,6 +79,14 @@ const Portfolio = ({ stakes, address }: PortfolioProps) => {
     }
   };
 
+  if (!api) {
+    return (
+      <div className="flex justify-center items-center h-16">
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-mf-milk-300" />
+      </div>
+    );
+  }
+
   return (
     <div>
       {selectedStake ? (
@@ -111,7 +114,7 @@ const Portfolio = ({ stakes, address }: PortfolioProps) => {
             </div>
           ) : (
             <div className="bg-mf-ash-500 rounded-lg p-2.5">
-              <p className="text-[10px] text-mf-silver-300">No stakes found</p>
+              <p className="text-xs text-mf-silver-300">No stakes found</p>
             </div>
           )}
         </>
@@ -119,7 +122,7 @@ const Portfolio = ({ stakes, address }: PortfolioProps) => {
 
       {error && !isSwapping && (
         <div className="mt-2 p-3 bg-mf-ash-500 rounded-lg">
-          <p className="text-xs text-mf-sybil-300 text-center">{error}</p>
+          <p className="text-xs text-mf-safety-300 text-center">{error}</p>
         </div>
       )}
 

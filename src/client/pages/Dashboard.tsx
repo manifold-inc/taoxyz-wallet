@@ -26,12 +26,7 @@ export const Dashboard = () => {
 
   useEffect(() => {
     const fetchBalance = async () => {
-      if (!api) {
-        setError("No API found");
-        return;
-      }
-      setError(null);
-
+      if (!api) return;
       try {
         setIsLoading(true);
         const balance = await api.getBalance(address);
@@ -46,12 +41,7 @@ export const Dashboard = () => {
     };
 
     const fetchStake = async () => {
-      if (!api) {
-        setError("No API found");
-        return;
-      }
-      setError(null);
-
+      if (!api) return;
       try {
         setIsLoading(true);
         const stake = await api.getStake(address);
@@ -74,8 +64,11 @@ export const Dashboard = () => {
       }
     };
 
-    fetchBalance();
-    fetchStake();
+    if (api) {
+      setError(null);
+      fetchBalance();
+      fetchStake();
+    }
   }, [address, api]);
 
   const handleCopy = async () => {
@@ -93,17 +86,15 @@ export const Dashboard = () => {
             <div className="w-full px-3 py-2 rounded-lg bg-mf-ash-500">
               <div className="flex items-center space-x-2">
                 <span className="text-xl font-semibold text-mf-safety-300">
-                  τ
+                  {!api ? "" : "τ"}
                 </span>
                 <span className="text-xl font-semibold text-mf-milk-300">
-                  {Number(balance).toFixed(4)}
+                  {!api ? "Loading..." : Number(balance).toFixed(4)}
                 </span>
               </div>
               <div className="flex items-center justify-between">
                 <p className="text-xs text-mf-silver-300">
-                  {address
-                    ? `${address.slice(0, 8)}...${address.slice(-8)}`
-                    : ""}
+                  {!api ? "" : `${address.slice(0, 8)}...${address.slice(-8)}`}
                 </p>
                 <button onClick={handleCopy} className="transition-colors">
                   <Copy
