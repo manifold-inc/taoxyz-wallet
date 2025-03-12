@@ -18,14 +18,10 @@ const ExpandedStake = ({
 }: ExpandedStakeProps) => {
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(stake.validatorHotkey);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
-      console.error("Failed to copy address:", error);
-    }
+  const handleCopy = () => {
+    navigator.clipboard.writeText(stake.validatorHotkey);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (

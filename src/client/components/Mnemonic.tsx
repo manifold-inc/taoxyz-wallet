@@ -10,13 +10,9 @@ const Mnemonic = ({ mnemonic, onContinue }: MnemonicProps) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopyMnemonic = async () => {
-    try {
-      await navigator.clipboard.writeText(mnemonic);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 5000);
-    } catch (err) {
-      console.error("Failed to copy mnemonic:", err);
-    }
+    await navigator.clipboard.writeText(mnemonic);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 5000);
   };
 
   return (

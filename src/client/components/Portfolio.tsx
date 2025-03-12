@@ -22,16 +22,30 @@ const Portfolio = ({ stakes, address }: PortfolioProps) => {
   const [selectedSubnet, setSelectedSubnet] = useState<Subnet | null>(null);
   const [isSwapping, setIsSwapping] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleStakeSelect = async (stake: StakeTransaction) => {
+    if (!api) {
+      setError("No API found");
+      return;
+    }
+    setError(null);
+
     try {
-      const subnetData = await api?.getSubnet(stake.subnetId);
-      if (subnetData) {
-        setSelectedSubnet(subnetData);
+      setIsLoading(true);
+      const subnet = await api.getSubnet(stake.subnetId);
+      if (subnet) {
+        setSelectedSubnet(subnet);
         setSelectedStake(stake);
       }
     } catch (error) {
-      console.error("Error fetching subnet:", error);
+      setError(
+        error instanceof Error ? error.message : "Failed to fetch subnet"
+      );
+      setSelectedStake(null);
+      setSelectedSubnet(null);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -41,7 +55,10 @@ const Portfolio = ({ stakes, address }: PortfolioProps) => {
   };
 
   const confirmSwap = async () => {
-    if (!api || !selectedStake) return;
+    if (!api || !selectedStake) {
+      setError("No API or stake selected");
+      return;
+    }
     setError(null);
 
     try {
@@ -76,6 +93,7 @@ const Portfolio = ({ stakes, address }: PortfolioProps) => {
           onClose={() => {
             setSelectedStake(null);
             setSelectedSubnet(null);
+            setError(null);
           }}
           onSwap={handleSwap}
         />
@@ -97,6 +115,18 @@ const Portfolio = ({ stakes, address }: PortfolioProps) => {
             </div>
           )}
         </>
+      )}
+
+      {error && !isSwapping && (
+        <div className="mt-2 p-3 bg-mf-ash-500 rounded-lg">
+          <p className="text-xs text-mf-sybil-300 text-center">{error}</p>
+        </div>
+      )}
+
+      {isLoading && (
+        <div className="mt-2 flex justify-center items-center h-16">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-mf-milk-300" />
+        </div>
       )}
 
       {isSwapping && (

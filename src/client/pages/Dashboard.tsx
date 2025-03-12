@@ -26,7 +26,12 @@ export const Dashboard = () => {
 
   useEffect(() => {
     const fetchBalance = async () => {
-      if (!api) return;
+      if (!api) {
+        setError("No API found");
+        return;
+      }
+      setError(null);
+
       try {
         setIsLoading(true);
         const balance = await api.getBalance(address);
@@ -41,8 +46,14 @@ export const Dashboard = () => {
     };
 
     const fetchStake = async () => {
-      if (!api) return;
+      if (!api) {
+        setError("No API found");
+        return;
+      }
+      setError(null);
+
       try {
+        setIsLoading(true);
         const stake = await api.getStake(address);
         if (stake) {
           const formattedStakes = (stake as unknown as StakeResponse[]).map(
@@ -58,6 +69,8 @@ export const Dashboard = () => {
         setError(
           error instanceof Error ? error.message : "Failed to fetch stake"
         );
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -66,13 +79,9 @@ export const Dashboard = () => {
   }, [address, api]);
 
   const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(address);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
-      console.error("Failed to copy address:", error);
-    }
+    await navigator.clipboard.writeText(address);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
