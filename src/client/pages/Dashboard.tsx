@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeftRight, ListPlus, Redo } from "lucide-react";
+import { ArrowLeftRight, ListPlus, Redo, Copy } from "lucide-react";
 
 import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 import Portfolio from "../components/Portfolio";
@@ -21,6 +21,7 @@ export const Dashboard = () => {
   const [stakes, setStakes] = useState<StakeTransaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const fetchBalance = async () => {
@@ -63,21 +64,45 @@ export const Dashboard = () => {
     fetchStake();
   }, [address, api]);
 
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(address);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      console.error("Failed to copy address:", error);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center min-h-screen">
       <div className="h-20" />
       <div className="flex flex-col items-center flex-1">
         <div className="w-72 space-y-6">
           <div>
-            <h2 className="text-xs text-mf-silver-300 mb-2">Balance</h2>
             <div className="w-full px-4 py-3 rounded-lg bg-mf-ash-500">
-              <div className="flex items-baseline space-x-1">
-                <span className="text-sm font-semibold text-mf-milk-300">
+              <div className="flex items-center space-x-2">
+                <span className="text-xl font-semibold text-mf-safety-300">
+                  τ
+                </span>
+                <span className="text-xl font-semibold text-mf-milk-300">
                   {Number(balance).toFixed(4)}
                 </span>
-                <span className="text-[10px] text-mf-silver-300">τ</span>
               </div>
-              <p className="text-[10px] text-mf-silver-300 mt-1">{address}</p>
+              <div className="flex items-center justify-between mt-1">
+                <p className="text-xs text-mf-silver-300">
+                  {address
+                    ? `${address.slice(0, 8)}...${address.slice(-8)}`
+                    : ""}
+                </p>
+                <button onClick={handleCopy} className="transition-colors">
+                  <Copy
+                    className={`w-4 h-4 ${
+                      copied ? "text-mf-sybil-300" : "text-mf-safety-300"
+                    }`}
+                  />
+                </button>
+              </div>
             </div>
           </div>
 
@@ -129,7 +154,7 @@ export const Dashboard = () => {
                 </div>
               )}
               {error && (
-                <p className="text-[10px] text-mf-safety-300 text-center">
+                <p className="text-xs text-mf-safety-300 text-center">
                   {error}
                 </p>
               )}
