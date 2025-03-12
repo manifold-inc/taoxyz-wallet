@@ -43,10 +43,6 @@ const MessageHandlers = {
     _sender: chrome.runtime.MessageSender,
     sendResponse: (response: ResponseMessage) => void
   ) {
-    console.log(
-      "[MessageHandler] Accounts locked due to:",
-      message.payload.reason
-    );
     sendResponse({ success: true });
     return true;
   },

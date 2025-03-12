@@ -88,7 +88,7 @@ export const MESSAGE_TYPES = {
   CONNECT_RESPONSE: "ext(connectResponse)",
   SIGN_REQUEST: "dapp(signRequest)",
   SIGN_RESPONSE: "ext(signResponse)",
-  AUTHENTICATE: "bg(authPermission)",
+  AUTHENTICATE: "ext(authPermission)",
   ACCOUNTS_LOCKED: "ext(accountsLocked)",
 } as const;
 
