@@ -5,6 +5,7 @@ import { ArrowLeftRight, ListPlus, Redo, Copy } from "lucide-react";
 import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 import Portfolio from "../components/Portfolio";
 import type { StakeTransaction } from "../../types/client";
+import BalanceChart from "../components/BalanceChart";
 
 interface StakeResponse {
   netuid: number;
@@ -76,11 +77,11 @@ export const Dashboard = () => {
 
   return (
     <div className="flex flex-col items-center min-h-screen">
-      <div className="h-20" />
+      <div className="h-5" />
       <div className="flex flex-col items-center flex-1">
-        <div className="w-72 space-y-6">
+        <div className="w-72 space-y-4">
           <div>
-            <div className="w-full px-4 py-3 rounded-lg bg-mf-ash-500">
+            <div className="w-full px-4 py-2 rounded-lg bg-mf-ash-500">
               <div className="flex items-center space-x-2">
                 <span className="text-xl font-semibold text-mf-safety-300">
                   τ
@@ -89,7 +90,7 @@ export const Dashboard = () => {
                   {Number(balance).toFixed(4)}
                 </span>
               </div>
-              <div className="flex items-center justify-between mt-1">
+              <div className="flex items-center justify-between">
                 <p className="text-xs text-mf-silver-300">
                   {address
                     ? `${address.slice(0, 8)}...${address.slice(-8)}`
@@ -102,6 +103,9 @@ export const Dashboard = () => {
                     }`}
                   />
                 </button>
+              </div>
+              <div className="-mx-4 -mb-2">
+                <BalanceChart />
               </div>
             </div>
           </div>
@@ -162,7 +166,6 @@ export const Dashboard = () => {
           </div>
         </div>
       </div>
-      <div className="h-20" />
     </div>
   );
 };
