@@ -1,49 +1,42 @@
-import { useEffect, useState } from "react";
 import { useLocation, Link } from "react-router-dom";
+import { House, ArrowLeftRight, ListPlus, Redo, Settings2 } from "lucide-react";
 
 const Navigation = () => {
   const location = useLocation();
-  const [address, setAddress] = useState<string | null>(null);
 
-  useEffect(() => {
-    const savedAddress = localStorage.getItem("currentAddress");
-
-    if (location.state?.address) {
-      setAddress(location.state.address);
-      localStorage.setItem("currentAddress", location.state.address);
-    } else if (savedAddress) {
-      setAddress(savedAddress);
-    } else {
-      setAddress(null);
-    }
-  }, [location.state?.address]);
-
-  if (!localStorage.getItem("currentAddress")) return null;
+  const address = localStorage.getItem("currentAddress");
+  const currentAddress = location.state?.address || address;
+  if (location.state?.address) {
+    localStorage.setItem("currentAddress", location.state.address);
+  }
+  if (!currentAddress) return null;
 
   const navLinks = [
-    { path: "/dashboard", label: "Dashboard" },
-    { path: "/swap", label: "Swap" },
-    { path: "/stake", label: "Stake" },
-    { path: "/transfer", label: "Transfer" },
-    { path: "/settings", label: "Settings" },
+    { path: "/dashboard", icon: <House className="w-5 h-5" /> },
+    { path: "/swap", icon: <ArrowLeftRight className="w-5 h-5" /> },
+    { path: "/stake", icon: <ListPlus className="w-5 h-5" /> },
+    { path: "/transfer", icon: <Redo className="w-5 h-5" /> },
+    { path: "/settings", icon: <Settings2 className="w-5 h-5" /> },
   ];
 
   return (
-    <nav className="bg-white shadow-sm fixed top-0 left-0 right-0 z-50">
-      <div className="max-w-7xl mx-auto px-2">
-        <div className="flex justify-center h-10">
-          <div className="flex items-center space-x-6">
-            {navLinks.map((link) => (
+    <nav className="bg-mf-ash-500/80 backdrop-blur-sm fixed bottom-0 left-0 right-0 z-50">
+      <div className="w-full px-2">
+        <div className="flex justify-between h-14">
+          {navLinks.map((link, index) => (
+            <div key={link.path} className="flex items-center">
               <Link
-                key={link.path}
                 to={link.path}
                 state={{ address }}
-                className="text-gray-500 hover:text-blue-600 transition-colors text-[11px] uppercase tracking-tight"
+                className="text-mf-safety-300 px-6"
               >
-                {link.label}
+                {link.icon}
               </Link>
-            ))}
-          </div>
+              {index < navLinks.length - 1 && (
+                <div className="h-4 w-px bg-mf-ash-300/30" />
+              )}
+            </div>
+          ))}
         </div>
       </div>
     </nav>

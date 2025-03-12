@@ -12,6 +12,7 @@ const Signin = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     try {
       const isUnlocked = await KeyringService.unlockAccount(username, password);
       if (isUnlocked) {

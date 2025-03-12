@@ -1,23 +1,48 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 import { KeyringService } from "../services/KeyringService";
-import type { StakeTransaction } from "../../types/client";
+import StakeOverview from "./portfolio/StakeOverview";
+import ExpandedStake from "./portfolio/ExpandedStake";
+import type { StakeTransaction, Subnet } from "../../types/client";
 
 interface PortfolioProps {
   stakes: StakeTransaction[];
   address: string;
 }
 
-export const Portfolio = ({ stakes, address }: PortfolioProps) => {
+const Portfolio = ({ stakes, address }: PortfolioProps) => {
   const { api } = usePolkadotApi();
   const navigate = useNavigate();
-  const [isSwapping, setIsSwapping] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [password, setPassword] = useState("");
   const [selectedStake, setSelectedStake] = useState<StakeTransaction | null>(
     null
   );
+  const [selectedSubnet, setSelectedSubnet] = useState<Subnet | null>(null);
+  const [isSwapping, setIsSwapping] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleStakeSelect = async (stake: StakeTransaction) => {
+    setError(null);
+    try {
+      setIsLoading(true);
+      const subnet = await api?.getSubnet(stake.subnetId);
+      if (subnet) {
+        setSelectedSubnet(subnet);
+        setSelectedStake(stake);
+      }
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : "Failed to fetch subnet"
+      );
+      setSelectedStake(null);
+      setSelectedSubnet(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSwap = async (stake: StakeTransaction) => {
     setSelectedStake(stake);
@@ -25,9 +50,13 @@ export const Portfolio = ({ stakes, address }: PortfolioProps) => {
   };
 
   const confirmSwap = async () => {
-    if (!api || !selectedStake) return;
+    if (!api || !selectedStake) {
+      setError("No API or stake selected");
+      return;
+    }
+    setError(null);
+
     try {
-      setError(null);
       const account = await KeyringService.getAccount(address);
       const username = account.meta.username as string;
       await KeyringService.unlockAccount(username, password);
@@ -42,56 +71,71 @@ export const Portfolio = ({ stakes, address }: PortfolioProps) => {
 
       setPassword("");
       setSelectedStake(null);
+      setSelectedSubnet(null);
       setIsSwapping(false);
-
       navigate("/dashboard", { state: { address } });
     } catch (error) {
       setError(error instanceof Error ? error.message : "Failed to swap");
     }
   };
 
+  if (!api) {
+    return (
+      <div className="flex justify-center items-center h-16">
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-mf-milk-300" />
+      </div>
+    );
+  }
+
   return (
     <div>
-      {stakes.length > 0 ? (
-        <div className="space-y-2">
-          {stakes.map((stake, index) => (
-            <div
-              key={index}
-              className="bg-white/5 rounded-lg p-3 outline outline-1 outline-black/20"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <h3 className="text-[13px] font-semibold">
-                    Subnet {stake.subnetId}
-                  </h3>
-                  <p className="text-[10px] text-gray-400">
-                    {stake.validatorHotkey.slice(0, 8)}...
-                    {stake.validatorHotkey.slice(-8)}
-                  </p>
-                  <p className="text-[10px] text-gray-400">
-                    Stake: {(stake.tokens / 1e9).toFixed(4)} α
-                  </p>
-                </div>
-                <button
-                  onClick={() => handleSwap(stake)}
-                  className="text-[10px] text-red-500 px-4 py-1 rounded outline outline-1 outline-black/20 hover:bg-red-500/10 hover:text-red-500"
-                >
-                  Unstake
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+      {selectedStake ? (
+        <ExpandedStake
+          stake={selectedStake}
+          subnet={selectedSubnet}
+          onClose={() => {
+            setSelectedStake(null);
+            setSelectedSubnet(null);
+            setError(null);
+          }}
+          onSwap={handleSwap}
+        />
       ) : (
-        <div className="bg-white/5 rounded-lg p-3 outline outline-1 outline-black/20">
-          <p className="text-[10px] text-gray-400">No stakes found</p>
+        <>
+          {stakes.length > 0 ? (
+            <div className="space-y-1.5">
+              {stakes.map((stake, index) => (
+                <StakeOverview
+                  key={index}
+                  stake={stake}
+                  onClick={() => handleStakeSelect(stake)}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="bg-mf-ash-500 rounded-lg p-2.5">
+              <p className="text-xs text-mf-silver-300">No stakes found</p>
+            </div>
+          )}
+        </>
+      )}
+
+      {error && !isSwapping && (
+        <div className="mt-2 p-3 bg-mf-ash-500 rounded-lg">
+          <p className="text-xs text-mf-safety-300 text-center">{error}</p>
+        </div>
+      )}
+
+      {isLoading && (
+        <div className="mt-2 flex justify-center items-center h-16">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-mf-milk-300" />
         </div>
       )}
 
       {isSwapping && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg p-4 max-w-sm w-full mx-4">
-            <h3 className="text-[13px] font-semibold mb-4 text-gray-900">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-mf-ash-500 rounded-lg p-4 max-w-sm w-full mx-4">
+            <h3 className="text-xs font-medium text-mf-milk-300 mb-4">
               Enter Password to Swap
             </h3>
             <input
@@ -99,10 +143,10 @@ export const Portfolio = ({ stakes, address }: PortfolioProps) => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password"
-              className="w-full px-3 py-2 text-[10px] rounded-lg border border-gray-200 hover:border-blue-500 focus:outline-none focus:border-blue-500 mb-4"
+              className="w-full px-3 py-2 text-[10px] rounded-lg bg-mf-ash-300 border border-mf-ash-400 text-mf-milk-300 placeholder:text-mf-silver-300 focus:outline-none focus:border-mf-safety-300 mb-4"
             />
             {error && (
-              <div className="p-3 bg-red-50 text-red-500 text-[10px] rounded-lg border border-red-100 mb-4">
+              <div className="p-3 bg-mf-ash-300 text-mf-sybil-300 text-[10px] rounded-lg mb-4">
                 {error}
               </div>
             )}
@@ -113,13 +157,13 @@ export const Portfolio = ({ stakes, address }: PortfolioProps) => {
                   setPassword("");
                   setError(null);
                 }}
-                className="flex-1 py-2 px-3 text-[10px] rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                className="flex-1 py-2 px-3 text-[10px] rounded-lg bg-mf-ash-300 text-mf-milk-300 hover:bg-mf-ash-400 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmSwap}
-                className="flex-1 py-2 px-3 text-[10px] text-red-500 rounded-lg border border-gray-200 hover:bg-red-500/10 hover:border-red-500 transition-colors"
+                className="flex-1 py-2 px-3 text-[10px] text-mf-sybil-300 rounded-lg bg-mf-ash-300 hover:bg-mf-ash-400 transition-colors"
               >
                 Confirm
               </button>
@@ -130,3 +174,5 @@ export const Portfolio = ({ stakes, address }: PortfolioProps) => {
     </div>
   );
 };
+
+export default Portfolio;
