@@ -4,7 +4,11 @@ import { useNavigate } from "react-router-dom";
 import { KeyringService } from "../services/KeyringService";
 import taoxyzLogo from "../../../public/icons/taoxyz.svg";
 
-const Signin = () => {
+interface SigninProps {
+  setIsLocked: (isLocked: boolean) => void;
+}
+
+const Signin = ({ setIsLocked }: SigninProps) => {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -18,6 +22,8 @@ const Signin = () => {
       if (isUnlocked) {
         const address = await KeyringService.getAddress(username);
         localStorage.setItem("currentAddress", address);
+        localStorage.setItem("accountLocked", "false");
+        setIsLocked(false);
         navigate("/dashboard");
       }
     } catch (error) {

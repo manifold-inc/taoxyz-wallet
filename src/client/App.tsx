@@ -18,34 +18,26 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Navigation from "./components/Navigation";
 
 import MessageService from "./services/MessageService";
-import KeyringService from "./services/KeyringService";
 import { PolkadotApiProvider } from "./contexts/PolkadotApiContext";
 
 import background from "../../public/images/background.png";
 
 const App = () => {
-  const [isLocked, setIsLocked] = useState<boolean>(true);
+  const [isLocked, setIsLocked] = useState(() => {
+    return localStorage.getItem("accountLocked") === "true";
+  });
 
   useEffect(() => {
     const cleanup = MessageService.setupMessageListeners();
-
-    const checkLockState = async () => {
+    const checkAddress = async () => {
       const currentAddress = localStorage.getItem("currentAddress");
       if (!currentAddress) {
         setIsLocked(false);
+        localStorage.setItem("accountLocked", "false");
         return;
       }
-
-      try {
-        const isLocked = await KeyringService.isLocked(currentAddress);
-        setIsLocked(isLocked);
-      } catch (error) {
-        console.error("[App] Error checking lock state:", error);
-        setIsLocked(true);
-      }
     };
-
-    checkLockState();
+    checkAddress();
     return cleanup;
   }, []);
 
@@ -65,9 +57,18 @@ const App = () => {
                 <main className="bg-transparent">
                   <Routes>
                     <Route path="/" element={<Home />} />
-                    <Route path="/signin" element={<Signin />} />
-                    <Route path="/create" element={<Create />} />
-                    <Route path="/import" element={<Import />} />
+                    <Route
+                      path="/signin"
+                      element={<Signin setIsLocked={setIsLocked} />}
+                    />
+                    <Route
+                      path="/create"
+                      element={<Create setIsLocked={setIsLocked} />}
+                    />
+                    <Route
+                      path="/import"
+                      element={<Import setIsLocked={setIsLocked} />}
+                    />
                     <Route
                       path="/dashboard"
                       element={
@@ -104,7 +105,7 @@ const App = () => {
                       path="/settings"
                       element={
                         <ProtectedRoute>
-                          <Settings />
+                          <Settings setIsLocked={setIsLocked} />
                         </ProtectedRoute>
                       }
                     />

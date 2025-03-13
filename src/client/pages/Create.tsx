@@ -6,7 +6,11 @@ import taoxyzLogo from "../../../public/icons/taoxyz.svg";
 import CreateForm from "../components/CreateForm";
 import MnemonicDisplay from "../components/Mnemonic";
 
-export const Create = () => {
+interface CreateProps {
+  setIsLocked: (isLocked: boolean) => void;
+}
+
+export const Create = ({ setIsLocked }: CreateProps) => {
   const navigate = useNavigate();
   const [mnemonic, setMnemonic] = useState("");
   const [account, setAccount] = useState<KeyringPair | null>(null);
@@ -21,6 +25,8 @@ export const Create = () => {
 
   const handleContinue = () => {
     localStorage.setItem("currentAddress", account?.address as string);
+    localStorage.setItem("accountLocked", "false");
+    setIsLocked(false);
     navigate("/dashboard");
   };
 

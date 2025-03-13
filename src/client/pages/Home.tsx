@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { UserPlus, FolderInput, SquareArrowLeft } from "lucide-react";
 
 import Disclaimer from "../components/Disclaimer";
@@ -11,8 +11,10 @@ const Home = () => {
 
   useEffect(() => {
     const savedAddress = localStorage.getItem("currentAddress");
-    if (savedAddress) {
-      navigate("/dashboard", { state: { address: savedAddress } });
+    const isLocked = localStorage.getItem("accountLocked") === "true";
+
+    if (savedAddress && !isLocked) {
+      navigate("/dashboard");
     }
   }, [navigate]);
 

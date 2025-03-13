@@ -7,7 +7,7 @@ interface ProtectedRouteProps {
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const address = localStorage.getItem("currentAddress");
   if (!address) {
-    return <Navigate to="/signin" replace />;
+    return <Navigate to="/" replace />;
   }
   return children;
 };

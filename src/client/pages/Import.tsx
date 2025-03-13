@@ -6,7 +6,11 @@ import taoxyzLogo from "../../../public/icons/taoxyz.svg";
 import CreateForm from "../components/CreateForm";
 import { KeyringService } from "../services/KeyringService";
 
-const Import = () => {
+interface ImportProps {
+  setIsLocked: (isLocked: boolean) => void;
+}
+
+const Import = ({ setIsLocked }: ImportProps) => {
   const navigate = useNavigate();
   const [mnemonic, setMnemonic] = useState("");
   const [validatedMnemonic, setValidatedMnemonic] = useState<string | null>(
@@ -42,6 +46,8 @@ const Import = () => {
 
   const handleSuccess = (account: KeyringPair) => {
     localStorage.setItem("currentAddress", account.address as string);
+    localStorage.setItem("accountLocked", "false");
+    setIsLocked(false);
     navigate("/dashboard");
   };
 
