@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import taoxyzLogo from "../../../public/icons/taoxyz.svg";
@@ -6,7 +6,6 @@ import taoxyzLogo from "../../../public/icons/taoxyz.svg";
 import SubnetSelection from "../components/swap/SubnetSelection";
 import ValidatorSelection from "../components/swap/ValidatorSelection";
 import ConfirmSwap from "../components/swap/ConfirmSwap";
-
 import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 import type { Subnet, Validator } from "../../types/client";
 
@@ -15,6 +14,19 @@ enum Step {
   SELECT_VALIDATOR,
   CONFIRM_SWAP,
 }
+
+const getStepSubtext = (step: Step) => {
+  switch (step) {
+    case Step.SELECT_SUBNET:
+      return "Select a subnet to swap to";
+    case Step.SELECT_VALIDATOR:
+      return "Select a validator to delegate to";
+    case Step.CONFIRM_SWAP:
+      return "Review and confirm your swap";
+    default:
+      return "";
+  }
+};
 
 export const Swap = () => {
   const { api } = usePolkadotApi();
@@ -30,8 +42,6 @@ export const Swap = () => {
   );
   const [isLoadingSubnets, setIsLoadingSubnets] = useState(true);
   const [isLoadingValidators, setIsLoadingValidators] = useState(false);
-
-  console.log("Swap component rendered");
 
   useEffect(() => {
     console.log("API effect triggered", {
@@ -96,8 +106,6 @@ export const Swap = () => {
     [selectedSubnet, api]
   );
 
-  const memoizedSubnets = useMemo(() => subnets, [subnets]);
-
   const handleValidatorSelect = (validator: Validator) => {
     setSelectedValidator(validator);
   };
@@ -131,7 +139,7 @@ export const Swap = () => {
       case Step.SELECT_SUBNET:
         return (
           <SubnetSelection
-            subnets={memoizedSubnets}
+            subnets={subnets}
             onSelect={handleSubnetSelect}
             isLoadingSubnets={isLoadingSubnets}
             selectedSubnet={selectedSubnet}
@@ -209,6 +217,9 @@ export const Swap = () => {
             <h1 className="text-xl font-semibold text-mf-silver-300">
               Swap Tokens
             </h1>
+            <p className="text-xs text-mf-silver-300 mt-1">
+              {getStepSubtext(step)}
+            </p>
           </div>
 
           <div className="w-80">

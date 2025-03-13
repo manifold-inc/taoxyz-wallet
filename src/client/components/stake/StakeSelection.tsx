@@ -1,10 +1,14 @@
 import type { StakeTransaction } from "../../../types/client";
+import type { Validator } from "../../../types/client";
 
 interface StakeSelectionProps {
   stakes: StakeTransaction[];
   onSelect: (stake: StakeTransaction) => void;
   isLoading: boolean;
   selectedStake: StakeTransaction | null;
+  validators: Validator[];
+  isLoadingValidators: boolean;
+  isLoadingSubnet: boolean;
 }
 
 const StakeSelection = ({
@@ -12,6 +16,9 @@ const StakeSelection = ({
   onSelect,
   isLoading,
   selectedStake,
+  validators,
+  isLoadingValidators,
+  isLoadingSubnet,
 }: StakeSelectionProps) => {
   if (isLoading) {
     return (
@@ -49,6 +56,21 @@ const StakeSelection = ({
                 <p className="text-xs text-mf-silver-300">
                   Stake: {(stake.tokens / 1e9).toFixed(4)} τ
                 </p>
+                {isSelected && (
+                  <p
+                    className={`text-xs mt-1 ${
+                      !isLoadingValidators && validators.length > 0
+                        ? "text-mf-sybil-300"
+                        : "text-mf-safety-300"
+                    }`}
+                  >
+                    {isLoadingValidators || isLoadingSubnet
+                      ? "Getting validators..."
+                      : validators.length === 0
+                      ? "No validators available"
+                      : `${validators.length} validators available`}
+                  </p>
+                )}
               </div>
             </div>
           </div>

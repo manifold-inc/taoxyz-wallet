@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import taoxyzLogo from "../../../public/icons/taoxyz.svg";
@@ -15,6 +15,19 @@ enum Step {
   SELECT_VALIDATOR,
   CONFIRM_STAKE,
 }
+
+const getStepSubtext = (step: Step) => {
+  switch (step) {
+    case Step.SELECT_STAKE:
+      return "Select a stake to move";
+    case Step.SELECT_VALIDATOR:
+      return "Select a validator to move to";
+    case Step.CONFIRM_STAKE:
+      return "Review and confirm your stake";
+    default:
+      return "";
+  }
+};
 
 interface StakeResponse {
   netuid: number;
@@ -37,6 +50,8 @@ const Stake = () => {
     null
   );
   const [isLoadingStakes, setIsLoadingStakes] = useState(true);
+  const [isLoadingSubnet, setIsLoadingSubnet] = useState(false);
+  const [isLoadingValidators, setIsLoadingValidators] = useState(false);
 
   useEffect(() => {
     getStakes();
@@ -67,15 +82,20 @@ const Stake = () => {
   const getSubnet = async (subnetId: number) => {
     if (!api) return;
     try {
+      setIsLoadingSubnet(true);
       const subnet = await api.getSubnet(subnetId);
       setSelectedSubnet(subnet ?? null);
     } catch (error) {
       console.error("[Client] Error loading subnet:", error);
+    } finally {
+      setIsLoadingSubnet(false);
     }
   };
 
   const getValidators = async (subnetId: number, validatorHotkey: string) => {
     try {
+      setIsLoadingValidators(true);
+      setValidators([]);
       const validators = await api?.getValidators(subnetId);
       const filteredValidators =
         validators?.filter(
@@ -84,14 +104,24 @@ const Stake = () => {
       setValidators(filteredValidators);
     } catch (error) {
       console.error("[Client] Error loading validators:", error);
+    } finally {
+      setIsLoadingValidators(false);
     }
   };
 
-  const handleStakeSelect = async (stake: StakeTransaction) => {
-    setSelectedStake(stake);
-    await getSubnet(stake.subnetId);
-    await getValidators(stake.subnetId, stake.validatorHotkey);
-  };
+  const handleStakeSelect = useCallback(
+    async (stake: StakeTransaction) => {
+      if (selectedStake?.subnetId === stake.subnetId) {
+        setSelectedStake(null);
+        setValidators([]);
+        return;
+      }
+      setSelectedStake(stake);
+      await getSubnet(stake.subnetId);
+      await getValidators(stake.subnetId, stake.validatorHotkey);
+    },
+    [selectedStake, api]
+  );
 
   const handleValidatorSelect = (validator: Validator) => {
     setSelectedValidator(validator);
@@ -125,6 +155,9 @@ const Stake = () => {
             onSelect={handleStakeSelect}
             isLoading={isLoadingStakes}
             selectedStake={selectedStake}
+            validators={validators}
+            isLoadingValidators={isLoadingValidators}
+            isLoadingSubnet={isLoadingSubnet}
           />
         );
       case Step.SELECT_VALIDATOR:
@@ -176,11 +209,13 @@ const Stake = () => {
             <button
               onClick={handleNext}
               disabled={
-                (step === Step.SELECT_STAKE && !selectedStake) ||
+                (step === Step.SELECT_STAKE &&
+                  (!selectedStake || validators.length === 0)) ||
                 (step === Step.SELECT_VALIDATOR && !selectedValidator)
               }
               className={`transition-colors ${
-                (step === Step.SELECT_STAKE && !selectedStake) ||
+                (step === Step.SELECT_STAKE &&
+                  (!selectedStake || validators.length === 0)) ||
                 (step === Step.SELECT_VALIDATOR && !selectedValidator)
                   ? "text-mf-ash-300 cursor-not-allowed"
                   : "text-mf-safety-300 hover:text-mf-milk-300"
@@ -196,6 +231,9 @@ const Stake = () => {
             <h1 className="text-xl font-semibold text-mf-silver-300">
               Add Stake
             </h1>
+            <p className="text-xs text-mf-silver-300 mt-1">
+              {getStepSubtext(step)}
+            </p>
           </div>
 
           <div className="w-80">
