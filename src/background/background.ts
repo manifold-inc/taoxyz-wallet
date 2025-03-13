@@ -9,7 +9,7 @@ import type {
 } from "../types/messages";
 import { generateId } from "../utils/utils";
 
-// This is Service Worker Code. 
+// This is Service Worker Code.
 
 const getStoredRequest = async (key: string): Promise<StoredRequest> => {
   const result = await chrome.storage.local.get(key);
@@ -218,6 +218,23 @@ async function handleSignResponse(
   }
 }
 
+async function handleAccountsLocked(
+  message: ExtensionMessage & { type: typeof MESSAGE_TYPES.ACCOUNTS_LOCKED },
+  sendResponse: (response: { success: boolean; error?: string }) => void
+) {
+  try {
+    console.log("[Background] Accounts locked");
+    await chrome.runtime.sendMessage({
+      type: MESSAGE_TYPES.ACCOUNTS_LOCKED,
+      payload: { reason: message.payload.reason },
+    });
+    sendResponse({ success: true });
+  } catch (error) {
+    console.error("[Background] Error handling accounts locked:", error);
+    sendErrorResponse(sendResponse, ERROR_TYPES.UNKNOWN_ERROR, error);
+  }
+}
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log("[Background] Message received:", message);
 
@@ -236,6 +253,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     case MESSAGE_TYPES.SIGN_RESPONSE:
       handleSignResponse(message, sendResponse);
+      break;
+
+    case MESSAGE_TYPES.ACCOUNTS_LOCKED:
+      handleAccountsLocked(message, sendResponse);
       break;
 
     default:

@@ -42,7 +42,14 @@ const MessageService = {
     _sender: chrome.runtime.MessageSender,
     sendResponse: (response: ResponseMessage) => void
   ) {
-    sendResponse({ success: true });
+    try {
+      localStorage.setItem("accountLocked", "true");
+      window.location.reload();
+      sendResponse({ success: true });
+    } catch (error) {
+      console.error("[MessageHandler] Error handling accounts locked:", error);
+      sendErrorResponse(sendResponse, ERROR_TYPES.UNKNOWN_ERROR, error);
+    }
     return true;
   },
 
