@@ -63,6 +63,7 @@ export const Swap = () => {
   const getValidators = async (subnetId: number) => {
     try {
       setIsLoadingValidators(true);
+      setValidators([]);
       const validators = await api?.getValidators(subnetId);
       setValidators(validators ?? []);
     } catch (error) {
@@ -90,10 +91,9 @@ export const Swap = () => {
         return;
       }
       setSelectedSubnet(subnet);
-      setValidators([]);
       await getValidators(subnet.id);
     },
-    [selectedSubnet]
+    [selectedSubnet, api]
   );
 
   const memoizedSubnets = useMemo(() => subnets, [subnets]);
