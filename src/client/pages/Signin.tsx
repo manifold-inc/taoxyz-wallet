@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import { KeyringService } from "../services/KeyringService";
 import taoxyzLogo from "../../../public/icons/taoxyz.svg";
+import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 
 interface SigninProps {
   setIsLocked: (isLocked: boolean) => void;
@@ -13,10 +14,17 @@ const Signin = ({ setIsLocked }: SigninProps) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const { api, isLoading: isApiLoading } = usePolkadotApi();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (!api || isApiLoading) {
+      setError("Please wait for wallet to initialize...");
+      return;
+    }
+
     try {
       const isUnlocked = await KeyringService.unlockAccount(username, password);
       if (isUnlocked) {
@@ -101,9 +109,12 @@ const Signin = ({ setIsLocked }: SigninProps) => {
 
               <button
                 type="submit"
+                disabled={isApiLoading}
                 className="w-full text-sm flex items-center justify-center rounded-lg bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors px-4 py-3"
               >
-                <span className="text-mf-milk-300">Sign In</span>
+                <span className="text-mf-milk-300">
+                  {isApiLoading ? "Initializing..." : "Sign In"}
+                </span>
               </button>
             </div>
           </form>

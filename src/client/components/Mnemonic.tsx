@@ -3,10 +3,11 @@ import { Copy } from "lucide-react";
 
 interface MnemonicProps {
   mnemonic: string;
+  isLoading: boolean;
   onContinue: () => void;
 }
 
-const Mnemonic = ({ mnemonic, onContinue }: MnemonicProps) => {
+const Mnemonic = ({ mnemonic, onContinue, isLoading }: MnemonicProps) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopyMnemonic = async () => {
@@ -49,9 +50,12 @@ const Mnemonic = ({ mnemonic, onContinue }: MnemonicProps) => {
       <div className="w-54 mt-auto mb-16">
         <button
           onClick={onContinue}
+          disabled={isLoading}
           className="w-full text-[14px] flex items-center justify-center rounded-lg bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors px-4 py-3"
         >
-          <span className="text-mf-milk-300">Continue</span>
+          <span className="text-mf-milk-300">
+            {isLoading ? "Initializing..." : "Continue"}
+          </span>
         </button>
       </div>
     </div>

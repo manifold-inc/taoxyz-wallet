@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import KeyringService from "../services/KeyringService";
 import taoxyzLogo from "../../../public/icons/taoxyz.svg";
+import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 
 interface LockScreenProps {
   setIsLocked: (isLocked: boolean) => void;
@@ -14,6 +15,7 @@ const LockScreen = ({ setIsLocked }: LockScreenProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { api, isLoading: isApiLoading } = usePolkadotApi();
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value);
@@ -23,6 +25,12 @@ const LockScreen = ({ setIsLocked }: LockScreenProps) => {
   const handleUnlock = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (isLoading || password.length < 3) return;
+
+    if (!api || isApiLoading) {
+      setError("Please wait for wallet to initialize...");
+      return;
+    }
+
     setError(null);
     setIsLoading(true);
 
@@ -77,7 +85,7 @@ const LockScreen = ({ setIsLocked }: LockScreenProps) => {
                 onBlur={() => setPasswordSelected(false)}
                 placeholder="Enter your password"
                 className="w-full px-4 py-3 rounded-lg bg-mf-ash-500 text-mf-milk-300 placeholder:text-mf-silver-500"
-                disabled={isLoading}
+                disabled={isLoading || isApiLoading}
                 minLength={3}
               />
               <div className="h-5">
@@ -90,13 +98,17 @@ const LockScreen = ({ setIsLocked }: LockScreenProps) => {
             <div className="fixed bottom-20 w-54">
               <button
                 type="submit"
-                disabled={password.length < 3 || isLoading}
+                disabled={password.length < 3 || isLoading || isApiLoading}
                 className="w-full text-sm rounded-lg bg-mf-safety-300 hover:bg-mf-safety-400 disabled:bg-mf-ash-300 disabled:cursor-not-allowed transition-colors px-4 py-3 text-mf-milk-300 relative"
               >
-                <span className={isLoading ? "opacity-0" : "opacity-100"}>
-                  Unlock
+                <span
+                  className={
+                    isLoading || isApiLoading ? "opacity-0" : "opacity-100"
+                  }
+                >
+                  {isApiLoading ? "Initializing..." : "Unlock"}
                 </span>
-                {isLoading && (
+                {(isLoading || isApiLoading) && (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="w-5 h-5 border-2 border-mf-milk-300 border-t-transparent rounded-full animate-spin" />
                   </div>
