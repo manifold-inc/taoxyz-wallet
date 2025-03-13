@@ -97,7 +97,7 @@ const Import = ({ setIsLocked }: ImportProps) => {
             onSubmit={handleMnemonicSubmit}
             className="space-y-4 flex flex-col items-center"
           >
-            <div className="w-54 h-[120px]">
+            <div className="w-54 h-24">
               <textarea
                 name="mnemonic"
                 value={mnemonic}
