@@ -2,8 +2,8 @@ import type { StakeTransaction } from "../../../types/client";
 
 interface StakeSelectionProps {
   stakes: StakeTransaction[];
-  onSelect: (stake: StakeTransaction) => void;
   isLoading: boolean;
+  onSelect: (stake: StakeTransaction) => void;
 }
 
 const StakeSelection = ({

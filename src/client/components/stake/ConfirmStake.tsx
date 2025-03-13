@@ -55,7 +55,7 @@ const ConfirmStake = ({
         toSubnetId: stake.subnetId,
         amount: alphaAmount,
       });
-      navigate("/dashboard", { state: { address } });
+      navigate("/dashboard");
     } catch (error) {
       setError(error instanceof Error ? error.message : "Failed to move stake");
     } finally {

@@ -26,6 +26,7 @@ export const Swap = () => {
   );
   const [isLoading, setIsLoading] = useState(true);
 
+  // TODO: Check
   useEffect(() => {
     getSubnets();
     getBalance();

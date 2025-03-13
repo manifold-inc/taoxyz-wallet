@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 import StakeSelection from "../components/stake/StakeSelection";
 import ConfirmStake from "../components/stake/ConfirmStake";
@@ -21,12 +22,18 @@ interface StakeResponse {
 
 const Stake = () => {
   const { api } = usePolkadotApi();
+  const location = useLocation();
   const address = localStorage.getItem("currentAddress") as string;
-  const [step, setStep] = useState<Step>(Step.SELECT_STAKE);
-  const [selectedSubnet, setSelectedSubnet] = useState<Subnet | null>(null);
+
+  const [step, setStep] = useState<Step>(
+    location.state?.selectedStake ? Step.SELECT_VALIDATOR : Step.SELECT_STAKE
+  );
+  const [selectedSubnet, setSelectedSubnet] = useState<Subnet | null>(
+    location.state?.selectedSubnet || null
+  );
   const [stakes, setStakes] = useState<StakeTransaction[]>([]);
   const [selectedStake, setSelectedStake] = useState<StakeTransaction | null>(
-    null
+    location.state?.selectedStake || null
   );
   const [validators, setValidators] = useState<Validator[]>([]);
   const [selectedValidator, setSelectedValidator] = useState<Validator | null>(
@@ -36,6 +43,10 @@ const Stake = () => {
 
   useEffect(() => {
     getStakes();
+    if (location.state?.selectedStake) {
+      const stake = location.state.selectedStake;
+      getValidators(stake.subnetId, stake.validatorHotkey);
+    }
   }, []);
 
   const getStakes = async () => {

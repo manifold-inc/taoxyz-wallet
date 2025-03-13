@@ -8,9 +8,9 @@ import type { Subnet, Validator } from "../../../types/client";
 interface ConfirmSwapProps {
   subnet: Subnet;
   validator: Validator;
-  onBack: () => void;
   balance: string;
   address: string;
+  onBack: () => void;
 }
 
 export const ConfirmSwap = ({
@@ -49,7 +49,7 @@ export const ConfirmSwap = ({
         validatorHotkey: validator.hotkey,
         amount: parseFloat(amount),
       });
-      navigate("/dashboard", { state: { address } });
+      navigate("/dashboard");
     } catch (error) {
       setError(error instanceof Error ? error.message : "Failed to stake");
     } finally {

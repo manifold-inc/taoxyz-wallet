@@ -49,11 +49,6 @@ const App = () => {
     return cleanup;
   }, []);
 
-  const currentAddress = localStorage.getItem("currentAddress");
-  if (isLocked && currentAddress) {
-    return <LockScreen />;
-  }
-
   return (
     <PolkadotApiProvider>
       <HashRouter>
@@ -62,57 +57,63 @@ const App = () => {
           className="bg-cover bg-center min-h-screen w-full"
         >
           <div className="bg-transparent">
-            <Navigation />
-            <main className="bg-transparent">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/signin" element={<Signin />} />
-                <Route path="/create" element={<Create />} />
-                <Route path="/import" element={<Import />} />
-                <Route
-                  path="/dashboard"
-                  element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/swap"
-                  element={
-                    <ProtectedRoute>
-                      <Swap />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/stake"
-                  element={
-                    <ProtectedRoute>
-                      <Stake />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/transfer"
-                  element={
-                    <ProtectedRoute>
-                      <Transfer />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/settings"
-                  element={
-                    <ProtectedRoute>
-                      <Settings />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route path="/connect" element={<Connect />} />
-                <Route path="/sign" element={<Sign />} />
-              </Routes>
-            </main>
+            {isLocked && localStorage.getItem("currentAddress") ? (
+              <LockScreen setIsLocked={setIsLocked} />
+            ) : (
+              <>
+                <Navigation />
+                <main className="bg-transparent">
+                  <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/signin" element={<Signin />} />
+                    <Route path="/create" element={<Create />} />
+                    <Route path="/import" element={<Import />} />
+                    <Route
+                      path="/dashboard"
+                      element={
+                        <ProtectedRoute>
+                          <Dashboard />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/swap"
+                      element={
+                        <ProtectedRoute>
+                          <Swap />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/stake"
+                      element={
+                        <ProtectedRoute>
+                          <Stake />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/transfer"
+                      element={
+                        <ProtectedRoute>
+                          <Transfer />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/settings"
+                      element={
+                        <ProtectedRoute>
+                          <Settings />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route path="/connect" element={<Connect />} />
+                    <Route path="/sign" element={<Sign />} />
+                  </Routes>
+                </main>
+              </>
+            )}
           </div>
         </div>
       </HashRouter>

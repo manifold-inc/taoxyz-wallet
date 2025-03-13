@@ -112,21 +112,21 @@ export const Dashboard = () => {
           <div className="mt-3">
             <div className="flex justify-between">
               <button
-                onClick={() => navigate("/swap", { state: { address } })}
+                onClick={() => navigate("/swap")}
                 className="w-25 text-xs flex flex-col items-center rounded-lg bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors px-2 py-2"
               >
                 <ArrowLeftRight className="text-mf-safety-300 w-4 h-4 mb-1" />
                 <span className="text-mf-milk-300">Swap</span>
               </button>
               <button
-                onClick={() => navigate("/stake", { state: { address } })}
+                onClick={() => navigate("/stake")}
                 className="w-25 text-xs flex flex-col items-center rounded-lg bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors px-2 py-2"
               >
                 <ListPlus className="text-mf-safety-300 w-4 h-4 mb-1" />
                 <span className="text-mf-milk-300">Stake</span>
               </button>
               <button
-                onClick={() => navigate("/transfer", { state: { address } })}
+                onClick={() => navigate("/transfer")}
                 className="w-25 text-xs flex flex-col items-center rounded-lg bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors px-2 py-2"
               >
                 <Redo className="text-mf-safety-300 w-4 h-4 mb-1" />
