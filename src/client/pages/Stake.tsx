@@ -111,7 +111,10 @@ const Stake = () => {
 
   const handleStakeSelect = useCallback(
     async (stake: StakeTransaction) => {
-      if (selectedStake?.subnetId === stake.subnetId) {
+      if (
+        selectedStake?.subnetId === stake.subnetId &&
+        selectedStake?.validatorHotkey === stake.validatorHotkey
+      ) {
         setSelectedStake(null);
         setValidators([]);
         return;
