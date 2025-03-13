@@ -299,6 +299,12 @@ class PolkadotApi {
       throw error;
     }
   }
+
+  public async disconnect(): Promise<void> {
+    if (this.api?.isConnected) {
+      await this.api.disconnect();
+    }
+  }
 }
 
 export default PolkadotApi;
