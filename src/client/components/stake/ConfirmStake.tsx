@@ -36,7 +36,11 @@ const ConfirmStake = ({
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value === "" || /^\d*\.?\d*$/.test(value)) {
-      setAmount(value);
+      // Validate amount
+      const numValue = parseFloat(value);
+      if (value === "" || (!isNaN(numValue) && numValue >= 0)) {
+        setAmount(value);
+      }
     }
   };
 
@@ -70,8 +74,8 @@ const ConfirmStake = ({
   }
 
   return (
-    <div className="space-y-3 p-4">
-      <div className="rounded-lg bg-mf-ash-300 p-3 space-y-2">
+    <div className="space-y-3 p-2">
+      <div className="rounded-lg bg-mf-ash-500 p-2 space-y-2">
         <div>
           <p className="text-xs text-mf-silver-300">Current Validator</p>
           <p className="text-xs text-mf-milk-300">
@@ -99,14 +103,12 @@ const ConfirmStake = ({
         <div>
           <p className="text-xs text-mf-silver-300 mb-1">Amount to Move (τ)</p>
           <input
-            type="number"
+            type="text"
+            inputMode="decimal"
             value={amount}
             onChange={handleAmountChange}
             placeholder="Enter amount to move"
             className="w-full px-3 py-2 text-xs rounded-lg bg-mf-ash-300 text-mf-milk-300 border-none focus:outline-none focus:ring-2 focus:ring-mf-safety-300"
-            min="0"
-            max={stake.tokens / 1e9}
-            step="0.0001"
           />
         </div>
 
@@ -149,7 +151,7 @@ const ConfirmStake = ({
         )}
 
         {error && (
-          <div className="p-3 bg-mf-ash-300 text-mf-sybil-300 text-xs rounded-lg">
+          <div className="p-3 bg-mf-ash-300 text-mf-safety-500 text-xs rounded-lg">
             {error}
           </div>
         )}
@@ -157,12 +159,16 @@ const ConfirmStake = ({
         <button
           onClick={handleSubmit}
           disabled={isSubmitting || alphaAmount > stake.tokens / 1e9}
-          className="w-full text-xs flex items-center justify-center rounded-lg bg-mf-safety-300 hover:bg-mf-safety-400 transition-colors px-4 py-3 text-mf-milk-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          className={`w-full text-xs flex items-center justify-center rounded-lg transition-colors px-4 py-3 mt-5 text-semibold text-mf-ash-300 ${
+            isSubmitting || alphaAmount > stake.tokens / 1e9 || !amount || !api
+              ? "bg-mf-ash-400 text-mf-milk-300 cursor-not-allowed"
+              : "bg-mf-sybil-700 hover:bg-mf-sybil-500 active:bg-mf-sybil-700"
+          }`}
         >
           {isSubmitting ? (
             <div className="flex items-center justify-center space-x-2">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-mf-milk-300" />
-              <span>Moving...</span>
+              <span>Pending...</span>
             </div>
           ) : (
             "Move Stake"

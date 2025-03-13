@@ -18,11 +18,24 @@ enum Step {
 const getStepSubtext = (step: Step) => {
   switch (step) {
     case Step.SELECT_SUBNET:
-      return "Select a subnet to swap to";
+      return "Select a subnet";
     case Step.SELECT_VALIDATOR:
-      return "Select a validator to delegate to";
+      return "Select a validator";
     case Step.CONFIRM_SWAP:
-      return "Review and confirm your swap";
+      return "Review and confirm swap";
+    default:
+      return "";
+  }
+};
+
+const getStepTitle = (step: Step) => {
+  switch (step) {
+    case Step.SELECT_SUBNET:
+      return "Swap Tokens";
+    case Step.SELECT_VALIDATOR:
+      return "Swap Tokens";
+    case Step.CONFIRM_SWAP:
+      return "Confirm Swap";
     default:
       return "";
   }
@@ -197,12 +210,14 @@ export const Swap = () => {
               disabled={
                 (step === Step.SELECT_SUBNET &&
                   (!selectedSubnet || validators.length === 0)) ||
-                (step === Step.SELECT_VALIDATOR && !selectedValidator)
+                (step === Step.SELECT_VALIDATOR && !selectedValidator) ||
+                step === Step.CONFIRM_SWAP
               }
               className={`transition-colors ${
                 (step === Step.SELECT_SUBNET &&
                   (!selectedSubnet || validators.length === 0)) ||
-                (step === Step.SELECT_VALIDATOR && !selectedValidator)
+                (step === Step.SELECT_VALIDATOR && !selectedValidator) ||
+                step === Step.CONFIRM_SWAP
                   ? "text-mf-ash-300 cursor-not-allowed"
                   : "text-mf-safety-300 hover:text-mf-milk-300"
               }`}
@@ -214,8 +229,8 @@ export const Swap = () => {
 
         <div className="w-full max-w-md">
           <div className="text-center mb-4">
-            <h1 className="text-xl font-semibold text-mf-silver-300">
-              Swap Tokens
+            <h1 className="text-lg font-semibold text-mf-silver-300">
+              {getStepTitle(step)}
             </h1>
             <p className="text-xs text-mf-silver-300 mt-1">
               {getStepSubtext(step)}

@@ -19,11 +19,24 @@ enum Step {
 const getStepSubtext = (step: Step) => {
   switch (step) {
     case Step.SELECT_STAKE:
-      return "Select a stake to move";
+      return "Select a stake";
     case Step.SELECT_VALIDATOR:
-      return "Select a validator to move to";
+      return "Select a validator";
     case Step.CONFIRM_STAKE:
-      return "Review and confirm your stake";
+      return "Review and confirm stake";
+    default:
+      return "";
+  }
+};
+
+const getStepTitle = (step: Step) => {
+  switch (step) {
+    case Step.SELECT_STAKE:
+      return "Add Stake";
+    case Step.SELECT_VALIDATOR:
+      return "Add Stake";
+    case Step.CONFIRM_STAKE:
+      return "Confirm Stake";
     default:
       return "";
   }
@@ -214,12 +227,14 @@ const Stake = () => {
               disabled={
                 (step === Step.SELECT_STAKE &&
                   (!selectedStake || validators.length === 0)) ||
-                (step === Step.SELECT_VALIDATOR && !selectedValidator)
+                (step === Step.SELECT_VALIDATOR && !selectedValidator) ||
+                step === Step.CONFIRM_STAKE
               }
               className={`transition-colors ${
                 (step === Step.SELECT_STAKE &&
                   (!selectedStake || validators.length === 0)) ||
-                (step === Step.SELECT_VALIDATOR && !selectedValidator)
+                (step === Step.SELECT_VALIDATOR && !selectedValidator) ||
+                step === Step.CONFIRM_STAKE
                   ? "text-mf-ash-300 cursor-not-allowed"
                   : "text-mf-safety-300 hover:text-mf-milk-300"
               }`}
@@ -231,8 +246,8 @@ const Stake = () => {
 
         <div className="w-full max-w-md">
           <div className="text-center mb-4">
-            <h1 className="text-xl font-semibold text-mf-silver-300">
-              Add Stake
+            <h1 className="text-lg font-semibold text-mf-silver-300">
+              {getStepTitle(step)}
             </h1>
             <p className="text-xs text-mf-silver-300 mt-1">
               {getStepSubtext(step)}

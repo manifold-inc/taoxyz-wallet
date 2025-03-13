@@ -25,6 +25,7 @@ export const ConfirmSwap = ({
   const [error, setError] = useState<string | null>(null);
 
   const taoAmount = parseFloat(amount) || 0;
+  const totalCost = taoAmount;
   const slippageCalculation = useMemo(() => {
     if (!subnet.alphaIn || !subnet.taoIn || !taoAmount) return null;
     return calculateSlippage(subnet.alphaIn, subnet.taoIn, taoAmount, true);
@@ -33,7 +34,10 @@ export const ConfirmSwap = ({
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value === "" || /^\d*\.?\d*$/.test(value)) {
-      setAmount(value);
+      const numValue = parseFloat(value);
+      if (value === "" || (!isNaN(numValue) && numValue >= 0)) {
+        setAmount(value);
+      }
     }
   };
 
@@ -55,8 +59,6 @@ export const ConfirmSwap = ({
     }
   };
 
-  const totalCost = taoAmount;
-
   if (isLoading) {
     return <div>Loading API...</div>;
   }
@@ -66,8 +68,8 @@ export const ConfirmSwap = ({
   }
 
   return (
-    <div className="space-y-3 p-4">
-      <div className="rounded-lg bg-mf-ash-300 p-3 space-y-2">
+    <div className="space-y-3 p-2">
+      <div className="rounded-lg bg-mf-ash-500 p-2 space-y-2">
         <div>
           <p className="text-xs text-mf-silver-300">Selected Subnet</p>
           <p className="text-xs font-semibold text-mf-milk-300">
@@ -94,13 +96,12 @@ export const ConfirmSwap = ({
         <div>
           <p className="text-xs text-mf-silver-300 mb-1">Swap Amount (τ)</p>
           <input
-            type="number"
+            type="text"
+            inputMode="decimal"
             value={amount}
             onChange={handleAmountChange}
             placeholder="Enter amount to swap"
             className="w-full px-3 py-2 text-xs rounded-lg bg-mf-ash-300 text-mf-milk-300 border-none focus:outline-none focus:ring-2 focus:ring-mf-safety-300"
-            min="0"
-            step="0.0001"
           />
           <p className="mt-1 text-xs text-mf-silver-300">
             Available Balance: {balance} τ
@@ -156,12 +157,16 @@ export const ConfirmSwap = ({
           disabled={
             !amount || isSubmitting || !api || totalCost > parseFloat(balance)
           }
-          className="w-full text-xs flex items-center justify-center rounded-lg bg-mf-safety-300 hover:bg-mf-safety-400 transition-colors px-4 py-3 text-mf-milk-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          className={`w-full text-xs flex items-center justify-center rounded-lg transition-colors px-4 py-3 mt-5 text-semibold text-mf-ash-300 ${
+            !amount || isSubmitting || !api || totalCost > parseFloat(balance)
+              ? "bg-mf-ash-400 text-mf-milk-300 cursor-not-allowed"
+              : "bg-mf-sybil-700 hover:bg-mf-sybil-500 active:bg-mf-sybil-700"
+          }`}
         >
           {isSubmitting ? (
             <div className="flex items-center justify-center space-x-2">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-mf-milk-300" />
-              <span>Swapping...</span>
+              <span>Pending...</span>
             </div>
           ) : (
             "Confirm"
