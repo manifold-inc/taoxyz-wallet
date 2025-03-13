@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import taoxyzLogo from "../../../public/icons/taoxyz.svg";
@@ -31,7 +31,15 @@ export const Swap = () => {
   const [isLoadingSubnets, setIsLoadingSubnets] = useState(true);
   const [isLoadingValidators, setIsLoadingValidators] = useState(false);
 
+  console.log("Swap component rendered");
+
   useEffect(() => {
+    console.log("API effect triggered", {
+      apiExists: !!api,
+      subnetsLength: subnets.length,
+      isLoadingSubnets,
+    });
+    if (!api) return;
     getSubnets();
     getBalance();
   }, [api]);
@@ -39,12 +47,15 @@ export const Swap = () => {
   const getSubnets = async () => {
     if (!api) return;
     try {
+      console.log("getSubnets called - setting loading state");
       setIsLoadingSubnets(true);
       const subnets = await api.getSubnets();
+      console.log("Subnets fetched from API:", subnets?.length);
       setSubnets(subnets ?? []);
     } catch (error) {
       console.error("Error loading subnets:", error);
     } finally {
+      console.log("Setting loading state to false");
       setIsLoadingSubnets(false);
     }
   };
@@ -71,10 +82,21 @@ export const Swap = () => {
     }
   };
 
-  const handleSubnetSelect = async (subnet: Subnet) => {
-    setSelectedSubnet(subnet);
-    await getValidators(subnet.id);
-  };
+  const handleSubnetSelect = useCallback(
+    async (subnet: Subnet) => {
+      if (selectedSubnet?.id === subnet.id) {
+        setSelectedSubnet(null);
+        setValidators([]);
+        return;
+      }
+      setSelectedSubnet(subnet);
+      setValidators([]);
+      await getValidators(subnet.id);
+    },
+    [selectedSubnet]
+  );
+
+  const memoizedSubnets = useMemo(() => subnets, [subnets]);
 
   const handleValidatorSelect = (validator: Validator) => {
     setSelectedValidator(validator);
@@ -84,6 +106,7 @@ export const Swap = () => {
     if (step === Step.SELECT_VALIDATOR) {
       setStep(Step.SELECT_SUBNET);
       setSelectedSubnet(null);
+      setSelectedValidator(null);
     } else if (step === Step.CONFIRM_SWAP) {
       setStep(Step.SELECT_VALIDATOR);
       setSelectedValidator(null);
@@ -91,8 +114,13 @@ export const Swap = () => {
   };
 
   const handleNext = () => {
-    if (step === Step.SELECT_SUBNET && selectedSubnet) {
+    if (
+      step === Step.SELECT_SUBNET &&
+      selectedSubnet &&
+      validators.length > 0
+    ) {
       setStep(Step.SELECT_VALIDATOR);
+      setValidators(validators);
     } else if (step === Step.SELECT_VALIDATOR && selectedValidator) {
       setStep(Step.CONFIRM_SWAP);
     }
@@ -103,10 +131,12 @@ export const Swap = () => {
       case Step.SELECT_SUBNET:
         return (
           <SubnetSelection
-            subnets={subnets}
+            subnets={memoizedSubnets}
             onSelect={handleSubnetSelect}
-            isLoading={isLoadingSubnets}
+            isLoadingSubnets={isLoadingSubnets}
             selectedSubnet={selectedSubnet}
+            validators={validators}
+            isLoadingValidators={isLoadingValidators}
           />
         );
       case Step.SELECT_VALIDATOR:
@@ -116,7 +146,6 @@ export const Swap = () => {
             subnet={selectedSubnet}
             validators={validators}
             onSelect={handleValidatorSelect}
-            isLoading={isLoadingValidators}
             selectedValidator={selectedValidator}
           />
         );
@@ -158,11 +187,13 @@ export const Swap = () => {
             <button
               onClick={handleNext}
               disabled={
-                (step === Step.SELECT_SUBNET && !selectedSubnet) ||
+                (step === Step.SELECT_SUBNET &&
+                  (!selectedSubnet || validators.length === 0)) ||
                 (step === Step.SELECT_VALIDATOR && !selectedValidator)
               }
               className={`transition-colors ${
-                (step === Step.SELECT_SUBNET && !selectedSubnet) ||
+                (step === Step.SELECT_SUBNET &&
+                  (!selectedSubnet || validators.length === 0)) ||
                 (step === Step.SELECT_VALIDATOR && !selectedValidator)
                   ? "text-mf-ash-300 cursor-not-allowed"
                   : "text-mf-safety-300 hover:text-mf-milk-300"

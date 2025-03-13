@@ -3,25 +3,15 @@ import type { Subnet, Validator } from "../../../types/client";
 interface ValidatorSelectionProps {
   subnet: Subnet;
   validators: Validator[];
-  isLoading: boolean;
   onSelect: (validator: Validator) => void;
   selectedValidator: Validator | null;
 }
 
 const ValidatorSelection = ({
   validators,
-  isLoading,
   onSelect,
   selectedValidator,
 }: ValidatorSelectionProps) => {
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-16">
-        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-mf-milk-300" />
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-2 p-4">
       {validators.map((validator) => {

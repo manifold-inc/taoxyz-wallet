@@ -37,7 +37,6 @@ const Stake = () => {
     null
   );
   const [isLoadingStakes, setIsLoadingStakes] = useState(true);
-  const [isLoadingValidators, setIsLoadingValidators] = useState(false);
 
   useEffect(() => {
     getStakes();
@@ -77,7 +76,6 @@ const Stake = () => {
 
   const getValidators = async (subnetId: number, validatorHotkey: string) => {
     try {
-      setIsLoadingValidators(true);
       const validators = await api?.getValidators(subnetId);
       const filteredValidators =
         validators?.filter(
@@ -86,8 +84,6 @@ const Stake = () => {
       setValidators(filteredValidators);
     } catch (error) {
       console.error("[Client] Error loading validators:", error);
-    } finally {
-      setIsLoadingValidators(false);
     }
   };
 
@@ -138,7 +134,6 @@ const Stake = () => {
             subnet={selectedSubnet}
             validators={validators}
             onSelect={handleValidatorSelect}
-            isLoading={isLoadingValidators}
             selectedValidator={selectedValidator}
           />
         );

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useRef } from "react";
 import PolkadotApi from "../api/polkadotApi";
 
 interface PolkadotApiContextType {
@@ -28,31 +28,57 @@ export const PolkadotApiProvider = ({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [endpoint, setEndpoint] = useState<"test" | "main">("test");
+  const mounted = useRef(false);
 
   useEffect(() => {
+    if (mounted.current) return;
+    mounted.current = true;
+
     const initApi = async () => {
       setIsLoading(true);
-      const newApi = new PolkadotApi(endpoint);
-      await newApi.getApi();
-      setApi(newApi);
-      setIsLoading(false);
+      try {
+        const newApi = new PolkadotApi(endpoint);
+        await newApi.getApi();
+        setApi(newApi);
+      } catch (error) {
+        setError(
+          error instanceof Error ? error : new Error("Failed to initialize API")
+        );
+      } finally {
+        setIsLoading(false);
+      }
     };
+
     initApi();
+
+    return () => {
+      if (api) {
+        api.disconnect();
+      }
+    };
   }, []);
 
   const handleEndpointChange = async (newEndpoint: "test" | "main") => {
+    console.log("handleEndpointChange called", {
+      newEndpoint,
+      currentEndpoint: endpoint,
+    });
+
     if (!api) {
+      console.log("No existing API, creating new instance");
       const newApi = new PolkadotApi(newEndpoint);
       await newApi.getApi();
       setApi(newApi);
       return newApi;
     }
     setIsLoading(true);
+
     try {
       await api.changeEndpoint(newEndpoint);
       setEndpoint(newEndpoint);
       return api;
     } catch (error) {
+      console.error("Error changing endpoint:", error);
       setError(
         error instanceof Error ? error : new Error("Failed to change endpoint")
       );
