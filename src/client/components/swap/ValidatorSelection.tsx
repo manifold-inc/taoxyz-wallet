@@ -13,7 +13,7 @@ const ValidatorSelection = ({
   selectedValidator,
 }: ValidatorSelectionProps) => {
   return (
-    <div className="space-y-2 p-4">
+    <div className="space-y-2 p-2">
       {validators.map((validator) => {
         const isSelected = selectedValidator?.hotkey === validator.hotkey;
         return (
@@ -22,7 +22,7 @@ const ValidatorSelection = ({
             className={`w-full rounded-lg ${
               isSelected
                 ? "bg-mf-ash-400 ring-1 ring-mf-safety-300"
-                : "bg-mf-ash-300 hover:bg-mf-ash-400"
+                : "bg-mf-ash-500 hover:bg-mf-ash-400"
             } transition-colors px-3 py-2 cursor-pointer`}
             onClick={() => onSelect(validator)}
           >

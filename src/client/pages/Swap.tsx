@@ -213,7 +213,7 @@ export const Swap = () => {
         </div>
 
         <div className="w-full max-w-md">
-          <div className="text-center mb-6">
+          <div className="text-center mb-4">
             <h1 className="text-xl font-semibold text-mf-silver-300">
               Swap Tokens
             </h1>
@@ -223,7 +223,7 @@ export const Swap = () => {
           </div>
 
           <div className="w-80">
-            <div className="w-full rounded-lg bg-mf-ash-500 max-h-[calc(100vh-280px)] overflow-y-auto">
+            <div className="w-full rounded-lg bg-mf-ash-500 max-h-[calc(100vh-310px)] overflow-y-auto">
               {renderStep()}
             </div>
           </div>

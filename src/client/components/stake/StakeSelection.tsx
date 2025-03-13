@@ -29,7 +29,7 @@ const StakeSelection = ({
   }
 
   return (
-    <div className="space-y-2 p-4">
+    <div className="space-y-2 p-2">
       {stakes.map((stake) => {
         const isSelected =
           selectedStake?.validatorHotkey === stake.validatorHotkey &&
@@ -40,7 +40,7 @@ const StakeSelection = ({
             className={`w-full rounded-lg ${
               isSelected
                 ? "bg-mf-ash-400 ring-1 ring-mf-safety-300"
-                : "bg-mf-ash-300 hover:bg-mf-ash-400"
+                : "bg-mf-ash-500 hover:bg-mf-ash-400"
             } transition-colors px-3 py-2 cursor-pointer`}
             onClick={() => onSelect(stake)}
           >
@@ -58,7 +58,7 @@ const StakeSelection = ({
                 </p>
                 {isSelected && (
                   <p
-                    className={`text-xs mt-1 ${
+                    className={`text-xs ${
                       !isLoadingValidators && validators.length > 0
                         ? "text-mf-sybil-300"
                         : "text-mf-safety-300"
