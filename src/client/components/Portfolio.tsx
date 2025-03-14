@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { usePolkadotApi } from "../contexts/PolkadotApiContext";
+import KeyringService from "../services/KeyringService";
+import MessageService from "../services/MessageService";
 import StakeOverview from "./portfolio/StakeOverview";
 import ExpandedStake from "./portfolio/ExpandedStake";
-import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 import type { StakeTransaction, Subnet } from "../../types/client";
 
 interface PortfolioProps {
@@ -15,7 +17,14 @@ const Portfolio = ({ stakes, address }: PortfolioProps) => {
   const { api } = usePolkadotApi();
   const navigate = useNavigate();
   const [selectedStake, setSelectedStake] = useState<StakeTransaction | null>(
-    null
+    () => {
+      const storedStake = localStorage.getItem("storeStakeSelection");
+      if (storedStake) {
+        localStorage.removeItem("storeStakeSelection");
+        return JSON.parse(storedStake);
+      }
+      return null;
+    }
   );
   const [selectedSubnet, setSelectedSubnet] = useState<Subnet | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -50,14 +59,24 @@ const Portfolio = ({ stakes, address }: PortfolioProps) => {
     });
   };
 
-  const confirmSwap = async () => {
-    if (!api || !selectedStake) {
-      setError("No API or stake selected");
+  const handleAuth = async () => {
+    if (KeyringService.isLocked(address)) {
+      localStorage.setItem("accountLocked", "true");
+      localStorage.setItem(
+        "storeStakeSelection",
+        JSON.stringify(selectedStake)
+      );
+      MessageService.sendAccountsLockedMessage("manual");
       return;
     }
+  };
+
+  const handleSwap = async () => {
+    if (!api || !selectedStake) return;
     setError(null);
 
     try {
+      await handleAuth();
       const convertedStake = selectedStake.tokens / 1e9;
       await api.removeStake({
         address,
@@ -93,7 +112,7 @@ const Portfolio = ({ stakes, address }: PortfolioProps) => {
             setSelectedSubnet(null);
             setError(null);
           }}
-          onSwap={confirmSwap}
+          onSwap={handleSwap}
           onMoveStake={handleMoveStake}
         />
       ) : (

@@ -12,6 +12,8 @@ const sendErrorResponse = (
   sendResponse({ success: false, error, details });
 };
 
+// Potentially sendMessage() Refactor
+
 const MessageService = {
   async sendAccountsLockedMessage(reason: string) {
     await chrome.runtime.sendMessage({
