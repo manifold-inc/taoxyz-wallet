@@ -12,6 +12,20 @@ const ValidatorSelection = ({
   onSelect,
   selectedValidator,
 }: ValidatorSelectionProps) => {
+  if (validators.length === 0) {
+    return (
+      <div className="p-2">
+        <div className="w-full rounded-lg bg-mf-ash-500 px-3 py-4 ring-1 ring-mf-safety-300">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <p className="text-xs text-mf-safety-300">No validators found</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-2 p-2">
       {validators.map((validator) => {
