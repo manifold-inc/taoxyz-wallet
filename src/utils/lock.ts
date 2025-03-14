@@ -1,5 +1,5 @@
 import KeyringService from "../client/services/KeyringService";
-import { MESSAGE_TYPES } from "../types/messages";
+import MessageService from "../client/services/MessageService";
 
 const LOCK_TIMEOUT_MS = 15 * 60 * 1000;
 let lockLockId: number | null = null;
@@ -24,10 +24,7 @@ const LockManager = {
       lockLockId = null;
     }
 
-    chrome.runtime.sendMessage({
-      type: MESSAGE_TYPES.ACCOUNTS_LOCKED,
-      payload: { reason: event },
-    });
+    MessageService.sendAccountsLockedMessage(event);
   },
 };
 

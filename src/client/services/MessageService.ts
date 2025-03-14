@@ -13,6 +13,15 @@ const sendErrorResponse = (
 };
 
 const MessageService = {
+  async sendAccountsLockedMessage(reason: string) {
+    await chrome.runtime.sendMessage({
+      type: MESSAGE_TYPES.ACCOUNTS_LOCKED,
+      payload: {
+        reason,
+      },
+    });
+  },
+
   async handleAuthMessage(
     message: ExtensionMessage & { type: typeof MESSAGE_TYPES.AUTHENTICATE },
     _sender: chrome.runtime.MessageSender,
@@ -38,7 +47,7 @@ const MessageService = {
   },
 
   handleLockMessage(
-    message: ExtensionMessage & { type: typeof MESSAGE_TYPES.ACCOUNTS_LOCKED },
+    _message: ExtensionMessage & { type: typeof MESSAGE_TYPES.ACCOUNTS_LOCKED },
     _sender: chrome.runtime.MessageSender,
     sendResponse: (response: ResponseMessage) => void
   ) {

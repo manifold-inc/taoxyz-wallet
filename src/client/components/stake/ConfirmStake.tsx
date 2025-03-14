@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
 import KeyringService from "../../services/KeyringService";
+import MessageService from "../../services/MessageService";
 import { usePolkadotApi } from "../../contexts/PolkadotApiContext";
 import { calculateSlippage } from "../../../utils/utils";
 import type {
@@ -9,7 +10,6 @@ import type {
   Subnet,
   StakeTransaction,
 } from "../../../types/client";
-import { MESSAGE_TYPES } from "../../../types/messages";
 
 interface ConfirmStakeProps {
   stake: StakeTransaction;
@@ -30,9 +30,9 @@ const ConfirmStake = ({
     const storedTransaction = localStorage.getItem("storeStakeTransaction");
     if (storedTransaction) {
       const { amount } = JSON.parse(storedTransaction);
+      localStorage.removeItem("storeStakeTransaction");
       return amount;
     }
-    localStorage.removeItem("storeStakeTransaction");
     return "";
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -62,12 +62,7 @@ const ConfirmStake = ({
         JSON.stringify({ subnet, validator, stake, amount })
       );
       localStorage.setItem("accountLocked", "true");
-      await chrome.runtime.sendMessage({
-        type: MESSAGE_TYPES.ACCOUNTS_LOCKED,
-        payload: {
-          reason: "manual",
-        },
-      });
+      MessageService.sendAccountsLockedMessage("manual");
       setIsSubmitting(false);
       return;
     }

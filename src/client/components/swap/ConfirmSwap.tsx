@@ -2,10 +2,10 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { usePolkadotApi } from "../../contexts/PolkadotApiContext";
+import MessageService from "../../services/MessageService";
 import KeyringService from "../../services/KeyringService";
 import { calculateSlippage } from "../../../utils/utils";
 import type { Subnet, Validator } from "../../../types/client";
-import { MESSAGE_TYPES } from "../../../types/messages";
 
 interface ConfirmSwapProps {
   subnet: Subnet;
@@ -26,9 +26,9 @@ export const ConfirmSwap = ({
     const storedTransaction = localStorage.getItem("storeSwapTransaction");
     if (storedTransaction) {
       const { amount } = JSON.parse(storedTransaction);
+      localStorage.removeItem("storeSwapTransaction");
       return amount;
     }
-    localStorage.removeItem("storeSwapTransaction");
     return "";
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -62,12 +62,7 @@ export const ConfirmSwap = ({
         })
       );
       localStorage.setItem("accountLocked", "true");
-      await chrome.runtime.sendMessage({
-        type: MESSAGE_TYPES.ACCOUNTS_LOCKED,
-        payload: {
-          reason: "manual",
-        },
-      });
+      MessageService.sendAccountsLockedMessage("manual");
       setIsSubmitting(false);
       return;
     }
