@@ -2,8 +2,10 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { usePolkadotApi } from "../../contexts/PolkadotApiContext";
+import KeyringService from "../../services/KeyringService";
 import { calculateSlippage } from "../../../utils/utils";
 import type { Subnet, Validator } from "../../../types/client";
+import { MESSAGE_TYPES } from "../../../types/messages";
 
 interface ConfirmSwapProps {
   subnet: Subnet;
@@ -20,7 +22,15 @@ export const ConfirmSwap = ({
 }: ConfirmSwapProps) => {
   const { api, isLoading } = usePolkadotApi();
   const navigate = useNavigate();
-  const [amount, setAmount] = useState<string>("");
+  const [amount, setAmount] = useState<string>(() => {
+    const storedTransaction = localStorage.getItem("storeSwapTransaction");
+    if (storedTransaction) {
+      const { amount } = JSON.parse(storedTransaction);
+      return amount;
+    }
+    localStorage.removeItem("storeSwapTransaction");
+    return "";
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -41,10 +51,33 @@ export const ConfirmSwap = ({
     }
   };
 
+  const handleAuth = async () => {
+    if (KeyringService.isLocked(address)) {
+      localStorage.setItem(
+        "storeSwapTransaction",
+        JSON.stringify({
+          subnet,
+          validator,
+          amount,
+        })
+      );
+      localStorage.setItem("accountLocked", "true");
+      await chrome.runtime.sendMessage({
+        type: MESSAGE_TYPES.ACCOUNTS_LOCKED,
+        payload: {
+          reason: "manual",
+        },
+      });
+      setIsSubmitting(false);
+      return;
+    }
+  };
+
   const handleSubmit = async () => {
     if (!api || !amount || isSubmitting) return;
     setIsSubmitting(true);
     try {
+      await handleAuth();
       await api.createStake({
         address,
         subnetId: subnet.id,

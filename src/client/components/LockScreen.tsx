@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 import KeyringService from "../services/KeyringService";
 import taoxyzLogo from "../../../public/icons/taoxyz.svg";
@@ -10,12 +9,11 @@ interface LockScreenProps {
 }
 
 const LockScreen = ({ setIsLocked }: LockScreenProps) => {
+  const { api, isLoading: isApiLoading } = usePolkadotApi();
   const [password, setPassword] = useState("");
   const [passwordSelected, setPasswordSelected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
-  const { api, isLoading: isApiLoading } = usePolkadotApi();
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value);
@@ -45,7 +43,6 @@ const LockScreen = ({ setIsLocked }: LockScreenProps) => {
       if (isUnlocked) {
         localStorage.setItem("accountLocked", "false");
         setIsLocked(false);
-        navigate("/dashboard");
       }
     } catch (error) {
       if (

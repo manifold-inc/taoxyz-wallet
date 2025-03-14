@@ -60,6 +60,16 @@ export const Swap = () => {
     getBalance();
   }, [api]);
 
+  useEffect(() => {
+    const savedTransaction = localStorage.getItem("storeSwapTransaction");
+    if (savedTransaction) {
+      const { subnet, validator } = JSON.parse(savedTransaction);
+      setStep(Step.CONFIRM_SWAP);
+      setSelectedSubnet(subnet);
+      setSelectedValidator(validator);
+    }
+  }, []);
+
   const getSubnets = async () => {
     if (!api) return;
     try {

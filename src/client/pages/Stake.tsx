@@ -72,12 +72,24 @@ const Stake = () => {
   const [isLoadingValidators, setIsLoadingValidators] = useState(false);
 
   useEffect(() => {
+    if (!api) return;
     getStakes();
     if (location.state?.selectedStake) {
       const stake = location.state.selectedStake;
       getValidators(stake.subnetId, stake.validatorHotkey);
     }
   }, [api]);
+
+  useEffect(() => {
+    const storedTransaction = localStorage.getItem("storeStakeTransaction");
+    if (storedTransaction) {
+      const { subnet, validator, stake } = JSON.parse(storedTransaction);
+      setStep(Step.CONFIRM_STAKE);
+      setSelectedSubnet(subnet);
+      setSelectedValidator(validator);
+      setSelectedStake(stake);
+    }
+  }, []);
 
   const getStakes = async () => {
     if (!api) return;
