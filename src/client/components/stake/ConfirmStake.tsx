@@ -62,7 +62,7 @@ const ConfirmStake = ({
         JSON.stringify({ subnet, validator, stake, amount })
       );
       localStorage.setItem("accountLocked", "true");
-      MessageService.sendAccountsLockedMessage("manual");
+      MessageService.sendAccountsLockedMessage();
       setIsSubmitting(false);
       return;
     }

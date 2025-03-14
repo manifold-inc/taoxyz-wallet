@@ -66,7 +66,7 @@ const Portfolio = ({ stakes, address }: PortfolioProps) => {
         "storeStakeSelection",
         JSON.stringify(selectedStake)
       );
-      MessageService.sendAccountsLockedMessage("manual");
+      MessageService.sendAccountsLockedMessage();
       return;
     }
   };

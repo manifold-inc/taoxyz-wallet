@@ -2,8 +2,8 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { usePolkadotApi } from "../../contexts/PolkadotApiContext";
-import MessageService from "../../services/MessageService";
 import KeyringService from "../../services/KeyringService";
+import MessageService from "../../services/MessageService";
 import { calculateSlippage } from "../../../utils/utils";
 import type { Subnet, Validator } from "../../../types/client";
 
@@ -62,7 +62,7 @@ export const ConfirmSwap = ({
         })
       );
       localStorage.setItem("accountLocked", "true");
-      MessageService.sendAccountsLockedMessage("manual");
+      MessageService.sendAccountsLockedMessage();
       setIsSubmitting(false);
       return;
     }

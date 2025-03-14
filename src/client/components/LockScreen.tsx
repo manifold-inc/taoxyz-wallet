@@ -1,8 +1,9 @@
 import { useState } from "react";
 
-import KeyringService from "../services/KeyringService";
-import taoxyzLogo from "../../../public/icons/taoxyz.svg";
 import { usePolkadotApi } from "../contexts/PolkadotApiContext";
+import KeyringService from "../services/KeyringService";
+import MessageService from "../services/MessageService";
+import taoxyzLogo from "../../../public/icons/taoxyz.svg";
 
 interface LockScreenProps {
   setIsLocked: (isLocked: boolean) => void;
@@ -42,6 +43,7 @@ const LockScreen = ({ setIsLocked }: LockScreenProps) => {
 
       if (isUnlocked) {
         localStorage.setItem("accountLocked", "false");
+        await MessageService.sendStartLockTimer();
         setIsLocked(false);
       }
     } catch (error) {

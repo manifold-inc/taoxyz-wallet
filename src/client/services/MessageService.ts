@@ -15,12 +15,21 @@ const sendErrorResponse = (
 // Potentially sendMessage() Refactor
 
 const MessageService = {
-  async sendAccountsLockedMessage(reason: string) {
+  async sendAccountsLockedMessage() {
     await chrome.runtime.sendMessage({
       type: MESSAGE_TYPES.ACCOUNTS_LOCKED,
-      payload: {
-        reason,
-      },
+    });
+  },
+
+  async sendStartLockTimer() {
+    await chrome.runtime.sendMessage({
+      type: MESSAGE_TYPES.START_LOCK_TIMER,
+    });
+  },
+
+  async sendClearLockTimer() {
+    await chrome.runtime.sendMessage({
+      type: MESSAGE_TYPES.CLEAR_LOCK_TIMER,
     });
   },
 
@@ -55,6 +64,7 @@ const MessageService = {
   ) {
     try {
       localStorage.setItem("accountLocked", "true");
+      KeyringService.lockAll();
       window.location.reload();
       sendResponse({ success: true });
     } catch (error) {

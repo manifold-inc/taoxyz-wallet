@@ -4,7 +4,7 @@ import { TypeRegistry } from "@polkadot/types";
 import type { KeyringPair, KeyringPair$Meta } from "@polkadot/keyring/types";
 import type { SignerPayloadJSON } from "@polkadot/types/types";
 
-import LockManager from "../../utils/lock";
+import MessageService from "./MessageService";
 import type { Permissions } from "../../types/client";
 
 const registry = new TypeRegistry();
@@ -28,7 +28,7 @@ export const KeyringService = {
 
     pair.decodePkcs8(password);
     if (!pair.isLocked) {
-      LockManager.startLockTimer();
+      MessageService.sendClearLockTimer();
       return true;
     }
     return false;

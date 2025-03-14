@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { KeyringPair } from "@polkadot/keyring/types";
-import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 
-import taoxyzLogo from "../../../public/icons/taoxyz.svg";
-import CreateForm from "../components/CreateForm";
+import { usePolkadotApi } from "../contexts/PolkadotApiContext";
+import MessageService from "../services/MessageService";
 import MnemonicDisplay from "../components/Mnemonic";
+import CreateForm from "../components/CreateForm";
+import taoxyzLogo from "../../../public/icons/taoxyz.svg";
 
 interface CreateProps {
   setIsLocked: (isLocked: boolean) => void;
@@ -28,6 +29,7 @@ export const Create = ({ setIsLocked }: CreateProps) => {
   const handleContinue = () => {
     localStorage.setItem("currentAddress", account?.address as string);
     localStorage.setItem("accountLocked", "false");
+    MessageService.sendClearLockTimer();
     setIsLocked(false);
     navigate("/dashboard");
   };

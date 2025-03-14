@@ -4,6 +4,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import type { KeyringPair } from "@polkadot/keyring/types";
 
 import KeyringService from "../services/KeyringService";
+import MessageService from "../services/MessageService";
 import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 import type { Permissions } from "../../types/client";
 
@@ -76,6 +77,7 @@ const Settings = ({ setIsLocked }: SettingsProps) => {
 
   const handleLock = () => {
     KeyringService.lockAll();
+    MessageService.sendAccountsLockedMessage();
     localStorage.setItem("accountLocked", "true");
     setIsLocked(true);
     navigate("/");
@@ -83,6 +85,7 @@ const Settings = ({ setIsLocked }: SettingsProps) => {
 
   const handleLogout = () => {
     KeyringService.lockAll();
+    MessageService.sendAccountsLockedMessage();
     localStorage.removeItem("currentAddress");
     localStorage.setItem("accountLocked", "true");
     setIsLocked(true);
@@ -99,6 +102,7 @@ const Settings = ({ setIsLocked }: SettingsProps) => {
       setEndpoint(network);
       localStorage.removeItem("currentAddress");
       localStorage.setItem("accountLocked", "true");
+      MessageService.sendAccountsLockedMessage();
       setIsLocked(true);
       navigate("/");
     }

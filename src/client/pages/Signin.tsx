@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { KeyringService } from "../services/KeyringService";
+import KeyringService from "../services/KeyringService";
+import MessageService from "../services/MessageService";
 import taoxyzLogo from "../../../public/icons/taoxyz.svg";
 import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 
@@ -31,6 +32,7 @@ const Signin = ({ setIsLocked }: SigninProps) => {
         const address = await KeyringService.getAddress(username);
         localStorage.setItem("currentAddress", address);
         localStorage.setItem("accountLocked", "false");
+        MessageService.sendClearLockTimer();
         setIsLocked(false);
         navigate("/dashboard");
       }

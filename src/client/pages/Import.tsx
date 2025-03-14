@@ -3,9 +3,10 @@ import { useNavigate } from "react-router-dom";
 import type { KeyringPair } from "@polkadot/keyring/types";
 import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 
-import taoxyzLogo from "../../../public/icons/taoxyz.svg";
+import KeyringService from "../services/KeyringService";
+import MessageService from "../services/MessageService";
 import CreateForm from "../components/CreateForm";
-import { KeyringService } from "../services/KeyringService";
+import taoxyzLogo from "../../../public/icons/taoxyz.svg";
 
 interface ImportProps {
   setIsLocked: (isLocked: boolean) => void;
@@ -54,6 +55,7 @@ const Import = ({ setIsLocked }: ImportProps) => {
   const handleSuccess = (account: KeyringPair) => {
     localStorage.setItem("currentAddress", account.address as string);
     localStorage.setItem("accountLocked", "false");
+    MessageService.sendClearLockTimer();
     setIsLocked(false);
     navigate("/dashboard");
   };
