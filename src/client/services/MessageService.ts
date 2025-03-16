@@ -63,8 +63,9 @@ const MessageService = {
     sendResponse: (response: ResponseMessage) => void
   ) {
     try {
-      localStorage.setItem("accountLocked", "true");
+      await chrome.storage.local.set({ accountLocked: true });
       KeyringService.lockAll();
+      console.log("[MessageService] Set accountLocked to true");
       window.location.reload();
       sendResponse({ success: true });
     } catch (error) {

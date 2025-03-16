@@ -30,6 +30,8 @@ const App = () => {
     const initState = async () => {
       const lockResult = await chrome.storage.local.get("accountLocked");
       const addressResult = await chrome.storage.local.get("currentAddress");
+      console.log("[App] Lock state:", lockResult.accountLocked);
+      console.log("[App] Current address:", addressResult.currentAddress);
       setIsLocked(lockResult.accountLocked === true);
       setCurrentAddress(addressResult.currentAddress);
     };
