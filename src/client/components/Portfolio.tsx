@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { usePolkadotApi } from "../contexts/PolkadotApiContext";
@@ -17,18 +17,22 @@ const Portfolio = ({ stakes, address }: PortfolioProps) => {
   const { api } = usePolkadotApi();
   const navigate = useNavigate();
   const [selectedStake, setSelectedStake] = useState<StakeTransaction | null>(
-    () => {
-      const storedStake = localStorage.getItem("storeStakeSelection");
-      if (storedStake) {
-        localStorage.removeItem("storeStakeSelection");
-        return JSON.parse(storedStake);
-      }
-      return null;
-    }
+    null
   );
   const [selectedSubnet, setSelectedSubnet] = useState<Subnet | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const initStake = async () => {
+      const result = await chrome.storage.local.get("storeStakeSelection");
+      if (result.storeStakeSelection) {
+        await chrome.storage.local.remove("storeStakeSelection");
+        setSelectedStake(JSON.parse(result.storeStakeSelection));
+      }
+    };
+    initStake();
+  }, []);
 
   const handleStakeSelect = async (stake: StakeTransaction) => {
     setError(null);
@@ -61,11 +65,10 @@ const Portfolio = ({ stakes, address }: PortfolioProps) => {
 
   const handleAuth = async () => {
     if (KeyringService.isLocked(address)) {
-      localStorage.setItem("accountLocked", "true");
-      localStorage.setItem(
-        "storeStakeSelection",
-        JSON.stringify(selectedStake)
-      );
+      await chrome.storage.local.set({ accountLocked: true });
+      await chrome.storage.local.set({
+        storeStakeSelection: selectedStake,
+      });
       MessageService.sendAccountsLockedMessage();
       return;
     }

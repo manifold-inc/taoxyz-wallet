@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import KeyringService from "../../services/KeyringService";
@@ -26,17 +26,21 @@ const ConfirmStake = ({
 }: ConfirmStakeProps) => {
   const { api, isLoading } = usePolkadotApi();
   const navigate = useNavigate();
-  const [amount, setAmount] = useState<string>(() => {
-    const storedTransaction = localStorage.getItem("storeStakeTransaction");
-    if (storedTransaction) {
-      const { amount } = JSON.parse(storedTransaction);
-      localStorage.removeItem("storeStakeTransaction");
-      return amount;
-    }
-    return "";
-  });
+  const [amount, setAmount] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const initAmount = async () => {
+      const result = await chrome.storage.local.get("storeStakeTransaction");
+      if (result.storeStakeTransaction) {
+        const { amount } = result.storeStakeTransaction;
+        await chrome.storage.local.remove("storeStakeTransaction");
+        setAmount(amount);
+      }
+    };
+    initAmount();
+  }, []);
 
   const alphaAmount = parseFloat(amount) || 0;
   const slippageCalculation = useMemo(() => {
@@ -57,11 +61,15 @@ const ConfirmStake = ({
 
   const handleAuth = async () => {
     if (KeyringService.isLocked(address)) {
-      localStorage.setItem(
-        "storeStakeTransaction",
-        JSON.stringify({ subnet, validator, stake, amount })
-      );
-      localStorage.setItem("accountLocked", "true");
+      await chrome.storage.local.set({
+        storeStakeTransaction: {
+          subnet,
+          validator,
+          stake,
+          amount,
+        },
+      });
+      await chrome.storage.local.set({ accountLocked: true });
       MessageService.sendAccountsLockedMessage();
       setIsSubmitting(false);
       return;

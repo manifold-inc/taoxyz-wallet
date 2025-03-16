@@ -34,15 +34,17 @@ const LockScreen = ({ setIsLocked }: LockScreenProps) => {
     setIsLoading(true);
 
     try {
-      const currentAddress = localStorage.getItem("currentAddress") as string;
-      const account = await KeyringService.getAccount(currentAddress);
+      const result = (await chrome.storage.local.get("currentAddress")) as {
+        currentAddress: string;
+      };
+      const account = await KeyringService.getAccount(result.currentAddress);
       const isUnlocked = await KeyringService.unlockAccount(
         account.meta.username as string,
         password
       );
 
       if (isUnlocked) {
-        localStorage.setItem("accountLocked", "false");
+        await chrome.storage.local.set({ accountLocked: false });
         await MessageService.sendStartLockTimer();
         setIsLocked(false);
       }

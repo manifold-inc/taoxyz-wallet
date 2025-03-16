@@ -26,9 +26,11 @@ export const Create = ({ setIsLocked }: CreateProps) => {
     setMnemonic(generatedMnemonic);
   };
 
-  const handleContinue = () => {
-    localStorage.setItem("currentAddress", account?.address as string);
-    localStorage.setItem("accountLocked", "false");
+  const handleContinue = async () => {
+    await chrome.storage.local.set({
+      currentAddress: account?.address as string,
+    });
+    await chrome.storage.local.set({ accountLocked: false });
     MessageService.sendClearLockTimer();
     setIsLocked(false);
     navigate("/dashboard");

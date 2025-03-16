@@ -42,7 +42,7 @@ const getStepTitle = (step: Step) => {
 
 export const Swap = () => {
   const { api } = usePolkadotApi();
-  const address = localStorage.getItem("currentAddress") as string;
+  const [address, setAddress] = useState("");
   const [step, setStep] = useState<Step>(Step.SELECT_SUBNET);
   const [subnets, setSubnets] = useState<Subnet[]>([]);
   const [selectedSubnet, setSelectedSubnet] = useState<Subnet | null>(null);
@@ -58,16 +58,24 @@ export const Swap = () => {
     if (!api) return;
     getSubnets();
     getBalance();
+    const initAddress = async () => {
+      const result = await chrome.storage.local.get("currentAddress");
+      setAddress(result.currentAddress as string);
+    };
+    initAddress();
   }, [api]);
 
   useEffect(() => {
-    const savedTransaction = localStorage.getItem("storeSwapTransaction");
-    if (savedTransaction) {
-      const { subnet, validator } = JSON.parse(savedTransaction);
-      setStep(Step.CONFIRM_SWAP);
-      setSelectedSubnet(subnet);
-      setSelectedValidator(validator);
-    }
+    const initSwap = async () => {
+      const result = await chrome.storage.local.get("storeSwapTransaction");
+      if (result.storeSwapTransaction) {
+        const { subnet, validator } = result.storeSwapTransaction;
+        setStep(Step.CONFIRM_SWAP);
+        setSelectedSubnet(subnet);
+        setSelectedValidator(validator);
+      }
+    };
+    initSwap();
   }, []);
 
   const getSubnets = async () => {

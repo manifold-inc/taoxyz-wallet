@@ -240,6 +240,7 @@ async function handleStartLockTimer(
 ) {
   try {
     chrome.alarms.create("lockTimer", { delayInMinutes: 1 });
+    console.log("[Background] Lock timer started");
     sendResponse({ success: true });
   } catch (error) {
     sendErrorResponse(sendResponse, ERROR_TYPES.UNKNOWN_ERROR, error);
@@ -301,6 +302,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 // When timer goes up, lock all accounts
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === "lockTimer") {
+    console.log("[Background] Lock timer finished");
     chrome.runtime.sendMessage({
       type: MESSAGE_TYPES.ACCOUNTS_LOCKED,
     });

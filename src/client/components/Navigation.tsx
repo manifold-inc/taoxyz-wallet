@@ -1,8 +1,17 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { House, ArrowLeftRight, ListPlus, Redo, Settings2 } from "lucide-react";
 
 const Navigation = () => {
-  const currentAddress = localStorage.getItem("currentAddress");
+  const [currentAddress, setCurrentAddress] = useState<string | null>(null);
+
+  useEffect(() => {
+    const init = async () => {
+      const result = await chrome.storage.local.get("currentAddress");
+      setCurrentAddress(result.currentAddress);
+    };
+    init();
+  }, []);
 
   if (!currentAddress) return null;
 

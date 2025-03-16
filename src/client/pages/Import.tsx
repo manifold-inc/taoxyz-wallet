@@ -52,9 +52,11 @@ const Import = ({ setIsLocked }: ImportProps) => {
     setValidatedMnemonic(mnemonic.trim());
   };
 
-  const handleSuccess = (account: KeyringPair) => {
-    localStorage.setItem("currentAddress", account.address as string);
-    localStorage.setItem("accountLocked", "false");
+  const handleSuccess = async (account: KeyringPair) => {
+    await chrome.storage.local.set({
+      currentAddress: account.address as string,
+    });
+    await chrome.storage.local.set({ accountLocked: false });
     MessageService.sendClearLockTimer();
     setIsLocked(false);
     navigate("/dashboard");

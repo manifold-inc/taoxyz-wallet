@@ -23,21 +23,18 @@ import { PolkadotApiProvider } from "./contexts/PolkadotApiContext";
 import background from "../../public/images/background.png";
 
 const App = () => {
-  const [isLocked, setIsLocked] = useState(() => {
-    return localStorage.getItem("accountLocked") === "true";
-  });
+  const [isLocked, setIsLocked] = useState(false);
+  const [currentAddress, setCurrentAddress] = useState<string | null>(null);
 
   useEffect(() => {
-    const cleanup = MessageService.setupMessageListeners();
-    const checkAddress = async () => {
-      const currentAddress = localStorage.getItem("currentAddress");
-      if (!currentAddress) {
-        setIsLocked(false);
-        localStorage.setItem("accountLocked", "false");
-        return;
-      }
+    const initState = async () => {
+      const lockResult = await chrome.storage.local.get("accountLocked");
+      const addressResult = await chrome.storage.local.get("currentAddress");
+      setIsLocked(lockResult.accountLocked === true);
+      setCurrentAddress(addressResult.currentAddress);
     };
-    checkAddress();
+    initState();
+    const cleanup = MessageService.setupMessageListeners();
     return cleanup;
   }, []);
 
@@ -49,7 +46,7 @@ const App = () => {
           className="bg-cover bg-center min-h-screen w-full"
         >
           <div className="bg-transparent">
-            {isLocked && localStorage.getItem("currentAddress") ? (
+            {isLocked && currentAddress ? (
               <LockScreen setIsLocked={setIsLocked} />
             ) : (
               <>

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { usePolkadotApi } from "../../contexts/PolkadotApiContext";
@@ -22,15 +22,7 @@ export const ConfirmSwap = ({
 }: ConfirmSwapProps) => {
   const { api, isLoading } = usePolkadotApi();
   const navigate = useNavigate();
-  const [amount, setAmount] = useState<string>(() => {
-    const storedTransaction = localStorage.getItem("storeSwapTransaction");
-    if (storedTransaction) {
-      const { amount } = JSON.parse(storedTransaction);
-      localStorage.removeItem("storeSwapTransaction");
-      return amount;
-    }
-    return "";
-  });
+  const [amount, setAmount] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,6 +32,18 @@ export const ConfirmSwap = ({
     if (!subnet.alphaIn || !subnet.taoIn || !taoAmount) return null;
     return calculateSlippage(subnet.alphaIn, subnet.taoIn, taoAmount, true);
   }, [subnet.alphaIn, subnet.taoIn, taoAmount]);
+
+  useEffect(() => {
+    const initAmount = async () => {
+      const result = await chrome.storage.local.get("storeSwapTransaction");
+      if (result.storeSwapTransaction) {
+        const { amount } = result.storeSwapTransaction;
+        await chrome.storage.local.remove("storeSwapTransaction");
+        setAmount(amount);
+      }
+    };
+    initAmount();
+  }, []);
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -53,15 +57,14 @@ export const ConfirmSwap = ({
 
   const handleAuth = async () => {
     if (KeyringService.isLocked(address)) {
-      localStorage.setItem(
-        "storeSwapTransaction",
-        JSON.stringify({
+      await chrome.storage.local.set({
+        storeSwapTransaction: {
           subnet,
           validator,
           amount,
-        })
-      );
-      localStorage.setItem("accountLocked", "true");
+        },
+      });
+      await chrome.storage.local.set({ accountLocked: true });
       MessageService.sendAccountsLockedMessage();
       setIsSubmitting(false);
       return;

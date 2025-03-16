@@ -16,7 +16,7 @@ interface StakeResponse {
 export const Dashboard = () => {
   const { api } = usePolkadotApi();
   const navigate = useNavigate();
-  const address = localStorage.getItem("currentAddress") as string;
+  const [address, setAddress] = useState("");
   const [balance, setBalance] = useState("");
   const [stakes, setStakes] = useState<StakeTransaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -63,6 +63,12 @@ export const Dashboard = () => {
       }
     };
 
+    const initAddress = async () => {
+      const result = await chrome.storage.local.get("currentAddress");
+      setAddress(result.currentAddress as string);
+    };
+
+    initAddress();
     if (api) {
       setError(null);
       fetchBalance();

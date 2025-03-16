@@ -6,7 +6,7 @@ import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 const Transfer = () => {
   const { api } = usePolkadotApi();
   const navigate = useNavigate();
-  const address = localStorage.getItem("currentAddress") as string;
+  const [address, setAddress] = useState("");
   const [toAddress, setToAddress] = useState("");
   const [balance, setBalance] = useState<string>("0");
   const [amount, setAmount] = useState("");
@@ -15,6 +15,11 @@ const Transfer = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    const initAddress = async () => {
+      const result = await chrome.storage.local.get("currentAddress");
+      setAddress(result.currentAddress as string);
+    };
+    initAddress();
     const getBalance = async () => {
       if (!api || !address) return;
       try {

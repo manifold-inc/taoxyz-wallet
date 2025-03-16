@@ -57,7 +57,7 @@ const MessageService = {
     return true;
   },
 
-  handleLockMessage(
+  async handleLockMessage(
     _message: ExtensionMessage & { type: typeof MESSAGE_TYPES.ACCOUNTS_LOCKED },
     _sender: chrome.runtime.MessageSender,
     sendResponse: (response: ResponseMessage) => void

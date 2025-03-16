@@ -30,8 +30,10 @@ const Signin = ({ setIsLocked }: SigninProps) => {
       const isUnlocked = await KeyringService.unlockAccount(username, password);
       if (isUnlocked) {
         const address = await KeyringService.getAddress(username);
-        localStorage.setItem("currentAddress", address);
-        localStorage.setItem("accountLocked", "false");
+        await chrome.storage.local.set({
+          currentAddress: address,
+        });
+        await chrome.storage.local.set({ accountLocked: false });
         MessageService.sendClearLockTimer();
         setIsLocked(false);
         navigate("/dashboard");

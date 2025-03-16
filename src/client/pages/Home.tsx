@@ -10,12 +10,14 @@ const Home = () => {
   const [showDisclaimer, setShowDisclaimer] = useState(false);
 
   useEffect(() => {
-    const savedAddress = localStorage.getItem("currentAddress");
-    const isLocked = localStorage.getItem("accountLocked") === "true";
-
-    if (savedAddress && !isLocked) {
-      navigate("/dashboard");
-    }
+    const initAddress = async () => {
+      const resultAddress = await chrome.storage.local.get("currentAddress");
+      const resultLocked = await chrome.storage.local.get("accountLocked");
+      if (resultAddress.currentAddress && !resultLocked.accountLocked) {
+        navigate("/dashboard");
+      }
+    };
+    initAddress();
   }, [navigate]);
 
   return (

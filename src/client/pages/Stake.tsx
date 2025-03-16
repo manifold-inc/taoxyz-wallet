@@ -51,7 +51,7 @@ interface StakeResponse {
 const Stake = () => {
   const { api } = usePolkadotApi();
   const location = useLocation();
-  const address = localStorage.getItem("currentAddress") as string;
+  const [address, setAddress] = useState("");
 
   const [step, setStep] = useState<Step>(
     location.state?.selectedStake ? Step.SELECT_VALIDATOR : Step.SELECT_STAKE
@@ -73,6 +73,11 @@ const Stake = () => {
 
   useEffect(() => {
     if (!api) return;
+    const initAddress = async () => {
+      const result = await chrome.storage.local.get("currentAddress");
+      setAddress(result.currentAddress as string);
+    };
+    initAddress();
     getStakes();
     if (location.state?.selectedStake) {
       const stake = location.state.selectedStake;
@@ -81,14 +86,17 @@ const Stake = () => {
   }, [api]);
 
   useEffect(() => {
-    const storedTransaction = localStorage.getItem("storeStakeTransaction");
-    if (storedTransaction) {
-      const { subnet, validator, stake } = JSON.parse(storedTransaction);
-      setStep(Step.CONFIRM_STAKE);
-      setSelectedSubnet(subnet);
-      setSelectedValidator(validator);
-      setSelectedStake(stake);
-    }
+    const initStake = async () => {
+      const result = await chrome.storage.local.get("storeStakeTransaction");
+      if (result.storeStakeTransaction) {
+        const { subnet, validator, stake } = result.storeStakeTransaction;
+        setStep(Step.CONFIRM_STAKE);
+        setSelectedSubnet(subnet);
+        setSelectedValidator(validator);
+        setSelectedStake(stake);
+      }
+    };
+    initStake();
   }, []);
 
   const getStakes = async () => {

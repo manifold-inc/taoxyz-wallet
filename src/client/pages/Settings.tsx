@@ -75,24 +75,24 @@ const Settings = ({ setIsLocked }: SettingsProps) => {
     }
   };
 
-  const handleLock = () => {
+  const handleLock = async () => {
     KeyringService.lockAll();
     MessageService.sendAccountsLockedMessage();
-    localStorage.setItem("accountLocked", "true");
+    await chrome.storage.local.set({ accountLocked: true });
     setIsLocked(true);
     navigate("/");
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     KeyringService.lockAll();
     MessageService.sendAccountsLockedMessage();
-    localStorage.removeItem("currentAddress");
-    localStorage.setItem("accountLocked", "true");
+    await chrome.storage.local.remove("currentAddress");
+    await chrome.storage.local.set({ accountLocked: true });
     setIsLocked(true);
     navigate("/");
   };
 
-  const handleNetworkChange = (network: "test" | "main") => {
+  const handleNetworkChange = async (network: "test" | "main") => {
     if (
       window.confirm(
         "Changing the network will require a restart and log you out. Do you want to continue?"
@@ -100,8 +100,8 @@ const Settings = ({ setIsLocked }: SettingsProps) => {
     ) {
       setSelectedNetwork(network);
       setEndpoint(network);
-      localStorage.removeItem("currentAddress");
-      localStorage.setItem("accountLocked", "true");
+      await chrome.storage.local.remove("currentAddress");
+      await chrome.storage.local.set({ accountLocked: true });
       MessageService.sendAccountsLockedMessage();
       setIsLocked(true);
       navigate("/");
