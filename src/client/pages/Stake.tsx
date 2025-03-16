@@ -72,17 +72,27 @@ const Stake = () => {
   const [isLoadingValidators, setIsLoadingValidators] = useState(false);
 
   useEffect(() => {
-    if (!api) return;
-    const initAddress = async () => {
-      const result = await chrome.storage.local.get("currentAddress");
-      setAddress(result.currentAddress as string);
+    const init = async () => {
+      if (!api) return;
+
+      try {
+        const result = await chrome.storage.local.get("currentAddress");
+        const currentAddress = result.currentAddress as string;
+        setAddress(currentAddress);
+
+        if (currentAddress) {
+          await getStakes(currentAddress);
+          if (location.state?.selectedStake) {
+            const stake = location.state.selectedStake;
+            await getValidators(stake.subnetId, stake.validatorHotkey);
+          }
+        }
+      } catch (error) {
+        console.error("[Stake] Error initializing:", error);
+      }
     };
-    initAddress();
-    getStakes();
-    if (location.state?.selectedStake) {
-      const stake = location.state.selectedStake;
-      getValidators(stake.subnetId, stake.validatorHotkey);
-    }
+
+    init();
   }, [api]);
 
   useEffect(() => {
@@ -99,7 +109,7 @@ const Stake = () => {
     initStake();
   }, []);
 
-  const getStakes = async () => {
+  const getStakes = async (address: string) => {
     if (!api) return;
     try {
       setIsLoadingStakes(true);
