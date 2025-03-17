@@ -299,6 +299,10 @@ class PolkadotApi {
     }
   }
 
+  public getNetwork(): string {
+    return this.endpoint;
+  }
+
   public async disconnect(): Promise<void> {
     if (this.api?.isConnected) {
       await this.api.disconnect();

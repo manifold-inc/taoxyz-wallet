@@ -1,25 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, LogOut, Lock } from "lucide-react";
 import type { KeyringPair } from "@polkadot/keyring/types";
 
 import KeyringService from "../services/KeyringService";
 import MessageService from "../services/MessageService";
 import { usePolkadotApi } from "../contexts/PolkadotApiContext";
-import type { Permissions } from "../../types/client";
-
-// TODO: Refactor
-type WebsiteStats = Record<
-  string,
-  {
-    accountCount: number;
-    accounts: {
-      address: string;
-      username: string;
-      hasAccess: boolean;
-    }[];
-  }
->;
+import type { Permissions, PermissionsPerWebsite } from "../../types/client";
+import taoxyzLogo from "../../../public/icons/taoxyz.png";
 
 interface SettingsProps {
   setIsLocked: (isLocked: boolean) => void;
@@ -27,11 +15,14 @@ interface SettingsProps {
 
 const Settings = ({ setIsLocked }: SettingsProps) => {
   const navigate = useNavigate();
-  const { setEndpoint } = usePolkadotApi();
+  const { api, setEndpoint } = usePolkadotApi();
   const [selectedNetwork, setSelectedNetwork] = useState<"test" | "main">(
-    "test"
+    () => {
+      const network = api?.getNetwork();
+      return network === "test" ? "test" : "main";
+    }
   );
-  const [websiteStats, setWebsiteStats] = useState<WebsiteStats>({});
+  const [websiteStats, setWebsiteStats] = useState<PermissionsPerWebsite>({});
   const [expandedWebsite, setExpandedWebsite] = useState<string | null>(null);
   const [accounts, setAccounts] = useState<KeyringPair[]>([]);
 
@@ -43,7 +34,7 @@ const Settings = ({ setIsLocked }: SettingsProps) => {
     try {
       const keyringAccounts = await KeyringService.getAccounts();
       setAccounts(keyringAccounts);
-      const stats: WebsiteStats = {};
+      const stats: PermissionsPerWebsite = {};
 
       for (const account of keyringAccounts) {
         const permissions =
@@ -142,11 +133,21 @@ const Settings = ({ setIsLocked }: SettingsProps) => {
 
   return (
     <div className="flex flex-col items-center min-h-screen overflow-hidden">
-      <div className="h-4" />
-      <div className="flex flex-col items-center h-full w-full">
+      <div className="h-20" />
+      <div className="flex flex-col items-center flex-1">
+        <div className="w-80 grid grid-cols-3 mb-8">
+          <div className="flex items-center justify-start pl-4" />
+          <div className="flex justify-center">
+            <img src={taoxyzLogo} alt="Taoxyz Logo" className="w-16 h-16" />
+          </div>
+          <div className="flex items-center justify-end pr-4" />
+        </div>
+
         <div className="w-80">
-          <div className="mb-4">
-            <h2 className="text-sm font-medium text-mf-silver-300">Settings</h2>
+          <div className="text-center mb-4">
+            <h2 className="text-lg font-semibold text-mf-silver-300">
+              Settings
+            </h2>
           </div>
 
           <div className="space-y-4">
@@ -154,34 +155,27 @@ const Settings = ({ setIsLocked }: SettingsProps) => {
               <h3 className="text-sm font-medium text-mf-silver-300 mb-2">
                 Network
               </h3>
-              <div className="relative w-full h-10 bg-mf-ash-300 rounded-lg p-1">
-                <div
-                  className={`absolute top-1 bottom-1 w-1/2 transition-all duration-200 rounded-md bg-mf-milk-300 ${
-                    selectedNetwork === "test" ? "left-[50%]" : "left-1"
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleNetworkChange("main")}
+                  className={`flex-1 text-xs rounded-lg px-4 py-2 transition-colors ${
+                    selectedNetwork === "main"
+                      ? "bg-mf-sybil-500 text-mf-ash-500 hover:bg-mf-sybil-700"
+                      : "bg-mf-ash-300 text-mf-silver-300 hover:bg-mf-ash-400 hover:text-mf-milk-300"
                   }`}
-                />
-                <div className="relative flex h-full">
-                  <button
-                    onClick={() => handleNetworkChange("test")}
-                    className={`flex-1 text-sm rounded-md transition-colors ${
-                      selectedNetwork === "test"
-                        ? "text-mf-ash-500 font-medium"
-                        : "text-mf-silver-300"
-                    }`}
-                  >
-                    Testnet
-                  </button>
-                  <button
-                    onClick={() => handleNetworkChange("main")}
-                    className={`flex-1 text-sm rounded-md transition-colors ${
-                      selectedNetwork === "main"
-                        ? "text-mf-ash-500 font-medium"
-                        : "text-mf-silver-300"
-                    }`}
-                  >
-                    Mainnet
-                  </button>
-                </div>
+                >
+                  Mainnet
+                </button>
+                <button
+                  onClick={() => handleNetworkChange("test")}
+                  className={`flex-1 text-xs rounded-lg px-4 py-2 transition-colors ${
+                    selectedNetwork === "test"
+                      ? "bg-mf-sybil-500 text-mf-ash-500 hover:bg-mf-sybil-700"
+                      : "bg-mf-ash-300 text-mf-silver-300 hover:bg-mf-ash-400 hover:text-mf-milk-300"
+                  }`}
+                >
+                  Testnet
+                </button>
               </div>
             </div>
 
@@ -269,18 +263,24 @@ const Settings = ({ setIsLocked }: SettingsProps) => {
             </div>
 
             <div className="fixed bottom-20 w-80">
-              <div className="flex space-x-2">
+              <div className="flex space-x-2 text-xs">
                 <button
                   onClick={handleLock}
-                  className="flex-1 text-sm rounded-lg bg-mf-ash-500 hover:bg-mf-ash-400 px-4 py-3 text-mf-safety-300"
+                  className="flex-1 rounded-lg bg-mf-ash-500 hover:bg-mf-ash-400 px-4 py-3 text-mf-safety-300"
                 >
-                  Lock Account
+                  <div className="flex items-center justify-center">
+                    <Lock className="w-4 h-4" />
+                    <span className="ml-2">Lock Account</span>
+                  </div>
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="flex-1 text-sm rounded-lg bg-mf-ash-500 hover:bg-mf-ash-400 px-4 py-3 text-mf-safety-300"
+                  className="flex-1 rounded-lg bg-mf-ash-500 hover:bg-mf-ash-400 px-4 py-3 text-mf-safety-300"
                 >
-                  Log Out
+                  <div className="flex items-center justify-center">
+                    <LogOut className="w-4 h-4" />
+                    <span className="ml-2">Log Out</span>
+                  </div>
                 </button>
               </div>
             </div>
