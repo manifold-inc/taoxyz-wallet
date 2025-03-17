@@ -101,19 +101,21 @@ export const KeyringService = {
   async updatePermissions(
     origin: string,
     address: string,
-    allowAccess: boolean
+    allowAccess: boolean,
+    removeWebsite = false
   ): Promise<boolean> {
     try {
       const account = await this.getAccount(address);
-
-      if (!account) {
-        console.error("[KeyringService] Account not found");
-        return false;
-      }
+      if (!account) throw new Error("Account not found");
 
       const meta = { ...account.meta };
       const permissions = (meta.websitePermissions as Permissions) || {};
-      permissions[origin] = allowAccess;
+
+      if (removeWebsite) {
+        permissions[origin] = undefined;
+      } else {
+        permissions[origin] = allowAccess;
+      }
 
       meta.websitePermissions = permissions;
       keyring.saveAccountMeta(account, meta);

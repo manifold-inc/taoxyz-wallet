@@ -46,7 +46,9 @@ const App = () => {
             <LockScreen setIsLocked={setIsLocked} />
           ) : (
             <>
-              <Navigation />
+              {!["/connect", "/sign"].includes(location.pathname) && (
+                <Navigation />
+              )}
               <main>
                 <Routes>
                   <Route path="/" element={<Home />} />

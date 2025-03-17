@@ -57,7 +57,7 @@ export type PermissionsPerWebsite = Record<
     }[];
   }
 >;
-export type Permissions = Record<string, boolean>;
+export type Permissions = Record<string, boolean | undefined>;
 
 // BLOCKCHAIN TYPES
 export interface BittensorSubnet {

@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { KeyringService } from "../services/KeyringService";
 import type { InjectedAccount } from "@polkadot/extension-inject/types";
+import taoxyzLogo from "../../../public/icons/taoxyz.svg";
+import { MESSAGE_TYPES } from "../../types/messages";
 
 interface AuthRequest {
   origin: string;
@@ -58,13 +60,14 @@ const Connect = () => {
 
   const handleResponse = async (approved: boolean) => {
     if (!request) return;
-    const selectedAccounts = accounts
-      .filter((account) => account.selected)
-      .map(({ selected: _, ...account }) => account);
 
     try {
+      const selectedAccounts = accounts
+        .filter((account) => account.selected)
+        .map(({ selected: _, ...account }) => account);
+
       const response = await chrome.runtime.sendMessage({
-        type: "ext(connectResponse)",
+        type: MESSAGE_TYPES.CONNECT_RESPONSE,
         payload: {
           approved,
           accounts: selectedAccounts,
@@ -74,72 +77,90 @@ const Connect = () => {
       });
 
       if (response?.success) {
-        await KeyringService.updatePermissions(
-          request.origin,
-          selectedAccounts[0].address,
-          approved
-        );
         window.close();
+
+        try {
+          await KeyringService.updatePermissions(
+            request.origin,
+            selectedAccounts[0].address,
+            approved
+          );
+        } catch (error) {
+          console.error("[Connect] Error updating permissions:", error);
+        }
       }
     } catch (error) {
-      console.error("[Client] Error sending response:", error);
+      console.error("[Connect] Error sending response:", error);
     }
   };
 
-  if (loading) return <div className="p-4">Loading...</div>;
-  if (!request) return <div className="p-4">No pending request</div>;
+  if (loading) return <div className="p-4 text-mf-silver-300">Loading...</div>;
+  if (!request)
+    return <div className="p-4 text-mf-silver-300">No pending request</div>;
 
   return (
-    <div className="p-4 max-w-lg w-full">
-      <div className="bg-white rounded-lg p-4 shadow-sm border">
-        <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 mb-4">
-          <p className="text-xs text-blue-700">
-            {request.origin} is requesting to connect to your wallet
-          </p>
-        </div>
+    <div className="flex flex-col items-center min-h-screen bg-mf-black">
+      <div className="h-20" />
+      <div className="flex flex-col items-center flex-1 w-full px-4">
+        <img src={taoxyzLogo} alt="Taoxyz Logo" className="w-16 h-16 mb-8" />
 
-        <div className="mb-4">
-          <div className="space-y-2">
-            {accounts.map((account) => (
-              <label
-                key={account.address}
-                className="flex items-center p-2.5 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-              >
-                <input
-                  type="checkbox"
-                  checked={account.selected}
-                  onChange={() => toggleAccount(account.address)}
-                  className="mr-2.5 text-blue-500 focus:ring-blue-500"
-                />
-                <div className="min-w-0 flex-1">
-                  <div className="font-medium text-xs text-gray-900">
-                    {account.name}
+        <div className="w-full">
+          <div className="text-center mb-6">
+            <h1 className="text-xl font-semibold text-mf-silver-300">
+              Connection Request
+            </h1>
+          </div>
+
+          <div className="bg-mf-ash-500/30 border border-mf-ash-500 rounded-lg p-3 mb-4">
+            <p className="text-xs text-mf-silver-300">
+              {request.origin} is requesting to connect to your wallet
+            </p>
+          </div>
+
+          <div className="mb-4">
+            <div className="space-y-2">
+              {accounts.map((account) => (
+                <label
+                  key={account.address}
+                  className="flex items-center p-2.5 bg-mf-ash-500/30 border border-mf-ash-500 rounded-lg hover:bg-mf-ash-500/50 cursor-pointer transition-colors"
+                >
+                  <input
+                    type="checkbox"
+                    checked={account.selected}
+                    onChange={() => toggleAccount(account.address)}
+                    className="mr-2.5 text-mf-safety-300 focus:ring-mf-safety-300 bg-mf-ash-500 border-mf-ash-300"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="font-medium text-xs text-mf-silver-300">
+                      {account.name}
+                    </div>
+                    <div className="text-[10px] text-mf-silver-500 truncate">
+                      {account.address}
+                    </div>
                   </div>
-                  <div className="text-[10px] text-gray-500 truncate">
-                    {account.address}
-                  </div>
-                </div>
-              </label>
-            ))}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex space-x-2">
+            <button
+              onClick={() => handleResponse(true)}
+              disabled={!accounts.some((acc) => acc.selected)}
+              className="flex-1 text-sm rounded-lg bg-mf-safety-300 hover:bg-mf-safety-400 disabled:bg-mf-ash-500 disabled:cursor-not-allowed px-4 py-3 text-mf-milk-300 transition-colors"
+            >
+              Approve
+            </button>
+            <button
+              onClick={() => handleResponse(false)}
+              className="flex-1 text-sm rounded-lg bg-mf-ash-500 hover:bg-mf-ash-400 px-4 py-3 text-mf-safety-300 transition-colors"
+            >
+              Reject
+            </button>
           </div>
         </div>
-
-        <div className="flex space-x-2">
-          <button
-            onClick={() => handleResponse(true)}
-            disabled={!accounts.some((acc) => acc.selected)}
-            className="flex-1 bg-blue-500 text-white px-3 py-2 rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors text-xs font-medium"
-          >
-            Approve
-          </button>
-          <button
-            onClick={() => handleResponse(false)}
-            className="flex-1 bg-white text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-50 border border-gray-200 transition-colors text-xs font-medium"
-          >
-            Reject
-          </button>
-        </div>
       </div>
+      <div className="h-20" />
     </div>
   );
 };

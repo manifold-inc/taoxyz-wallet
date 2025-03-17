@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronDown, ChevronUp, LogOut, Lock } from "lucide-react";
+import { ChevronDown, ChevronUp, LogOut, Lock, Trash2 } from "lucide-react";
 import type { KeyringPair } from "@polkadot/keyring/types";
 
 import KeyringService from "../services/KeyringService";
@@ -27,10 +27,10 @@ const Settings = ({ setIsLocked }: SettingsProps) => {
   const [accounts, setAccounts] = useState<KeyringPair[]>([]);
 
   useEffect(() => {
-    loadWebsiteStats();
+    loadPermissions();
   }, []);
 
-  const loadWebsiteStats = async () => {
+  const loadPermissions = async () => {
     try {
       const keyringAccounts = await KeyringService.getAccounts();
       setAccounts(keyringAccounts);
@@ -106,7 +106,7 @@ const Settings = ({ setIsLocked }: SettingsProps) => {
   ) => {
     try {
       await KeyringService.updatePermissions(website, address, allowed);
-      loadWebsiteStats();
+      loadPermissions();
     } catch (error) {
       console.error("Failed to update permissions:", error);
     }
@@ -116,16 +116,15 @@ const Settings = ({ setIsLocked }: SettingsProps) => {
     if (!window.confirm(`Remove access for ${website}?`)) return;
 
     try {
-      const accountsWithAccess = accounts.filter(
-        (account) =>
-          (account.meta.websitePermissions as Permissions)[website] === true
-      );
-
-      for (const account of accountsWithAccess) {
-        await KeyringService.updatePermissions(website, account.address, false);
+      for (const account of accounts) {
+        await KeyringService.updatePermissions(
+          website,
+          account.address,
+          false,
+          true
+        );
       }
-
-      loadWebsiteStats();
+      loadPermissions();
     } catch (error) {
       console.error("Failed to remove website:", error);
     }
@@ -209,9 +208,9 @@ const Settings = ({ setIsLocked }: SettingsProps) => {
                               e.stopPropagation();
                               handleRemoveWebsite(website);
                             }}
-                            className="text-xs text-mf-safety-300 hover:text-mf-safety-200"
+                            className="text-mf-safety-500 hover:text-mf-safety-300"
                           >
-                            Remove
+                            <Trash2 className="w-4 h-4" />
                           </button>
                           {expandedWebsite === website ? (
                             <ChevronUp className="w-4 h-4 text-mf-silver-300" />
