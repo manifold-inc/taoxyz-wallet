@@ -1,5 +1,6 @@
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { KeyringService } from "../services/KeyringService";
+
 import type {
   BittensorSubnet,
   BittensorMetagraph,
@@ -66,8 +67,11 @@ class PolkadotApi {
   }) {
     try {
       const account = await KeyringService.getAccount(fromAddress);
-      if (!account) throw new Error("Account not found");
+      const toAccount = (await this.api.query.system.account(
+        toAddress
+      )) as unknown as SubstrateAccount;
       if (account.isLocked) throw new Error("Account is locked");
+      if (!toAccount.data.free) throw new Error("Invalid recipient address");
 
       const amountInRao = BigInt(Math.floor(amount * 1e9));
       const transaction = await this.api.tx.balances
