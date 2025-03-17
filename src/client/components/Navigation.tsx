@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { House, ArrowLeftRight, ListPlus, Redo, Settings2 } from "lucide-react";
 
 const Navigation = () => {
   const [currentAddress, setCurrentAddress] = useState<string | null>(null);
+  const location = useLocation();
 
   useEffect(() => {
     const init = async () => {
@@ -11,7 +12,7 @@ const Navigation = () => {
       setCurrentAddress(result.currentAddress);
     };
     init();
-  }, []);
+  }, [location]);
 
   if (!currentAddress) return null;
 
