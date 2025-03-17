@@ -34,7 +34,7 @@
 }
 
 body {
-  background-color: black;
+  background-color: var(--color-mf-night-500);
 }
 
 #root {

@@ -20,8 +20,6 @@ import Navigation from "./components/Navigation";
 import MessageService from "./services/MessageService";
 import { PolkadotApiProvider } from "./contexts/PolkadotApiContext";
 
-import background from "../../public/images/background.png";
-
 const App = () => {
   const [isLocked, setIsLocked] = useState(false);
   const [currentAddress, setCurrentAddress] = useState<string | null>(null);
@@ -43,78 +41,73 @@ const App = () => {
   return (
     <PolkadotApiProvider>
       <HashRouter>
-        <div
-          style={{ backgroundImage: `url(${background})` }}
-          className="bg-cover bg-center min-h-screen w-full"
-        >
-          <div className="bg-transparent">
-            {isLocked && currentAddress ? (
-              <LockScreen setIsLocked={setIsLocked} />
-            ) : (
-              <>
-                <Navigation />
-                <main className="bg-transparent">
-                  <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route
-                      path="/signin"
-                      element={<Signin setIsLocked={setIsLocked} />}
-                    />
-                    <Route
-                      path="/create"
-                      element={<Create setIsLocked={setIsLocked} />}
-                    />
-                    <Route
-                      path="/import"
-                      element={<Import setIsLocked={setIsLocked} />}
-                    />
-                    <Route
-                      path="/dashboard"
-                      element={
-                        <ProtectedRoute>
-                          <Dashboard />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/swap"
-                      element={
-                        <ProtectedRoute>
-                          <Swap />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/stake"
-                      element={
-                        <ProtectedRoute>
-                          <Stake />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/transfer"
-                      element={
-                        <ProtectedRoute>
-                          <Transfer />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/settings"
-                      element={
-                        <ProtectedRoute>
-                          <Settings setIsLocked={setIsLocked} />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route path="/connect" element={<Connect />} />
-                    <Route path="/sign" element={<Sign />} />
-                  </Routes>
-                </main>
-              </>
-            )}
-          </div>
+        <div>
+          {isLocked && currentAddress ? (
+            <LockScreen setIsLocked={setIsLocked} />
+          ) : (
+            <>
+              <Navigation />
+              <main>
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route
+                    path="/signin"
+                    element={<Signin setIsLocked={setIsLocked} />}
+                  />
+                  <Route
+                    path="/create"
+                    element={<Create setIsLocked={setIsLocked} />}
+                  />
+                  <Route
+                    path="/import"
+                    element={<Import setIsLocked={setIsLocked} />}
+                  />
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <ProtectedRoute>
+                        <Dashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/swap"
+                    element={
+                      <ProtectedRoute>
+                        <Swap />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/stake"
+                    element={
+                      <ProtectedRoute>
+                        <Stake />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/transfer"
+                    element={
+                      <ProtectedRoute>
+                        <Transfer />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/settings"
+                    element={
+                      <ProtectedRoute>
+                        <Settings setIsLocked={setIsLocked} />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route path="/connect" element={<Connect />} />
+                  <Route path="/sign" element={<Sign />} />
+                </Routes>
+              </main>
+            </>
+          )}
         </div>
       </HashRouter>
     </PolkadotApiProvider>
