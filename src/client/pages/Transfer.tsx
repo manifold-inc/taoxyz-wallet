@@ -2,48 +2,76 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { usePolkadotApi } from "../contexts/PolkadotApiContext";
+import KeyringService from "../services/KeyringService";
+import MessageService from "../services/MessageService";
 
 const Transfer = () => {
   const { api } = usePolkadotApi();
   const navigate = useNavigate();
-  const [address, setAddress] = useState("");
+  const [fromAddress, setFromAddress] = useState("");
   const [toAddress, setToAddress] = useState("");
   const [balance, setBalance] = useState<string>("0");
   const [amount, setAmount] = useState("");
-  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    const initAddress = async () => {
-      const result = await chrome.storage.local.get("currentAddress");
-      setAddress(result.currentAddress as string);
-    };
-    initAddress();
-    const getBalance = async () => {
-      if (!api || !address) return;
+    const init = async () => {
+      if (!api) return;
       try {
-        const balance = await api.getBalance(address);
-        setBalance(balance);
+        const result = await chrome.storage.local.get("currentAddress");
+        const currentAddress = result.currentAddress as string;
+        setFromAddress(currentAddress);
+        getBalance(currentAddress);
       } catch (error) {
-        console.error("[Client] Error fetching balance:", error);
+        console.error("[Transfer] Error initializing:", error);
       }
     };
-    getBalance();
-  }, [api, address]);
+    init();
+  }, [api]);
+
+  const getBalance = async (address: string) => {
+    if (!api) return;
+    const balance = await api.getBalance(address);
+    setBalance(balance ?? "0");
+  };
+
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === "" || /^\d*\.?\d*$/.test(value)) {
+      const numValue = parseFloat(value);
+      if (value === "" || (!isNaN(numValue) && numValue >= 0)) {
+        setAmount(value);
+      }
+    }
+  };
+
+  const handleAuth = async () => {
+    if (KeyringService.isLocked(fromAddress)) {
+      await chrome.storage.local.set({
+        storeTransferTransaction: {
+          toAddress,
+          amount,
+        },
+      });
+      await chrome.storage.local.set({ accountLocked: true });
+      MessageService.sendAccountsLockedMessage();
+      setIsSubmitting(false);
+      return;
+    }
+  };
 
   const handleSubmit = async () => {
-    if (!api || !address || !toAddress || !amount || !password || isSubmitting)
-      return;
+    if (!api || !fromAddress || !toAddress || !amount || isSubmitting) return;
     setIsSubmitting(true);
     setError(null);
 
     try {
+      await handleAuth();
       await api.transfer({
-        fromAddress: address,
+        fromAddress,
         toAddress,
         amount: parseFloat(amount),
-        password,
       });
       navigate("/dashboard");
     } catch (error) {
@@ -53,106 +81,80 @@ const Transfer = () => {
     }
   };
 
-  if (!address) {
-    return (
-      <div className="p-4">
-        <div className="bg-white/5 rounded-lg p-3 outline outline-1 outline-black/20">
-          <p className="text-xs text-gray-400">Unauthorized Access</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="p-4">
-      <div className="bg-white rounded-lg p-4">
-        <div className="space-y-2">
-          <div>
-            <label className="block text-xs text-gray-600 mb-1">
-              Available Balance
-            </label>
-            <div className="flex items-baseline space-x-1">
-              <span className="text-xs font-semibold text-gray-900">
-                {balance}
-              </span>
-              <span className="text-xs text-gray-600">τ</span>
+    <div className="flex flex-col items-center min-h-screen">
+      <div className="h-20" />
+      <div className="w-80">
+        <div className="w-full rounded-lg bg-mf-ash-500 p-4 space-y-4">
+          <div className="rounded-lg bg-mf-ash-500">
+            <span className="text-xl font-semibold text-mf-safety-300">τ</span>
+            <span className="text-xl font-semibold text-mf-milk-300">
+              {Number(balance).toFixed(4)}
+            </span>
+            <p className="text-xs text-mf-silver-300">
+              {fromAddress.slice(0, 8)}...{fromAddress.slice(-8)}
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <div>
+              <p className="text-xs text-mf-silver-300 mb-1">
+                Recipient Address
+              </p>
+              <input
+                type="text"
+                value={toAddress}
+                onChange={(e) => setToAddress(e.target.value)}
+                placeholder="Enter recipient's address"
+                className="w-full px-3 py-2 text-xs rounded-lg bg-mf-ash-300 text-mf-milk-300 border-none focus:outline-none focus:ring-2 focus:ring-mf-safety-300"
+              />
             </div>
-          </div>
 
-          <div>
-            <label className="block text-xs text-gray-600 mb-1">
-              Recipient Address
-            </label>
-            <input
-              type="text"
-              value={toAddress}
-              onChange={(e) => setToAddress(e.target.value)}
-              placeholder="Enter recipient's address"
-              className="w-full px-3 py-2 text-xs rounded-lg border border-gray-200 hover:border-blue-500 focus:outline-none focus:border-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs text-gray-600 mb-1">
-              Amount (τ)
-            </label>
-            <input
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="Enter amount to transfer"
-              className="w-full px-3 py-2 text-xs rounded-lg border border-gray-200 hover:border-blue-500 focus:outline-none focus:border-blue-500"
-              min="0"
-              max={parseFloat(balance)}
-              step="0.0001"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs text-gray-600 mb-1">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your wallet password"
-              className="w-full px-3 py-2 text-xs rounded-lg border border-gray-200 hover:border-blue-500 focus:outline-none focus:border-blue-500"
-            />
-          </div>
-
-          {error && (
-            <div className="p-3 bg-red-50 text-red-500 text-xs rounded-lg border border-red-100">
-              {error}
+            <div>
+              <p className="text-xs text-mf-silver-300 mb-1">Amount (τ)</p>
+              <input
+                type="text"
+                inputMode="decimal"
+                value={amount}
+                onChange={handleAmountChange}
+                placeholder="Enter amount to transfer"
+                className="w-full px-3 py-2 text-xs rounded-lg bg-mf-ash-300 text-mf-milk-300 border-none focus:outline-none focus:ring-2 focus:ring-mf-safety-300"
+              />
             </div>
-          )}
 
-          <button
-            onClick={handleSubmit}
-            disabled={
-              !toAddress ||
-              !amount ||
-              !password ||
-              isSubmitting ||
-              parseFloat(amount) > parseFloat(balance)
-            }
-            className={`w-full text-xs px-4 py-3 rounded-lg border border-gray-200 ${
-              !toAddress ||
-              !amount ||
-              !password ||
-              isSubmitting ||
-              parseFloat(amount) > parseFloat(balance)
-                ? "text-gray-400 cursor-not-allowed"
-                : "hover:bg-blue-50 hover:text-blue-500 hover:border-blue-500 transition-colors"
-            }`}
-          >
-            {isSubmitting ? (
-              <div className="flex items-center justify-center space-x-2">
-                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-current"></div>
-                <span>Transferring...</span>
+            {error && (
+              <div className="p-3 bg-mf-ash-300 text-mf-sybil-300 text-xs rounded-lg">
+                {error}
               </div>
-            ) : (
-              "Confirm"
             )}
-          </button>
+
+            <button
+              onClick={handleSubmit}
+              disabled={
+                !toAddress ||
+                !amount ||
+                isSubmitting ||
+                parseFloat(amount) > parseFloat(balance)
+              }
+              className={`w-full text-xs flex items-center justify-center rounded-lg transition-colors px-4 py-3 mt-5 text-semibold text-mf-ash-300 ${
+                !toAddress ||
+                !amount ||
+                isSubmitting ||
+                parseFloat(amount) > parseFloat(balance)
+                  ? "bg-mf-ash-400 text-mf-milk-300 cursor-not-allowed"
+                  : "bg-mf-sybil-700 hover:bg-mf-sybil-500 active:bg-mf-sybil-700"
+              }`}
+            >
+              {isSubmitting ? (
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-mf-milk-300" />
+                  <span>Transferring...</span>
+                </div>
+              ) : (
+                "Confirm"
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>

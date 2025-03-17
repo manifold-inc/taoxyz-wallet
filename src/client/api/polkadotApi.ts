@@ -55,36 +55,19 @@ class PolkadotApi {
     await this.initialize();
   }
 
-  public async getStake(address: string) {
-    try {
-      const stake =
-        await this.api.call.stakeInfoRuntimeApi.getStakeInfoForColdkey(address);
-      return stake.toJSON();
-    } catch (error) {
-      console.error("Error in getStake:", error);
-      throw error;
-    }
-  }
-
   public async transfer({
     fromAddress,
     toAddress,
     amount,
-    password,
   }: {
     fromAddress: string;
     toAddress: string;
     amount: number;
-    password: string;
   }) {
     try {
       const account = await KeyringService.getAccount(fromAddress);
       if (!account) throw new Error("Account not found");
-
-      account.decodePkcs8(password);
-      if (account.isLocked) {
-        throw new Error("Invalid password");
-      }
+      if (account.isLocked) throw new Error("Account is locked");
 
       const amountInRao = BigInt(Math.floor(amount * 1e9));
       const transaction = await this.api.tx.balances
@@ -98,6 +81,18 @@ class PolkadotApi {
     }
   }
 
+  public async getStake(address: string) {
+    try {
+      const stake =
+        await this.api.call.stakeInfoRuntimeApi.getStakeInfoForColdkey(address);
+      return stake.toJSON();
+    } catch (error) {
+      console.error("Error in getStake:", error);
+      throw error;
+    }
+  }
+
+  // TODO: Relook at error handling for api
   public async createStake({
     address,
     subnetId,
