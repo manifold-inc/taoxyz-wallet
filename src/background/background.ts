@@ -9,7 +9,7 @@ import type {
 } from "../types/messages";
 import { generateId } from "../utils/utils";
 
-// This is Service Worker Code. 
+// This is Service Worker Code.
 
 const getStoredRequest = async (key: string): Promise<StoredRequest> => {
   const result = await chrome.storage.local.get(key);
@@ -218,6 +218,48 @@ async function handleSignResponse(
   }
 }
 
+async function handleAccountsLocked(
+  _message: ExtensionMessage & { type: typeof MESSAGE_TYPES.ACCOUNTS_LOCKED },
+  sendResponse: (response: { success: boolean; error?: string }) => void
+) {
+  try {
+    console.log("[Background] Accounts locked");
+    await chrome.runtime.sendMessage({
+      type: MESSAGE_TYPES.ACCOUNTS_LOCKED,
+    });
+    sendResponse({ success: true });
+  } catch (error) {
+    console.error("[Background] Error handling accounts locked:", error);
+    sendErrorResponse(sendResponse, ERROR_TYPES.UNKNOWN_ERROR, error);
+  }
+}
+
+async function handleStartLockTimer(
+  message: ExtensionMessage & { type: typeof MESSAGE_TYPES.START_LOCK_TIMER },
+  sendResponse: (response: { success: boolean; error?: string }) => void
+) {
+  try {
+    chrome.alarms.create("lockTimer", { delayInMinutes: 15 });
+    console.log("[Background] Lock timer started");
+    sendResponse({ success: true });
+  } catch (error) {
+    console.error("[Background] Error starting lock timer:", error);
+    sendErrorResponse(sendResponse, ERROR_TYPES.UNKNOWN_ERROR, error);
+  }
+}
+
+async function handleClearLockTimer(
+  message: ExtensionMessage & { type: typeof MESSAGE_TYPES.CLEAR_LOCK_TIMER },
+  sendResponse: (response: { success: boolean; error?: string }) => void
+) {
+  try {
+    chrome.alarms.clear("lockTimer");
+    sendResponse({ success: true });
+  } catch (error) {
+    sendErrorResponse(sendResponse, ERROR_TYPES.UNKNOWN_ERROR, error);
+  }
+}
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log("[Background] Message received:", message);
 
@@ -238,10 +280,35 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       handleSignResponse(message, sendResponse);
       break;
 
+    case MESSAGE_TYPES.ACCOUNTS_LOCKED:
+      handleAccountsLocked(message, sendResponse);
+      break;
+
+    case MESSAGE_TYPES.START_LOCK_TIMER:
+      handleStartLockTimer(message, sendResponse);
+      break;
+
+    case MESSAGE_TYPES.CLEAR_LOCK_TIMER:
+      handleClearLockTimer(message, sendResponse);
+      break;
+
     default:
       console.log("[Background] Unknown message type:", message.type);
       sendErrorResponse(sendResponse, ERROR_TYPES.UNKNOWN_ERROR);
   }
 
   return true;
+});
+
+// When timer goes up, lock all accounts
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name === "lockTimer") {
+    console.log("[Background] Lock timer finished");
+    chrome.storage.local.set({ accountLocked: true }, () => {
+      console.log("[Background] Set accountLocked to true");
+      chrome.runtime.sendMessage({
+        type: MESSAGE_TYPES.ACCOUNTS_LOCKED,
+      });
+    });
+  }
 });

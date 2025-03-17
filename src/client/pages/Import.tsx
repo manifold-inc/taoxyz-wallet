@@ -1,12 +1,19 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { KeyringPair } from "@polkadot/keyring/types";
+import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 
-import taoxyzLogo from "../../../public/icons/taoxyz.svg";
+import KeyringService from "../services/KeyringService";
+import MessageService from "../services/MessageService";
 import CreateForm from "../components/CreateForm";
-import { KeyringService } from "../services/KeyringService";
+import taoxyzLogo from "../../../public/icons/taoxyz.svg";
 
-const Import = () => {
+interface ImportProps {
+  setIsLocked: (isLocked: boolean) => void;
+}
+
+const Import = ({ setIsLocked }: ImportProps) => {
+  const { api, isLoading: isApiLoading } = usePolkadotApi();
   const navigate = useNavigate();
   const [mnemonic, setMnemonic] = useState("");
   const [validatedMnemonic, setValidatedMnemonic] = useState<string | null>(
@@ -20,6 +27,11 @@ const Import = () => {
     e.preventDefault();
     setIsSubmitted(true);
     setError(null);
+
+    if (!api || isApiLoading) {
+      setError("Please wait for wallet to initialize...");
+      return;
+    }
 
     if (!mnemonic.trim()) {
       setError("Recovery phrase is required");
@@ -40,8 +52,14 @@ const Import = () => {
     setValidatedMnemonic(mnemonic.trim());
   };
 
-  const handleSuccess = (account: KeyringPair) => {
-    navigate("/dashboard", { state: { address: account.address } });
+  const handleSuccess = async (account: KeyringPair) => {
+    await chrome.storage.local.set({
+      currentAddress: account.address as string,
+    });
+    await chrome.storage.local.set({ accountLocked: false });
+    MessageService.sendClearLockTimer();
+    setIsLocked(false);
+    navigate("/dashboard");
   };
 
   if (validatedMnemonic) {
@@ -120,10 +138,12 @@ const Import = () => {
 
               <button
                 type="submit"
-                disabled={!mnemonic.trim()}
+                disabled={!mnemonic.trim() || isApiLoading}
                 className="w-full text-sm flex items-center justify-center rounded-lg bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors px-4 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <span className="text-mf-milk-300">Continue</span>
+                <span className="text-mf-milk-300">
+                  {isApiLoading ? "Initializing..." : "Continue"}
+                </span>
               </button>
             </div>
           </form>

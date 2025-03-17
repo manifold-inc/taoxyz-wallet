@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { UserPlus, FolderInput, SquareArrowLeft } from "lucide-react";
 
 import Disclaimer from "../components/Disclaimer";
@@ -9,11 +9,16 @@ const Home = () => {
   const navigate = useNavigate();
   const [showDisclaimer, setShowDisclaimer] = useState(false);
 
-  const address = localStorage.getItem("currentAddress");
-  if (address) {
-    navigate("/dashboard", { state: { address } });
-    return null;
-  }
+  useEffect(() => {
+    const initAddress = async () => {
+      const resultAddress = await chrome.storage.local.get("currentAddress");
+      const resultLocked = await chrome.storage.local.get("accountLocked");
+      if (resultAddress.currentAddress && !resultLocked.accountLocked) {
+        navigate("/dashboard");
+      }
+    };
+    initAddress();
+  }, [navigate]);
 
   return (
     <>
@@ -43,7 +48,7 @@ const Home = () => {
                 >
                   <div className="w-1/5 ml-2"></div>
                   <div className="w-4/5 flex items-center gap-2">
-                    <UserPlus className="text-mf-safety-300 w-[20px] h-[20px]" />
+                    <UserPlus className="text-mf-safety-300 w-5 h-5" />
                     <span className="text-mf-milk-300">Create</span>
                   </div>
                 </button>
@@ -53,7 +58,7 @@ const Home = () => {
                 >
                   <div className="w-1/5 ml-2"></div>
                   <div className="w-4/5 flex items-center gap-2">
-                    <FolderInput className="text-mf-safety-300 w-[20px] h-[20px]" />
+                    <FolderInput className="text-mf-safety-300 w-5 h-5" />
                     <span className="text-mf-milk-300">Import</span>
                   </div>
                 </button>
@@ -63,7 +68,7 @@ const Home = () => {
                 >
                   <div className="w-1/5 ml-2"></div>
                   <div className="w-4/5 flex items-center gap-2">
-                    <SquareArrowLeft className="text-mf-safety-300 w-[20px] h-[20px]" />
+                    <SquareArrowLeft className="text-mf-safety-300 w-5 h-5" />
                     <span className="text-mf-milk-300">Sign In</span>
                   </div>
                 </button>

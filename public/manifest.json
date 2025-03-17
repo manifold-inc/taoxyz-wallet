@@ -3,7 +3,7 @@
   "name": "Taoxyz Wallet",
   "version": "1.0.0",
   "description": "A wallet extension for the Tao network",
-  "permissions": ["storage", "activeTab"],
+  "permissions": ["storage", "activeTab", "alarms"],
   "content_security_policy": {
     "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
   },

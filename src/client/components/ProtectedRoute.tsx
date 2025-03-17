@@ -1,17 +1,25 @@
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const location = useLocation();
-  const address = location.state?.address;
+  const [hasAccess, setHasAccess] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  if (!address) {
-    return <Navigate to="/signin" replace />;
-  }
+  useEffect(() => {
+    const checkAccess = async () => {
+      const result = await chrome.storage.local.get("currentAddress");
+      setHasAccess(!!result.currentAddress);
+      setLoading(false);
+    };
+    checkAccess();
+  }, []);
 
+  if (loading) return null;
+  if (!hasAccess) return <Navigate to="/" replace />;
   return children;
 };
 

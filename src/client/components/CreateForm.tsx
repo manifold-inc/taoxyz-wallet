@@ -75,6 +75,7 @@ const CreateForm = ({
         username,
         password
       );
+      await KeyringService.unlockAccount(username, password);
       onSuccess(account, userMnemonic);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create wallet");

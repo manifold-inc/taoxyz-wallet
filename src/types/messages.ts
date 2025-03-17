@@ -4,26 +4,35 @@ import type {
 } from "@polkadot/types/types";
 import type { InjectedAccount } from "@polkadot/extension-inject/types";
 
-export interface ConnectRequestPayload {
+export interface ConnectRequestPayload extends BasePayload {
   origin: string;
 }
 
-export interface SignRequestPayload {
+export interface SignRequestPayload extends BasePayload {
   id: number;
   address: string;
   data: SignerPayloadJSON | SignerPayloadRaw;
   origin: string;
 }
 
-export interface ConnectResponsePayload {
+export interface ConnectResponsePayload extends BasePayload {
   approved: boolean;
   accounts: InjectedAccount[];
 }
 
-export interface SignResponsePayload {
+export interface SignResponsePayload extends BasePayload {
   id: number;
   signature?: `0x${string}`;
   approved?: boolean;
+}
+
+export interface AuthenticatePayload extends BasePayload {
+  address: string;
+  origin: string;
+}
+
+export interface BasePayload {
+  type?: string;
 }
 
 export interface MessagePayloadMap {
@@ -31,6 +40,10 @@ export interface MessagePayloadMap {
   [MESSAGE_TYPES.CONNECT_RESPONSE]: ConnectResponsePayload;
   [MESSAGE_TYPES.SIGN_REQUEST]: SignRequestPayload;
   [MESSAGE_TYPES.SIGN_RESPONSE]: SignResponsePayload;
+  [MESSAGE_TYPES.AUTHENTICATE]: AuthenticatePayload;
+  [MESSAGE_TYPES.ACCOUNTS_LOCKED]: BasePayload;
+  [MESSAGE_TYPES.START_LOCK_TIMER]: BasePayload;
+  [MESSAGE_TYPES.CLEAR_LOCK_TIMER]: BasePayload;
 }
 
 interface BaseMessage<T extends keyof MessagePayloadMap> {
@@ -44,7 +57,11 @@ export type DappMessage =
 
 export type ExtensionMessage =
   | BaseMessage<typeof MESSAGE_TYPES.CONNECT_RESPONSE>
-  | BaseMessage<typeof MESSAGE_TYPES.SIGN_RESPONSE>;
+  | BaseMessage<typeof MESSAGE_TYPES.SIGN_RESPONSE>
+  | BaseMessage<typeof MESSAGE_TYPES.AUTHENTICATE>
+  | BaseMessage<typeof MESSAGE_TYPES.ACCOUNTS_LOCKED>
+  | BaseMessage<typeof MESSAGE_TYPES.START_LOCK_TIMER>
+  | BaseMessage<typeof MESSAGE_TYPES.CLEAR_LOCK_TIMER>;
 
 export interface StoredRequest {
   tabId: number;
@@ -75,7 +92,10 @@ export const MESSAGE_TYPES = {
   CONNECT_RESPONSE: "ext(connectResponse)",
   SIGN_REQUEST: "dapp(signRequest)",
   SIGN_RESPONSE: "ext(signResponse)",
-  AUTHENTICATE: "bg(authPermission)",
+  AUTHENTICATE: "ext(authPermission)",
+  ACCOUNTS_LOCKED: "ext(accountsLocked)",
+  START_LOCK_TIMER: "ext(startLockTimer)",
+  CLEAR_LOCK_TIMER: "ext(clearLockTimer)",
 } as const;
 
 export const ERROR_TYPES = {

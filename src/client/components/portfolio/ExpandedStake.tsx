@@ -7,7 +7,8 @@ interface ExpandedStakeProps {
   stake: StakeTransaction;
   subnet: Subnet | null;
   onClose: () => void;
-  onSwap: (stake: StakeTransaction) => void;
+  onSwap: () => void;
+  onMoveStake: () => void;
 }
 
 const ExpandedStake = ({
@@ -15,6 +16,7 @@ const ExpandedStake = ({
   subnet,
   onClose,
   onSwap,
+  onMoveStake,
 }: ExpandedStakeProps) => {
   const [copied, setCopied] = useState(false);
 
@@ -79,16 +81,16 @@ const ExpandedStake = ({
           </div>
         </div>
 
-        <div className="flex space-x-2 mt-3">
+        <div className="flex space-x-2">
           <button
-            onClick={() => onSwap(stake)}
-            className="flex-1 text-xs font-medium text-mf-sybil-300 px-3 py-2 rounded bg-mf-ash-400 hover:bg-mf-ash-300 transition-colors"
+            onClick={onSwap}
+            className="flex-1 py-2 px-3 text-[10px] text-mf-sybil-300 rounded-lg bg-mf-ash-300 hover:bg-mf-ash-400 transition-colors"
           >
             Swap
           </button>
           <button
-            onClick={() => onSwap(stake)}
-            className="flex-1 text-xs font-medium text-mf-milk-300 px-3 py-2 rounded bg-mf-ash-400 hover:bg-mf-ash-300 transition-colors"
+            onClick={onMoveStake}
+            className="flex-1 py-2 px-3 text-[10px] text-mf-sybil-300 rounded-lg bg-mf-ash-300 hover:bg-mf-ash-400 transition-colors"
           >
             Move Stake
           </button>

@@ -1,23 +1,42 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { KeyringService } from "../services/KeyringService";
+import KeyringService from "../services/KeyringService";
+import MessageService from "../services/MessageService";
 import taoxyzLogo from "../../../public/icons/taoxyz.svg";
+import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 
-const Signin = () => {
+interface SigninProps {
+  setIsLocked: (isLocked: boolean) => void;
+}
+
+const Signin = ({ setIsLocked }: SigninProps) => {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const { api, isLoading: isApiLoading } = usePolkadotApi();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (!api || isApiLoading) {
+      setError("Please wait for wallet to initialize...");
+      return;
+    }
+
     try {
       const isUnlocked = await KeyringService.unlockAccount(username, password);
       if (isUnlocked) {
         const address = await KeyringService.getAddress(username);
-        navigate("/dashboard", { state: { address } });
+        await chrome.storage.local.set({
+          currentAddress: address,
+        });
+        await chrome.storage.local.set({ accountLocked: false });
+        MessageService.sendClearLockTimer();
+        setIsLocked(false);
+        navigate("/dashboard");
       }
     } catch (error) {
       if (error instanceof Error && error.message === "Account not found") {
@@ -51,21 +70,21 @@ const Signin = () => {
             className="space-y-4 flex flex-col items-center"
           >
             <div className="w-54 mb-2">
-              <label className="text-xs text-mf-silver-300 mb-2">
+              <label className="block text-xs text-mf-silver-300 mb-2">
                 Username
               </label>
               <input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-4 py-3 text-xs rounded-lg bg-mf-ash-500 text-mf-milk-300 border-none focus:outline-none focus:ring-2 focus:ring-mf-safety-300"
+                className="w-full px-4 py-3 text-sm rounded-lg bg-mf-ash-500 text-mf-milk-300 border-none focus:outline-none focus:ring-2 focus:ring-mf-safety-300"
                 placeholder="Enter username"
                 required
               />
             </div>
 
-            <div className="w-54 h-20 mb-2">
-              <label className="text-xs text-mf-silver-300 mb-2">
+            <div className="w-54 h-[85px]">
+              <label className="block text-xs text-mf-silver-300 mb-2">
                 Password
               </label>
               <input
@@ -94,9 +113,12 @@ const Signin = () => {
 
               <button
                 type="submit"
+                disabled={isApiLoading}
                 className="w-full text-sm flex items-center justify-center rounded-lg bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors px-4 py-3"
               >
-                <span className="text-mf-milk-300">Sign In</span>
+                <span className="text-mf-milk-300">
+                  {isApiLoading ? "Initializing..." : "Sign In"}
+                </span>
               </button>
             </div>
           </form>

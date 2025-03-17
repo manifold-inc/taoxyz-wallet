@@ -2,16 +2,23 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { KeyringPair } from "@polkadot/keyring/types";
 
-import taoxyzLogo from "../../../public/icons/taoxyz.svg";
-import CreateForm from "../components/CreateForm";
+import { usePolkadotApi } from "../contexts/PolkadotApiContext";
+import MessageService from "../services/MessageService";
 import MnemonicDisplay from "../components/Mnemonic";
+import CreateForm from "../components/CreateForm";
+import taoxyzLogo from "../../../public/icons/taoxyz.svg";
 
-export const Create = () => {
+interface CreateProps {
+  setIsLocked: (isLocked: boolean) => void;
+}
+
+export const Create = ({ setIsLocked }: CreateProps) => {
+  const { isLoading: isApiLoading } = usePolkadotApi();
   const navigate = useNavigate();
   const [mnemonic, setMnemonic] = useState("");
   const [account, setAccount] = useState<KeyringPair | null>(null);
 
-  const handleSuccess = (
+  const handleSuccess = async (
     newAccount: KeyringPair,
     generatedMnemonic: string
   ) => {
@@ -19,8 +26,14 @@ export const Create = () => {
     setMnemonic(generatedMnemonic);
   };
 
-  const handleContinue = () => {
-    navigate("/dashboard", { state: { address: account?.address } });
+  const handleContinue = async () => {
+    await chrome.storage.local.set({
+      currentAddress: account?.address as string,
+    });
+    await chrome.storage.local.set({ accountLocked: false });
+    MessageService.sendClearLockTimer();
+    setIsLocked(false);
+    navigate("/dashboard");
   };
 
   return (
@@ -36,7 +49,7 @@ export const Create = () => {
                 Create Wallet
               </h1>
             </div>
-            <CreateForm onSuccess={handleSuccess} />
+            <CreateForm onSuccess={handleSuccess} isLoading={isApiLoading} />
           </div>
         ) : (
           <>
@@ -49,6 +62,7 @@ export const Create = () => {
               <MnemonicDisplay
                 mnemonic={mnemonic}
                 onContinue={handleContinue}
+                isLoading={isApiLoading}
               />
             </div>
           </>
