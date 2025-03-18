@@ -46,7 +46,7 @@ const App = () => {
             <LockScreen setIsLocked={setIsLocked} />
           ) : (
             <>
-              {!["/connect", "/sign"].includes(location.pathname) && (
+              {!["#/connect", "#/sign"].includes(window.location.hash) && (
                 <Navigation />
               )}
               <main>
