@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { usePolkadotApi } from "../contexts/PolkadotApiContext";
-import KeyringService from "../services/KeyringService";
-import MessageService from "../services/MessageService";
-import StakeOverview from "./portfolio/StakeOverview";
-import ExpandedStake from "./portfolio/ExpandedStake";
-import type { StakeTransaction, Subnet } from "../../types/client";
+import { usePolkadotApi } from "../../contexts/PolkadotApiContext";
+import { KeyringService } from "../../services/KeyringService";
+import MessageService from "../../services/MessageService";
+import StakeOverview from "../portfolio/StakeOverview";
+import ExpandedStake from "../portfolio/ExpandedStake";
+import type { StakeTransaction, Subnet } from "../../../types/client";
 
 interface PortfolioProps {
   stakes: StakeTransaction[];

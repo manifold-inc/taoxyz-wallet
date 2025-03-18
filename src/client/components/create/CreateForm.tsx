@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { KeyringService } from "../services/KeyringService";
+import { KeyringService } from "../../services/KeyringService";
 import type { KeyringPair } from "@polkadot/keyring/types";
 
 interface CreateFormProps {

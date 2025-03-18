@@ -5,7 +5,7 @@ import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 
 import KeyringService from "../services/KeyringService";
 import MessageService from "../services/MessageService";
-import CreateForm from "../components/CreateForm";
+import CreateForm from "../components/create/CreateForm";
 import taoxyzLogo from "../../../public/icons/taoxyz.svg";
 
 interface ImportProps {
