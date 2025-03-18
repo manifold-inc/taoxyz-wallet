@@ -37,11 +37,6 @@ const dappMessageHandler = <T extends keyof MessagePayloadMap>(
   return handler;
 };
 
-const errorHandler = (error: Error, context: string) => {
-  console.error(`[Provider] ${context}:`, error.message);
-  throw error;
-};
-
 const accountsHandler = (accounts: InjectedAccount[]) => {
   console.log(
     "[Provider] Creating accounts interface with:",
@@ -76,14 +71,12 @@ const signerHandler = () => ({
         MESSAGE_TYPES.SIGN_RESPONSE,
         (response: SignResponsePayload) => {
           if (response.approved === false) {
-            console.log("[Provider] Sign payload: Signing rejected");
-            reject();
+            reject(new Error(ERROR_TYPES.PERMISSION_DENIED));
             return;
           }
 
           if (!response.signature) {
-            errorHandler(new Error(ERROR_TYPES.SIGNING_FAILED), "Sign Payload");
-            reject();
+            reject(new Error(ERROR_TYPES.SIGNING_FAILED));
             return;
           }
 
@@ -120,11 +113,7 @@ const signerHandler = () => ({
         MESSAGE_TYPES.SIGN_RESPONSE,
         (response: SignResponsePayload) => {
           if (!response.signature) {
-            errorHandler(
-              new Error(ERROR_TYPES.SIGNING_FAILED),
-              "Sign Raw Payload"
-            );
-            reject();
+            reject(new Error(ERROR_TYPES.SIGNING_FAILED));
             return;
           }
 
@@ -165,8 +154,7 @@ export const TaoxyzWalletProvider: InjectedWindowProvider = {
         MESSAGE_TYPES.CONNECT_RESPONSE,
         (response: ConnectResponsePayload) => {
           if (!response.approved) {
-            errorHandler(new Error(ERROR_TYPES.CONNECTION_REJECTED), "Enable");
-            reject();
+            reject(new Error(ERROR_TYPES.CONNECTION_REJECTED));
             return;
           }
           console.log(
