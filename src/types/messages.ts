@@ -23,7 +23,7 @@ export interface ConnectResponsePayload extends BasePayload {
 export interface SignResponsePayload extends BasePayload {
   id: number;
   signature?: `0x${string}`;
-  approved?: boolean;
+  approved: boolean;
 }
 
 export interface AuthenticatePayload extends BasePayload {
