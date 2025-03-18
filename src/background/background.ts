@@ -156,25 +156,10 @@ async function handleSignRequest(
     const origin = message.payload.origin;
     const address = message.payload.address;
 
-    console.log("[Background] Sign request received:", {
-      address,
-      origin,
-      requestId: message.payload.id,
-    });
-
-    // const permissionCheck = await chrome.runtime.sendMessage({
-    //   type: MESSAGE_TYPES.AUTHENTICATE,
-    //   payload: { address, origin, requestId: message.payload.id },
-    // });
-
     const storageKey = `permissions_${address}`;
-    console.log("[Background] Storage key:", storageKey);
     const result = await chrome.storage.local.get(storageKey);
-    console.log("[Background] Storage result:", result);
     const permissions = result[storageKey]?.permissions || {};
-    console.log("[Background] Permissions:", permissions);
     const approved = permissions[origin] === true;
-    console.log("[Background] Approved:", approved);
 
     if (!approved) {
       console.log(
