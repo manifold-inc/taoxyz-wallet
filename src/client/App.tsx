@@ -30,7 +30,7 @@ const App = () => {
     return cleanupListeners;
   }, []);
 
-  const init = async () => {
+  const init = async (): Promise<void> => {
     const lockResult = await chrome.storage.local.get("accountLocked");
     const addressResult = await chrome.storage.local.get("currentAddress");
     console.log("[App] Lock state:", lockResult.accountLocked);

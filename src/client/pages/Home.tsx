@@ -13,7 +13,7 @@ const Home = () => {
     init();
   }, []);
 
-  const init = async () => {
+  const init = async (): Promise<void> => {
     const resultAddress = await chrome.storage.local.get("currentAddress");
     const resultLocked = await chrome.storage.local.get("accountLocked");
     if (resultAddress.currentAddress && !resultLocked.accountLocked) {

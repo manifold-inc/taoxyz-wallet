@@ -51,8 +51,8 @@ class PolkadotApi {
     return this.api;
   }
 
-  public async changeEndpoint(newEndpoint: "test" | "main"): Promise<void> {
-    this.endpoint = newEndpoint;
+  public async changeEndpoint(reqEndpoint: "test" | "main"): Promise<void> {
+    this.endpoint = reqEndpoint;
     await this.initialize();
   }
 

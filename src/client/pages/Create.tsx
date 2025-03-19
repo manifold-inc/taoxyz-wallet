@@ -6,16 +6,16 @@ import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 import MessageService from "../services/MessageService";
 import MnemonicDisplay from "../components/create/Mnemonic";
 import CreateForm from "../components/create/CreateForm";
-import taoxyzLogo from "../../../public/icons/taoxyz.svg";
+import taoxyz from "../../../public/icons/taoxyz.svg";
 
 interface CreateProps {
   setIsLocked: (isLocked: boolean) => void;
 }
 
 export const Create = ({ setIsLocked }: CreateProps) => {
-  const { isLoading: isApiLoading } = usePolkadotApi();
   const navigate = useNavigate();
-  const [mnemonic, setMnemonic] = useState("");
+  const { isLoading } = usePolkadotApi();
+  const [mnemonic, setMnemonic] = useState<string>("");
   const [account, setAccount] = useState<KeyringPair | null>(null);
 
   const handleSuccess = async (
@@ -40,7 +40,7 @@ export const Create = ({ setIsLocked }: CreateProps) => {
     <div className="flex flex-col items-center min-h-screen">
       <div className="h-20" />
       <div className="flex flex-col items-center flex-1">
-        <img src={taoxyzLogo} alt="Taoxyz Logo" className="w-16 h-16 mb-8" />
+        <img src={taoxyz} alt="Taoxyz Logo" className="w-16 h-16 mb-8" />
 
         {!mnemonic ? (
           <div className="w-full max-w-md">
@@ -49,7 +49,7 @@ export const Create = ({ setIsLocked }: CreateProps) => {
                 Create Wallet
               </h1>
             </div>
-            <CreateForm onSuccess={handleSuccess} isLoading={isApiLoading} />
+            <CreateForm onSuccess={handleSuccess} isLoading={isLoading} />
           </div>
         ) : (
           <>
@@ -62,7 +62,7 @@ export const Create = ({ setIsLocked }: CreateProps) => {
               <MnemonicDisplay
                 mnemonic={mnemonic}
                 onContinue={handleContinue}
-                isLoading={isApiLoading}
+                isLoading={isLoading}
               />
             </div>
           </>
