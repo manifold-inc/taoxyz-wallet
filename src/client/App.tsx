@@ -25,18 +25,19 @@ const App = () => {
   const [currentAddress, setCurrentAddress] = useState<string | null>(null);
 
   useEffect(() => {
-    const initState = async () => {
-      const lockResult = await chrome.storage.local.get("accountLocked");
-      const addressResult = await chrome.storage.local.get("currentAddress");
-      console.log("[App] Lock state:", lockResult.accountLocked);
-      console.log("[App] Current address:", addressResult.currentAddress);
-      setIsLocked(lockResult.accountLocked === true);
-      setCurrentAddress(addressResult.currentAddress);
-    };
-    initState();
-    const cleanup = MessageService.setupMessageListeners();
-    return cleanup;
+    init();
+    const cleanupListeners = MessageService.setupMessageListeners();
+    return cleanupListeners;
   }, []);
+
+  const init = async () => {
+    const lockResult = await chrome.storage.local.get("accountLocked");
+    const addressResult = await chrome.storage.local.get("currentAddress");
+    console.log("[App] Lock state:", lockResult.accountLocked);
+    console.log("[App] Current address:", addressResult.currentAddress);
+    setIsLocked(lockResult.accountLocked === true);
+    setCurrentAddress(addressResult.currentAddress);
+  };
 
   return (
     <PolkadotApiProvider>
