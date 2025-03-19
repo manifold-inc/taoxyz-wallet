@@ -7,12 +7,12 @@ import Import from "./pages/Import";
 import Dashboard from "./pages/Dashboard";
 import Swap from "./pages/Swap";
 import Create from "./pages/Create";
-import Connect from "./pages/Connect";
-import Sign from "./pages/Sign";
 import Stake from "./pages/Stake";
 import Transfer from "./pages/Transfer";
 import Settings from "./pages/Settings";
 
+import Sign from "./components/popups/Sign";
+import Connect from "./components/popups/Connect";
 import LockScreen from "./components/LockScreen";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Navigation from "./components/Navigation";

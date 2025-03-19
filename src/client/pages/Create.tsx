@@ -15,20 +15,21 @@ interface CreateProps {
 export const Create = ({ setIsLocked }: CreateProps) => {
   const navigate = useNavigate();
   const { isLoading } = usePolkadotApi();
-  const [mnemonic, setMnemonic] = useState<string>("");
   const [account, setAccount] = useState<KeyringPair | null>(null);
+  const [mnemonic, setMnemonic] = useState<string>("");
 
   const handleSuccess = async (
-    newAccount: KeyringPair,
-    generatedMnemonic: string
-  ) => {
-    setAccount(newAccount);
-    setMnemonic(generatedMnemonic);
+    account: KeyringPair,
+    mnemonic: string
+  ): Promise<void> => {
+    setAccount(account);
+    setMnemonic(mnemonic);
   };
 
-  const handleContinue = async () => {
+  const handleContinue = async (): Promise<void> => {
+    if (!account) return;
     await chrome.storage.local.set({
-      currentAddress: account?.address as string,
+      currentAddress: account.address,
     });
     await chrome.storage.local.set({ accountLocked: false });
     MessageService.sendClearLockTimer();
@@ -38,7 +39,6 @@ export const Create = ({ setIsLocked }: CreateProps) => {
 
   return (
     <div className="flex flex-col items-center min-h-screen">
-      <div className="h-20" />
       <div className="flex flex-col items-center flex-1">
         <img src={taoxyz} alt="Taoxyz Logo" className="w-16 h-16 mb-8" />
 

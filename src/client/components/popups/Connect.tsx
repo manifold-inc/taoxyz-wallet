@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { KeyringService } from "../services/KeyringService";
 import type { InjectedAccount } from "@polkadot/extension-inject/types";
-import taoxyzLogo from "../../../public/icons/taoxyz.svg";
-import { MESSAGE_TYPES } from "../../types/messages";
+
+import KeyringService from "../../services/KeyringService";
+import { MESSAGE_TYPES } from "../../../types/messages";
+import taoxyzLogo from "../../../../public/icons/taoxyz.svg";
 
 interface AuthRequest {
   origin: string;

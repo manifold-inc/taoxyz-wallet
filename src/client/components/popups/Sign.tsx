@@ -4,13 +4,13 @@ import type {
   SignerPayloadRaw,
 } from "@polkadot/types/types";
 
-import KeyringService from "../services/KeyringService";
-import { MESSAGE_TYPES } from "../../types/messages";
+import KeyringService from "../../services/KeyringService";
+import { MESSAGE_TYPES } from "../../../types/messages";
 import type {
   StoredSignRequest,
   SignResponsePayload,
-} from "../../types/messages";
-import taoxyzLogo from "../../../public/icons/taoxyz.png";
+} from "../../../types/messages";
+import taoxyzLogo from "../../../../public/icons/taoxyz.svg";
 
 const Sign = () => {
   const [request, setRequest] = useState<StoredSignRequest | null>(null);
