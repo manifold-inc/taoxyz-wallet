@@ -34,7 +34,7 @@
 }
 
 body {
-  background-color: black;
+  background-color: var(--color-mf-night-500);
 }
 
 #root {
@@ -65,4 +65,49 @@ body {
 
 .portfolio-container::-webkit-scrollbar {
   width: 4px;
+}
+
+.custom-checkbox {
+  display: grid;
+  grid-template-columns: 1em auto;
+  gap: 0.5em;
+  font-size: 16px;
+}
+
+/* Remove default styles */
+.custom-checkbox input[type="checkbox"] {
+  appearance: none;
+  background-color: transparent;
+  margin: 0;
+  font: inherit;
+  width: 1em;
+  height: 1em;
+  border: 2px solid var(--color-mf-ash-300);
+  border-radius: 0.15em;
+  transform: translateY(-0.075em);
+  display: grid;
+  place-content: center;
+}
+
+.custom-checkbox input[type="checkbox"]::before {
+  content: "";
+  width: 0.65em;
+  height: 0.65em;
+  transform: scale(0);
+  transition: 120ms transform ease-in-out;
+  box-shadow: inset 1em 1em var(--color-mf-safety-500);
+  transform-origin: center;
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+
+.custom-checkbox input[type="checkbox"]:checked::before {
+  transform: scale(1);
+}
+
+.custom-checkbox input[type="checkbox"]:focus {
+  outline: none;
+}
+
+.custom-checkbox input[type="checkbox"]:hover {
+  cursor: pointer;
 }

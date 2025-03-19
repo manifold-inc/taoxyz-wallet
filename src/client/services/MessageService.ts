@@ -1,7 +1,6 @@
 import { KeyringService } from "./KeyringService";
 import { MESSAGE_TYPES, ERROR_TYPES } from "../../types/messages";
 import type { ResponseMessage, ExtensionMessage } from "../../types/messages";
-import type { Permissions } from "../../types/client";
 
 const sendErrorResponse = (
   sendResponse: (response: ResponseMessage) => void,
@@ -31,30 +30,6 @@ const MessageService = {
     await chrome.runtime.sendMessage({
       type: MESSAGE_TYPES.CLEAR_LOCK_TIMER,
     });
-  },
-
-  async handleAuthMessage(
-    message: ExtensionMessage & { type: typeof MESSAGE_TYPES.AUTHENTICATE },
-    _sender: chrome.runtime.MessageSender,
-    sendResponse: (response: { approved: boolean }) => void
-  ) {
-    try {
-      const { address, origin } = message.payload;
-      console.log(
-        `[MessageHandler] Checking permission for ${origin} to access ${address}`
-      );
-
-      const account = await KeyringService.getAccount(address);
-      const permissions =
-        (account.meta.websitePermissions as Permissions) || {};
-      const approved = permissions[origin] === true;
-
-      sendResponse({ approved });
-    } catch (error) {
-      console.error("[MessageHandler] Error checking permissions:", error);
-      sendResponse({ approved: false });
-    }
-    return true;
   },
 
   async handleLockMessage(
@@ -87,15 +62,6 @@ const MessageService = {
       }
 
       switch (message.type) {
-        case MESSAGE_TYPES.AUTHENTICATE:
-          return this.handleAuthMessage(
-            message as ExtensionMessage & {
-              type: typeof MESSAGE_TYPES.AUTHENTICATE;
-            },
-            sender,
-            sendResponse as (response: { approved: boolean }) => void
-          );
-
         case MESSAGE_TYPES.ACCOUNTS_LOCKED:
           return this.handleLockMessage(
             message as ExtensionMessage & {

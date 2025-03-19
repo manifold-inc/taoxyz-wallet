@@ -4,8 +4,8 @@ import type { KeyringPair } from "@polkadot/keyring/types";
 
 import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 import MessageService from "../services/MessageService";
-import MnemonicDisplay from "../components/Mnemonic";
-import CreateForm from "../components/CreateForm";
+import MnemonicDisplay from "../components/create/Mnemonic";
+import CreateForm from "../components/create/CreateForm";
 import taoxyzLogo from "../../../public/icons/taoxyz.svg";
 
 interface CreateProps {

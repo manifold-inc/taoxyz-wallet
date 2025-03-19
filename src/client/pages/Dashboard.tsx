@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeftRight, ListPlus, Redo, Copy } from "lucide-react";
 
 import { usePolkadotApi } from "../contexts/PolkadotApiContext";
-import Portfolio from "../components/Portfolio";
+import Portfolio from "../components/dashboard/Portfolio";
+import BalanceChart from "../components/dashboard/BalanceChart";
 import type { StakeTransaction } from "../../types/client";
-import BalanceChart from "../components/BalanceChart";
 
 interface StakeResponse {
   netuid: number;

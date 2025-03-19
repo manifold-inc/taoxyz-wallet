@@ -1,5 +1,6 @@
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { KeyringService } from "../services/KeyringService";
+
 import type {
   BittensorSubnet,
   BittensorMetagraph,
@@ -55,36 +56,22 @@ class PolkadotApi {
     await this.initialize();
   }
 
-  public async getStake(address: string) {
-    try {
-      const stake =
-        await this.api.call.stakeInfoRuntimeApi.getStakeInfoForColdkey(address);
-      return stake.toJSON();
-    } catch (error) {
-      console.error("Error in getStake:", error);
-      throw error;
-    }
-  }
-
   public async transfer({
     fromAddress,
     toAddress,
     amount,
-    password,
   }: {
     fromAddress: string;
     toAddress: string;
     amount: number;
-    password: string;
   }) {
     try {
       const account = await KeyringService.getAccount(fromAddress);
-      if (!account) throw new Error("Account not found");
-
-      account.decodePkcs8(password);
-      if (account.isLocked) {
-        throw new Error("Invalid password");
-      }
+      const toAccount = (await this.api.query.system.account(
+        toAddress
+      )) as unknown as SubstrateAccount;
+      if (account.isLocked) throw new Error("Account is locked");
+      if (!toAccount.data.free) throw new Error("Invalid recipient address");
 
       const amountInRao = BigInt(Math.floor(amount * 1e9));
       const transaction = await this.api.tx.balances
@@ -98,6 +85,18 @@ class PolkadotApi {
     }
   }
 
+  public async getStake(address: string) {
+    try {
+      const stake =
+        await this.api.call.stakeInfoRuntimeApi.getStakeInfoForColdkey(address);
+      return stake.toJSON();
+    } catch (error) {
+      console.error("Error in getStake:", error);
+      throw error;
+    }
+  }
+
+  // TODO: Relook at error handling for api
   public async createStake({
     address,
     subnetId,
@@ -298,6 +297,10 @@ class PolkadotApi {
       console.error("Error in getValidators:", error);
       throw error;
     }
+  }
+
+  public getNetwork(): string {
+    return this.endpoint;
   }
 
   public async disconnect(): Promise<void> {

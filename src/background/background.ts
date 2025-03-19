@@ -37,11 +37,16 @@ const sendMessageToTab = async <T extends keyof MessagePayloadMap>(
   message: ExtensionMessage & { type: T }
 ): Promise<void> => {
   try {
+    const tab = await chrome.tabs.get(tabId);
+    if (!tab) {
+      console.error(`[Background] Tab ${tabId} no longer exists`);
+      throw new Error(ERROR_TYPES.NO_TAB);
+    }
+
     await chrome.tabs.sendMessage(tabId, message);
     console.log(
-      `[Background] Response sent to tab ${tabId}, message: ${JSON.stringify(
-        message
-      )}`
+      `[Background] Response sent to tab ${tabId}, message:`,
+      message
     );
   } catch (error) {
     console.error(
@@ -65,8 +70,8 @@ const openPopup = async (route: string): Promise<chrome.windows.Window> => {
   return await chrome.windows.create({
     url: chrome.runtime.getURL(`index.html#/${route}`),
     type: "popup",
-    width: 400,
-    height: 600,
+    width: 366,
+    height: 628,
   });
 };
 
@@ -151,12 +156,12 @@ async function handleSignRequest(
     const origin = message.payload.origin;
     const address = message.payload.address;
 
-    const permissionCheck = await chrome.runtime.sendMessage({
-      type: MESSAGE_TYPES.AUTHENTICATE,
-      payload: { address, origin, requestId: message.payload.id },
-    });
+    const storageKey = `permissions_${address}`;
+    const result = await chrome.storage.local.get(storageKey);
+    const permissions = result[storageKey]?.permissions || {};
+    const approved = permissions[origin] === true;
 
-    if (!permissionCheck.approved) {
+    if (!approved) {
       console.log(
         `[Background] Permission denied for ${origin} to sign with ${address}`
       );

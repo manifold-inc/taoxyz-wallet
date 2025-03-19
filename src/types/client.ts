@@ -46,7 +46,18 @@ export interface Slippage {
   slippage: number;
 }
 
-export type Permissions = Record<string, boolean>;
+export type PermissionsPerWebsite = Record<
+  string,
+  {
+    accountCount: number;
+    accounts: {
+      address: string;
+      username: string;
+      hasAccess: boolean;
+    }[];
+  }
+>;
+export type Permissions = Record<string, boolean | undefined>;
 
 // BLOCKCHAIN TYPES
 export interface BittensorSubnet {
