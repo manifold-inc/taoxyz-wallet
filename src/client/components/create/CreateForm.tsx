@@ -67,27 +67,20 @@ const CreateForm = ({ mnemonic, onSuccess }: CreateFormProps) => {
 
     setIsSubmitting(true);
     const inputMnemonic = mnemonic || KeyringService.createMnemonic();
-    // TODO: Render error component
-    if (!inputMnemonic) {
-      setError("Failed to create mnemonic");
-      setIsSubmitting(false);
-      return;
-    }
 
+    // TODO: Render error component
     const account = await KeyringService.addAccount(
       inputMnemonic,
       username,
       password
     );
-    if (!account) {
-      setError("Failed to create account");
+    if (account instanceof Error) {
+      setError(account.message);
       setIsSubmitting(false);
       return;
     }
 
-    // TODO: Handle account unlock failure
     await KeyringService.unlockAccount(username, password);
-
     onSuccess(account, inputMnemonic);
     setIsSubmitting(false);
   };

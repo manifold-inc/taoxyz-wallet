@@ -54,7 +54,7 @@ const Home = () => {
                 </div>
               </button>
               <button
-                onClick={() => navigate("/signin")}
+                onClick={() => navigate("/login")}
                 className="rounded-sm bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors p-3"
               >
                 <div className="flex justify-center items-center gap-2 mr-4">

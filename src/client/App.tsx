@@ -2,7 +2,7 @@ import { HashRouter, Routes, Route } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 import Home from "./pages/Home";
-import Signin from "./pages/Signin";
+import LogIn from "./pages/LogIn";
 import Import from "./pages/Import";
 import Dashboard from "./pages/Dashboard";
 import Swap from "./pages/Swap";
@@ -54,8 +54,8 @@ const App = () => {
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route
-                    path="/signin"
-                    element={<Signin setIsLocked={setIsLocked} />}
+                    path="/login"
+                    element={<LogIn setIsLocked={setIsLocked} />}
                   />
                   <Route
                     path="/create"

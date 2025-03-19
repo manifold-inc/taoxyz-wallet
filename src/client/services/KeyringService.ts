@@ -4,7 +4,6 @@ import { TypeRegistry } from "@polkadot/types";
 import type { KeyringPair, KeyringPair$Meta } from "@polkadot/keyring/types";
 import type { SignerPayloadJSON } from "@polkadot/types/types";
 
-import MessageService from "./MessageService";
 import type { Permissions } from "../../types/client";
 
 const registry = new TypeRegistry();
@@ -14,66 +13,49 @@ export const KeyringService = {
     mnemonic: string,
     username: string,
     password: string
-  ): Promise<KeyringPair> {
-    try {
-      const result = await keyring.addUri(mnemonic, password, {
-        username,
-        websitePermissions: {} as Permissions,
-      } as KeyringPair$Meta);
-      return result.pair;
-    } catch (error) {
-      console.error("[KeyringService] Error adding account:", error);
-      throw error;
-    }
+  ): Promise<KeyringPair | Error> {
+    const result = await keyring.addUri(mnemonic, password, {
+      username,
+      websitePermissions: {} as Permissions,
+    } as KeyringPair$Meta);
+    if (!result.pair) return new Error("Failed to add account");
+    return result.pair;
   },
 
   async unlockAccount(username: string, password: string): Promise<boolean> {
     const address = await this.getAddress(username);
-    if (!address) throw new Error("Account not found");
+    if (address instanceof Error) return false;
+
     const pair = keyring.getPair(address);
-    if (!pair) throw new Error("Account not found");
+    if (!pair) return false;
+
     try {
       pair.decodePkcs8(password);
-      if (!pair.isLocked) {
-        MessageService.sendClearLockTimer();
-        return true;
-      }
+    } catch {
       return false;
-    } catch (error) {
-      console.error("[KeyringService] Error unlocking account:", error);
-      throw error;
     }
+
+    if (!pair.isLocked) {
+      return true;
+    }
+    return false;
   },
 
   createMnemonic(): string {
-    try {
-      return mnemonicGenerate(12);
-    } catch (error) {
-      console.error("[KeyringService] Error creating mnemonic:", error);
-      throw error;
-    }
+    return mnemonicGenerate(12);
   },
 
   validateMnemonic(mnemonic: string): boolean {
-    try {
-      return mnemonicValidate(mnemonic);
-    } catch (error) {
-      console.error("[KeyringService] Error validating mnemonic:", error);
-      throw error;
-    }
+    return mnemonicValidate(mnemonic);
   },
 
-  async getAddress(username: string): Promise<string> {
+  async getAddress(username: string): Promise<string | Error> {
     const pairs = keyring.getPairs();
-    if (!pairs) throw new Error("Keyring not initialized");
+    if (!pairs) return new Error("Keyring not initialized");
     const pair = pairs.find((pair) => pair.meta.username === username);
-    if (!pair) throw new Error("Account not found");
-    try {
-      return pair.address;
-    } catch (error) {
-      console.error("[KeyringService] Error getting address:", error);
-      throw error;
-    }
+    if (!pair) return new Error("Account not found");
+
+    return pair.address;
   },
 
   async getAccount(address: string): Promise<KeyringPair> {
