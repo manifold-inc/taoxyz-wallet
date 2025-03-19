@@ -40,16 +40,14 @@ export const Create = ({ setIsLocked }: CreateProps) => {
   return (
     <div className="flex flex-col items-center min-h-screen">
       <div className="flex flex-col items-center flex-1">
-        <img src={taoxyz} alt="Taoxyz Logo" className="w-16 h-16 mb-8" />
+        <img src={taoxyz} alt="Taoxyz Logo" className="w-16 h-16 mt-24" />
 
         {!mnemonic ? (
-          <div className="w-full max-w-md">
-            <div className="text-center mb-6">
-              <h1 className="text-xl font-semibold text-mf-silver-300">
-                Create Wallet
-              </h1>
+          <div>
+            <div className="text-center text-lg text-mf-milk-500 mt-4">
+              <h1>Create Wallet</h1>
             </div>
-            <CreateForm onSuccess={handleSuccess} isLoading={isLoading} />
+            <CreateForm onSuccess={handleSuccess} />
           </div>
         ) : (
           <>
