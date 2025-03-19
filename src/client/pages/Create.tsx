@@ -27,6 +27,7 @@ export const Create = ({ setIsLocked }: CreateProps) => {
   };
 
   const handleContinue = async (): Promise<void> => {
+    // TODO: Render error component
     if (!account) return;
     await chrome.storage.local.set({
       currentAddress: account.address,

@@ -74,7 +74,6 @@ const CreateForm = ({ mnemonic, onSuccess }: CreateFormProps) => {
       return;
     }
 
-    // TODO: Render error component
     const account = await KeyringService.addAccount(
       inputMnemonic,
       username,

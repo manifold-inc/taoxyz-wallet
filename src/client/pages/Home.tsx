@@ -40,7 +40,7 @@ const Home = () => {
                 className="rounded-sm bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors p-3"
               >
                 <div className="flex justify-center items-center gap-2 mr-2">
-                  <UserPlus className="text-mf-safety-300 w-5 h-5" />
+                  <UserPlus className="text-mf-safety-500 w-5 h-5" />
                   <span className="text-mf-milk-500">Sign Up</span>
                 </div>
               </button>
@@ -49,7 +49,7 @@ const Home = () => {
                 className="rounded-sm bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors p-3"
               >
                 <div className="flex justify-center items-center gap-2 mr-4">
-                  <FolderInput className="text-mf-safety-300 w-5 h-5" />
+                  <FolderInput className="text-mf-safety-500 w-5 h-5" />
                   <span className="text-mf-milk-500">Import</span>
                 </div>
               </button>
@@ -58,14 +58,14 @@ const Home = () => {
                 className="rounded-sm bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors p-3"
               >
                 <div className="flex justify-center items-center gap-2 mr-4">
-                  <CircleArrowRight className="text-mf-safety-300 w-5 h-5" />
+                  <CircleArrowRight className="text-mf-safety-500 w-5 h-5" />
                   <span className="text-mf-milk-500">Log In</span>
                 </div>
               </button>
 
               <div className="flex justify-center mt-2">
                 <button onClick={() => setShowDisclaimer(true)}>
-                  <span className="text-xs text-mf-safety-300 hover:text-mf-safety-500 transition-colors underline underline-offset-2 decoration-mf-safety-300 hover:decoration-mf-safety-500">
+                  <span className="text-xs text-mf-safety-500 hover:text-mf-safety-300 transition-colors underline underline-offset-2 decoration-mf-safety-500 hover:decoration-mf-safety-300">
                     Disclaimer
                   </span>
                 </button>
