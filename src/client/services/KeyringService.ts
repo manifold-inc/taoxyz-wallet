@@ -15,53 +15,87 @@ export const KeyringService = {
     username: string,
     password: string
   ): Promise<KeyringPair> {
-    const result = await keyring.addUri(mnemonic, password, {
-      username,
-      websitePermissions: {} as Permissions,
-    } as KeyringPair$Meta);
-    return result.pair;
+    try {
+      const result = await keyring.addUri(mnemonic, password, {
+        username,
+        websitePermissions: {} as Permissions,
+      } as KeyringPair$Meta);
+      return result.pair;
+    } catch (error) {
+      console.error("[KeyringService] Error adding account:", error);
+      throw error;
+    }
   },
 
   async unlockAccount(username: string, password: string): Promise<boolean> {
     const address = await this.getAddress(username);
+    if (!address) throw new Error("Account not found");
     const pair = keyring.getPair(address);
-
-    pair.decodePkcs8(password);
-    if (!pair.isLocked) {
-      MessageService.sendClearLockTimer();
-      return true;
+    if (!pair) throw new Error("Account not found");
+    try {
+      pair.decodePkcs8(password);
+      if (!pair.isLocked) {
+        MessageService.sendClearLockTimer();
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("[KeyringService] Error unlocking account:", error);
+      throw error;
     }
-    return false;
   },
 
   createMnemonic(): string {
-    return mnemonicGenerate(12);
+    try {
+      return mnemonicGenerate(12);
+    } catch (error) {
+      console.error("[KeyringService] Error creating mnemonic:", error);
+      throw error;
+    }
   },
 
   validateMnemonic(mnemonic: string): boolean {
-    return mnemonicValidate(mnemonic);
+    try {
+      return mnemonicValidate(mnemonic);
+    } catch (error) {
+      console.error("[KeyringService] Error validating mnemonic:", error);
+      throw error;
+    }
   },
 
   async getAddress(username: string): Promise<string> {
     const pairs = keyring.getPairs();
+    if (!pairs) throw new Error("Keyring not initialized");
     const pair = pairs.find((pair) => pair.meta.username === username);
-    if (!pair) {
-      throw new Error("Account not found");
+    if (!pair) throw new Error("Account not found");
+    try {
+      return pair.address;
+    } catch (error) {
+      console.error("[KeyringService] Error getting address:", error);
+      throw error;
     }
-    return pair.address;
   },
 
   async getAccount(address: string): Promise<KeyringPair> {
     const pairs = keyring.getPairs();
+    if (!pairs) throw new Error("Keyring not initialized");
     const pair = pairs.find((pair) => pair.address === address);
-    if (!pair) {
-      throw new Error("Account not found");
+    if (!pair) throw new Error("Account not found");
+    try {
+      return pair;
+    } catch (error) {
+      console.error("[KeyringService] Error getting account:", error);
+      throw error;
     }
-    return pair;
   },
 
   getAccounts(): KeyringPair[] {
-    return keyring.getPairs();
+    try {
+      return keyring.getPairs();
+    } catch (error) {
+      console.error("[KeyringService] Error getting accounts:", error);
+      throw error;
+    }
   },
 
   async sign(
@@ -69,11 +103,9 @@ export const KeyringService = {
     payload: SignerPayloadJSON,
     password: string
   ): Promise<`0x${string}`> {
+    const account = await this.getAccount(address);
+    if (!account) throw new Error("Unable to find account");
     try {
-      const account = await this.getAccount(address);
-      if (!account) {
-        throw new Error("Unable to find account");
-      }
       account.decodePkcs8(password);
 
       registry.setSignedExtensions(payload.signedExtensions);
@@ -95,7 +127,13 @@ export const KeyringService = {
 
   async getPermissions(address: string): Promise<Permissions> {
     const account = await this.getAccount(address);
-    return (account.meta.websitePermissions as Permissions) || {};
+    if (!account) throw new Error("Account not found");
+    try {
+      return (account.meta.websitePermissions as Permissions) || {};
+    } catch (error) {
+      console.error("[KeyringService] Error getting permissions:", error);
+      throw error;
+    }
   },
 
   async updatePermissions(
@@ -104,10 +142,9 @@ export const KeyringService = {
     allowAccess: boolean,
     removeWebsite = false
   ): Promise<boolean> {
+    const account = await this.getAccount(address);
+    if (!account) throw new Error("Account not found");
     try {
-      const account = await this.getAccount(address);
-      if (!account) throw new Error("Account not found");
-
       const meta = { ...account.meta };
       const permissions = (meta.websitePermissions as Permissions) || {};
 
@@ -136,16 +173,23 @@ export const KeyringService = {
 
   lockAll(): void {
     const pairs = keyring.getPairs();
-    pairs.forEach((pair) => {
-      if (!pair.isLocked) {
-        pair.lock();
-      }
-    });
+    if (!pairs) throw new Error("Keyring not initialized");
+    try {
+      pairs.forEach((pair) => {
+        if (!pair.isLocked) {
+          pair.lock();
+        }
+      });
+    } catch (error) {
+      console.error("[KeyringService] Error locking all accounts:", error);
+      throw error;
+    }
   },
 
   isLocked(address: string): boolean {
+    const account = keyring.getPair(address);
+    if (!account) throw new Error("Account not found");
     try {
-      const account = keyring.getPair(address);
       return account.isLocked;
     } catch (error) {
       console.error("[KeyringService] Error checking lock status:", error);
