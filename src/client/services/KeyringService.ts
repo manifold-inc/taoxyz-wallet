@@ -14,12 +14,16 @@ export const KeyringService = {
     username: string,
     password: string
   ): Promise<KeyringPair | Error> {
-    const result = await keyring.addUri(mnemonic, password, {
-      username,
-      websitePermissions: {} as Permissions,
-    } as KeyringPair$Meta);
-    if (!result.pair) return new Error("Failed to add account");
-    return result.pair;
+    try {
+      const result = await keyring.addUri(mnemonic, password, {
+        username,
+        websitePermissions: {} as Permissions,
+      } as KeyringPair$Meta);
+      if (!result.pair) return new Error("Failed to add account");
+      return result.pair;
+    } catch {
+      return new Error("Failed to add account");
+    }
   },
 
   async unlockAccount(username: string, password: string): Promise<boolean> {

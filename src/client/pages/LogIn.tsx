@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import KeyringService from "../services/KeyringService";
 import MessageService from "../services/MessageService";
+import ErrorModal from "../components/Notification";
 import taoxyzLogo from "../../../public/icons/taoxyz.svg";
 
 interface LogInProps {
@@ -14,10 +15,14 @@ const LogIn = ({ setIsLocked }: LogInProps) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [notification, setNotification] = useState<string | null>(null);
+  const [showNotification, setShowNotification] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent): Promise<void> => {
     event.preventDefault();
     setError(null);
+    setNotification(null);
+    setShowNotification(false);
 
     const isUnlocked = await KeyringService.unlockAccount(username, password);
     if (!isUnlocked) {
@@ -26,9 +31,9 @@ const LogIn = ({ setIsLocked }: LogInProps) => {
     }
 
     const address = await KeyringService.getAddress(username);
-    // TODO: Render error component
     if (address instanceof Error) {
-      setError(address.message);
+      setNotification(address.message);
+      setShowNotification(true);
       return;
     }
 
@@ -43,6 +48,11 @@ const LogIn = ({ setIsLocked }: LogInProps) => {
 
   return (
     <div className="flex flex-col items-center min-h-screen">
+      <ErrorModal
+        message={notification as string}
+        show={showNotification}
+        onDismiss={() => setShowNotification(false)}
+      />
       <div className="flex flex-col items-center flex-1">
         <img src={taoxyzLogo} alt="Taoxyz Logo" className="w-16 h-16 mt-24" />
 
