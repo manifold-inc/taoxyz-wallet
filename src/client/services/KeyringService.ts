@@ -75,13 +75,9 @@ export const KeyringService = {
     }
   },
 
-  getAccounts(): KeyringPair[] {
-    try {
-      return keyring.getPairs();
-    } catch (error) {
-      console.error("[KeyringService] Error getting accounts:", error);
-      throw error;
-    }
+  // TODO: Figure out error handling for walletselection, where does the notification display
+  getWallets(): KeyringPair[] {
+    return keyring.getPairs();
   },
 
   async sign(
