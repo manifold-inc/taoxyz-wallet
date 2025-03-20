@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import KeyringService from "../services/KeyringService";
 import MessageService from "../services/MessageService";
-import ErrorModal from "../components/Notification";
+import Notification from "../components/Notification";
 import taoxyzLogo from "../../../public/icons/taoxyz.svg";
 
 interface LogInProps {
@@ -48,7 +48,7 @@ const LogIn = ({ setIsLocked }: LogInProps) => {
 
   return (
     <div className="flex flex-col items-center min-h-screen">
-      <ErrorModal
+      <Notification
         message={notification as string}
         show={showNotification}
         onDismiss={() => setShowNotification(false)}

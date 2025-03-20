@@ -6,6 +6,7 @@ import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 import MessageService from "../services/MessageService";
 import MnemonicDisplay from "../components/create/Mnemonic";
 import CreateForm from "../components/create/CreateForm";
+import Notification from "../components/Notification";
 import taoxyz from "../../../public/icons/taoxyz.svg";
 
 interface CreateProps {
@@ -17,6 +18,8 @@ export const Create = ({ setIsLocked }: CreateProps) => {
   const { isLoading } = usePolkadotApi();
   const [account, setAccount] = useState<KeyringPair | null>(null);
   const [mnemonic, setMnemonic] = useState<string>("");
+  const [notification, setNotification] = useState<string | null>(null);
+  const [showNotification, setShowNotification] = useState(false);
 
   const handleSuccess = async (
     account: KeyringPair,
@@ -27,8 +30,14 @@ export const Create = ({ setIsLocked }: CreateProps) => {
   };
 
   const handleContinue = async (): Promise<void> => {
-    // TODO: Render error component
-    if (!account) return;
+    setNotification(null);
+    setShowNotification(false);
+
+    if (!account) {
+      setNotification("Could not find account");
+      setShowNotification(true);
+      return;
+    }
     await chrome.storage.local.set({
       currentAddress: account.address,
     });
@@ -40,6 +49,11 @@ export const Create = ({ setIsLocked }: CreateProps) => {
 
   return (
     <div className="flex flex-col items-center min-h-screen">
+      <Notification
+        message={notification as string}
+        show={showNotification}
+        onDismiss={() => setShowNotification(false)}
+      />
       <div className="flex flex-col items-center flex-1">
         <img src={taoxyz} alt="Taoxyz Logo" className="w-16 h-16 mt-24" />
 
