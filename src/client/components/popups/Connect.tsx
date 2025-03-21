@@ -67,6 +67,18 @@ const Connect = () => {
         .filter((wallet) => wallet.selected)
         .map(({ selected: _, ...wallet }) => wallet);
 
+      if (approved && selectedWallets.length > 0) {
+        try {
+          await KeyringService.updatePermissions(
+            request.origin,
+            selectedWallets[0].address,
+            approved
+          );
+        } catch (error) {
+          console.error("[Connect] Error updating permissions:", error);
+        }
+      }
+
       const response = await chrome.runtime.sendMessage({
         type: MESSAGE_TYPES.CONNECT_RESPONSE,
         payload: {
@@ -77,23 +89,14 @@ const Connect = () => {
         },
       });
 
-      if (response?.success) {
-        window.close();
-
-        if (approved && selectedWallets.length > 0) {
-          try {
-            await KeyringService.updatePermissions(
-              request.origin,
-              selectedWallets[0].address,
-              approved
-            );
-          } catch (error) {
-            console.error("[Connect] Error updating permissions:", error);
-          }
-        }
+      if (!response?.success) {
+        console.error("[Connect] Response was not successful");
       }
+
+      window.close();
     } catch (error) {
       console.error("[Connect] Error sending response:", error);
+      window.close();
     }
   };
 

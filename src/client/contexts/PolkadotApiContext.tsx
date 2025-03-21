@@ -33,7 +33,7 @@ export const PolkadotApiProvider = ({
     setIsLoading(true);
     try {
       if (!api) {
-        const reqApi = new PolkadotApi();
+        const reqApi = PolkadotApi.getInstance();
         await reqApi.getApi();
         setApi(reqApi);
         return reqApi;

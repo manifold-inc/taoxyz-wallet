@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 import KeyringService from "../services/KeyringService";
 import MessageService from "../services/MessageService";
+import TransactionNotification from "../components/TransactionNotification";
 
 const Transfer = () => {
   const { api } = usePolkadotApi();
@@ -15,6 +16,11 @@ const Transfer = () => {
   const [amountError, setAmountError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [txStatus, setTxStatus] = useState<{
+    type: "pending" | "success" | "error";
+    message: string;
+    hash?: string;
+  } | null>(null);
 
   useEffect(() => {
     const init = async () => {
@@ -74,17 +80,36 @@ const Transfer = () => {
     if (!api || !fromAddress || !toAddress || !amount || isSubmitting) return;
     setIsSubmitting(true);
     setError(null);
+    setTxStatus({
+      type: "pending",
+      message: "Transaction pending...",
+    });
 
     try {
       await handleAuth();
-      await api.transfer({
+      const result = await api.transfer({
         fromAddress,
         toAddress,
         amount: parseFloat(amount),
       });
-      navigate("/dashboard");
+
+      setTxStatus({
+        type: "success",
+        message: "Transaction successful!",
+        hash: result,
+      });
+
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 2000);
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Failed to transfer");
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to transfer";
+      setError(errorMessage);
+      setTxStatus({
+        type: "error",
+        message: errorMessage,
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -176,6 +201,13 @@ const Transfer = () => {
           </button>
         </div>
       </div>
+      {txStatus && (
+        <TransactionNotification
+          type={txStatus.type}
+          message={txStatus.message}
+          hash={txStatus.hash}
+        />
+      )}
     </div>
   );
 };

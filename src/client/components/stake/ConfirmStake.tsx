@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import KeyringService from "../../services/KeyringService";
 import MessageService from "../../services/MessageService";
+import TransactionNotification from "../TransactionNotification";
 import { usePolkadotApi } from "../../contexts/PolkadotApiContext";
 import { calculateSlippage } from "../../../utils/utils";
 import type {
@@ -29,6 +30,11 @@ const ConfirmStake = ({
   const [amount, setAmount] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [txStatus, setTxStatus] = useState<{
+    type: "pending" | "success" | "error";
+    message: string;
+    hash?: string;
+  } | null>(null);
 
   useEffect(() => {
     const initAmount = async () => {
@@ -80,9 +86,15 @@ const ConfirmStake = ({
     if (!api || !amount || isSubmitting || alphaAmount > stake.tokens / 1e9)
       return;
     setIsSubmitting(true);
+    setError(null);
+    setTxStatus({
+      type: "pending",
+      message: "Submitting transaction...",
+    });
+
     try {
       await handleAuth();
-      await api.moveStake({
+      const result = await api.moveStake({
         address,
         fromHotkey: stake.validatorHotkey,
         toHotkey: validator.hotkey,
@@ -90,10 +102,26 @@ const ConfirmStake = ({
         toSubnetId: stake.subnetId,
         amount: alphaAmount,
       });
-      navigate("/dashboard");
+
+      setTxStatus({
+        type: "success",
+        message: "Transaction successful!",
+        hash: result,
+      });
+
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 2000);
+
+      setIsSubmitting(false);
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Failed to move stake");
-    } finally {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to move stake";
+      setError(errorMessage);
+      setTxStatus({
+        type: "error",
+        message: errorMessage,
+      });
       setIsSubmitting(false);
     }
   };
@@ -196,6 +224,13 @@ const ConfirmStake = ({
           )}
         </button>
       </div>
+      {txStatus && (
+        <TransactionNotification
+          type={txStatus.type}
+          message={txStatus.message}
+          hash={txStatus.hash}
+        />
+      )}
     </div>
   );
 };

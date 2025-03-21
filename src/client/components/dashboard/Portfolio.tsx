@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { usePolkadotApi } from "../../contexts/PolkadotApiContext";
 import KeyringService from "../../services/KeyringService";
 import MessageService from "../../services/MessageService";
+import TransactionNotification from "../TransactionNotification";
 import StakeOverview from "../portfolio/StakeOverview";
 import ExpandedStake from "../portfolio/ExpandedStake";
 import type { StakeTransaction, Subnet } from "../../../types/client";
@@ -11,10 +12,11 @@ import type { StakeTransaction, Subnet } from "../../../types/client";
 interface PortfolioProps {
   stakes: StakeTransaction[];
   address: string;
+  onRefresh: () => Promise<void>;
 }
 
-// TODO: Replace error handling with noticiation and refine spinner
-const Portfolio = ({ stakes, address }: PortfolioProps) => {
+// TODO: Replace error handling with notification and refine spinner
+const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
   const navigate = useNavigate();
   const { api } = usePolkadotApi();
   const [selectedStake, setSelectedStake] = useState<StakeTransaction | null>(
@@ -23,6 +25,11 @@ const Portfolio = ({ stakes, address }: PortfolioProps) => {
   const [selectedSubnet, setSelectedSubnet] = useState<Subnet | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [txStatus, setTxStatus] = useState<{
+    type: "pending" | "success" | "error";
+    message: string;
+    hash?: string;
+  } | null>(null);
 
   useEffect(() => {
     init();
@@ -81,22 +88,41 @@ const Portfolio = ({ stakes, address }: PortfolioProps) => {
   const handleSwap = async (): Promise<void> => {
     if (!api || !selectedStake) return;
     setError(null);
+    setTxStatus({
+      type: "pending",
+      message: "Submitting transaction...",
+    });
 
     try {
       await handleAuth();
       const convertedStake = selectedStake.tokens / 1e9;
-      await api.removeStake({
+      const result = await api.removeStake({
         address,
         validatorHotkey: selectedStake.validatorHotkey,
         subnetId: selectedStake.subnetId,
         amount: convertedStake,
       });
 
+      setTxStatus({
+        type: "success",
+        message: "Transaction finalized!",
+        hash: result,
+      });
+
       setSelectedStake(null);
       setSelectedSubnet(null);
-      navigate("/dashboard");
+
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 2000);
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Failed to swap");
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to swap";
+      setError(errorMessage);
+      setTxStatus({
+        type: "error",
+        message: errorMessage,
+      });
     }
   };
 
@@ -121,6 +147,7 @@ const Portfolio = ({ stakes, address }: PortfolioProps) => {
           }}
           onSwap={handleSwap}
           onMoveStake={handleMoveStake}
+          onRefresh={onRefresh}
         />
       ) : (
         <div className="w-full max-h-76 overflow-y-auto portfolio-container mt-2">
@@ -152,6 +179,14 @@ const Portfolio = ({ stakes, address }: PortfolioProps) => {
         <div className="mt-2 flex justify-center items-center h-16">
           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-mf-milk-300" />
         </div>
+      )}
+
+      {txStatus && (
+        <TransactionNotification
+          type={txStatus.type}
+          message={txStatus.message}
+          hash={txStatus.hash}
+        />
       )}
     </div>
   );

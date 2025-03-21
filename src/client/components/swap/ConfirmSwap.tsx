@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { usePolkadotApi } from "../../contexts/PolkadotApiContext";
 import KeyringService from "../../services/KeyringService";
 import MessageService from "../../services/MessageService";
+import TransactionNotification from "../TransactionNotification";
 import { calculateSlippage } from "../../../utils/utils";
 import type { Subnet, Validator } from "../../../types/client";
 
@@ -20,11 +21,16 @@ export const ConfirmSwap = ({
   balance,
   address,
 }: ConfirmSwapProps) => {
-  const { api, isLoading } = usePolkadotApi();
   const navigate = useNavigate();
+  const { api, isLoading } = usePolkadotApi();
   const [amount, setAmount] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [txStatus, setTxStatus] = useState<{
+    type: "pending" | "success" | "error";
+    message: string;
+    hash?: string;
+  } | null>(null);
 
   const taoAmount = parseFloat(amount) || 0;
   const totalCost = taoAmount;
@@ -72,20 +78,43 @@ export const ConfirmSwap = ({
   };
 
   const handleSubmit = async () => {
-    if (!api || !amount || isSubmitting) return;
+    if (!api || !amount || isSubmitting || taoAmount > parseFloat(balance))
+      return;
     setIsSubmitting(true);
+    setError(null);
+    setTxStatus({
+      type: "pending",
+      message: "Submitting transaction...",
+    });
+
     try {
       await handleAuth();
-      await api.createStake({
+      const result = await api.createStake({
         address,
         subnetId: subnet.id,
         validatorHotkey: validator.hotkey,
-        amount: parseFloat(amount),
+        amount: taoAmount,
       });
-      navigate("/dashboard");
+
+      setTxStatus({
+        type: "success",
+        message: "Transaction successful!",
+        hash: result,
+      });
+
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 2000);
+
+      setIsSubmitting(false);
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Failed to stake");
-    } finally {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to swap";
+      setError(errorMessage);
+      setTxStatus({
+        type: "error",
+        message: errorMessage,
+      });
       setIsSubmitting(false);
     }
   };
@@ -198,6 +227,13 @@ export const ConfirmSwap = ({
           )}
         </button>
       </div>
+      {txStatus && (
+        <TransactionNotification
+          type={txStatus.type}
+          message={txStatus.message}
+          hash={txStatus.hash}
+        />
+      )}
     </div>
   );
 };

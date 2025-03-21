@@ -27,14 +27,22 @@ export const Dashboard = () => {
   const [notification, setNotification] = useState<string | null>(null);
   const [showNotification, setShowNotification] = useState(false);
 
-  useEffect(() => {
-    getAddress();
+  const refreshData = async () => {
     if (api && address) {
-      setNotification(null);
-      setShowNotification(false);
-      fetchBalance();
-      fetchStake();
+      await Promise.all([fetchBalance(), fetchStake()]);
     }
+  };
+
+  useEffect(() => {
+    const init = async () => {
+      getAddress();
+      if (api && address) {
+        setNotification(null);
+        setShowNotification(false);
+        refreshData();
+      }
+    };
+    init();
   }, [address, api]);
 
   const getAddress = async (): Promise<void> => {
@@ -137,7 +145,11 @@ export const Dashboard = () => {
 
         <div className="mt-3">
           <h2 className="text-xs text-mf-sybil-500 font-semibold">Portfolio</h2>
-          <Portfolio stakes={stakes} address={address as string} />
+          <Portfolio
+            stakes={stakes}
+            address={address as string}
+            onRefresh={refreshData}
+          />
           {isLoading && (
             <div className="flex justify-center items-center h-16">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-mf-milk-300" />
