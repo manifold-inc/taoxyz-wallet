@@ -16,16 +16,16 @@ interface CreateProps {
 export const Create = ({ setIsLocked }: CreateProps) => {
   const navigate = useNavigate();
   const { isLoading } = usePolkadotApi();
-  const [account, setAccount] = useState<KeyringPair | null>(null);
+  const [wallet, setWallet] = useState<KeyringPair | null>(null);
   const [mnemonic, setMnemonic] = useState<string>("");
   const [notification, setNotification] = useState<string | null>(null);
   const [showNotification, setShowNotification] = useState(false);
 
   const handleSuccess = async (
-    account: KeyringPair,
+    wallet: KeyringPair,
     mnemonic: string
   ): Promise<void> => {
-    setAccount(account);
+    setWallet(wallet);
     setMnemonic(mnemonic);
   };
 
@@ -33,13 +33,13 @@ export const Create = ({ setIsLocked }: CreateProps) => {
     setNotification(null);
     setShowNotification(false);
 
-    if (!account) {
-      setNotification("Could not find account");
+    if (!wallet) {
+      setNotification("Could not find wallet");
       setShowNotification(true);
       return;
     }
     await chrome.storage.local.set({
-      currentAddress: account.address,
+      currentAddress: wallet.address,
     });
     await chrome.storage.local.set({ walletLocked: false });
     MessageService.sendClearLockTimer();

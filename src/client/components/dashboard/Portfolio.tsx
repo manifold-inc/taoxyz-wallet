@@ -64,7 +64,7 @@ const Portfolio = ({ stakes, address }: PortfolioProps) => {
       await chrome.storage.local.set({
         storeStakeSelection: selectedStake,
       });
-      MessageService.sendAccountsLockedMessage();
+      MessageService.sendWalletsLockedMessage();
       return;
     }
   };

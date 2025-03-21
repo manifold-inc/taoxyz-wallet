@@ -45,7 +45,7 @@ const LockScreen = ({ setIsLocked }: LockScreenProps) => {
         await MessageService.sendStartLockTimer();
         setIsLocked(false);
       } else {
-        setError("Failed to unlock account");
+        setError("Failed to unlock wallet");
       }
     } catch (error) {
       if (

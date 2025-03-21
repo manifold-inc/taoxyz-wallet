@@ -46,21 +46,21 @@ const Import = ({ setIsLocked }: ImportProps) => {
     setValidMnemonic(mnemonic.trim());
   };
 
-  const handleSuccess = async (account: KeyringPair): Promise<void> => {
-    await handleContinue(account);
+  const handleSuccess = async (wallet: KeyringPair): Promise<void> => {
+    await handleContinue(wallet);
   };
 
-  const handleContinue = async (account: KeyringPair): Promise<void> => {
+  const handleContinue = async (wallet: KeyringPair): Promise<void> => {
     setNotification(null);
     setShowNotification(false);
 
-    if (!account) {
-      setNotification("Could not find account");
+    if (!wallet) {
+      setNotification("Could not find wallet");
       setShowNotification(true);
       return;
     }
     await chrome.storage.local.set({
-      currentAddress: account.address,
+      currentAddress: wallet.address,
     });
     await chrome.storage.local.set({ walletLocked: false });
     MessageService.sendClearLockTimer();
@@ -80,7 +80,7 @@ const Import = ({ setIsLocked }: ImportProps) => {
           <img src={taoxyz} alt="Taoxyz Logo" className="w-16 h-16 mt-24" />
           <div>
             <div className="text-center text-lg text-mf-milk-500 mt-4">
-              <h1>Create Account</h1>
+              <h1>Create Wallet</h1>
             </div>
             <CreateForm mnemonic={validMnemonic} onSuccess={handleSuccess} />
           </div>

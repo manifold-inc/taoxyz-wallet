@@ -13,30 +13,26 @@ import type {
 class PolkadotApi {
   private api!: ApiPromise;
   private initPromise: Promise<void>;
-  private endpoint: "test" | "main";
 
   private readonly endpoints = {
     test: "wss://test.finney.opentensor.ai:443",
     main: "wss://entrypoint-finney.opentensor.ai:443",
   };
 
-  constructor(endpoint: "test" | "main" = "test") {
-    this.endpoint = endpoint;
+  constructor() {
     this.initPromise = this.initialize();
   }
 
   private async initialize(): Promise<void> {
     console.log("[Client] Starting initialization");
-    const provider = new WsProvider(this.endpoints[this.endpoint]);
+    const provider = new WsProvider(this.endpoints.main);
     try {
       if (this.api?.isConnected) {
         await this.api.disconnect();
       }
 
       this.api = await ApiPromise.create({ provider });
-      console.log(
-        `[Client] Connected to the endpoint: ${this.endpoints[this.endpoint]}`
-      );
+      console.log(`[Client] Connected to the endpoint: ${this.endpoints.test}`);
     } catch (error) {
       console.error("Error in initialize:", error);
       throw error;
@@ -50,11 +46,6 @@ class PolkadotApi {
       throw new Error("API not initialized");
     }
     return this.api;
-  }
-
-  public async changeEndpoint(reqEndpoint: "test" | "main"): Promise<void> {
-    this.endpoint = reqEndpoint;
-    await this.initialize();
   }
 
   public async transfer({
@@ -73,7 +64,7 @@ class PolkadotApi {
       )) as unknown as SubstrateAccount;
 
       if (wallet instanceof Error) throw new Error(wallet.message);
-      if (wallet.isLocked) throw new Error("Account is locked");
+      if (wallet.isLocked) throw new Error("Wallet is locked");
       if (!toWallet.data.free) throw new Error("Invalid recipient address");
 
       const amountInRao = BigInt(Math.floor(amount * 1e9));

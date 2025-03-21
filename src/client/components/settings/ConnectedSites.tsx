@@ -36,7 +36,7 @@ const ConnectedSites = () => {
           if (hasAccess) permissionsPerWebsite[website].walletCount++;
           permissionsPerWebsite[website].wallets.push({
             address: wallet.address,
-            username: (wallet.meta.username as string) || "Unnamed Account",
+            username: (wallet.meta.username as string) || "Unnamed Wallet",
             hasAccess: hasAccess as boolean,
           });
         });

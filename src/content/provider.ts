@@ -37,22 +37,15 @@ const dappMessageHandler = <T extends keyof MessagePayloadMap>(
   return handler;
 };
 
-const accountsHandler = (accounts: InjectedAccount[]) => {
-  console.log(
-    "[Provider] Creating accounts interface with:",
-    accounts.length,
-    "accounts"
-  );
+const walletsHandler = (wallets: InjectedAccount[]) => {
   return {
     get: async () => {
-      console.log("[Provider] Getting accounts");
-      return accounts;
+      return wallets;
     },
-    subscribe: (cb: (accounts: InjectedAccount[]) => void) => {
-      console.log("[Provider] Setting up account subscription");
-      cb(accounts);
+    subscribe: (cb: (wallets: InjectedAccount[]) => void) => {
+      cb(wallets);
       return () => {
-        console.log("[Provider] Cleaning up account subscription");
+        console.log("[Provider] Cleaning up wallet subscription");
       };
     },
   };
@@ -60,11 +53,6 @@ const accountsHandler = (accounts: InjectedAccount[]) => {
 
 const signerHandler = () => ({
   signPayload: async (payload: SignerPayloadJSON): Promise<SignerResult> => {
-    console.log("[Provider] Sign payload requested:", {
-      address: payload.address,
-      method: payload.method,
-    });
-
     return new Promise((resolve, reject) => {
       const id = generateId();
       const handleSignResponse = dappMessageHandler(
@@ -79,11 +67,6 @@ const signerHandler = () => ({
             reject(new Error(ERROR_TYPES.SIGNING_FAILED));
             return;
           }
-
-          console.log("[Provider] Signature received:", {
-            id: response.id,
-            signaturePrefix: response.signature.slice(0, 10) + "...",
-          });
           resolve({ id: response.id, signature: response.signature });
         }
       );
@@ -102,11 +85,6 @@ const signerHandler = () => ({
   },
 
   signRaw: async (payload: SignerPayloadRaw): Promise<SignerResult> => {
-    console.log("[Provider] Sign raw requested:", {
-      address: payload.address,
-      dataLength: payload.data.length,
-    });
-
     return new Promise((resolve, reject) => {
       const id = generateId();
       const handleSignResponse = dappMessageHandler(
@@ -117,10 +95,6 @@ const signerHandler = () => ({
             return;
           }
 
-          console.log("[Provider] Raw signature received:", {
-            id: response.id,
-            signaturePrefix: response.signature.slice(0, 10) + "...",
-          });
           resolve({ id: response.id, signature: response.signature });
         }
       );
@@ -159,11 +133,11 @@ export const TaoxyzWalletProvider: InjectedWindowProvider = {
           }
           console.log(
             "[Provider] Connection approved with",
-            response.accounts.length,
-            "accounts"
+            response.wallets.length,
+            "wallets"
           );
           resolve({
-            accounts: accountsHandler(response.accounts),
+            accounts: walletsHandler(response.wallets),
             signer: signerHandler(),
           });
         }

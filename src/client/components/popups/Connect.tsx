@@ -10,13 +10,13 @@ interface AuthRequest {
   requestId: string;
 }
 
-interface SelectableAccount extends InjectedAccount {
+interface SelectableWallet extends InjectedAccount {
   selected: boolean;
 }
 
 const Connect = () => {
   const [request, setRequest] = useState<AuthRequest | null>(null);
-  const [accounts, setAccounts] = useState<SelectableAccount[]>([]);
+  const [wallets, setWallets] = useState<SelectableWallet[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -27,18 +27,18 @@ const Connect = () => {
           setRequest(result.connectRequest);
         }
 
-        const keyringAccounts = await KeyringService.getAccounts();
-        const formattedAccounts = keyringAccounts.map((account) => ({
-          address: account.address,
+        const keyringWallets = await KeyringService.getWallets();
+        const formattedWallets = keyringWallets.map((wallet) => ({
+          address: wallet.address,
           genesisHash: null,
-          name: (account.meta?.username as string) || "Unnamed Account",
+          name: (wallet.meta?.username as string) || "Unnamed Wallet",
           type: "sr25519" as const,
           meta: {
             source: "taoxyz-wallet",
           },
           selected: false,
         }));
-        setAccounts(formattedAccounts);
+        setWallets(formattedWallets);
       } catch (error) {
         console.error("Failed to connect:", error);
       } finally {
@@ -49,12 +49,12 @@ const Connect = () => {
     requestConnect();
   }, []);
 
-  const toggleAccount = (address: string) => {
-    setAccounts((prev) =>
-      prev.map((account) =>
-        account.address === address
-          ? { ...account, selected: !account.selected }
-          : account
+  const toggleWallet = (address: string) => {
+    setWallets((prev) =>
+      prev.map((wallet) =>
+        wallet.address === address
+          ? { ...wallet, selected: !wallet.selected }
+          : wallet
       )
     );
   };
@@ -63,15 +63,15 @@ const Connect = () => {
     if (!request) return;
 
     try {
-      const selectedAccounts = accounts
-        .filter((account) => account.selected)
-        .map(({ selected: _, ...account }) => account);
+      const selectedWallets = wallets
+        .filter((wallet) => wallet.selected)
+        .map(({ selected: _, ...wallet }) => wallet);
 
       const response = await chrome.runtime.sendMessage({
         type: MESSAGE_TYPES.CONNECT_RESPONSE,
         payload: {
           approved,
-          accounts: selectedAccounts,
+          wallets: selectedWallets,
           requestId: request.requestId,
           origin: request.origin,
         },
@@ -80,11 +80,11 @@ const Connect = () => {
       if (response?.success) {
         window.close();
 
-        if (approved && selectedAccounts.length > 0) {
+        if (approved && selectedWallets.length > 0) {
           try {
             await KeyringService.updatePermissions(
               request.origin,
-              selectedAccounts[0].address,
+              selectedWallets[0].address,
               approved
             );
           } catch (error) {
@@ -132,11 +132,11 @@ const Connect = () => {
 
           <div className="mb-4">
             <div className="space-y-2">
-              {accounts.map((account) => (
+              {wallets.map((wallet) => (
                 <label
-                  key={account.address}
+                  key={wallet.address}
                   className={`flex items-center p-2 bg-mf-ash-500/30 border rounded-lg hover:bg-mf-ash-500/50 cursor-pointer transition-colors ${
-                    account.selected
+                    wallet.selected
                       ? "border-mf-safety-500 ring-1 ring-mf-safety-500"
                       : "border-mf-ash-500"
                   }`}
@@ -144,19 +144,18 @@ const Connect = () => {
                   <div className="custom-checkbox">
                     <input
                       type="checkbox"
-                      checked={account.selected}
-                      onChange={() => toggleAccount(account.address)}
+                      checked={wallet.selected}
+                      onChange={() => toggleWallet(wallet.address)}
                     />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="font-medium text-xs text-mf-silver-300">
-                      {account.name}
+                      {wallet.name}
                     </div>
                     <div className="text-xs text-mf-silver-500">
-                      {`${account.address.slice(
-                        0,
-                        8
-                      )}...${account.address.slice(-8)}`}
+                      {`${wallet.address.slice(0, 8)}...${wallet.address.slice(
+                        -8
+                      )}`}
                     </div>
                   </div>
                 </label>
@@ -167,7 +166,7 @@ const Connect = () => {
           <div className="flex space-x-2">
             <button
               onClick={() => handleResponse(true)}
-              disabled={!accounts.some((acc) => acc.selected)}
+              disabled={!wallets.some((wallet) => wallet.selected)}
               className="flex-1 text-sm rounded-lg bg-mf-safety-500 hover:bg-mf-safety-300 disabled:bg-mf-ash-500 disabled:cursor-not-allowed px-4 py-3 text-mf-milk-300 transition-colors"
             >
               Approve

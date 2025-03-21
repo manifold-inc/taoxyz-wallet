@@ -147,7 +147,7 @@ export const KeyringService = {
         }
       });
     } catch (error) {
-      console.error("[KeyringService] Error locking all accounts:", error);
+      console.error("[KeyringService] Error locking all wallets:", error);
       throw error;
     }
   },

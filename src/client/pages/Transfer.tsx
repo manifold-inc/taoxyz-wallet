@@ -64,7 +64,7 @@ const Transfer = () => {
         },
       });
       await chrome.storage.local.set({ walletLocked: true });
-      MessageService.sendAccountsLockedMessage();
+      MessageService.sendWalletsLockedMessage();
       setIsSubmitting(false);
       return;
     }

@@ -14,9 +14,9 @@ const sendErrorResponse = (
 // Potentially sendMessage() Refactor
 
 const MessageService = {
-  async sendAccountsLockedMessage() {
+  async sendWalletsLockedMessage() {
     await chrome.runtime.sendMessage({
-      type: MESSAGE_TYPES.ACCOUNTS_LOCKED,
+      type: MESSAGE_TYPES.WALLETS_LOCKED,
     });
   },
 
@@ -33,7 +33,7 @@ const MessageService = {
   },
 
   async handleLockMessage(
-    _message: ExtensionMessage & { type: typeof MESSAGE_TYPES.ACCOUNTS_LOCKED },
+    _message: ExtensionMessage & { type: typeof MESSAGE_TYPES.WALLETS_LOCKED },
     _sender: chrome.runtime.MessageSender,
     sendResponse: (response: ResponseMessage) => void
   ) {
@@ -43,7 +43,7 @@ const MessageService = {
       window.location.reload();
       sendResponse({ success: true });
     } catch (error) {
-      console.error("[MessageHandler] Error handling accounts locked:", error);
+      console.error("[MessageHandler] Error handling wallets locked:", error);
       sendErrorResponse(sendResponse, ERROR_TYPES.UNKNOWN_ERROR, error);
     }
     return true;
@@ -61,10 +61,10 @@ const MessageService = {
       }
 
       switch (message.type) {
-        case MESSAGE_TYPES.ACCOUNTS_LOCKED:
+        case MESSAGE_TYPES.WALLETS_LOCKED:
           return this.handleLockMessage(
             message as ExtensionMessage & {
-              type: typeof MESSAGE_TYPES.ACCOUNTS_LOCKED;
+              type: typeof MESSAGE_TYPES.WALLETS_LOCKED;
             },
             sender,
             sendResponse as (response: ResponseMessage) => void

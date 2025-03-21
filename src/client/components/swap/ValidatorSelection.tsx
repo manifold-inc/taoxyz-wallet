@@ -43,7 +43,7 @@ const ValidatorSelection = ({
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <h3 className="text-xs font-semibold text-mf-milk-300">
-                  Validator {validator.index + 1}
+                  Validator {validator.index}
                 </h3>
                 <p className="text-xs text-mf-silver-300">
                   {validator.hotkey.slice(0, 8)}...{validator.hotkey.slice(-8)}

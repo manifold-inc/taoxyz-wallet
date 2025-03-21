@@ -15,7 +15,7 @@ const Settings = ({ setIsLocked }: SettingsProps) => {
 
   const handleLock = async () => {
     KeyringService.lockAll();
-    MessageService.sendAccountsLockedMessage();
+    MessageService.sendWalletsLockedMessage();
     await chrome.storage.local.set({ walletLocked: true });
     setIsLocked(true);
     navigate("/");
@@ -23,7 +23,7 @@ const Settings = ({ setIsLocked }: SettingsProps) => {
 
   const handleLogout = async () => {
     KeyringService.lockAll();
-    MessageService.sendAccountsLockedMessage();
+    MessageService.sendWalletsLockedMessage();
     await chrome.storage.local.remove("currentAddress");
     await chrome.storage.local.set({ walletLocked: true });
     setIsLocked(true);
@@ -61,7 +61,7 @@ const Settings = ({ setIsLocked }: SettingsProps) => {
               >
                 <div className="flex items-center justify-center">
                   <Lock className="w-4 h-4" />
-                  <span className="ml-2">Lock Account</span>
+                  <span className="ml-2">Lock Wallet</span>
                 </div>
               </button>
               <button
