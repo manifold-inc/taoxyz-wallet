@@ -122,13 +122,15 @@ export const KeyringService = {
 
       meta.websitePermissions = permissions;
       keyring.saveAccountMeta(wallet, meta);
-      chrome.storage.local.set({
+      await chrome.storage.local.set({
         [`permissions_${wallet.address}`]: { permissions },
       });
 
       console.log("[KeyringService] Updated permissions:", {
         address: wallet.address,
         permissions: permissions,
+        origin,
+        allowAccess,
       });
       return true;
     } catch (error) {

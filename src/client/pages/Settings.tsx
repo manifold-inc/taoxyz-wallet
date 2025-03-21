@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { LogOut, Lock } from "lucide-react";
+import { Lock } from "lucide-react";
 
 import KeyringService from "../services/KeyringService";
 import MessageService from "../services/MessageService";
@@ -16,15 +16,6 @@ const Settings = ({ setIsLocked }: SettingsProps) => {
   const handleLock = async () => {
     KeyringService.lockAll();
     MessageService.sendWalletsLockedMessage();
-    await chrome.storage.local.set({ walletLocked: true });
-    setIsLocked(true);
-    navigate("/");
-  };
-
-  const handleLogout = async () => {
-    KeyringService.lockAll();
-    MessageService.sendWalletsLockedMessage();
-    await chrome.storage.local.remove("currentAddress");
     await chrome.storage.local.set({ walletLocked: true });
     setIsLocked(true);
     navigate("/");
@@ -62,15 +53,6 @@ const Settings = ({ setIsLocked }: SettingsProps) => {
                 <div className="flex items-center justify-center">
                   <Lock className="w-4 h-4" />
                   <span className="ml-2">Lock Wallet</span>
-                </div>
-              </button>
-              <button
-                onClick={handleLogout}
-                className="flex-1 rounded-lg bg-mf-ash-500 hover:bg-mf-ash-400 px-4 py-3 text-mf-safety-300"
-              >
-                <div className="flex items-center justify-center">
-                  <LogOut className="w-4 h-4" />
-                  <span className="ml-2">Log Out</span>
                 </div>
               </button>
             </div>

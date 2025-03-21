@@ -74,13 +74,14 @@ const CreateForm = ({ mnemonic, onSuccess }: CreateFormProps) => {
       username,
       password
     );
+
     if (wallet instanceof Error) {
       setError(wallet.message);
       setIsSubmitting(false);
       return;
     }
 
-    await KeyringService.unlockWallet(username, password);
+    await KeyringService.unlockWallet(wallet.address, password);
     onSuccess(wallet, inputMnemonic);
     setIsSubmitting(false);
   };

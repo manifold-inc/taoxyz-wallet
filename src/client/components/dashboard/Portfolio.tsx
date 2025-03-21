@@ -123,7 +123,7 @@ const Portfolio = ({ stakes, address }: PortfolioProps) => {
           onMoveStake={handleMoveStake}
         />
       ) : (
-        <div className="w-full max-h-64 overflow-y-auto portfolio-container mt-2">
+        <div className="w-full max-h-76 overflow-y-auto portfolio-container mt-2">
           {stakes.length > 0 ? (
             <div className="space-y-3">
               {stakes.map((stake, index) => (
