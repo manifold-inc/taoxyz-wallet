@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { WalletCards, ChevronDown, ChevronUp } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { WalletCards, ChevronDown, ChevronUp, Plus } from "lucide-react";
 import type { KeyringPair } from "@polkadot/keyring/types";
 
 import KeyringService from "../services/KeyringService";
@@ -10,6 +11,7 @@ interface WalletSelectionProps {
 
 // TODO: Error handling if there are no wallets - shouldn't even display the component
 const WalletSelection = ({ onSelect }: WalletSelectionProps) => {
+  const navigate = useNavigate();
   const [wallet, setWallet] = useState<KeyringPair | null>(null);
   const [wallets, setWallets] = useState<KeyringPair[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -22,7 +24,11 @@ const WalletSelection = ({ onSelect }: WalletSelectionProps) => {
   const getWallet = async (): Promise<void> => {
     const result = await chrome.storage.local.get("currentAddress");
     const wallet = await KeyringService.getWallet(result.currentAddress);
-    setWallet(wallet);
+    if (wallet instanceof Error) {
+      setWallet(null);
+    } else {
+      setWallet(wallet);
+    }
   };
 
   const getWallets = async (): Promise<void> => {
@@ -87,6 +93,19 @@ const WalletSelection = ({ onSelect }: WalletSelectionProps) => {
                 </div>
               </button>
             ))}
+
+          <button
+            onClick={() => navigate("/create")}
+            className="w-full flex items-center gap-3 p-2"
+          >
+            <div className="flex items-center justify-center bg-mf-safety-500 border border-mf-safety-500 rounded-sm p-1">
+              <Plus className="w-5 h-5 text-mf-ash-500" />
+            </div>
+            <div className="text-left text-mf-safety-500 text-xs">
+              <span>Add New Wallet</span>
+              <div></div>
+            </div>
+          </button>
         </div>
       )}
     </div>

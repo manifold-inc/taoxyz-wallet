@@ -80,9 +80,13 @@ const Import = ({ setIsLocked }: ImportProps) => {
           <img src={taoxyz} alt="Taoxyz Logo" className="w-16 h-16 mt-24" />
           <div>
             <div className="text-center text-lg text-mf-milk-500 mt-4">
-              <h1>Create Wallet</h1>
+              <h1>Import Wallet</h1>
             </div>
-            <CreateForm mnemonic={validMnemonic} onSuccess={handleSuccess} />
+            <CreateForm
+              mnemonic={validMnemonic}
+              onSuccess={handleSuccess}
+              isImport={true}
+            />
           </div>
         </div>
       </div>

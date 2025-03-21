@@ -20,6 +20,7 @@ export const Create = ({ setIsLocked }: CreateProps) => {
   const [mnemonic, setMnemonic] = useState<string>("");
   const [notification, setNotification] = useState<string | null>(null);
   const [showNotification, setShowNotification] = useState(false);
+  const [showOptions, setShowOptions] = useState(true);
 
   const handleSuccess = async (
     wallet: KeyringPair,
@@ -57,7 +58,26 @@ export const Create = ({ setIsLocked }: CreateProps) => {
       <div className="flex flex-col items-center flex-1">
         <img src={taoxyz} alt="Taoxyz Logo" className="w-16 h-16 mt-24" />
 
-        {!mnemonic ? (
+        {/* Could abstract this out */}
+        {showOptions ? (
+          <div className="flex flex-col items-center mt-4 space-y-4">
+            <h1 className="text-lg text-mf-milk-500">Add New Wallet</h1>
+            <div className="flex flex-col space-y-3">
+              <button
+                onClick={() => setShowOptions(false)}
+                className="w-44 rounded-xs text-sm text-mf-night-500 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 transition-colors p-1.5"
+              >
+                Create Wallet
+              </button>
+              <button
+                onClick={() => navigate("/import")}
+                className="w-44 rounded-xs text-sm text-mf-safety-500 bg-mf-night-500 border-mf-night-500 hover:border-mf-safety-500 border-2 transition-colors p-1.5"
+              >
+                Import Wallet
+              </button>
+            </div>
+          </div>
+        ) : !mnemonic ? (
           <div>
             <div className="text-center text-lg text-mf-milk-500 mt-4">
               <h1>Create Wallet</h1>
@@ -81,7 +101,7 @@ export const Create = ({ setIsLocked }: CreateProps) => {
           </>
         )}
       </div>
-      {!mnemonic && <div className="h-20" />}
+      {!mnemonic && !showOptions && <div className="h-20" />}
     </div>
   );
 };

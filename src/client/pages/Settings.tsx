@@ -18,7 +18,7 @@ const Settings = ({ setIsLocked }: SettingsProps) => {
     MessageService.sendWalletsLockedMessage();
     await chrome.storage.local.set({ walletLocked: true });
     setIsLocked(true);
-    navigate("/");
+    navigate("/dashboard");
   };
 
   return (

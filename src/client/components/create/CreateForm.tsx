@@ -6,10 +6,11 @@ import KeyringService from "../../services/KeyringService";
 
 interface CreateFormProps {
   mnemonic?: string;
+  isImport?: boolean;
   onSuccess: (wallet: KeyringPair, mnemonic: string) => void;
 }
 
-const CreateForm = ({ mnemonic, onSuccess }: CreateFormProps) => {
+const CreateForm = ({ mnemonic, isImport, onSuccess }: CreateFormProps) => {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -185,7 +186,15 @@ const CreateForm = ({ mnemonic, onSuccess }: CreateFormProps) => {
           }
           className="w-44 rounded-xs text-sm text-mf-night-500 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 transition-colors p-1.5"
         >
-          <span>{isSubmitting ? "Creating..." : "Create Wallet"}</span>
+          <span>
+            {isSubmitting
+              ? isImport
+                ? "Importing..."
+                : "Creating..."
+              : isImport
+              ? "Import"
+              : "Create"}
+          </span>
         </button>
       </div>
     </form>

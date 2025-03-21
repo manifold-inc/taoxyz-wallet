@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { UserPlus, FolderInput, CircleArrowRight } from "lucide-react";
+import { UserPlus, FolderInput } from "lucide-react";
 
 import Disclaimer from "../components/Disclaimer";
 import taoxyz from "../../../public/icons/taoxyz.svg";
@@ -51,15 +51,6 @@ const Home = () => {
                 <div className="flex justify-center items-center gap-2 mr-4">
                   <FolderInput className="text-mf-safety-500 w-5 h-5" />
                   <span className="text-mf-milk-500">Import</span>
-                </div>
-              </button>
-              <button
-                onClick={() => navigate("/login")}
-                className="rounded-sm bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors p-3"
-              >
-                <div className="flex justify-center items-center gap-2 mr-4">
-                  <CircleArrowRight className="text-mf-safety-500 w-5 h-5" />
-                  <span className="text-mf-milk-500">Log In</span>
                 </div>
               </button>
 
