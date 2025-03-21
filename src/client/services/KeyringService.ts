@@ -64,6 +64,15 @@ export const KeyringService = {
     return keyring.getPairs();
   },
 
+  deleteWallet(address: string): boolean {
+    try {
+      keyring.forgetAccount(address);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+
   async sign(
     address: string,
     payload: SignerPayloadJSON,

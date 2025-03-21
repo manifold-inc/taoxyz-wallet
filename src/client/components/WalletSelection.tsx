@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { WalletCards, ChevronDown, ChevronUp, Plus } from "lucide-react";
+import { WalletCards, ChevronDown, ChevronUp, Plus, Trash } from "lucide-react";
 import type { KeyringPair } from "@polkadot/keyring/types";
 
 import KeyringService from "../services/KeyringService";
@@ -45,6 +45,15 @@ const WalletSelection = ({ onSelect }: WalletSelectionProps) => {
     onSelect();
   };
 
+  const handleDeleteWallet = async (
+    wallet: KeyringPair,
+    event: React.MouseEvent
+  ): Promise<void> => {
+    event.stopPropagation();
+    await KeyringService.deleteWallet(wallet.address);
+    await getWallets();
+  };
+
   return (
     <div className="bg-mf-ash-500 mt-4 relative">
       <div className="flex items-center justify-between p-2">
@@ -77,26 +86,39 @@ const WalletSelection = ({ onSelect }: WalletSelectionProps) => {
           {wallets
             .filter((w) => w.address !== wallet?.address)
             .map((w) => (
-              <button
+              <div
                 key={w.address}
-                onClick={() => handleSelectWallet(w)}
-                className="w-full flex items-center gap-3 p-2"
+                className="flex items-center justify-between p-2 hover:bg-mf-night-500 transition-colors"
               >
-                <div className="flex items-center justify-center bg-mf-night-500 border border-mf-sybil-500 rounded-sm p-1">
-                  <WalletCards className="w-5 h-5 text-mf-sybil-500" />
-                </div>
-                <div className="text-left text-mf-milk-300 text-xs">
-                  <span>{(w.meta as { username: string }).username}</span>
-                  <div className="text-mf-sybil-500">
-                    {w.address.slice(0, 6)}...{w.address.slice(-6)}
+                <button
+                  onClick={() => handleSelectWallet(w)}
+                  className="flex items-center gap-3 flex-1 text-left"
+                >
+                  <div className="flex items-center justify-center bg-mf-night-500 border border-mf-sybil-500 rounded-sm p-1">
+                    <WalletCards className="w-5 h-5 text-mf-sybil-500" />
                   </div>
-                </div>
-              </button>
+                  <div className="text-left text-mf-milk-300 text-xs">
+                    <span>{(w.meta as { username: string }).username}</span>
+                    <div className="text-mf-sybil-500">
+                      {w.address.slice(0, 6)}...{w.address.slice(-6)}
+                    </div>
+                  </div>
+                </button>
+                <button
+                  onClick={(event) => handleDeleteWallet(w, event)}
+                  className="p-2 text-mf-milk-300 hover:text-mf-safety-500 transition-colors rounded-sm hover:bg-mf-night-500"
+                  aria-label={`Delete wallet ${
+                    (w.meta as { username: string }).username
+                  }`}
+                >
+                  <Trash className="w-4 h-4" />
+                </button>
+              </div>
             ))}
 
           <button
             onClick={() => navigate("/create")}
-            className="w-full flex items-center gap-3 p-2"
+            className="w-full flex items-center gap-3 p-2 hover:bg-mf-night-500 transition-colors"
           >
             <div className="flex items-center justify-center bg-mf-safety-500 border border-mf-safety-500 rounded-sm p-1">
               <Plus className="w-5 h-5 text-mf-ash-500" />
