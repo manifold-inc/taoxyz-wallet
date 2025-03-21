@@ -43,7 +43,6 @@ export interface StakeTransaction {
 export interface Slippage {
   tokens: number;
   slippagePercentage: number;
-  slippage: number;
 }
 
 export type PermissionsPerWebsite = Record<

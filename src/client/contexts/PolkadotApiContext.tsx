@@ -5,16 +5,12 @@ interface ApiContext {
   api: PolkadotApi | null;
   isLoading: boolean;
   error: Error | null;
-  setEndpoint: (endpoint: "test" | "main") => Promise<PolkadotApi>;
 }
 
 const PolkadotApiContext = createContext<ApiContext>({
   api: null,
   isLoading: true,
   error: null,
-  setEndpoint: async () => {
-    throw new Error("Context cannot be used outside of the provider");
-  },
 });
 
 export const PolkadotApiProvider = ({
@@ -33,17 +29,16 @@ export const PolkadotApiProvider = ({
     };
   }, []);
 
-  const init = async (endpoint?: "test" | "main"): Promise<PolkadotApi> => {
+  const init = async (): Promise<PolkadotApi> => {
     setIsLoading(true);
     try {
       if (!api) {
-        const reqApi = new PolkadotApi(endpoint ?? "test");
+        const reqApi = new PolkadotApi();
         await reqApi.getApi();
         setApi(reqApi);
         return reqApi;
       }
 
-      if (endpoint) await api.changeEndpoint(endpoint);
       return api;
     } catch (error) {
       if (error instanceof Error) {
@@ -58,9 +53,7 @@ export const PolkadotApiProvider = ({
   };
 
   return (
-    <PolkadotApiContext.Provider
-      value={{ api, isLoading, error, setEndpoint: init }}
-    >
+    <PolkadotApiContext.Provider value={{ api, isLoading, error }}>
       {children}
     </PolkadotApiContext.Provider>
   );

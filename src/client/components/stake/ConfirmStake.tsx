@@ -44,9 +44,9 @@ const ConfirmStake = ({
 
   const alphaAmount = parseFloat(amount) || 0;
   const slippageCalculation = useMemo(() => {
-    if (!subnet.alphaIn || !subnet.taoIn || !alphaAmount) return null;
-    return calculateSlippage(subnet.alphaIn, subnet.taoIn, alphaAmount, false);
-  }, [subnet.alphaIn, subnet.taoIn, alphaAmount]);
+    if (!subnet.alphaIn || !alphaAmount) return null;
+    return calculateSlippage(subnet.alphaIn, 0, alphaAmount, true);
+  }, [subnet.alphaIn, alphaAmount]);
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -127,14 +127,14 @@ const ConfirmStake = ({
         <div>
           <p className="text-xs text-mf-silver-300">Available to Move</p>
           <p className="text-xs font-semibold text-mf-milk-300">
-            {(stake.tokens / 1e9).toFixed(4)} τ
+            {(stake.tokens / 1e9).toFixed(4)} α
           </p>
         </div>
       </div>
 
       <div className="space-y-2">
         <div>
-          <p className="text-xs text-mf-silver-300 mb-1">Amount to Move (τ)</p>
+          <p className="text-xs text-mf-silver-300 mb-1">Amount to Move (α)</p>
           <input
             type="text"
             inputMode="decimal"
@@ -153,13 +153,7 @@ const ConfirmStake = ({
             <div className="flex justify-between items-center">
               <span className="text-xs text-mf-silver-300">Moving:</span>
               <span className="text-xs font-medium text-mf-milk-300">
-                {alphaAmount.toFixed(4)} τ
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-xs text-mf-silver-300">You receive:</span>
-              <span className="text-xs font-medium text-mf-milk-300">
-                {slippageCalculation.tokens.toFixed(4)} τ
+                {alphaAmount.toFixed(4)} α
               </span>
             </div>
             <div className="flex justify-between items-center">
@@ -172,12 +166,6 @@ const ConfirmStake = ({
                 }`}
               >
                 {slippageCalculation.slippagePercentage.toFixed(2)}%
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-xs text-mf-silver-300">Fee:</span>
-              <span className="text-xs text-mf-silver-300">
-                {slippageCalculation.slippage.toFixed(4)} τ
               </span>
             </div>
           </div>

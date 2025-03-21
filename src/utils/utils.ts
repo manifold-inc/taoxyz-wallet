@@ -10,6 +10,18 @@ export const calculateSlippage = (
   amount: number,
   toAlpha: boolean
 ): Slippage => {
+  // Moving stake between validators in the same subnet
+  if (toAlpha && taoIn === 0) {
+    const actualAmount = (alphaIn * amount) / (alphaIn + amount);
+    const slippagePercentage = ((amount - actualAmount) / amount) * 100;
+
+    return {
+      tokens: actualAmount,
+      slippagePercentage,
+    };
+  }
+
+  // Regular token swap calculations
   const amountRao = amount * 1e9;
   if (toAlpha) {
     const spotPrice = alphaIn / taoIn;
@@ -18,13 +30,12 @@ export const calculateSlippage = (
     const actualAmount = (alphaIn * amountRao) / (taoIn + amountRao);
     const actualAmountNormalized = actualAmount / 1e9;
 
-    const slippage = idealAmount - actualAmountNormalized;
-    const slippagePercentage = (slippage / idealAmount) * 100;
+    const slippagePercentage =
+      ((idealAmount - actualAmountNormalized) / idealAmount) * 100;
 
     return {
       tokens: actualAmountNormalized,
       slippagePercentage,
-      slippage,
     };
   } else {
     const spotPrice = taoIn / alphaIn;
@@ -33,13 +44,12 @@ export const calculateSlippage = (
     const actualAmount = (taoIn * amountRao) / (alphaIn + amountRao);
     const actualAmountNormalized = actualAmount / 1e9;
 
-    const slippage = idealAmount - actualAmountNormalized;
-    const slippagePercentage = (slippage / idealAmount) * 100;
+    const slippagePercentage =
+      ((idealAmount - actualAmountNormalized) / idealAmount) * 100;
 
     return {
       tokens: actualAmountNormalized,
       slippagePercentage,
-      slippage,
     };
   }
 };

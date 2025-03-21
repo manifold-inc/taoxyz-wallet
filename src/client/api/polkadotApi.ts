@@ -25,7 +25,7 @@ class PolkadotApi {
 
   private async initialize(): Promise<void> {
     console.log("[Client] Starting initialization");
-    const provider = new WsProvider(this.endpoints.main);
+    const provider = new WsProvider(this.endpoints.test);
     try {
       if (this.api?.isConnected) {
         await this.api.disconnect();

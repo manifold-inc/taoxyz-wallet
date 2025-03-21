@@ -168,12 +168,6 @@ export const ConfirmSwap = ({
                 {slippageCalculation.slippagePercentage.toFixed(2)}%
               </span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-xs text-mf-silver-300">Fee:</span>
-              <span className="text-xs text-mf-silver-300">
-                {slippageCalculation.slippage.toFixed(4)} τ
-              </span>
-            </div>
           </div>
         )}
 
