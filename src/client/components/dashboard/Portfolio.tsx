@@ -112,9 +112,7 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
       setSelectedStake(null);
       setSelectedSubnet(null);
 
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 2000);
+      onRefresh();
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to swap";

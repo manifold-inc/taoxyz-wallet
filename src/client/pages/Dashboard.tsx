@@ -28,8 +28,12 @@ export const Dashboard = () => {
   const [showNotification, setShowNotification] = useState(false);
 
   const refreshData = async () => {
-    if (api && address) {
+    if (!api || !address) return;
+    setIsLoading(true);
+    try {
       await Promise.all([fetchBalance(), fetchStake()]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -52,7 +56,6 @@ export const Dashboard = () => {
 
   const fetchBalance = async (): Promise<void> => {
     if (!api || !address) return;
-    setIsLoading(true);
     const balance = await api.getBalance(address);
     if (!balance) {
       setNotification("Failed to get balance");
@@ -60,12 +63,10 @@ export const Dashboard = () => {
       return;
     }
     setBalance(balance);
-    setIsLoading(false);
   };
 
   const fetchStake = async (): Promise<void> => {
     if (!api || !address) return;
-    setIsLoading(true);
     const stake = await api.getStake(address);
     if (!stake) {
       setNotification("Failed to get stake");
@@ -80,7 +81,6 @@ export const Dashboard = () => {
       })
     );
     setStakes(formattedStakes);
-    setIsLoading(false);
   };
 
   const handleCopy = async (): Promise<void> => {
