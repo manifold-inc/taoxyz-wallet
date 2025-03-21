@@ -65,7 +65,7 @@ class PolkadotApi {
     fromAddress: string;
     toAddress: string;
     amount: number;
-  }) {
+  }): Promise<string> {
     try {
       const wallet = await KeyringService.getWallet(fromAddress);
       const toWallet = (await this.api.query.system.account(
@@ -77,11 +77,58 @@ class PolkadotApi {
       if (!toWallet.data.free) throw new Error("Invalid recipient address");
 
       const amountInRao = BigInt(Math.floor(amount * 1e9));
-      const transaction = await this.api.tx.balances
-        .transferAllowDeath(toAddress, amountInRao)
-        .signAndSend(wallet);
+      return new Promise((resolve, reject) => {
+        let unsubscribe: (() => void) | undefined;
 
-      return transaction.hash.toHex();
+        this.api.tx.balances
+          .transferAllowDeath(toAddress, amountInRao)
+          .signAndSend(wallet, ({ status, dispatchError, events = [] }) => {
+            // Only log state transitions
+            if (status.isReady) console.log("[Transaction] Ready to broadcast");
+            if (status.isBroadcast)
+              console.log("[Transaction] Broadcasted to network");
+            if (status.isInBlock)
+              console.log(
+                "[Transaction] Included in block:",
+                status.asInBlock.toHex()
+              );
+
+            if (dispatchError) {
+              if (unsubscribe) unsubscribe();
+              reject(new Error(dispatchError.toString()));
+              return;
+            }
+
+            if (status.isInBlock) {
+              // Check if the transaction was successful
+              const extrinsicFailed = events.find(
+                ({ event }) => event.method === "ExtrinsicFailed"
+              );
+              if (extrinsicFailed) {
+                if (unsubscribe) unsubscribe();
+                reject(new Error("Transaction failed"));
+                return;
+              }
+
+              const extrinsicSuccess = events.find(
+                ({ event }) => event.method === "ExtrinsicSuccess"
+              );
+              if (extrinsicSuccess) {
+                console.log("[Transaction] Successful");
+                if (unsubscribe) unsubscribe();
+                resolve(status.asInBlock.toHex());
+              }
+            }
+          })
+          .then((unsub) => {
+            unsubscribe = unsub;
+          })
+          .catch((error) => {
+            console.error("[Transaction] Error:", error);
+            if (unsubscribe) unsubscribe();
+            reject(error);
+          });
+      });
     } catch (error) {
       console.error("Error in transfer:", error);
       throw error;
