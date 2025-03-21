@@ -24,7 +24,7 @@ const LogIn = ({ setIsLocked }: LogInProps) => {
     setNotification(null);
     setShowNotification(false);
 
-    const isUnlocked = await KeyringService.unlockAccount(username, password);
+    const isUnlocked = await KeyringService.unlockWallet(username, password);
     if (!isUnlocked) {
       setError("Invalid Credentials");
       return;
@@ -40,7 +40,7 @@ const LogIn = ({ setIsLocked }: LogInProps) => {
     await chrome.storage.local.set({
       currentAddress: address,
     });
-    await chrome.storage.local.set({ accountLocked: false });
+    await chrome.storage.local.set({ walletLocked: false });
     MessageService.sendClearLockTimer();
     setIsLocked(false);
     navigate("/dashboard");

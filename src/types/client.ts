@@ -49,8 +49,8 @@ export interface Slippage {
 export type PermissionsPerWebsite = Record<
   string,
   {
-    accountCount: number;
-    accounts: {
+    walletCount: number;
+    wallets: {
       address: string;
       username: string;
       hasAccess: boolean;

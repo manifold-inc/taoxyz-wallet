@@ -62,7 +62,7 @@ const Import = ({ setIsLocked }: ImportProps) => {
     await chrome.storage.local.set({
       currentAddress: account.address,
     });
-    await chrome.storage.local.set({ accountLocked: false });
+    await chrome.storage.local.set({ walletLocked: false });
     MessageService.sendClearLockTimer();
     setIsLocked(false);
     navigate("/dashboard");

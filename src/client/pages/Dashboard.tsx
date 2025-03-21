@@ -15,6 +15,7 @@ interface StakeResponse {
   stake: number;
 }
 
+// TODO: Better loading state for balance and stake
 export const Dashboard = () => {
   const navigate = useNavigate();
   const { api } = usePolkadotApi();
@@ -115,19 +116,19 @@ export const Dashboard = () => {
           <div className="flex justify-between rounded-sm text-sm text-mf-night-500 transition-colors space-x-2">
             <button
               onClick={() => navigate("/swap")}
-              className="w-1/3 p-2 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-night-500 hover:border-mf-safety-500 transition-colors"
+              className="w-1/3 p-1 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 hover:border-mf-safety-500 border-sm transition-colors"
             >
               <span>Swap</span>
             </button>
             <button
               onClick={() => navigate("/stake")}
-              className="w-1/3 p-2 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-night-500 hover:border-mf-safety-500 transition-colors"
+              className="w-1/3 p-1 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 hover:border-mf-safety-500 border-sm transition-colors"
             >
               <span>Stake</span>
             </button>
             <button
               onClick={() => navigate("/transfer")}
-              className="w-1/3 p-2 bg-mf-sybil-500 hover:bg-mf-night-500 hover:text-mf-sybil-500 border-2 border-mf-night-500 hover:border-mf-sybil-500 transition-colors"
+              className="w-1/3 p-1 bg-mf-sybil-500 hover:bg-mf-night-500 hover:text-mf-sybil-500 border-2 border-mf-sybil-500 hover:border-mf-sybil-500 border-sm transition-colors"
             >
               <span>Transfer</span>
             </button>
@@ -136,14 +137,12 @@ export const Dashboard = () => {
 
         <div className="mt-3">
           <h2 className="text-xs text-mf-sybil-500 font-semibold">Portfolio</h2>
-          <div className="w-full p-2 max-h-64 overflow-y-auto portfolio-container">
-            <Portfolio stakes={stakes} address={address as string} />
-            {isLoading && (
-              <div className="flex justify-center items-center h-16">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-mf-milk-300" />
-              </div>
-            )}
-          </div>
+          <Portfolio stakes={stakes} address={address as string} />
+          {isLoading && (
+            <div className="flex justify-center items-center h-16">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-mf-milk-300" />
+            </div>
+          )}
         </div>
       </div>
     </div>

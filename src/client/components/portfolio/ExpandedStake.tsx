@@ -1,7 +1,9 @@
-import { Minimize2, Copy } from "lucide-react";
 import { useState } from "react";
-import StakeChart from "./StakeChart";
+import { ChevronUp, Copy } from "lucide-react";
+
 import type { StakeTransaction, Subnet } from "../../../types/client";
+import taoxyz from "../../../../public/icons/taoxyz.png";
+import StakeChart from "./StakeChart";
 
 interface ExpandedStakeProps {
   stake: StakeTransaction;
@@ -26,75 +28,71 @@ const ExpandedStake = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // TODO: Error handle if subnet price is not available also prefetch subnet when user hovers?
   return (
-    <div className="bg-mf-ash-500 rounded-lg p-3">
-      <div className="flex items-start justify-between mb-3">
-        <div className="space-y-1">
-          <h3 className="text-lg font-semibold text-mf-milk-300">
-            Subnet {stake.subnetId}
-          </h3>
-          {subnet?.price && (
-            <p className="text-xs text-mf-silver-300">
-              <span className="text-mf-safety-300">τ</span> ={" "}
-              {(1 / subnet.price).toFixed(4)}
-              <span className="text-mf-safety-300"> α</span>
-            </p>
-          )}
-        </div>
-        <button
-          onClick={onClose}
-          className="p-1 hover:bg-mf-ash-300 rounded transition-colors"
-        >
-          <Minimize2 className="w-4 h-4 text-mf-milk-300" />
-        </button>
-      </div>
-      <div className="space-y-3">
-        <div className="flex items-center space-x-6">
-          <div className="flex-1">
-            <p className="text-xs font-medium text-mf-milk-300">Validator</p>
-            <div className="flex items-center space-x-2">
-              <p className="text-xs text-mf-silver-300">
-                {stake.validatorHotkey.slice(0, 8)}...
-                {stake.validatorHotkey.slice(-8)}
-              </p>
-              <button onClick={handleCopy} className="transition-colors">
-                <Copy
-                  className={`w-3 h-3 ${
-                    copied ? "text-mf-sybil-300" : "text-mf-safety-300"
-                  }`}
-                />
-              </button>
+    <div className="mt-2">
+      <div className="rounded-sm p-3 border border-mf-safety-500 bg-mf-ash-500">
+        <div className="flex justify-between">
+          <div>
+            <h3 className="text-sm font-semibold text-mf-milk-300">
+              Subnet {stake.subnetId}
+            </h3>
+          </div>
+          <div className="flex flex-col text-mf-sybil-500 text-xs">
+            <div className="flex items-center gap-1">
+              <span className="text-mf-milk-300">Stake</span>
+              <span>{(stake.tokens / 1e9).toFixed(4)}</span>
+              <span className="text-mf-safety-500">α</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="text-mf-milk-300">Price</span>
+              <span className="flex items-center gap-1">
+                {subnet?.price ? subnet.price.toFixed(4) : "-"}
+                <img src={taoxyz} alt="taoxyz" className="w-3 h-3" />
+              </span>
             </div>
           </div>
-          <div>
-            <p className="text-xs font-medium text-mf-milk-300">Stake</p>
-            <p className="text-xs text-mf-silver-300">
-              {(stake.tokens / 1e9).toFixed(6)}{" "}
-              <span className="text-mf-safety-300">α</span>
+        </div>
+
+        <div className="h-38">
+          <StakeChart subnetId={stake.subnetId} />
+        </div>
+
+        <div className="text-mf-milk-300 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-mf-milk-300">Validator</span>
+            <p>
+              {stake.validatorHotkey.slice(0, 6)}...
+              {stake.validatorHotkey.slice(-6)}
             </p>
+            <button onClick={handleCopy} className="transition-colors">
+              <Copy
+                className={`w-3 h-3 ${
+                  copied ? "text-mf-sybil-500" : "text-mf-milk-300"
+                }`}
+              />
+            </button>
           </div>
-        </div>
-
-        <div className="mt-3 -mx-3">
-          <div className="h-40">
-            <StakeChart subnetId={stake.subnetId} />
-          </div>
-        </div>
-
-        <div className="flex space-x-2">
-          <button
-            onClick={onSwap}
-            className="flex-1 py-2 px-3 text-[10px] text-mf-sybil-300 rounded-lg bg-mf-ash-300 hover:bg-mf-ash-400 transition-colors"
-          >
-            Swap
-          </button>
-          <button
-            onClick={onMoveStake}
-            className="flex-1 py-2 px-3 text-[10px] text-mf-sybil-300 rounded-lg bg-mf-ash-300 hover:bg-mf-ash-400 transition-colors"
-          >
-            Move Stake
+          <button onClick={onClose} className="p-1">
+            <ChevronUp className="w-5 h-5 text-mf-milk-300" />
           </button>
         </div>
+      </div>
+
+      <div className="flex mt-4 space-x-4">
+        <button
+          onClick={onSwap}
+          className="flex-1 p-2 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 hover:border-mf-safety-500 transition-colors
+          "
+        >
+          Swap
+        </button>
+        <button
+          onClick={onMoveStake}
+          className="flex-1 p-2 bg-mf-sybil-500 hover:bg-mf-night-500 hover:text-mf-sybil-500 border-2 border-mf-sybil-500 hover:border-mf-sybil-500 transition-colors"
+        >
+          Move
+        </button>
       </div>
     </div>
   );

@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   AreaChart,
   Area,
@@ -7,25 +8,48 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const tempStakeData = [
-  { timestamp: "00:00", value: 200 },
-  { timestamp: "04:00", value: 250 },
-  { timestamp: "08:00", value: 220 },
-  { timestamp: "12:00", value: 300 },
-  { timestamp: "16:00", value: 280 },
-  { timestamp: "20:00", value: 350 },
-  { timestamp: "24:00", value: 320 },
-];
-
 interface StakeChartProps {
   subnetId: number;
 }
 
+interface PriceResponse {
+  price: number;
+  timestamp: string;
+}
+
+// TODO: Format the data to be used in the chart and call correct api endpoint
 const StakeChart = ({ subnetId }: StakeChartProps) => {
+  const [priceData, setPriceData] = useState<PriceResponse[]>([]);
+
+  useEffect(() => {
+    fetchSubnetPrice();
+  }, [subnetId]);
+
+  const fetchSubnetPrice = async () => {
+    const response = await fetch(
+      "https://taoxyz.vercel.app/api/subnets/price",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          allSubnets: false,
+          netuid: subnetId,
+        }),
+      }
+    );
+
+    console.log(response);
+
+    const data = await response.json();
+    setPriceData(data);
+  };
+
   return (
     <ResponsiveContainer width="100%" height="100%">
       <AreaChart
-        data={tempStakeData}
+        data={priceData}
         margin={{ top: 10, right: 10, left: -5, bottom: 0 }}
       >
         <defs>

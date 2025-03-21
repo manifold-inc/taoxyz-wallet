@@ -56,14 +56,14 @@ const Transfer = () => {
   };
 
   const handleAuth = async () => {
-    if (KeyringService.isLocked(fromAddress)) {
+    if (await KeyringService.isLocked(fromAddress)) {
       await chrome.storage.local.set({
         storeTransferTransaction: {
           toAddress,
           amount,
         },
       });
-      await chrome.storage.local.set({ accountLocked: true });
+      await chrome.storage.local.set({ walletLocked: true });
       MessageService.sendAccountsLockedMessage();
       setIsSubmitting(false);
       return;

@@ -15,13 +15,19 @@ const WalletSelection = ({ onSelect }: WalletSelectionProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
+    getWallet();
     getWallets();
   }, []);
+
+  const getWallet = async (): Promise<void> => {
+    const result = await chrome.storage.local.get("currentAddress");
+    const wallet = await KeyringService.getWallet(result.currentAddress);
+    setWallet(wallet);
+  };
 
   const getWallets = async (): Promise<void> => {
     const wallets = await KeyringService.getWallets();
     setWallets(wallets);
-    setWallet(wallets[0]);
   };
 
   const handleSelectWallet = async (wallet: KeyringPair): Promise<void> => {
@@ -51,9 +57,9 @@ const WalletSelection = ({ onSelect }: WalletSelectionProps) => {
             </div>
             <button onClick={() => setIsExpanded(!isExpanded)} className="p-1">
               {isExpanded ? (
-                <ChevronUp className="w-6 h-6 text-mf-silver-300" />
+                <ChevronUp className="w-6 h-6 text-mf-silver-300 p-1" />
               ) : (
-                <ChevronDown className="w-6 h-6 text-mf-silver-300" />
+                <ChevronDown className="w-6 h-6 text-mf-silver-300 p-1" />
               )}
             </button>
           </>
@@ -68,7 +74,7 @@ const WalletSelection = ({ onSelect }: WalletSelectionProps) => {
               <button
                 key={w.address}
                 onClick={() => handleSelectWallet(w)}
-                className="flex items-center gap-3 p-2"
+                className="w-full flex items-center gap-3 p-2"
               >
                 <div className="flex items-center justify-center bg-mf-night-500 border border-mf-sybil-500 rounded-sm p-1">
                   <WalletCards className="w-5 h-5 text-mf-sybil-500" />

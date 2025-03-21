@@ -41,7 +41,7 @@ export const Create = ({ setIsLocked }: CreateProps) => {
     await chrome.storage.local.set({
       currentAddress: account.address,
     });
-    await chrome.storage.local.set({ accountLocked: false });
+    await chrome.storage.local.set({ walletLocked: false });
     MessageService.sendClearLockTimer();
     setIsLocked(false);
     navigate("/dashboard");

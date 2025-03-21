@@ -56,7 +56,7 @@ export const ConfirmSwap = ({
   };
 
   const handleAuth = async () => {
-    if (KeyringService.isLocked(address)) {
+    if (await KeyringService.isLocked(address)) {
       await chrome.storage.local.set({
         storeSwapTransaction: {
           subnet,
@@ -64,7 +64,7 @@ export const ConfirmSwap = ({
           amount,
         },
       });
-      await chrome.storage.local.set({ accountLocked: true });
+      await chrome.storage.local.set({ walletLocked: true });
       MessageService.sendAccountsLockedMessage();
       setIsSubmitting(false);
       return;

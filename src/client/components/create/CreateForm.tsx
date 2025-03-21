@@ -6,7 +6,7 @@ import KeyringService from "../../services/KeyringService";
 
 interface CreateFormProps {
   mnemonic?: string;
-  onSuccess: (account: KeyringPair, mnemonic: string) => void;
+  onSuccess: (wallet: KeyringPair, mnemonic: string) => void;
 }
 
 const CreateForm = ({ mnemonic, onSuccess }: CreateFormProps) => {
@@ -69,19 +69,19 @@ const CreateForm = ({ mnemonic, onSuccess }: CreateFormProps) => {
     const inputMnemonic = mnemonic || KeyringService.createMnemonic();
 
     // TODO: Render error component
-    const account = await KeyringService.addAccount(
+    const wallet = await KeyringService.addWallet(
       inputMnemonic,
       username,
       password
     );
-    if (account instanceof Error) {
-      setError(account.message);
+    if (wallet instanceof Error) {
+      setError(wallet.message);
       setIsSubmitting(false);
       return;
     }
 
-    await KeyringService.unlockAccount(username, password);
-    onSuccess(account, inputMnemonic);
+    await KeyringService.unlockWallet(username, password);
+    onSuccess(wallet, inputMnemonic);
     setIsSubmitting(false);
   };
 

@@ -309,8 +309,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === "lockTimer") {
     console.log("[Background] Lock timer finished");
-    chrome.storage.local.set({ accountLocked: true }, () => {
-      console.log("[Background] Set accountLocked to true");
+    chrome.storage.local.set({ walletLocked: true }, () => {
+      console.log("[Background] Set walletLocked to true");
       chrome.runtime.sendMessage({
         type: MESSAGE_TYPES.ACCOUNTS_LOCKED,
       });

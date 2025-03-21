@@ -1,11 +1,8 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogOut, Lock } from "lucide-react";
 
-import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 import KeyringService from "../services/KeyringService";
 import MessageService from "../services/MessageService";
-import NetworkSelector from "../components/settings/NetworkSelector";
 import ConnectedSites from "../components/settings/ConnectedSites";
 import taoxyzLogo from "../../../public/icons/taoxyz.png";
 
@@ -15,34 +12,11 @@ interface SettingsProps {
 
 const Settings = ({ setIsLocked }: SettingsProps) => {
   const navigate = useNavigate();
-  const { api, setEndpoint } = usePolkadotApi();
-  const [selectedNetwork, setSelectedNetwork] = useState<"test" | "main">(
-    () => {
-      const network = api?.getNetwork();
-      return network === "test" ? "test" : "main";
-    }
-  );
-
-  const handleNetworkChange = async (network: "test" | "main") => {
-    if (
-      window.confirm(
-        "Changing the network will require a restart and log you out. Do you want to continue?"
-      )
-    ) {
-      setSelectedNetwork(network);
-      setEndpoint(network);
-      await chrome.storage.local.remove("currentAddress");
-      await chrome.storage.local.set({ accountLocked: true });
-      MessageService.sendAccountsLockedMessage();
-      setIsLocked(true);
-      navigate("/");
-    }
-  };
 
   const handleLock = async () => {
     KeyringService.lockAll();
     MessageService.sendAccountsLockedMessage();
-    await chrome.storage.local.set({ accountLocked: true });
+    await chrome.storage.local.set({ walletLocked: true });
     setIsLocked(true);
     navigate("/");
   };
@@ -51,7 +25,7 @@ const Settings = ({ setIsLocked }: SettingsProps) => {
     KeyringService.lockAll();
     MessageService.sendAccountsLockedMessage();
     await chrome.storage.local.remove("currentAddress");
-    await chrome.storage.local.set({ accountLocked: true });
+    await chrome.storage.local.set({ walletLocked: true });
     setIsLocked(true);
     navigate("/");
   };
@@ -76,13 +50,7 @@ const Settings = ({ setIsLocked }: SettingsProps) => {
           </div>
 
           <div className="flex flex-col space-y-4 flex-1">
-            <NetworkSelector
-              selectedNetwork={selectedNetwork}
-              onNetworkChange={handleNetworkChange}
-            />
-            <div className="flex-1 min-h-0">
-              <ConnectedSites />
-            </div>
+            <ConnectedSites />
           </div>
 
           <div className="mt-4">

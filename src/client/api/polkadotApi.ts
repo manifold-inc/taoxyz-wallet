@@ -1,5 +1,6 @@
 import { ApiPromise, WsProvider } from "@polkadot/api";
-import { KeyringService } from "../services/KeyringService";
+
+import KeyringService from "../services/KeyringService";
 
 import type {
   BittensorSubnet,
@@ -66,17 +67,19 @@ class PolkadotApi {
     amount: number;
   }) {
     try {
-      const account = await KeyringService.getAccount(fromAddress);
-      const toAccount = (await this.api.query.system.account(
+      const wallet = await KeyringService.getWallet(fromAddress);
+      const toWallet = (await this.api.query.system.account(
         toAddress
       )) as unknown as SubstrateAccount;
-      if (account.isLocked) throw new Error("Account is locked");
-      if (!toAccount.data.free) throw new Error("Invalid recipient address");
+
+      if (wallet instanceof Error) throw new Error(wallet.message);
+      if (wallet.isLocked) throw new Error("Account is locked");
+      if (!toWallet.data.free) throw new Error("Invalid recipient address");
 
       const amountInRao = BigInt(Math.floor(amount * 1e9));
       const transaction = await this.api.tx.balances
         .transferAllowDeath(toAddress, amountInRao)
-        .signAndSend(account);
+        .signAndSend(wallet);
 
       return transaction.hash;
     } catch (error) {
@@ -109,11 +112,13 @@ class PolkadotApi {
     amount: number;
   }) {
     try {
+      const wallet = await KeyringService.getWallet(address);
+      if (wallet instanceof Error) throw new Error(wallet.message);
+
       const amountInRao = BigInt(Math.floor(amount * 1e9));
-      const account = await KeyringService.getAccount(address);
       const stake = await this.api.tx.subtensorModule
         .addStake(validatorHotkey, subnetId, amountInRao)
-        .signAndSend(account);
+        .signAndSend(wallet);
       return stake.hash;
     } catch (error) {
       console.error("Error in createStake:", error);
@@ -133,11 +138,13 @@ class PolkadotApi {
     amount: number;
   }) {
     try {
+      const wallet = await KeyringService.getWallet(address);
+      if (wallet instanceof Error) throw new Error(wallet.message);
+
       const amountInRao = BigInt(Math.floor(amount * 1e9));
-      const account = await KeyringService.getAccount(address);
       const stake = await this.api.tx.subtensorModule
         .removeStake(validatorHotkey, subnetId, amountInRao)
-        .signAndSend(account);
+        .signAndSend(wallet);
       return stake.hash;
     } catch (error) {
       console.error("Error in removeStake:", error);
@@ -161,11 +168,13 @@ class PolkadotApi {
     amount: number;
   }) {
     try {
+      const wallet = await KeyringService.getWallet(address);
+      if (wallet instanceof Error) throw new Error(wallet.message);
+
       const amountInRao = BigInt(Math.floor(amount * 1e9));
-      const account = await KeyringService.getAccount(address);
       const stake = await this.api.tx.subtensorModule
         .moveStake(fromHotkey, toHotkey, fromSubnetId, toSubnetId, amountInRao)
-        .signAndSend(account);
+        .signAndSend(wallet);
       return stake.hash;
     } catch (error) {
       console.error("Error in moveStake:", error);
@@ -297,10 +306,6 @@ class PolkadotApi {
       console.error("Error in getValidators:", error);
       throw error;
     }
-  }
-
-  public getNetwork(): string {
-    return this.endpoint;
   }
 
   public async disconnect(): Promise<void> {

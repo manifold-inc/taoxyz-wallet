@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { usePolkadotApi } from "../../contexts/PolkadotApiContext";
-import { KeyringService } from "../../services/KeyringService";
+import KeyringService from "../../services/KeyringService";
 import MessageService from "../../services/MessageService";
 import StakeOverview from "../portfolio/StakeOverview";
 import ExpandedStake from "../portfolio/ExpandedStake";
@@ -13,9 +13,10 @@ interface PortfolioProps {
   address: string;
 }
 
+// TODO: Replace error handling with noticiation and refine spinner
 const Portfolio = ({ stakes, address }: PortfolioProps) => {
-  const { api } = usePolkadotApi();
   const navigate = useNavigate();
+  const { api } = usePolkadotApi();
   const [selectedStake, setSelectedStake] = useState<StakeTransaction | null>(
     null
   );
@@ -24,17 +25,20 @@ const Portfolio = ({ stakes, address }: PortfolioProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const initStake = async () => {
-      const result = await chrome.storage.local.get("storeStakeSelection");
-      if (result.storeStakeSelection) {
-        await chrome.storage.local.remove("storeStakeSelection");
-        setSelectedStake(JSON.parse(result.storeStakeSelection));
-      }
-    };
-    initStake();
-  }, []);
+    init();
+  }, [address]);
 
-  const handleStakeSelect = async (stake: StakeTransaction) => {
+  const init = async (): Promise<void> => {
+    setSelectedStake(null);
+    setSelectedSubnet(null);
+    const result = await chrome.storage.local.get("storeStakeSelection");
+    if (result.storeStakeSelection) {
+      setSelectedStake(result.storeStakeSelection);
+      await chrome.storage.local.remove("storeStakeSelection");
+    }
+  };
+
+  const handleStakeSelect = async (stake: StakeTransaction): Promise<void> => {
     setError(null);
     try {
       setIsLoading(true);
@@ -54,18 +58,9 @@ const Portfolio = ({ stakes, address }: PortfolioProps) => {
     }
   };
 
-  const handleMoveStake = () => {
-    navigate("/stake", {
-      state: {
-        selectedStake,
-        selectedSubnet,
-      },
-    });
-  };
-
-  const handleAuth = async () => {
-    if (KeyringService.isLocked(address)) {
-      await chrome.storage.local.set({ accountLocked: true });
+  const handleAuth = async (): Promise<void> => {
+    if (await KeyringService.isLocked(address)) {
+      await chrome.storage.local.set({ walletLocked: true });
       await chrome.storage.local.set({
         storeStakeSelection: selectedStake,
       });
@@ -74,7 +69,16 @@ const Portfolio = ({ stakes, address }: PortfolioProps) => {
     }
   };
 
-  const handleSwap = async () => {
+  const handleMoveStake = (): void => {
+    navigate("/stake", {
+      state: {
+        selectedStake,
+        selectedSubnet,
+      },
+    });
+  };
+
+  const handleSwap = async (): Promise<void> => {
     if (!api || !selectedStake) return;
     setError(null);
 
@@ -119,9 +123,9 @@ const Portfolio = ({ stakes, address }: PortfolioProps) => {
           onMoveStake={handleMoveStake}
         />
       ) : (
-        <>
+        <div className="w-full max-h-64 overflow-y-auto portfolio-container mt-2">
           {stakes.length > 0 ? (
-            <div className="space-y-1.5">
+            <div className="space-y-3">
               {stakes.map((stake, index) => (
                 <StakeOverview
                   key={index}
@@ -131,11 +135,11 @@ const Portfolio = ({ stakes, address }: PortfolioProps) => {
               ))}
             </div>
           ) : (
-            <div className="bg-mf-ash-500 rounded-lg p-2.5">
-              <p className="text-xs text-mf-silver-300">No stakes found</p>
+            <div className="rounded-sm p-2 bg-mf-ash-500 text-sm text-mf-milk-300">
+              <p>No stakes</p>
             </div>
           )}
-        </>
+        </div>
       )}
 
       {error && (
