@@ -1,42 +1,39 @@
-import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { House, ArrowLeftRight, ListPlus, Redo, Settings2 } from "lucide-react";
+import {
+  House,
+  ArrowLeftRight,
+  Plus,
+  CornerUpRight,
+  Settings,
+} from "lucide-react";
 
 const Navigation = () => {
-  const [currentAddress, setCurrentAddress] = useState<string | null>(null);
   const location = useLocation();
 
-  useEffect(() => {
-    const init = async () => {
-      const result = await chrome.storage.local.get("currentAddress");
-      setCurrentAddress(result.currentAddress);
-    };
-    init();
-  }, [location]);
-
-  if (!currentAddress) return null;
-
-  const navLinks = [
-    { path: "/dashboard", icon: <House className="w-5 h-5" /> },
-    { path: "/swap", icon: <ArrowLeftRight className="w-5 h-5" /> },
-    { path: "/stake", icon: <ListPlus className="w-5 h-5" /> },
-    { path: "/transfer", icon: <Redo className="w-5 h-5" /> },
-    { path: "/settings", icon: <Settings2 className="w-5 h-5" /> },
+  const links = [
+    { path: "/dashboard", icon: <House className="w-7 h-7" /> },
+    { path: "/swap", icon: <ArrowLeftRight className="w-7 h-7" /> },
+    { path: "/stake", icon: <Plus className="w-7 h-7" /> },
+    { path: "/transfer", icon: <CornerUpRight className="w-7 h-7" /> },
+    { path: "/settings", icon: <Settings className="w-7 h-7" /> },
   ];
 
   return (
-    <nav className="bg-mf-ash-500/80 backdrop-blur-sm fixed bottom-0 left-0 right-0 z-50">
-      <div className="w-full px-2">
-        <div className="flex justify-between h-14">
-          {navLinks.map((link, index) => (
-            <div key={link.path} className="flex items-center">
-              <Link to={link.path} className="text-mf-safety-300 px-6">
-                {link.icon}
-              </Link>
-              {index < navLinks.length - 1 && (
-                <div className="h-4 w-px bg-mf-ash-300/30" />
-              )}
-            </div>
+    <nav className="fixed bottom-0 left-0 right-0 z-50 flex justify-center">
+      <div className="w-74 h-14">
+        <div className="flex items-center justify-evenly h-full">
+          {links.map((link) => (
+            <Link
+              key={link.path}
+              to={link.path}
+              className={`flex items-center hover:bg-mf-ash-500 p-4 ${
+                location.pathname === link.path
+                  ? "text-mf-safety-500"
+                  : "text-mf-milk-300"
+              }`}
+            >
+              {link.icon}
+            </Link>
           ))}
         </div>
       </div>
