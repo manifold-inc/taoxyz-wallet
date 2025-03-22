@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import KeyringService from "../../services/KeyringService";
 import MessageService from "../../services/MessageService";
+import TransactionNotification from "../TransactionNotification";
 import { usePolkadotApi } from "../../contexts/PolkadotApiContext";
 import { calculateSlippage } from "../../../utils/utils";
 import type {
@@ -29,6 +30,11 @@ const ConfirmStake = ({
   const [amount, setAmount] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [txStatus, setTxStatus] = useState<{
+    type: "pending" | "success" | "error";
+    message: string;
+    hash?: string;
+  } | null>(null);
 
   useEffect(() => {
     const initAmount = async () => {
@@ -44,9 +50,9 @@ const ConfirmStake = ({
 
   const alphaAmount = parseFloat(amount) || 0;
   const slippageCalculation = useMemo(() => {
-    if (!subnet.alphaIn || !subnet.taoIn || !alphaAmount) return null;
-    return calculateSlippage(subnet.alphaIn, subnet.taoIn, alphaAmount, false);
-  }, [subnet.alphaIn, subnet.taoIn, alphaAmount]);
+    if (!subnet.alphaIn || !alphaAmount) return null;
+    return calculateSlippage(subnet.alphaIn, 0, alphaAmount, true);
+  }, [subnet.alphaIn, alphaAmount]);
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -60,7 +66,7 @@ const ConfirmStake = ({
   };
 
   const handleAuth = async () => {
-    if (KeyringService.isLocked(address)) {
+    if (await KeyringService.isLocked(address)) {
       await chrome.storage.local.set({
         storeStakeTransaction: {
           subnet,
@@ -69,8 +75,8 @@ const ConfirmStake = ({
           amount,
         },
       });
-      await chrome.storage.local.set({ accountLocked: true });
-      MessageService.sendAccountsLockedMessage();
+      await chrome.storage.local.set({ walletLocked: true });
+      MessageService.sendWalletsLockedMessage();
       setIsSubmitting(false);
       return;
     }
@@ -80,9 +86,15 @@ const ConfirmStake = ({
     if (!api || !amount || isSubmitting || alphaAmount > stake.tokens / 1e9)
       return;
     setIsSubmitting(true);
+    setError(null);
+    setTxStatus({
+      type: "pending",
+      message: "Submitting transaction...",
+    });
+
     try {
       await handleAuth();
-      await api.moveStake({
+      const result = await api.moveStake({
         address,
         fromHotkey: stake.validatorHotkey,
         toHotkey: validator.hotkey,
@@ -90,10 +102,26 @@ const ConfirmStake = ({
         toSubnetId: stake.subnetId,
         amount: alphaAmount,
       });
-      navigate("/dashboard");
+
+      setTxStatus({
+        type: "success",
+        message: "Transaction successful!",
+        hash: result,
+      });
+
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 2000);
+
+      setIsSubmitting(false);
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Failed to move stake");
-    } finally {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to move stake";
+      setError(errorMessage);
+      setTxStatus({
+        type: "error",
+        message: errorMessage,
+      });
       setIsSubmitting(false);
     }
   };
@@ -127,14 +155,14 @@ const ConfirmStake = ({
         <div>
           <p className="text-xs text-mf-silver-300">Available to Move</p>
           <p className="text-xs font-semibold text-mf-milk-300">
-            {(stake.tokens / 1e9).toFixed(4)} τ
+            {(stake.tokens / 1e9).toFixed(4)} α
           </p>
         </div>
       </div>
 
       <div className="space-y-2">
         <div>
-          <p className="text-xs text-mf-silver-300 mb-1">Amount to Move (τ)</p>
+          <p className="text-xs text-mf-silver-300 mb-1">Amount to Move (α)</p>
           <input
             type="text"
             inputMode="decimal"
@@ -153,13 +181,7 @@ const ConfirmStake = ({
             <div className="flex justify-between items-center">
               <span className="text-xs text-mf-silver-300">Moving:</span>
               <span className="text-xs font-medium text-mf-milk-300">
-                {alphaAmount.toFixed(4)} τ
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-xs text-mf-silver-300">You receive:</span>
-              <span className="text-xs font-medium text-mf-milk-300">
-                {slippageCalculation.tokens.toFixed(4)} τ
+                {alphaAmount.toFixed(4)} α
               </span>
             </div>
             <div className="flex justify-between items-center">
@@ -172,12 +194,6 @@ const ConfirmStake = ({
                 }`}
               >
                 {slippageCalculation.slippagePercentage.toFixed(2)}%
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-xs text-mf-silver-300">Fee:</span>
-              <span className="text-xs text-mf-silver-300">
-                {slippageCalculation.slippage.toFixed(4)} τ
               </span>
             </div>
           </div>
@@ -208,6 +224,13 @@ const ConfirmStake = ({
           )}
         </button>
       </div>
+      {txStatus && (
+        <TransactionNotification
+          type={txStatus.type}
+          message={txStatus.message}
+          hash={txStatus.hash}
+        />
+      )}
     </div>
   );
 };

@@ -1,4 +1,4 @@
-export interface Account {
+export interface Wallet {
   name: string;
   address: string;
 }
@@ -43,14 +43,13 @@ export interface StakeTransaction {
 export interface Slippage {
   tokens: number;
   slippagePercentage: number;
-  slippage: number;
 }
 
 export type PermissionsPerWebsite = Record<
   string,
   {
-    accountCount: number;
-    accounts: {
+    walletCount: number;
+    wallets: {
       address: string;
       username: string;
       hasAccess: boolean;

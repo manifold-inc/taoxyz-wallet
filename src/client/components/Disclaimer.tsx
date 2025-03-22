@@ -1,46 +1,49 @@
+import { ArrowLeftToLine } from "lucide-react";
+import taoxyz from "../../../public/icons/taoxyz.svg";
+
 interface DisclaimerProps {
   onClose: () => void;
 }
 
-const DisclaimerModal = ({ onClose }: DisclaimerProps) => {
+const Disclaimer = ({ onClose }: DisclaimerProps) => {
   return (
-    <div className="flex flex-col items-center min-h-screen py-4">
-      <div className="mt-8 px-8 w-80">
-        <h2 className="text-xl font-semibold text-mf-silver-300 mb-8 flex text-center">
-          THIS IS A NON-CUSTODIAL WALLET CREATED BY MANIFOLD LABS INC.
-        </h2>
+    <div className="flex flex-col items-center min-h-screen">
+      <div className="relative flex justify-center items-center w-72 mt-12">
+        <ArrowLeftToLine
+          className="absolute left-3 w-6 h-6 text-mf-milk-500"
+          onClick={onClose}
+        />
+        <img src={taoxyz} alt="Taoxyz Logo" className="w-16 h-16" />
+      </div>
 
-        <p className="text-mf-milk-300 text-xs mb-6">
+      <div className="flex flex-col items-center w-72 [&>*]:w-full mt-4 space-y-4">
+        <div className="text-center text-lg text-mf-milk-500">
+          <h1>Disclaimer</h1>
+        </div>
+
+        <p className="text-mf-safety-500 text-xs bg-mf-ash-500 p-3 rounded-sm">
           You can use this wallet to securely store and transfer TAO. Please
           securely store all mnemonics and passwords created.
         </p>
 
-        <ul className="text-mf-milk-300 text-xs space-y-3 mb-6">
+        <div className="text-center text-xs text-mf-milk-300">
+          <p>Data Privacy</p>
+        </div>
+
+        <ul className="rounded-sm bg-mf-ash-500 text-mf-sybil-500 text-xs space-y-4 p-3">
           <li>
-            • We refrain from transmitting any clicks, page views or events to a
+            We refrain from transmitting any clicks, page views, or events to a
             central server.
           </li>
-          <li>• We abstain from utilizing any trackers or analytics.</li>
+          <li>We abstain from utilizing any trackers or analytics.</li>
           <li>
-            • We do not gather addresses, keys or other personal information.
+            We do not gather addresses, keys, or other personal information.
           </li>
+          <p>For support or questions, please contact hello@manifoldlabs.inc</p>
         </ul>
-
-        <p className="text-mf-milk-300 text-xs">
-          For support or questions, please contact hey@manifoldlabs.inc
-        </p>
-      </div>
-
-      <div className="flex-1 flex items-end justify-center mb-6">
-        <button
-          onClick={onClose}
-          className="w-54 text-xs flex items-center justify-center rounded-lg bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors mb-3 px-4 py-3"
-        >
-          <span className="text-mf-milk-300">Back</span>
-        </button>
       </div>
     </div>
   );
 };
 
-export default DisclaimerModal;
+export default Disclaimer;

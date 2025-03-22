@@ -34,19 +34,18 @@ const LockScreen = ({ setIsLocked }: LockScreenProps) => {
     setIsLoading(true);
 
     try {
-      const result = (await chrome.storage.local.get("currentAddress")) as {
-        currentAddress: string;
-      };
-      const account = await KeyringService.getAccount(result.currentAddress);
-      const isUnlocked = await KeyringService.unlockAccount(
-        account.meta.username as string,
+      const result = await chrome.storage.local.get("currentAddress");
+      const isUnlocked = KeyringService.unlockWallet(
+        result.currentAddress,
         password
       );
 
       if (isUnlocked) {
-        await chrome.storage.local.set({ accountLocked: false });
+        await chrome.storage.local.set({ walletLocked: false });
         await MessageService.sendStartLockTimer();
         setIsLocked(false);
+      } else {
+        setError("Failed to unlock wallet");
       }
     } catch (error) {
       if (

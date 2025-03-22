@@ -6,31 +6,43 @@ import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 import MessageService from "../services/MessageService";
 import MnemonicDisplay from "../components/create/Mnemonic";
 import CreateForm from "../components/create/CreateForm";
-import taoxyzLogo from "../../../public/icons/taoxyz.svg";
+import Notification from "../components/Notification";
+import taoxyz from "../../../public/icons/taoxyz.svg";
 
 interface CreateProps {
   setIsLocked: (isLocked: boolean) => void;
 }
 
 export const Create = ({ setIsLocked }: CreateProps) => {
-  const { isLoading: isApiLoading } = usePolkadotApi();
   const navigate = useNavigate();
-  const [mnemonic, setMnemonic] = useState("");
-  const [account, setAccount] = useState<KeyringPair | null>(null);
+  const { isLoading } = usePolkadotApi();
+  const [wallet, setWallet] = useState<KeyringPair | null>(null);
+  const [mnemonic, setMnemonic] = useState<string>("");
+  const [notification, setNotification] = useState<string | null>(null);
+  const [showNotification, setShowNotification] = useState(false);
+  const [showOptions, setShowOptions] = useState(true);
 
   const handleSuccess = async (
-    newAccount: KeyringPair,
-    generatedMnemonic: string
-  ) => {
-    setAccount(newAccount);
-    setMnemonic(generatedMnemonic);
+    wallet: KeyringPair,
+    mnemonic: string
+  ): Promise<void> => {
+    setWallet(wallet);
+    setMnemonic(mnemonic);
   };
 
-  const handleContinue = async () => {
+  const handleContinue = async (): Promise<void> => {
+    setNotification(null);
+    setShowNotification(false);
+
+    if (!wallet) {
+      setNotification("Could not find wallet");
+      setShowNotification(true);
+      return;
+    }
     await chrome.storage.local.set({
-      currentAddress: account?.address as string,
+      currentAddress: wallet.address,
     });
-    await chrome.storage.local.set({ accountLocked: false });
+    await chrome.storage.local.set({ walletLocked: false });
     MessageService.sendClearLockTimer();
     setIsLocked(false);
     navigate("/dashboard");
@@ -38,18 +50,39 @@ export const Create = ({ setIsLocked }: CreateProps) => {
 
   return (
     <div className="flex flex-col items-center min-h-screen">
-      <div className="h-20" />
+      <Notification
+        message={notification as string}
+        show={showNotification}
+        onDismiss={() => setShowNotification(false)}
+      />
       <div className="flex flex-col items-center flex-1">
-        <img src={taoxyzLogo} alt="Taoxyz Logo" className="w-16 h-16 mb-8" />
+        <img src={taoxyz} alt="Taoxyz Logo" className="w-16 h-16 mt-24" />
 
-        {!mnemonic ? (
-          <div className="w-full max-w-md">
-            <div className="text-center mb-6">
-              <h1 className="text-xl font-semibold text-mf-silver-300">
+        {/* Could abstract this out */}
+        {showOptions ? (
+          <div className="flex flex-col items-center mt-4 space-y-4">
+            <h1 className="text-lg text-mf-milk-500">Add New Wallet</h1>
+            <div className="flex flex-col space-y-3">
+              <button
+                onClick={() => setShowOptions(false)}
+                className="w-44 rounded-xs text-sm text-mf-night-500 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 transition-colors p-1.5"
+              >
                 Create Wallet
-              </h1>
+              </button>
+              <button
+                onClick={() => navigate("/import")}
+                className="w-44 rounded-xs text-sm text-mf-safety-500 bg-mf-night-500 border-mf-night-500 hover:border-mf-safety-500 border-2 transition-colors p-1.5"
+              >
+                Import Wallet
+              </button>
             </div>
-            <CreateForm onSuccess={handleSuccess} isLoading={isApiLoading} />
+          </div>
+        ) : !mnemonic ? (
+          <div>
+            <div className="text-center text-lg text-mf-milk-500 mt-4">
+              <h1>Create Wallet</h1>
+            </div>
+            <CreateForm onSuccess={handleSuccess} />
           </div>
         ) : (
           <>
@@ -62,13 +95,13 @@ export const Create = ({ setIsLocked }: CreateProps) => {
               <MnemonicDisplay
                 mnemonic={mnemonic}
                 onContinue={handleContinue}
-                isLoading={isApiLoading}
+                isLoading={isLoading}
               />
             </div>
           </>
         )}
       </div>
-      {!mnemonic && <div className="h-20" />}
+      {!mnemonic && !showOptions && <div className="h-20" />}
     </div>
   );
 };

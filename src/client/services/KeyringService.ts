@@ -4,97 +4,72 @@ import { TypeRegistry } from "@polkadot/types";
 import type { KeyringPair, KeyringPair$Meta } from "@polkadot/keyring/types";
 import type { SignerPayloadJSON } from "@polkadot/types/types";
 
-import MessageService from "./MessageService";
 import type { Permissions } from "../../types/client";
 
 const registry = new TypeRegistry();
 
 export const KeyringService = {
-  async addAccount(
+  async addWallet(
     mnemonic: string,
     username: string,
     password: string
-  ): Promise<KeyringPair> {
+  ): Promise<KeyringPair | Error> {
     try {
       const result = await keyring.addUri(mnemonic, password, {
         username,
         websitePermissions: {} as Permissions,
       } as KeyringPair$Meta);
+      if (!result.pair) return new Error("Failed to add wallet");
       return result.pair;
-    } catch (error) {
-      console.error("[KeyringService] Error adding account:", error);
-      throw error;
+    } catch {
+      return new Error("Failed to add wallet");
     }
   },
 
-  async unlockAccount(username: string, password: string): Promise<boolean> {
-    const address = await this.getAddress(username);
-    if (!address) throw new Error("Account not found");
-    const pair = keyring.getPair(address);
-    if (!pair) throw new Error("Account not found");
-    try {
-      pair.decodePkcs8(password);
-      if (!pair.isLocked) {
-        MessageService.sendClearLockTimer();
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error("[KeyringService] Error unlocking account:", error);
-      throw error;
-    }
+  unlockWallet(address: string, password: string): boolean {
+    const wallet = this.getWallet(address);
+    if (wallet instanceof Error) return false;
+
+    wallet.decodePkcs8(password);
+    if (wallet.isLocked) return false;
+    return true;
   },
 
   createMnemonic(): string {
-    try {
-      return mnemonicGenerate(12);
-    } catch (error) {
-      console.error("[KeyringService] Error creating mnemonic:", error);
-      throw error;
-    }
+    return mnemonicGenerate(12);
   },
 
   validateMnemonic(mnemonic: string): boolean {
-    try {
-      return mnemonicValidate(mnemonic);
-    } catch (error) {
-      console.error("[KeyringService] Error validating mnemonic:", error);
-      throw error;
-    }
+    return mnemonicValidate(mnemonic);
   },
 
-  async getAddress(username: string): Promise<string> {
-    const pairs = keyring.getPairs();
-    if (!pairs) throw new Error("Keyring not initialized");
-    const pair = pairs.find((pair) => pair.meta.username === username);
-    if (!pair) throw new Error("Account not found");
-    try {
-      return pair.address;
-    } catch (error) {
-      console.error("[KeyringService] Error getting address:", error);
-      throw error;
-    }
+  // TODO: Figure out how to handle multiple wallets with the same name or make the names unique
+  async getAddress(username: string): Promise<string | Error> {
+    const wallets = this.getWallets();
+    if (!wallets) return new Error("Keyring not initialized");
+    const wallet = wallets.find((wallet) => wallet.meta.username === username);
+    if (!wallet) return new Error("Wallet not found");
+
+    return wallet.address;
   },
 
-  async getAccount(address: string): Promise<KeyringPair> {
-    const pairs = keyring.getPairs();
-    if (!pairs) throw new Error("Keyring not initialized");
-    const pair = pairs.find((pair) => pair.address === address);
-    if (!pair) throw new Error("Account not found");
-    try {
-      return pair;
-    } catch (error) {
-      console.error("[KeyringService] Error getting account:", error);
-      throw error;
-    }
+  getWallet(address: string): KeyringPair | Error {
+    const wallet = keyring.getPair(address);
+    if (!wallet) return new Error("Wallet not found");
+    return wallet;
   },
 
-  getAccounts(): KeyringPair[] {
+  // TODO: Figure out error handling for walletselection, where does the notification display
+  getWallets(): KeyringPair[] {
+    return keyring.getPairs();
+  },
+
+  deleteWallet(address: string): boolean {
     try {
-      return keyring.getPairs();
-    } catch (error) {
-      console.error("[KeyringService] Error getting accounts:", error);
-      throw error;
+      keyring.forgetAccount(address);
+      return true;
+    } catch {
+      return false;
     }
   },
 
@@ -103,10 +78,10 @@ export const KeyringService = {
     payload: SignerPayloadJSON,
     password: string
   ): Promise<`0x${string}`> {
-    const account = await this.getAccount(address);
-    if (!account) throw new Error("Unable to find account");
+    const wallet = await this.getWallet(address);
+    if (wallet instanceof Error) throw new Error(wallet.message);
     try {
-      account.decodePkcs8(password);
+      wallet.decodePkcs8(password);
 
       registry.setSignedExtensions(payload.signedExtensions);
       const extrinsicPayload = registry.createType(
@@ -117,7 +92,7 @@ export const KeyringService = {
         }
       );
 
-      const { signature } = extrinsicPayload.sign(account);
+      const { signature } = extrinsicPayload.sign(wallet);
       return signature;
     } catch (error) {
       console.error("[KeyringService] Signing failed:", error);
@@ -126,10 +101,10 @@ export const KeyringService = {
   },
 
   async getPermissions(address: string): Promise<Permissions> {
-    const account = await this.getAccount(address);
-    if (!account) throw new Error("Account not found");
+    const wallet = await this.getWallet(address);
+    if (wallet instanceof Error) throw new Error(wallet.message);
     try {
-      return (account.meta.websitePermissions as Permissions) || {};
+      return (wallet.meta.websitePermissions as Permissions) || {};
     } catch (error) {
       console.error("[KeyringService] Error getting permissions:", error);
       throw error;
@@ -142,10 +117,10 @@ export const KeyringService = {
     allowAccess: boolean,
     removeWebsite = false
   ): Promise<boolean> {
-    const account = await this.getAccount(address);
-    if (!account) throw new Error("Account not found");
+    const wallet = await this.getWallet(address);
+    if (wallet instanceof Error) throw new Error(wallet.message);
     try {
-      const meta = { ...account.meta };
+      const meta = { ...wallet.meta };
       const permissions = (meta.websitePermissions as Permissions) || {};
 
       if (removeWebsite) {
@@ -155,14 +130,16 @@ export const KeyringService = {
       }
 
       meta.websitePermissions = permissions;
-      keyring.saveAccountMeta(account, meta);
-      chrome.storage.local.set({
-        [`permissions_${account.address}`]: { permissions },
+      keyring.saveAccountMeta(wallet, meta);
+      await chrome.storage.local.set({
+        [`permissions_${wallet.address}`]: { permissions },
       });
 
       console.log("[KeyringService] Updated permissions:", {
-        address: account.address,
+        address: wallet.address,
         permissions: permissions,
+        origin,
+        allowAccess,
       });
       return true;
     } catch (error) {
@@ -181,16 +158,16 @@ export const KeyringService = {
         }
       });
     } catch (error) {
-      console.error("[KeyringService] Error locking all accounts:", error);
+      console.error("[KeyringService] Error locking all wallets:", error);
       throw error;
     }
   },
 
   isLocked(address: string): boolean {
-    const account = keyring.getPair(address);
-    if (!account) throw new Error("Account not found");
+    const wallet = this.getWallet(address);
+    if (wallet instanceof Error) throw new Error(wallet.message);
     try {
-      return account.isLocked;
+      return wallet.isLocked;
     } catch (error) {
       console.error("[KeyringService] Error checking lock status:", error);
       return true;

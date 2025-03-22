@@ -2,35 +2,32 @@
 
 @theme {
   /* Safety Colors */
-  --color-mf-safety-300: oklch(0.75 0.15 30.77); /* #FF9B7A */
-  --color-mf-safety-500: oklch(0.7 0.18 30.77); /* #FF8159 */
-  --color-mf-safety-700: oklch(0.65 0.15 30.77); /* #D96547 */
+  --color-mf-safety-300: #ff9b7a; /* #FF9B7A */
+  --color-mf-safety-500: #ff8159; /* #FF8159 */
+  --color-mf-safety-700: #d96547; /* #D96547 */
 
   /* Ash Colors */
-  --color-mf-ash-300: oklch(0.35 0.02 262.77); /* #3A3C46 */
-  --color-mf-ash-400: oklch(0.3 0.02 262.77); /* #32343E */
-  --color-mf-ash-500: oklch(0.25 0.02 262.77); /* #22242E */
-  --color-mf-ash-700: oklch(0.15 0.02 262.77); /* #17181F */
+  --color-mf-ash-300: #3a3c46; /* #3A3C46 */
+  --color-mf-ash-500: #22242e; /* #22242E */
+  --color-mf-ash-700: #17181f; /* #17181F */
 
   /* Night Colors */
-  --color-mf-night-300: oklch(0.3 0.02 262.77); /* #2A2C33 */
-  --color-mf-night-500: oklch(0.2 0.02 262.77); /* #191B20 */
-  --color-mf-night-700: oklch(0.1 0.02 262.77); /* #101114 */
+  --color-mf-night-300: #2a2c33; /* #2A2C33 */
+  --color-mf-night-500: #191b20; /* #191B20 */
+  --color-mf-night-700: #101114; /* #101114 */
 
   /* Silver Colors */
-  --color-mf-silver-300: oklch(0.9 0.05 240.77); /* #D8E5FF */
-  --color-mf-silver-500: oklch(0.85 0.05 240.77); /* #C5DBFF */
-  --color-mf-silver-700: oklch(0.8 0.05 240.77); /* #A3B5D6 */
+  --color-mf-silver-300: #d8e5ff; /* #D8E5FF */
+  --color-mf-silver-500: #c5dbff; /* #C5DBFF */
+  --color-mf-silver-700: #a3b5d6; /* #A3B5D6 */
 
   /* Milk Colors */
-  --color-mf-milk-300: oklch(0.94 0.05 240.77); /* #E5F0FF */
-  --color-mf-milk-500: oklch(0.91 0.05 240.77); /* #DBE9FF */
-  --color-mf-milk-700: oklch(0.86 0.05 240.77); /* #B9C4D6 */
+  --color-mf-milk-300: #e0ebff; /* #E5F0FF */
+  --color-mf-milk-500: #dbe9ff; /* #DBE9FF */
+  --color-mf-milk-700: #aec0d6; /* #B9C4D6 */
 
   /* Sybil Colors */
-  --color-mf-sybil-300: oklch(0.88 0.15 165); /* #7CEFC4 */
-  --color-mf-sybil-500: oklch(0.83 0.15 165); /* #56E8B4 */
-  --color-mf-sybil-700: oklch(0.78 0.15 165); /* #45B98D */
+  --color-mf-sybil-500: #57e8b4; /* #56E8B4 */
 }
 
 body {
@@ -110,4 +107,129 @@ body {
 
 .custom-checkbox input[type="checkbox"]:hover {
   cursor: pointer;
+}
+
+@keyframes slideDown {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slideDown {
+  animation: slideDown 0.3s ease-out forwards;
+}
+
+@keyframes slideUp {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+
+.animate-slideUp {
+  animation: slideUp 0.5s ease-in forwards;
+}
+
+.loader {
+  width: 20px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 3px solid var(--color-mf-safety-500);
+  animation: l20-1 0.8s infinite linear alternate, l20-2 1.6s infinite linear;
+}
+
+@keyframes l20-1 {
+  0% {
+    clip-path: polygon(50% 50%, 0 0, 50% 0%, 50% 0%, 50% 0%, 50% 0%, 50% 0%);
+  }
+  12.5% {
+    clip-path: polygon(
+      50% 50%,
+      0 0,
+      50% 0%,
+      100% 0%,
+      100% 0%,
+      100% 0%,
+      100% 0%
+    );
+  }
+  25% {
+    clip-path: polygon(
+      50% 50%,
+      0 0,
+      50% 0%,
+      100% 0%,
+      100% 100%,
+      100% 100%,
+      100% 100%
+    );
+  }
+  50% {
+    clip-path: polygon(
+      50% 50%,
+      0 0,
+      50% 0%,
+      100% 0%,
+      100% 100%,
+      50% 100%,
+      0% 100%
+    );
+  }
+  62.5% {
+    clip-path: polygon(
+      50% 50%,
+      100% 0,
+      100% 0%,
+      100% 0%,
+      100% 100%,
+      50% 100%,
+      0% 100%
+    );
+  }
+  75% {
+    clip-path: polygon(
+      50% 50%,
+      100% 100%,
+      100% 100%,
+      100% 100%,
+      100% 100%,
+      50% 100%,
+      0% 100%
+    );
+  }
+  100% {
+    clip-path: polygon(
+      50% 50%,
+      50% 100%,
+      50% 100%,
+      50% 100%,
+      50% 100%,
+      50% 100%,
+      0% 100%
+    );
+  }
+}
+
+@keyframes l20-2 {
+  0% {
+    transform: scaleY(1) rotate(0deg);
+  }
+  49.99% {
+    transform: scaleY(1) rotate(135deg);
+  }
+  50% {
+    transform: scaleY(-1) rotate(0deg);
+  }
+  100% {
+    transform: scaleY(-1) rotate(-135deg);
+  }
 }

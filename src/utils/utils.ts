@@ -1,6 +1,5 @@
 import type { Slippage } from "../types/client";
 
-// Generates a random ID to keep track of requests
 export const generateId = (): number => {
   return Math.floor(Math.random() * 1000000);
 };
@@ -11,36 +10,46 @@ export const calculateSlippage = (
   amount: number,
   toAlpha: boolean
 ): Slippage => {
-  console.log("Calulation: ", alphaIn, taoIn, amount, toAlpha);
-  const conversionRate = alphaIn / taoIn;
+  // Moving stake between validators in the same subnet
+  if (toAlpha && taoIn === 0) {
+    const actualAmount = (alphaIn * amount) / (alphaIn + amount);
+    const slippagePercentage = ((amount - actualAmount) / amount) * 100;
+
+    return {
+      tokens: actualAmount,
+      slippagePercentage,
+    };
+  }
+
+  // Regular token swap calculations
   const amountRao = amount * 1e9;
   if (toAlpha) {
-    // TAO to Alpha
-    const grossAlpha = amountRao * conversionRate;
-    const alphaInRao = alphaIn - (taoIn * alphaIn) / (taoIn + amountRao);
-    const alpha = alphaInRao / 1e9;
+    const spotPrice = alphaIn / taoIn;
+    const idealAmount = amount * spotPrice;
 
-    const slippage = grossAlpha - alpha;
-    const slippagePercentage = (slippage / grossAlpha) * 100;
+    const actualAmount = (alphaIn * amountRao) / (taoIn + amountRao);
+    const actualAmountNormalized = actualAmount / 1e9;
+
+    const slippagePercentage =
+      ((idealAmount - actualAmountNormalized) / idealAmount) * 100;
 
     return {
-      tokens: alpha,
+      tokens: actualAmountNormalized,
       slippagePercentage,
-      slippage,
     };
   } else {
-    // Alpha to TAO
-    const grossTao = amount / conversionRate;
-    const taoInRao = taoIn - (alphaIn * taoIn) / (alphaIn + amountRao);
-    const tao = taoInRao / 1e9;
+    const spotPrice = taoIn / alphaIn;
+    const idealAmount = amount * spotPrice;
 
-    const slippage = grossTao - tao;
-    const slippagePercentage = (slippage / grossTao) * 100;
+    const actualAmount = (taoIn * amountRao) / (alphaIn + amountRao);
+    const actualAmountNormalized = actualAmount / 1e9;
+
+    const slippagePercentage =
+      ((idealAmount - actualAmountNormalized) / idealAmount) * 100;
 
     return {
-      tokens: tao,
+      tokens: actualAmountNormalized,
       slippagePercentage,
-      slippage,
     };
   }
 };

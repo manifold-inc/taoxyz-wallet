@@ -1,19 +1,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { KeyringService } from "../../services/KeyringService";
 import type { KeyringPair } from "@polkadot/keyring/types";
+
+import KeyringService from "../../services/KeyringService";
 
 interface CreateFormProps {
   mnemonic?: string;
-  onSuccess: (account: KeyringPair, mnemonic: string) => void;
-  isLoading?: boolean;
+  isImport?: boolean;
+  onSuccess: (wallet: KeyringPair, mnemonic: string) => void;
 }
 
-const CreateForm = ({
-  mnemonic,
-  onSuccess,
-  isLoading = false,
-}: CreateFormProps) => {
+const CreateForm = ({ mnemonic, isImport, onSuccess }: CreateFormProps) => {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -24,26 +21,26 @@ const CreateForm = ({
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const validateUsername = (username: string) => {
+  const validateUsername = (username: string): boolean => {
     if (username.trim().length < 3) {
-      setUsernameStatus("Minimum 3 characters required");
+      setUsernameStatus("Minimum 3 Characters Required");
       return false;
     }
-    setUsernameStatus("Username is valid");
+    setUsernameStatus("Valid Username");
     return true;
   };
 
-  const validatePassword = (password: string) => {
+  const validatePassword = (password: string): boolean => {
     if (password.trim().length < 8) {
-      setPasswordStatus("Minimum 8 characters required");
+      setPasswordStatus("Minimum 8 Characters Required");
       return false;
     }
-    setPasswordStatus("Password is valid");
+    setPasswordStatus("Valid Password");
     return true;
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    const { name, value } = event.target;
     if (name === "username") {
       setUsername(value);
       if (value.length > 0) {
@@ -61,141 +58,142 @@ const CreateForm = ({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = async (
+    event: React.FormEvent<HTMLFormElement>
+  ): Promise<void> => {
+    event.preventDefault();
     setError(null);
     if (!validatePassword(password)) return;
     if (!validateUsername(username)) return;
 
-    try {
-      setIsSubmitting(true);
-      const userMnemonic = mnemonic || KeyringService.createMnemonic();
-      const account = await KeyringService.addAccount(
-        userMnemonic,
-        username,
-        password
-      );
-      await KeyringService.unlockAccount(username, password);
-      onSuccess(account, userMnemonic);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create wallet");
-      setPasswordStatus(null);
-      setUsernameStatus(null);
-    } finally {
+    setIsSubmitting(true);
+    const inputMnemonic = mnemonic || KeyringService.createMnemonic();
+
+    // TODO: Render error component
+    const wallet = await KeyringService.addWallet(
+      inputMnemonic,
+      username,
+      password
+    );
+
+    if (wallet instanceof Error) {
+      setError(wallet.message);
       setIsSubmitting(false);
+      return;
     }
+
+    await KeyringService.unlockWallet(wallet.address, password);
+    onSuccess(wallet, inputMnemonic);
+    setIsSubmitting(false);
   };
 
   return (
     <form
-      className="space-y-4 flex flex-col items-center"
+      className="flex flex-col items-center justify-center mt-8 w-64 [&>*]:w-full"
       onSubmit={handleSubmit}
       autoComplete="off"
     >
-      <div className="w-54 h-20">
-        <label className="text-xs text-mf-silver-300 mb-2">Username</label>
-        <input
-          type="text"
-          name="username"
-          required
-          autoComplete="off"
-          value={username}
-          onChange={handleChange}
-          onFocus={() => setUsernameSelected(true)}
-          onBlur={() => setUsernameSelected(false)}
-          className={`w-full px-4 py-3 text-xs rounded-lg bg-mf-ash-500 text-mf-milk-300 border-none focus:outline-none focus:ring-2 ${
-            usernameStatus
-              ? usernameStatus === "Username is valid"
-                ? usernameSelected
-                  ? "ring-2 ring-mf-sybil-500"
-                  : ""
-                : "ring-2 ring-mf-safety-300"
-              : "focus:ring-mf-safety-300"
-          }`}
-          placeholder="Enter username"
-        />
-        <div className="h-5">
-          {usernameStatus &&
-            (usernameSelected || usernameStatus !== "Username is valid") && (
-              <p
-                className={`mt-2 text-xs ${
-                  usernameStatus === "Username is valid"
-                    ? "text-mf-sybil-500"
-                    : "text-mf-safety-300"
-                }`}
-              >
-                {usernameStatus}
-              </p>
-            )}
-        </div>
-      </div>
-
-      <div className="w-54 h-20">
-        <label className="text-xs text-mf-silver-300 mb-2">Password</label>
-        <input
-          type="password"
-          name="password"
-          required
-          autoComplete="new-password"
-          value={password}
-          onChange={handleChange}
-          onFocus={() => setPasswordSelected(true)}
-          onBlur={() => setPasswordSelected(false)}
-          className={`w-full px-4 py-3 text-xs rounded-lg bg-mf-ash-500 text-mf-milk-300 border-none focus:outline-none focus:ring-2 ${
-            error
-              ? "ring-2 ring-mf-safety-300"
-              : passwordStatus
-              ? passwordStatus === "Password is valid"
-                ? passwordSelected
-                  ? "ring-2 ring-mf-sybil-500"
-                  : ""
-                : "ring-2 ring-mf-safety-300"
-              : "focus:ring-mf-safety-300"
-          }`}
-          placeholder="Enter password"
-        />
-        <div className="h-5">
-          {(passwordStatus &&
-            (passwordSelected || passwordStatus !== "Password is valid")) ||
-          error ? (
+      <input
+        type="text"
+        name="username"
+        required
+        value={username}
+        onChange={handleChange}
+        onFocus={() => setUsernameSelected(true)}
+        onBlur={() => setUsernameSelected(false)}
+        className={`p-3 rounded-sm text-base text-mf-milk-300 bg-mf-ash-300 placeholder:text-mf-milk-300 border-none focus:outline-none focus:ring-2 ${
+          usernameStatus
+            ? usernameStatus === "Valid Username"
+              ? usernameSelected
+                ? "ring-2 ring-mf-sybil-500"
+                : ""
+              : "ring-2 ring-mf-safety-500"
+            : "focus:ring-mf-safety-500"
+        }`}
+        placeholder="Enter Username"
+      />
+      <div className="h-8">
+        {usernameStatus &&
+          (usernameSelected || usernameStatus !== "Valid Username") && (
             <p
-              className={`mt-2 text-xs ${
-                error
-                  ? "text-mf-safety-300"
-                  : passwordStatus === "Password is valid"
+              className={`mt-2 text-xs text-left ${
+                usernameStatus === "Valid Username"
                   ? "text-mf-sybil-500"
-                  : "text-mf-safety-300"
+                  : "text-mf-safety-500"
               }`}
             >
-              {error || passwordStatus}
+              {usernameStatus}
             </p>
-          ) : null}
-        </div>
+          )}
       </div>
 
-      <div className="flex flex-col items-center w-54">
+      <input
+        type="password"
+        name="password"
+        required
+        value={password}
+        onChange={handleChange}
+        onFocus={() => setPasswordSelected(true)}
+        onBlur={() => setPasswordSelected(false)}
+        className={`p-3 rounded-sm text-base text-mf-milk-300 bg-mf-ash-300 placeholder:text-mf-milk-300 border-none focus:outline-none focus:ring-2 ${
+          error
+            ? "ring-2 ring-mf-safety-500"
+            : passwordStatus
+            ? passwordStatus === "Valid Password"
+              ? passwordSelected
+                ? "ring-2 ring-mf-sybil-500"
+                : ""
+              : "ring-2 ring-mf-safety-500"
+            : "focus:ring-mf-safety-500"
+        }`}
+        placeholder="Enter Password"
+      />
+      <div className="h-8">
+        {(passwordStatus &&
+          (passwordSelected || passwordStatus !== "Valid Password")) ||
+        error ? (
+          <p
+            className={`mt-2 text-xs text-left ${
+              error
+                ? "text-mf-safety-500"
+                : passwordStatus === "Valid Password"
+                ? "text-mf-sybil-500"
+                : "text-mf-safety-500"
+            }`}
+          >
+            {error || passwordStatus}
+          </p>
+        ) : null}
+      </div>
+
+      <div className="flex flex-col items-center space-y-3 mt-1">
         <button
           type="button"
           onClick={() => navigate("/")}
-          className="w-full text-sm flex items-center justify-center rounded-lg border border-mf-ash-500 hover:bg-mf-ash-500 transition-colors px-4 py-3 mb-3"
+          className="w-44 rounded-xs text-sm text-mf-safety-500 bg-mf-night-500 border-mf-night-500 hover:border-mf-safety-500 border-2 transition-colors p-1.5"
         >
-          <span className="text-mf-milk-300">Back</span>
+          <span>Back</span>
         </button>
 
         <button
           type="submit"
           disabled={
-            isLoading ||
             isSubmitting ||
             !username ||
             !password ||
-            usernameStatus !== "Username is valid" ||
-            passwordStatus !== "Password is valid"
+            usernameStatus !== "Valid Username" ||
+            passwordStatus !== "Valid Password"
           }
-          className="w-full text-sm flex items-center justify-center rounded-lg bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors px-4 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-44 rounded-xs text-sm text-mf-night-500 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 transition-colors p-1.5"
         >
-          <span className="text-mf-milk-300">
-            {isLoading || isSubmitting ? "Creating..." : "Create Wallet"}
+          <span>
+            {isSubmitting
+              ? isImport
+                ? "Importing..."
+                : "Creating..."
+              : isImport
+              ? "Import"
+              : "Create"}
           </span>
         </button>
       </div>

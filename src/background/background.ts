@@ -223,18 +223,18 @@ async function handleSignResponse(
   }
 }
 
-async function handleAccountsLocked(
-  _message: ExtensionMessage & { type: typeof MESSAGE_TYPES.ACCOUNTS_LOCKED },
+async function handleWalletsLocked(
+  _message: ExtensionMessage & { type: typeof MESSAGE_TYPES.WALLETS_LOCKED },
   sendResponse: (response: { success: boolean; error?: string }) => void
 ) {
   try {
-    console.log("[Background] Accounts locked");
+    console.log("[Background] Wallets locked");
     await chrome.runtime.sendMessage({
-      type: MESSAGE_TYPES.ACCOUNTS_LOCKED,
+      type: MESSAGE_TYPES.WALLETS_LOCKED,
     });
     sendResponse({ success: true });
   } catch (error) {
-    console.error("[Background] Error handling accounts locked:", error);
+    console.error("[Background] Error handling wallets locked:", error);
     sendErrorResponse(sendResponse, ERROR_TYPES.UNKNOWN_ERROR, error);
   }
 }
@@ -285,8 +285,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       handleSignResponse(message, sendResponse);
       break;
 
-    case MESSAGE_TYPES.ACCOUNTS_LOCKED:
-      handleAccountsLocked(message, sendResponse);
+    case MESSAGE_TYPES.WALLETS_LOCKED:
+      handleWalletsLocked(message, sendResponse);
       break;
 
     case MESSAGE_TYPES.START_LOCK_TIMER:
@@ -309,10 +309,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === "lockTimer") {
     console.log("[Background] Lock timer finished");
-    chrome.storage.local.set({ accountLocked: true }, () => {
-      console.log("[Background] Set accountLocked to true");
+    chrome.storage.local.set({ walletLocked: true }, () => {
+      console.log("[Background] Set walletLocked to true");
       chrome.runtime.sendMessage({
-        type: MESSAGE_TYPES.ACCOUNTS_LOCKED,
+        type: MESSAGE_TYPES.WALLETS_LOCKED,
       });
     });
   }

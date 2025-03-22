@@ -17,7 +17,7 @@ export interface SignRequestPayload extends BasePayload {
 
 export interface ConnectResponsePayload extends BasePayload {
   approved: boolean;
-  accounts: InjectedAccount[];
+  wallets: InjectedAccount[];
 }
 
 export interface SignResponsePayload extends BasePayload {
@@ -35,7 +35,7 @@ export interface MessagePayloadMap {
   [MESSAGE_TYPES.CONNECT_RESPONSE]: ConnectResponsePayload;
   [MESSAGE_TYPES.SIGN_REQUEST]: SignRequestPayload;
   [MESSAGE_TYPES.SIGN_RESPONSE]: SignResponsePayload;
-  [MESSAGE_TYPES.ACCOUNTS_LOCKED]: BasePayload;
+  [MESSAGE_TYPES.WALLETS_LOCKED]: BasePayload;
   [MESSAGE_TYPES.START_LOCK_TIMER]: BasePayload;
   [MESSAGE_TYPES.CLEAR_LOCK_TIMER]: BasePayload;
 }
@@ -52,7 +52,7 @@ export type DappMessage =
 export type ExtensionMessage =
   | BaseMessage<typeof MESSAGE_TYPES.CONNECT_RESPONSE>
   | BaseMessage<typeof MESSAGE_TYPES.SIGN_RESPONSE>
-  | BaseMessage<typeof MESSAGE_TYPES.ACCOUNTS_LOCKED>
+  | BaseMessage<typeof MESSAGE_TYPES.WALLETS_LOCKED>
   | BaseMessage<typeof MESSAGE_TYPES.START_LOCK_TIMER>
   | BaseMessage<typeof MESSAGE_TYPES.CLEAR_LOCK_TIMER>;
 
@@ -85,7 +85,7 @@ export const MESSAGE_TYPES = {
   CONNECT_RESPONSE: "ext(connectResponse)",
   SIGN_REQUEST: "dapp(signRequest)",
   SIGN_RESPONSE: "ext(signResponse)",
-  ACCOUNTS_LOCKED: "ext(accountsLocked)",
+  WALLETS_LOCKED: "ext(walletsLocked)",
   START_LOCK_TIMER: "ext(startLockTimer)",
   CLEAR_LOCK_TIMER: "ext(clearLockTimer)",
 } as const;

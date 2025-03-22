@@ -9,6 +9,7 @@ interface SubnetSelectionProps {
   onSelect: (subnet: Subnet) => void;
 }
 
+// TODO: Don't show root for swap, but show it for stake
 const SubnetSelection = ({
   subnets,
   selectedSubnet,

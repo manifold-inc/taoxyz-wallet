@@ -9,7 +9,7 @@ const ConnectedSites = () => {
   const [websitePermissions, setWebsitePermissions] =
     useState<PermissionsPerWebsite>({});
   const [expandedWebsite, setExpandedWebsite] = useState<string | null>(null);
-  const [accounts, setAccounts] = useState<KeyringPair[]>([]);
+  const [wallets, setWallets] = useState<KeyringPair[]>([]);
 
   useEffect(() => {
     loadPermissions();
@@ -17,26 +17,26 @@ const ConnectedSites = () => {
 
   const loadPermissions = async () => {
     try {
-      const keyringAccounts = await KeyringService.getAccounts();
-      setAccounts(keyringAccounts);
+      const keyringWallets = await KeyringService.getWallets();
+      setWallets(keyringWallets);
       const permissionsPerWebsite: PermissionsPerWebsite = {};
 
-      for (const account of keyringAccounts) {
+      for (const wallet of keyringWallets) {
         const permissions =
-          (account.meta.websitePermissions as Permissions) || {};
+          (wallet.meta.websitePermissions as Permissions) || {};
 
         Object.entries(permissions).forEach(([website, hasAccess]) => {
           if (!permissionsPerWebsite[website]) {
             permissionsPerWebsite[website] = {
-              accountCount: 0,
-              accounts: [],
+              walletCount: 0,
+              wallets: [],
             };
           }
 
-          if (hasAccess) permissionsPerWebsite[website].accountCount++;
-          permissionsPerWebsite[website].accounts.push({
-            address: account.address,
-            username: (account.meta.username as string) || "Unnamed Account",
+          if (hasAccess) permissionsPerWebsite[website].walletCount++;
+          permissionsPerWebsite[website].wallets.push({
+            address: wallet.address,
+            username: (wallet.meta.username as string) || "Unnamed Wallet",
             hasAccess: hasAccess as boolean,
           });
         });
@@ -64,10 +64,10 @@ const ConnectedSites = () => {
   const handleRemoveWebsite = async (website: string) => {
     if (!window.confirm(`Remove access for ${website}?`)) return;
     try {
-      for (const account of accounts) {
+      for (const wallet of wallets) {
         await KeyringService.updatePermissions(
           website,
-          account.address,
+          wallet.address,
           false,
           true
         );
@@ -85,7 +85,7 @@ const ConnectedSites = () => {
       </h3>
       <div className="flex-1 overflow-y-auto px-3 pb-3 space-y-2">
         {Object.entries(websitePermissions).map(
-          ([website, { accountCount, accounts }]) => (
+          ([website, { walletCount, wallets }]) => (
             <div key={website} className="bg-mf-ash-400 rounded-lg">
               <div
                 className="flex items-center justify-between p-3 cursor-pointer"
@@ -101,7 +101,7 @@ const ConnectedSites = () => {
                       {website}
                     </span>
                     <span className="bg-mf-safety-300 text-mf-milk-300 text-xs px-2 rounded-lg shrink-0">
-                      {accountCount}
+                      {walletCount}
                     </span>
                   </div>
                   <div className="flex items-center space-x-2 ml-2 shrink-0">
@@ -126,26 +126,26 @@ const ConnectedSites = () => {
               {expandedWebsite === website && (
                 <div className="border-t border-mf-ash-500 px-3 py-2">
                   <div className="space-y-2">
-                    {accounts.map((account) => (
+                    {wallets.map((wallet) => (
                       <div
-                        key={account.address}
+                        key={wallet.address}
                         className="flex items-center justify-between py-1"
                       >
                         <span className="text-xs text-mf-silver-300 truncate mr-4">
-                          {account.username}
+                          {wallet.username}
                           <span className="text-mf-silver-500 ml-1">
-                            ({account.address.slice(0, 4)}...
-                            {account.address.slice(-4)})
+                            ({wallet.address.slice(0, 4)}...
+                            {wallet.address.slice(-4)})
                           </span>
                         </span>
                         <label className="relative inline-flex items-center cursor-pointer shrink-0">
                           <input
                             type="checkbox"
-                            checked={account.hasAccess}
+                            checked={wallet.hasAccess}
                             onChange={(e) =>
                               handleWebsiteAccessToggle(
                                 website,
-                                account.address,
+                                wallet.address,
                                 e.target.checked
                               )
                             }

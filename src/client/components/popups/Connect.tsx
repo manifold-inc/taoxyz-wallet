@@ -1,21 +1,22 @@
 import { useEffect, useState } from "react";
-import { KeyringService } from "../services/KeyringService";
 import type { InjectedAccount } from "@polkadot/extension-inject/types";
-import taoxyzLogo from "../../../public/icons/taoxyz.svg";
-import { MESSAGE_TYPES } from "../../types/messages";
+
+import KeyringService from "../../services/KeyringService";
+import { MESSAGE_TYPES } from "../../../types/messages";
+import taoxyzLogo from "../../../../public/icons/taoxyz.svg";
 
 interface AuthRequest {
   origin: string;
   requestId: string;
 }
 
-interface SelectableAccount extends InjectedAccount {
+interface Wallet extends InjectedAccount {
   selected: boolean;
 }
 
 const Connect = () => {
   const [request, setRequest] = useState<AuthRequest | null>(null);
-  const [accounts, setAccounts] = useState<SelectableAccount[]>([]);
+  const [wallets, setWallets] = useState<Wallet[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -26,18 +27,35 @@ const Connect = () => {
           setRequest(result.connectRequest);
         }
 
-        const keyringAccounts = await KeyringService.getAccounts();
-        const formattedAccounts = keyringAccounts.map((account) => ({
-          address: account.address,
-          genesisHash: null,
-          name: (account.meta?.username as string) || "Unnamed Account",
-          type: "sr25519" as const,
-          meta: {
-            source: "taoxyz-wallet",
-          },
-          selected: false,
-        }));
-        setAccounts(formattedAccounts);
+        const keyringWallets = await KeyringService.getWallets();
+        const walletsWithPermissions = (
+          await Promise.all(
+            keyringWallets.map(async (wallet) => {
+              const permissions = await KeyringService.getPermissions(
+                wallet.address
+              );
+              if (
+                result.connectRequest?.origin &&
+                permissions[result.connectRequest.origin] === false
+              ) {
+                return null;
+              }
+              const selectableWallet = {
+                address: wallet.address,
+                genesisHash: null,
+                name: (wallet.meta?.username as string) || "Unnamed Wallet",
+                type: "sr25519" as const,
+                meta: {
+                  source: "taoxyz-wallet",
+                },
+                selected: false,
+              };
+              return selectableWallet;
+            })
+          )
+        ).filter((wallet) => wallet !== null);
+
+        setWallets(walletsWithPermissions);
       } catch (error) {
         console.error("Failed to connect:", error);
       } finally {
@@ -48,13 +66,12 @@ const Connect = () => {
     requestConnect();
   }, []);
 
-  const toggleAccount = (address: string) => {
-    setAccounts((prev) =>
-      prev.map((account) =>
-        account.address === address
-          ? { ...account, selected: !account.selected }
-          : account
-      )
+  const toggleWallet = (address: string) => {
+    setWallets((prev) =>
+      prev.map((wallet) => ({
+        ...wallet,
+        selected: wallet.address === address ? !wallet.selected : false,
+      }))
     );
   };
 
@@ -62,37 +79,41 @@ const Connect = () => {
     if (!request) return;
 
     try {
-      const selectedAccounts = accounts
-        .filter((account) => account.selected)
-        .map(({ selected: _, ...account }) => account);
+      const selectedWallet = wallets.find((wallet) => wallet.selected);
+      const selectedWallets = selectedWallet
+        ? [{ ...selectedWallet, selected: undefined }]
+        : [];
+
+      if (approved && selectedWallet) {
+        try {
+          await KeyringService.updatePermissions(
+            request.origin,
+            selectedWallet.address,
+            approved
+          );
+        } catch (error) {
+          console.error("[Connect] Error updating permissions:", error);
+        }
+      }
 
       const response = await chrome.runtime.sendMessage({
         type: MESSAGE_TYPES.CONNECT_RESPONSE,
         payload: {
           approved,
-          accounts: selectedAccounts,
+          wallets: selectedWallets,
           requestId: request.requestId,
           origin: request.origin,
         },
       });
 
-      if (response?.success) {
-        window.close();
-
-        if (approved && selectedAccounts.length > 0) {
-          try {
-            await KeyringService.updatePermissions(
-              request.origin,
-              selectedAccounts[0].address,
-              approved
-            );
-          } catch (error) {
-            console.error("[Connect] Error updating permissions:", error);
-          }
-        }
+      if (!response?.success) {
+        console.error("[Connect] Response was not successful");
       }
+
+      window.close();
     } catch (error) {
       console.error("[Connect] Error sending response:", error);
+      window.close();
     }
   };
 
@@ -131,11 +152,11 @@ const Connect = () => {
 
           <div className="mb-4">
             <div className="space-y-2">
-              {accounts.map((account) => (
+              {wallets.map((wallet) => (
                 <label
-                  key={account.address}
+                  key={wallet.address}
                   className={`flex items-center p-2 bg-mf-ash-500/30 border rounded-lg hover:bg-mf-ash-500/50 cursor-pointer transition-colors ${
-                    account.selected
+                    wallet.selected
                       ? "border-mf-safety-500 ring-1 ring-mf-safety-500"
                       : "border-mf-ash-500"
                   }`}
@@ -143,19 +164,18 @@ const Connect = () => {
                   <div className="custom-checkbox">
                     <input
                       type="checkbox"
-                      checked={account.selected}
-                      onChange={() => toggleAccount(account.address)}
+                      checked={wallet.selected}
+                      onChange={() => toggleWallet(wallet.address)}
                     />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="font-medium text-xs text-mf-silver-300">
-                      {account.name}
+                      {wallet.name}
                     </div>
                     <div className="text-xs text-mf-silver-500">
-                      {`${account.address.slice(
-                        0,
-                        8
-                      )}...${account.address.slice(-8)}`}
+                      {`${wallet.address.slice(0, 8)}...${wallet.address.slice(
+                        -8
+                      )}`}
                     </div>
                   </div>
                 </label>
@@ -166,7 +186,7 @@ const Connect = () => {
           <div className="flex space-x-2">
             <button
               onClick={() => handleResponse(true)}
-              disabled={!accounts.some((acc) => acc.selected)}
+              disabled={!wallets.some((wallet) => wallet.selected)}
               className="flex-1 text-sm rounded-lg bg-mf-safety-500 hover:bg-mf-safety-300 disabled:bg-mf-ash-500 disabled:cursor-not-allowed px-4 py-3 text-mf-milk-300 transition-colors"
             >
               Approve
