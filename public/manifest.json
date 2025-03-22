@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Taoxyz Wallet",
   "version": "1.0.0",
-  "description": "A wallet extension for the Tao network",
+  "description": "A wallet extension for the Bittensor network",
   "permissions": ["storage", "activeTab", "alarms"],
   "content_security_policy": {
     "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
