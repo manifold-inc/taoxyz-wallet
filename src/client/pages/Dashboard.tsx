@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Copy } from "lucide-react";
 
@@ -15,7 +15,6 @@ interface StakeResponse {
   stake: number;
 }
 
-// TODO: Better loading state for balance and stake
 export const Dashboard = () => {
   const navigate = useNavigate();
   const { api } = usePolkadotApi();
@@ -27,60 +26,61 @@ export const Dashboard = () => {
   const [notification, setNotification] = useState<string | null>(null);
   const [showNotification, setShowNotification] = useState(false);
 
-  const refreshData = async () => {
-    if (!api || !address) return;
+  const refetchData = async (currentAddress: string): Promise<void> => {
+    if (!api || !currentAddress) return;
+
     setIsLoading(true);
+    setNotification(null);
+    setShowNotification(false);
+
     try {
-      await Promise.all([fetchBalance(), fetchStake()]);
+      const [balanceResult, stakeResult] = await Promise.all([
+        api.getBalance(currentAddress),
+        api.getStake(currentAddress),
+      ]);
+
+      if (!balanceResult) {
+        setNotification("Failed to get balance");
+        setShowNotification(true);
+        return;
+      }
+      setBalance(balanceResult);
+
+      if (!stakeResult) {
+        setNotification("Failed to get stake");
+        setShowNotification(true);
+        return;
+      }
+
+      const formattedStakes = (stakeResult as unknown as StakeResponse[]).map(
+        (stake) => ({
+          subnetId: stake.netuid,
+          validatorHotkey: stake.hotkey,
+          tokens: stake.stake,
+        })
+      );
+      setStakes(formattedStakes);
+    } catch {
+      setNotification("Failed to fetch data");
+      setShowNotification(true);
     } finally {
       setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    const init = async () => {
-      getAddress();
-      if (api && address) {
-        setNotification(null);
-        setShowNotification(false);
-        refreshData();
-      }
-    };
-    init();
-  }, [address, api]);
-
-  const getAddress = async (): Promise<void> => {
+  const handleAddressChange = async (): Promise<void> => {
     const result = await chrome.storage.local.get("currentAddress");
-    setAddress(result.currentAddress as string);
+    const newAddress = result.currentAddress as string;
+    setAddress(newAddress);
+    if (api && newAddress) {
+      await refetchData(newAddress);
+    }
   };
 
-  const fetchBalance = async (): Promise<void> => {
-    if (!api || !address) return;
-    const balance = await api.getBalance(address);
-    if (!balance) {
-      setNotification("Failed to get balance");
-      setShowNotification(true);
-      return;
+  const handleRefetch = async (): Promise<void> => {
+    if (address) {
+      await refetchData(address);
     }
-    setBalance(balance);
-  };
-
-  const fetchStake = async (): Promise<void> => {
-    if (!api || !address) return;
-    const stake = await api.getStake(address);
-    if (!stake) {
-      setNotification("Failed to get stake");
-      setShowNotification(true);
-      return;
-    }
-    const formattedStakes = (stake as unknown as StakeResponse[]).map(
-      (stake) => ({
-        subnetId: stake.netuid,
-        validatorHotkey: stake.hotkey,
-        tokens: stake.stake,
-      })
-    );
-    setStakes(formattedStakes);
   };
 
   const handleCopy = async (): Promise<void> => {
@@ -98,7 +98,7 @@ export const Dashboard = () => {
         onDismiss={() => setShowNotification(false)}
       />
       <div className="w-74 [&>*]:w-full">
-        <WalletSelection onSelect={getAddress} />
+        <WalletSelection onSelect={handleAddressChange} />
         <div className="rounded-sm bg-mf-ash-500 p-3 flex justify-between mt-4">
           <div className="flex items-center justify-center space-x-2">
             <img src={taoxyz} alt="Taoxyz Logo" className="w-4 h-4" />
@@ -110,7 +110,10 @@ export const Dashboard = () => {
             <p>
               {!address ? "" : `${address.slice(0, 6)}...${address.slice(-6)}`}
             </p>
-            <button onClick={handleCopy} className="transition-colors">
+            <button
+              onClick={() => void handleCopy()}
+              className="transition-colors"
+            >
               <Copy
                 className={`w-3 h-3 ${
                   copied ? "text-mf-sybil-500" : "text-mf-milk-300"
@@ -148,7 +151,7 @@ export const Dashboard = () => {
           <Portfolio
             stakes={stakes}
             address={address as string}
-            onRefresh={refreshData}
+            onRefresh={handleRefetch}
           />
           {isLoading && (
             <div className="flex justify-center items-center h-16">
