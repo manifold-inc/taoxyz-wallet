@@ -70,6 +70,10 @@ const MessageService = {
             sendResponse as (response: ResponseMessage) => void
           );
 
+        case MESSAGE_TYPES.CONNECT_RESPONSE:
+        case MESSAGE_TYPES.SIGN_RESPONSE:
+          return true;
+
         default:
           console.log("[MessageHandler] Unknown message type:", message.type);
           sendErrorResponse(sendResponse, ERROR_TYPES.UNKNOWN_ERROR);

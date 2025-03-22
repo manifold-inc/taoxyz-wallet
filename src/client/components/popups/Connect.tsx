@@ -10,13 +10,13 @@ interface AuthRequest {
   requestId: string;
 }
 
-interface SelectableWallet extends InjectedAccount {
+interface Wallet extends InjectedAccount {
   selected: boolean;
 }
 
 const Connect = () => {
   const [request, setRequest] = useState<AuthRequest | null>(null);
-  const [wallets, setWallets] = useState<SelectableWallet[]>([]);
+  const [wallets, setWallets] = useState<Wallet[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,17 +28,34 @@ const Connect = () => {
         }
 
         const keyringWallets = await KeyringService.getWallets();
-        const formattedWallets = keyringWallets.map((wallet) => ({
-          address: wallet.address,
-          genesisHash: null,
-          name: (wallet.meta?.username as string) || "Unnamed Wallet",
-          type: "sr25519" as const,
-          meta: {
-            source: "taoxyz-wallet",
-          },
-          selected: false,
-        }));
-        setWallets(formattedWallets);
+        const walletsWithPermissions = (
+          await Promise.all(
+            keyringWallets.map(async (wallet) => {
+              const permissions = await KeyringService.getPermissions(
+                wallet.address
+              );
+              if (
+                result.connectRequest?.origin &&
+                permissions[result.connectRequest.origin] === false
+              ) {
+                return null;
+              }
+              const selectableWallet = {
+                address: wallet.address,
+                genesisHash: null,
+                name: (wallet.meta?.username as string) || "Unnamed Wallet",
+                type: "sr25519" as const,
+                meta: {
+                  source: "taoxyz-wallet",
+                },
+                selected: false,
+              };
+              return selectableWallet;
+            })
+          )
+        ).filter((wallet) => wallet !== null);
+
+        setWallets(walletsWithPermissions);
       } catch (error) {
         console.error("Failed to connect:", error);
       } finally {
@@ -51,11 +68,10 @@ const Connect = () => {
 
   const toggleWallet = (address: string) => {
     setWallets((prev) =>
-      prev.map((wallet) =>
-        wallet.address === address
-          ? { ...wallet, selected: !wallet.selected }
-          : wallet
-      )
+      prev.map((wallet) => ({
+        ...wallet,
+        selected: wallet.address === address ? !wallet.selected : false,
+      }))
     );
   };
 
@@ -63,15 +79,16 @@ const Connect = () => {
     if (!request) return;
 
     try {
-      const selectedWallets = wallets
-        .filter((wallet) => wallet.selected)
-        .map(({ selected: _, ...wallet }) => wallet);
+      const selectedWallet = wallets.find((wallet) => wallet.selected);
+      const selectedWallets = selectedWallet
+        ? [{ ...selectedWallet, selected: undefined }]
+        : [];
 
-      if (approved && selectedWallets.length > 0) {
+      if (approved && selectedWallet) {
         try {
           await KeyringService.updatePermissions(
             request.origin,
-            selectedWallets[0].address,
+            selectedWallet.address,
             approved
           );
         } catch (error) {
