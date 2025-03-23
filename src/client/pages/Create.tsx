@@ -6,6 +6,7 @@ import MessageService from "../services/MessageService";
 import { useNotification } from "../contexts/NotificationContext";
 import MnemonicDisplay from "../components/create/MnemonicDisplay";
 import CreateForm from "../components/create/CreateForm";
+import { NotificationType } from "../../types/client";
 import taoxyz from "../../../public/icons/taoxyz.svg";
 
 interface CreateProps {
@@ -30,7 +31,7 @@ export const Create = ({ setIsLocked }: CreateProps) => {
   const handleContinue = async (): Promise<void> => {
     if (!wallet) {
       showNotification({
-        type: "error",
+        type: NotificationType.Error,
         message: "Could not find wallet",
       });
       return;

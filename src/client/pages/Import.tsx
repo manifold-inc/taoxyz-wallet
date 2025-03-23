@@ -6,6 +6,7 @@ import { useNotification } from "../contexts/NotificationContext";
 import KeyringService from "../services/KeyringService";
 import MessageService from "../services/MessageService";
 import CreateForm from "../components/create/CreateForm";
+import { NotificationType } from "../../types/client";
 import taoxyz from "../../../public/icons/taoxyz.svg";
 
 interface ImportProps {
@@ -52,7 +53,7 @@ const Import = ({ setIsLocked }: ImportProps) => {
   const handleContinue = async (wallet: KeyringPair): Promise<void> => {
     if (!wallet) {
       showNotification({
-        type: "error",
+        type: NotificationType.Error,
         message: "Could not find wallet",
       });
       return;

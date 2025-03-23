@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, useCallback } from "react";
+
 import Notification from "../components/Notification";
+import { NotificationType } from "../../types/client";
 
 interface NotificationContextType {
   showNotification: (params: ShowNotificationParams) => void;
@@ -7,8 +9,8 @@ interface NotificationContextType {
 }
 
 interface ShowNotificationParams {
-  message: string;
-  type: "error" | "pending" | "inBlock" | "success";
+  type: NotificationType;
+  message?: string;
   hash?: string;
   autoHide?: boolean;
 }
@@ -23,15 +25,41 @@ export const NotificationProvider = ({
   children: React.ReactNode;
 }) => {
   const [notification, setNotification] = useState<
-    ShowNotificationParams & { show: boolean }
+    ShowNotificationParams & { show: boolean; message: string }
   >({
     show: false,
     message: "",
-    type: "error",
+    type: NotificationType.Error,
   });
 
   const showNotification = useCallback((params: ShowNotificationParams) => {
-    setNotification({ ...params, show: true });
+    let defaultMessage = "";
+    switch (params.type) {
+      case NotificationType.Pending:
+        defaultMessage = "Transaction submitted to network";
+        break;
+      case NotificationType.InBlock:
+        defaultMessage = "Transaction included in block";
+        break;
+      case NotificationType.Success:
+        defaultMessage = "Transaction finalized";
+        break;
+      case NotificationType.Error:
+        defaultMessage = "Transaction failed";
+        break;
+    }
+
+    const shouldAutoHide =
+      params.autoHide ??
+      (params.type === NotificationType.Success ||
+        params.type === NotificationType.Error);
+
+    setNotification({
+      ...params,
+      show: true,
+      message: params.message || defaultMessage,
+      autoHide: shouldAutoHide,
+    });
   }, []);
 
   const clearNotification = useCallback(() => {

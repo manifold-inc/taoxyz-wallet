@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { CheckCircle, XCircle, Loader } from "lucide-react";
 
-type NotificationType = "error" | "pending" | "inBlock" | "success";
+import { NotificationType } from "../../types/client";
 
 interface NotificationProps {
   type: NotificationType;
@@ -13,7 +13,7 @@ interface NotificationProps {
 }
 
 const Notification = ({
-  type = "error",
+  type = NotificationType.Error,
   message,
   hash,
   show = true,
@@ -21,27 +21,9 @@ const Notification = ({
   onDismiss,
 }: NotificationProps) => {
   const [isLeaving, setIsLeaving] = useState(false);
-  const [statusDetails, setStatusDetails] = useState<string>("");
 
   useEffect(() => {
-    if (show) {
-      setIsLeaving(false);
-    }
-
-    switch (type) {
-      case "pending":
-        setStatusDetails("Submitting transaction...");
-        break;
-      case "inBlock":
-        setStatusDetails("Transaction in block...");
-        break;
-      case "success":
-        setStatusDetails("Transaction successful!");
-        break;
-      case "error":
-        setStatusDetails("An error occurred");
-        break;
-    }
+    if (show) setIsLeaving(false);
 
     if (show && autoHide) {
       const startLeaveTimer = setTimeout(() => {
@@ -50,14 +32,14 @@ const Notification = ({
 
       const hideTimer = setTimeout(() => {
         onDismiss?.();
-      }, 2000);
+      }, 2100);
 
       return () => {
         clearTimeout(startLeaveTimer);
         clearTimeout(hideTimer);
       };
     }
-  }, [show, type, autoHide, onDismiss]);
+  }, [show, autoHide, onDismiss]);
 
   if (!show) return null;
 
@@ -65,6 +47,7 @@ const Notification = ({
     <div className="fixed top-4 left-0 right-0 flex justify-center z-50">
       <div
         className={`
+          w-72
           bg-mf-ash-500 
           py-2
           px-4
@@ -72,22 +55,21 @@ const Notification = ({
           shadow-lg
           transform
           transition-all
-          duration-300
+          duration-500
           ${isLeaving ? "animate-slideUp" : "animate-slideDown"}
-          w-60
         `}
       >
         <div className="flex items-center justify-between gap-4">
           <div className="flex flex-col items-start">
             <h2 className="text-xl font-semibold text-mf-silver-500">
-              {type === "pending" || type === "inBlock"
+              {type === NotificationType.Pending ||
+              type === NotificationType.InBlock
                 ? "Processing"
-                : type === "success"
+                : type === NotificationType.Success
                 ? "Success"
                 : "Error"}
             </h2>
             <p className="text-xs text-mf-milk-500">{message}</p>
-            <p className="text-xs text-mf-silver-300">{statusDetails}</p>
             {hash && (
               <p className="text-xs text-mf-milk-500 mt-1 font-mono">
                 {hash.slice(0, 10)}...{hash.slice(-8)}
@@ -95,12 +77,13 @@ const Notification = ({
             )}
           </div>
           <div className="flex items-center">
-            {type === "pending" || type === "inBlock" ? (
-              <Loader2 className="w-5 h-5 animate-spin text-mf-silver-500" />
-            ) : type === "success" ? (
-              <CheckCircle className="w-5 h-5 text-mf-sybil-500" />
+            {type === NotificationType.Pending ||
+            type === NotificationType.InBlock ? (
+              <Loader className="w-6 h-6 animate-spin text-mf-silver-500" />
+            ) : type === NotificationType.Success ? (
+              <CheckCircle className="w-6 h-6 text-mf-sybil-500" />
             ) : (
-              <XCircle className="w-5 h-5 text-mf-safety-500" />
+              <XCircle className="w-6 h-6 text-mf-safety-500" />
             )}
           </div>
         </div>

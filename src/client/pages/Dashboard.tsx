@@ -7,6 +7,7 @@ import { useNotification } from "../contexts/NotificationContext";
 import WalletSelection from "../components/WalletSelection";
 import Portfolio from "../components/dashboard/Portfolio";
 import type { StakeTransaction } from "../../types/client";
+import { NotificationType } from "../../types/client";
 import taoxyz from "../../../public/icons/taoxyz.png";
 
 interface StakeResponse {
@@ -42,7 +43,7 @@ export const Dashboard = () => {
 
     if (!balanceResult) {
       showNotification({
-        type: "error",
+        type: NotificationType.Error,
         message: "Failed to get balance",
       });
       return;
@@ -50,7 +51,7 @@ export const Dashboard = () => {
     setBalance(balanceResult);
     if (!stakeResult) {
       showNotification({
-        type: "error",
+        type: NotificationType.Error,
         message: "Failed to get stake",
       });
       return;
@@ -79,7 +80,7 @@ export const Dashboard = () => {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
     showNotification({
-      type: "success",
+      type: NotificationType.Success,
       message: "Address copied",
     });
   };

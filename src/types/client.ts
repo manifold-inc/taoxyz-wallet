@@ -56,7 +56,13 @@ export type PermissionsPerWebsite = Record<
     }[];
   }
 >;
-export type Permissions = Record<string, boolean | undefined>;
+
+export enum NotificationType {
+  Error = "error",
+  Pending = "pending",
+  InBlock = "inBlock",
+  Success = "success",
+}
 
 // BLOCKCHAIN TYPES
 export interface BittensorSubnet {
