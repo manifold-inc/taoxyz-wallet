@@ -105,7 +105,7 @@ const LockScreen = () => {
               <button
                 type="submit"
                 disabled={password.length < 3}
-                className="w-44 rounded-xs text-sm text-mf-night-500 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 transition-colors p-1.5"
+                className="w-44 rounded-sm text-sm text-mf-night-500 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 transition-colors p-1.5"
               >
                 <span>Unlock</span>
               </button>

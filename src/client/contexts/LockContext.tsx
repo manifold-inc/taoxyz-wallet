@@ -20,9 +20,9 @@ export const LockProvider = ({ children }: { children: ReactNode }) => {
     setIsLocked(lockResult.walletLocked === true);
   };
 
-  const updateIsLocked = async (locked: boolean): Promise<void> => {
-    await chrome.storage.local.set({ walletLocked: locked });
-    setIsLocked(locked);
+  const updateIsLocked = async (isLocked: boolean): Promise<void> => {
+    await chrome.storage.local.set({ walletLocked: isLocked });
+    setIsLocked(isLocked);
   };
 
   return (

@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 interface WalletContextType {
   currentAddress: string | null;
+  isLoading: boolean;
   setCurrentAddress: (address: string | null) => Promise<void>;
 }
 
@@ -10,6 +11,7 @@ const WalletContext = createContext<WalletContextType | undefined>(undefined);
 
 export const WalletProvider = ({ children }: { children: ReactNode }) => {
   const [currentAddress, setCurrentAddress] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     init();
@@ -18,6 +20,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   const init = async (): Promise<void> => {
     const result = await chrome.storage.local.get("currentAddress");
     setCurrentAddress(result.currentAddress);
+    setIsLoading(false);
   };
 
   const updateCurrentAddress = async (
@@ -29,7 +32,11 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <WalletContext.Provider
-      value={{ currentAddress, setCurrentAddress: updateCurrentAddress }}
+      value={{
+        currentAddress,
+        isLoading,
+        setCurrentAddress: updateCurrentAddress,
+      }}
     >
       {children}
     </WalletContext.Provider>

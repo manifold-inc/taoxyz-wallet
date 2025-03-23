@@ -9,6 +9,7 @@ import type { Permissions } from "../../types/client";
 const registry = new TypeRegistry();
 
 export const KeyringService = {
+  // TODO: Prevent users from adding wallets with the same mnemonic
   async addWallet(
     mnemonic: string,
     username: string,

@@ -14,7 +14,7 @@ const Welcome = () => {
       {showDisclaimer ? (
         <Disclaimer onClose={() => setShowDisclaimer(false)} />
       ) : (
-        <div className="flex flex-col items-center min-h-screen">
+        <>
           <img src={taoxyz} alt="Taoxyz Logo" className="w-16 h-16 mt-24" />
 
           <div>
@@ -24,7 +24,9 @@ const Welcome = () => {
 
             <div className="space-y-5 flex flex-col items-center w-52 [&>*]:w-full text-base mt-8">
               <button
-                onClick={() => navigate("/create")}
+                onClick={() =>
+                  navigate("/add-wallet", { state: { mode: "create-wallet" } })
+                }
                 className="rounded-sm bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors p-3"
               >
                 <div className="flex justify-center items-center gap-2 mr-2">
@@ -33,7 +35,11 @@ const Welcome = () => {
                 </div>
               </button>
               <button
-                onClick={() => navigate("/import")}
+                onClick={() =>
+                  navigate("/add-wallet", {
+                    state: { mode: "import-mnemonic" },
+                  })
+                }
                 className="rounded-sm bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors p-3"
               >
                 <div className="flex justify-center items-center gap-2 mr-4">
@@ -51,7 +57,7 @@ const Welcome = () => {
               </div>
             </div>
           </div>
-        </div>
+        </>
       )}
     </>
   );

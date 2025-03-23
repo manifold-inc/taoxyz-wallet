@@ -12,6 +12,8 @@ interface WalletSelectionProps {
 }
 
 // TODO: Error handling if there are no wallets - shouldn't even display the component
+// TODO: When the user clicks off of it should collapse
+// TODO: If there are no wallets, no chevron in lock screen
 const WalletSelection = ({ onSelect }: WalletSelectionProps) => {
   const navigate = useNavigate();
   const { isLocked } = useLock();
@@ -120,7 +122,7 @@ const WalletSelection = ({ onSelect }: WalletSelectionProps) => {
 
           {!isLocked && (
             <button
-              onClick={() => navigate("/create")}
+              onClick={() => navigate("/add-wallet")}
               className="w-full flex items-center gap-3 p-2 hover:bg-mf-night-500 transition-colors"
             >
               <div className="flex items-center justify-center bg-mf-safety-500 border border-mf-safety-500 rounded-sm p-1">
