@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import type { KeyringPair } from "@polkadot/keyring/types";
 
 import MessageService from "../services/MessageService";
+import { useNotification } from "../contexts/NotificationContext";
 import MnemonicDisplay from "../components/create/MnemonicDisplay";
 import CreateForm from "../components/create/CreateForm";
-import Notification from "../components/Notification";
 import taoxyz from "../../../public/icons/taoxyz.svg";
 
 interface CreateProps {
@@ -14,10 +14,9 @@ interface CreateProps {
 
 export const Create = ({ setIsLocked }: CreateProps) => {
   const navigate = useNavigate();
+  const { showNotification } = useNotification();
   const [wallet, setWallet] = useState<KeyringPair | null>(null);
   const [mnemonic, setMnemonic] = useState<string>("");
-  const [notification, setNotification] = useState<string | null>(null);
-  const [showNotification, setShowNotification] = useState(false);
   const [showOptions, setShowOptions] = useState(true);
 
   const handleSuccess = async (
@@ -29,12 +28,11 @@ export const Create = ({ setIsLocked }: CreateProps) => {
   };
 
   const handleContinue = async (): Promise<void> => {
-    setNotification(null);
-    setShowNotification(false);
-
     if (!wallet) {
-      setNotification("Could not find wallet");
-      setShowNotification(true);
+      showNotification({
+        type: "error",
+        message: "Could not find wallet",
+      });
       return;
     }
     await chrome.storage.local.set({
@@ -48,11 +46,6 @@ export const Create = ({ setIsLocked }: CreateProps) => {
 
   return (
     <div className="flex flex-col items-center min-h-screen">
-      <Notification
-        message={notification as string}
-        show={showNotification}
-        onDismiss={() => setShowNotification(false)}
-      />
       <div className="flex flex-col items-center flex-1">
         <img src={taoxyz} alt="Taoxyz Logo" className="w-16 h-16 mt-24" />
 

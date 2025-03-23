@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Copy } from "lucide-react";
 
 import { usePolkadotApi } from "../contexts/PolkadotApiContext";
+import { useNotification } from "../contexts/NotificationContext";
 import WalletSelection from "../components/WalletSelection";
 import Portfolio from "../components/dashboard/Portfolio";
-import Notification from "../components/Notification";
 import type { StakeTransaction } from "../../types/client";
 import taoxyz from "../../../public/icons/taoxyz.png";
 
@@ -17,70 +17,60 @@ interface StakeResponse {
 
 export const Dashboard = () => {
   const navigate = useNavigate();
+  const { showNotification } = useNotification();
   const { api } = usePolkadotApi();
   const [address, setAddress] = useState<string | null>(null);
   const [balance, setBalance] = useState<string | null>(null);
   const [stakes, setStakes] = useState<StakeTransaction[]>([]);
   const [copied, setCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [notification, setNotification] = useState<string | null>(null);
-  const [showNotification, setShowNotification] = useState(false);
 
-  const refetchData = async (currentAddress: string): Promise<void> => {
-    if (!api || !currentAddress) return;
-
-    setIsLoading(true);
-    setNotification(null);
-    setShowNotification(false);
-
-    try {
-      const [balanceResult, stakeResult] = await Promise.all([
-        api.getBalance(currentAddress),
-        api.getStake(currentAddress),
-      ]);
-
-      if (!balanceResult) {
-        setNotification("Failed to get balance");
-        setShowNotification(true);
-        return;
-      }
-      setBalance(balanceResult);
-
-      if (!stakeResult) {
-        setNotification("Failed to get stake");
-        setShowNotification(true);
-        return;
-      }
-
-      const formattedStakes = (stakeResult as unknown as StakeResponse[]).map(
-        (stake) => ({
-          subnetId: stake.netuid,
-          validatorHotkey: stake.hotkey,
-          tokens: stake.stake,
-        })
-      );
-      setStakes(formattedStakes);
-    } catch {
-      setNotification("Failed to fetch data");
-      setShowNotification(true);
-    } finally {
-      setIsLoading(false);
+  useEffect(() => {
+    if (api) {
+      void handleAddressChange();
     }
+  }, [api]);
+
+  const fetchData = async (currentAddress: string): Promise<void> => {
+    if (!api || !currentAddress) return;
+    setIsLoading(true);
+
+    const [balanceResult, stakeResult] = await Promise.all([
+      api.getBalance(currentAddress),
+      api.getStake(currentAddress),
+    ]);
+
+    if (!balanceResult) {
+      showNotification({
+        type: "error",
+        message: "Failed to get balance",
+      });
+      return;
+    }
+    setBalance(balanceResult);
+    if (!stakeResult) {
+      showNotification({
+        type: "error",
+        message: "Failed to get stake",
+      });
+      return;
+    }
+    const formattedStakes = (stakeResult as unknown as StakeResponse[]).map(
+      (stake) => ({
+        subnetId: stake.netuid,
+        validatorHotkey: stake.hotkey,
+        tokens: stake.stake,
+      })
+    );
+    setStakes(formattedStakes);
+
+    setIsLoading(false);
   };
 
   const handleAddressChange = async (): Promise<void> => {
     const result = await chrome.storage.local.get("currentAddress");
-    const newAddress = result.currentAddress as string;
-    setAddress(newAddress);
-    if (api && newAddress) {
-      await refetchData(newAddress);
-    }
-  };
-
-  const handleRefetch = async (): Promise<void> => {
-    if (address) {
-      await refetchData(address);
-    }
+    setAddress(result.currentAddress as string);
+    await fetchData(result.currentAddress as string);
   };
 
   const handleCopy = async (): Promise<void> => {
@@ -88,15 +78,14 @@ export const Dashboard = () => {
     await navigator.clipboard.writeText(address);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+    showNotification({
+      type: "success",
+      message: "Address copied",
+    });
   };
 
   return (
     <div className="flex flex-col items-center min-h-screen">
-      <Notification
-        message={notification as string}
-        show={showNotification}
-        onDismiss={() => setShowNotification(false)}
-      />
       <div className="w-74 [&>*]:w-full">
         <WalletSelection onSelect={handleAddressChange} />
         <div className="rounded-sm bg-mf-ash-500 p-3 flex justify-between mt-4">
@@ -151,7 +140,7 @@ export const Dashboard = () => {
           <Portfolio
             stakes={stakes}
             address={address as string}
-            onRefresh={handleRefetch}
+            onRefresh={() => fetchData(address as string)}
           />
           {isLoading && (
             <div className="flex justify-center items-center h-16">

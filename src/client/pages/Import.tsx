@@ -2,10 +2,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { KeyringPair } from "@polkadot/keyring/types";
 
+import { useNotification } from "../contexts/NotificationContext";
 import KeyringService from "../services/KeyringService";
 import MessageService from "../services/MessageService";
 import CreateForm from "../components/create/CreateForm";
-import Notification from "../components/Notification";
 import taoxyz from "../../../public/icons/taoxyz.svg";
 
 interface ImportProps {
@@ -14,13 +14,12 @@ interface ImportProps {
 
 const Import = ({ setIsLocked }: ImportProps) => {
   const navigate = useNavigate();
+  const { showNotification } = useNotification();
   const [mnemonic, setMnemonic] = useState("");
   const [mnemonicSelected, setMnemonicSelected] = useState(false);
   const [validMnemonic, setValidMnemonic] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [notification, setNotification] = useState<string | null>(null);
-  const [showNotification, setShowNotification] = useState(false);
 
   const handleSubmit = (event: React.FormEvent): void => {
     event.preventDefault();
@@ -51,12 +50,11 @@ const Import = ({ setIsLocked }: ImportProps) => {
   };
 
   const handleContinue = async (wallet: KeyringPair): Promise<void> => {
-    setNotification(null);
-    setShowNotification(false);
-
     if (!wallet) {
-      setNotification("Could not find wallet");
-      setShowNotification(true);
+      showNotification({
+        type: "error",
+        message: "Could not find wallet",
+      });
       return;
     }
     await chrome.storage.local.set({
@@ -71,11 +69,6 @@ const Import = ({ setIsLocked }: ImportProps) => {
   if (validMnemonic) {
     return (
       <div className="flex flex-col items-center min-h-screen">
-        <Notification
-          message={notification as string}
-          show={showNotification}
-          onDismiss={() => setShowNotification(false)}
-        />
         <div className="flex flex-col items-center flex-1">
           <img src={taoxyz} alt="Taoxyz Logo" className="w-16 h-16 mt-24" />
           <div>
