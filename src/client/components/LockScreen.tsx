@@ -17,12 +17,16 @@ const LockScreen = () => {
   const [passwordSelected, setPasswordSelected] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePasswordChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ): void => {
     setPassword(e.target.value);
     setError(null);
   };
 
-  const handleUnlock = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleUnlock = async (
+    e: React.FormEvent<HTMLFormElement>
+  ): Promise<void> => {
     e.preventDefault();
     if (password.length < 3) return;
 

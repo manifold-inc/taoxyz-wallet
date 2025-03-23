@@ -29,7 +29,6 @@ export const Dashboard = () => {
 
   useEffect(() => {
     if (api && currentAddress) {
-      console.log("useEffect triggered with address:", currentAddress);
       void fetchData(currentAddress);
     }
   }, [api, currentAddress]);

@@ -37,7 +37,9 @@ const ImportWallet = ({ mnemonic, onSuccess }: ImportWalletProps) => {
     return true;
   };
 
-  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUsernameChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ): void => {
     const value = e.target.value;
     setUsername(value);
     if (value.length > 0) {
@@ -49,7 +51,9 @@ const ImportWallet = ({ mnemonic, onSuccess }: ImportWalletProps) => {
     }
   };
 
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePasswordChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ): void => {
     const value = e.target.value;
     setPassword(value);
     if (value.length > 0) {
@@ -61,7 +65,7 @@ const ImportWallet = ({ mnemonic, onSuccess }: ImportWalletProps) => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     if (!validateUsername(username) || !validatePassword(password)) {
       return;
