@@ -7,6 +7,7 @@ import {
   useLocation,
 } from "react-router-dom";
 
+import { PolkadotApiProvider } from "./contexts/PolkadotApiContext";
 import { LockProvider } from "./contexts/LockContext";
 import { WalletProvider } from "./contexts/WalletContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
@@ -100,15 +101,17 @@ const App = () => {
   }, []);
 
   return (
-    <HashRouter>
-      <LockProvider>
-        <WalletProvider>
-          <NotificationProvider>
-            <Content />
-          </NotificationProvider>
-        </WalletProvider>
-      </LockProvider>
-    </HashRouter>
+    <PolkadotApiProvider>
+      <HashRouter>
+        <LockProvider>
+          <WalletProvider>
+            <NotificationProvider>
+              <Content />
+            </NotificationProvider>
+          </WalletProvider>
+        </LockProvider>
+      </HashRouter>
+    </PolkadotApiProvider>
   );
 };
 
