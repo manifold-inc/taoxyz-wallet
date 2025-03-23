@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import { Lock } from "lucide-react";
 
 import KeyringService from "../services/KeyringService";
@@ -8,15 +7,12 @@ import ConnectedSites from "../components/settings/ConnectedSites";
 import taoxyzLogo from "../../../public/icons/taoxyz.png";
 
 const Settings = () => {
-  const navigate = useNavigate();
   const { setIsLocked } = useLock();
 
   const handleLock = async () => {
     KeyringService.lockAll();
     MessageService.sendWalletsLockedMessage();
-    await chrome.storage.local.set({ walletLocked: true });
-    setIsLocked(true);
-    navigate("/dashboard");
+    await setIsLocked(true);
   };
 
   return (

@@ -35,7 +35,6 @@ const LockScreen = () => {
 
     try {
       const isUnlocked = KeyringService.unlockWallet(currentAddress, password);
-
       if (isUnlocked) {
         await setIsLocked(false);
         await MessageService.sendStartLockTimer();

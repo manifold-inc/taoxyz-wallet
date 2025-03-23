@@ -1,25 +1,13 @@
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { UserPlus, FolderInput } from "lucide-react";
 
 import Disclaimer from "../components/Disclaimer";
 import taoxyz from "../../../public/icons/taoxyz.svg";
 
-const Home = () => {
+const Welcome = () => {
   const navigate = useNavigate();
   const [showDisclaimer, setShowDisclaimer] = useState(false);
-
-  useEffect(() => {
-    init();
-  }, []);
-
-  const init = async (): Promise<void> => {
-    const resultAddress = await chrome.storage.local.get("currentAddress");
-    const resultLocked = await chrome.storage.local.get("walletLocked");
-    if (resultAddress.currentAddress && !resultLocked.walletLocked) {
-      navigate("/dashboard");
-    }
-  };
 
   return (
     <>
@@ -69,4 +57,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default Welcome;
