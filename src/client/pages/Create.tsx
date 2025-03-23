@@ -44,9 +44,8 @@ export const Create = () => {
   };
 
   return (
-    <div className="flex flex-col items-center h-screen overflow-hidden">
-      <div className="h-20" />
-      <div className="flex flex-col items-center w-80">
+    <div className="flex flex-col items-center min-h-screen">
+      <div className="flex flex-col items-center">
         <div className="grid grid-cols-3 mb-8 w-full">
           <div className="flex items-center justify-start pl-4" />
           <div className="flex justify-center">
@@ -62,7 +61,7 @@ export const Create = () => {
             </h2>
           </div>
 
-          <div className="flex flex-col space-y-4 flex-1">
+          <div className="flex flex-col flex-1">
             {showOptions ? (
               <CreateForm
                 onSuccess={handleSuccess}

@@ -23,8 +23,8 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   const updateCurrentAddress = async (
     address: string | null
   ): Promise<void> => {
-    setCurrentAddress(address);
     await chrome.storage.local.set({ currentAddress: address });
+    setCurrentAddress(address);
   };
 
   return (

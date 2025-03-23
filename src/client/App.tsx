@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
 
-import { LockProvider } from "./contexts/LockContext";
+import { LockProvider, useLock } from "./contexts/LockContext";
 import { WalletProvider } from "./contexts/WalletContext";
-import { useLock } from "./contexts/LockContext";
+import { NotificationProvider } from "./contexts/NotificationContext";
 import MessageService from "./services/MessageService";
 import LockScreen from "./components/LockScreen";
 import Dashboard from "./pages/Dashboard";
@@ -15,7 +15,6 @@ import Create from "./pages/Create";
 import Import from "./pages/Import";
 import Connect from "./components/popups/Connect";
 import Sign from "./components/popups/Sign";
-
 import Navigation from "./components/Navigation";
 
 const Content = () => {
@@ -58,7 +57,9 @@ const App = () => {
     <HashRouter>
       <LockProvider>
         <WalletProvider>
-          <Content />
+          <NotificationProvider>
+            <Content />
+          </NotificationProvider>
         </WalletProvider>
       </LockProvider>
     </HashRouter>
