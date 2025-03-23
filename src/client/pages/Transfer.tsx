@@ -4,10 +4,15 @@ import { useNavigate } from "react-router-dom";
 import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 import KeyringService from "../services/KeyringService";
 import MessageService from "../services/MessageService";
-import TransactionNotification from "../components/TransactionNotification";
+import Notification from "../components/Notification";
+import { NotificationType } from "../../types/client";
+import { useWallet } from "../contexts/WalletContext";
+import { useNotification } from "../contexts/NotificationContext";
 
 const Transfer = () => {
+  const { currentAddress } = useWallet();
   const { api } = usePolkadotApi();
+  const { showNotification } = useNotification();
   const navigate = useNavigate();
   const [fromAddress, setFromAddress] = useState("");
   const [toAddress, setToAddress] = useState("");
@@ -24,10 +29,8 @@ const Transfer = () => {
 
   useEffect(() => {
     const init = async () => {
-      if (!api) return;
+      if (!api || !currentAddress) return;
       try {
-        const result = await chrome.storage.local.get("currentAddress");
-        const currentAddress = result.currentAddress as string;
         setFromAddress(currentAddress);
         getBalance(currentAddress);
       } catch (error) {
@@ -35,7 +38,7 @@ const Transfer = () => {
       }
     };
     init();
-  }, [api]);
+  }, [api, currentAddress]);
 
   const getBalance = async (address: string) => {
     if (!api) return;
@@ -108,6 +111,10 @@ const Transfer = () => {
       setError(errorMessage);
       setTxStatus({
         type: "error",
+        message: errorMessage,
+      });
+      showNotification({
+        type: NotificationType.Error,
         message: errorMessage,
       });
     } finally {
@@ -202,8 +209,14 @@ const Transfer = () => {
         </div>
       </div>
       {txStatus && (
-        <TransactionNotification
-          type={txStatus.type}
+        <Notification
+          type={
+            txStatus.type === "pending"
+              ? NotificationType.Pending
+              : txStatus.type === "success"
+              ? NotificationType.Success
+              : NotificationType.Error
+          }
           message={txStatus.message}
           hash={txStatus.hash}
         />

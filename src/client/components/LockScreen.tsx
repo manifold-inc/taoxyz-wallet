@@ -1,19 +1,16 @@
 import { useState } from "react";
 
-import { usePolkadotApi } from "../contexts/PolkadotApiContext";
+import { useLock } from "../contexts/LockContext";
+import { useWallet } from "../contexts/WalletContext";
 import KeyringService from "../services/KeyringService";
 import MessageService from "../services/MessageService";
 import taoxyzLogo from "../../../public/icons/taoxyz.svg";
 
-interface LockScreenProps {
-  setIsLocked: (isLocked: boolean) => void;
-}
-
-const LockScreen = ({ setIsLocked }: LockScreenProps) => {
-  const { api, isLoading: isApiLoading } = usePolkadotApi();
+const LockScreen = () => {
+  const { setIsLocked } = useLock();
+  const { currentAddress } = useWallet();
   const [password, setPassword] = useState("");
   const [passwordSelected, setPasswordSelected] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,27 +20,21 @@ const LockScreen = ({ setIsLocked }: LockScreenProps) => {
 
   const handleUnlock = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (isLoading || password.length < 3) return;
+    if (password.length < 3) return;
 
-    if (!api || isApiLoading) {
-      setError("Please wait for wallet to initialize...");
+    if (!currentAddress) {
+      setError("No wallet selected");
       return;
     }
 
     setError(null);
-    setIsLoading(true);
 
     try {
-      const result = await chrome.storage.local.get("currentAddress");
-      const isUnlocked = KeyringService.unlockWallet(
-        result.currentAddress,
-        password
-      );
+      const isUnlocked = KeyringService.unlockWallet(currentAddress, password);
 
       if (isUnlocked) {
-        await chrome.storage.local.set({ walletLocked: false });
+        await setIsLocked(false);
         await MessageService.sendStartLockTimer();
-        setIsLocked(false);
       } else {
         setError("Failed to unlock wallet");
       }
@@ -57,66 +48,49 @@ const LockScreen = ({ setIsLocked }: LockScreenProps) => {
         console.error("[LockScreen] Error unlocking wallet:", error);
         setError("Failed to unlock wallet");
       }
-    } finally {
-      setIsLoading(false);
     }
   };
 
   return (
     <div className="flex flex-col items-center min-h-screen overflow-hidden">
-      <div className="h-20" />
       <div className="flex flex-col items-center">
         <img src={taoxyzLogo} alt="Taoxyz Logo" className="w-16 h-16 mb-8" />
 
-        <div className="w-full max-w-md">
-          <div className="text-center mb-6">
-            <h1 className="text-xl font-semibold text-mf-silver-300">
-              Unlock Your Wallet
-            </h1>
+        <div className="text-center mb-6">
+          <h1 className="text-xl font-semibold text-mf-silver-300">
+            Unlock Wallet
+          </h1>
+        </div>
+
+        <form onSubmit={handleUnlock} className="flex flex-col">
+          <div className="w-54 h-20">
+            <input
+              type="password"
+              value={password}
+              onChange={handlePasswordChange}
+              onFocus={() => setPasswordSelected(true)}
+              onBlur={() => setPasswordSelected(false)}
+              placeholder="Enter your password"
+              className="w-full px-4 py-3 rounded-lg bg-mf-ash-500 text-mf-milk-300 placeholder:text-mf-silver-500"
+              minLength={3}
+            />
+            <div className="h-5">
+              {error && passwordSelected && (
+                <p className="mt-2 text-xs text-mf-safety-300">{error}</p>
+              )}
+            </div>
           </div>
 
-          <form onSubmit={handleUnlock} className="flex flex-col">
-            <div className="w-54 h-20">
-              <input
-                type="password"
-                value={password}
-                onChange={handlePasswordChange}
-                onFocus={() => setPasswordSelected(true)}
-                onBlur={() => setPasswordSelected(false)}
-                placeholder="Enter your password"
-                className="w-full px-4 py-3 rounded-lg bg-mf-ash-500 text-mf-milk-300 placeholder:text-mf-silver-500"
-                disabled={isLoading || isApiLoading}
-                minLength={3}
-              />
-              <div className="h-5">
-                {error && passwordSelected && (
-                  <p className="mt-2 text-xs text-mf-safety-300">{error}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="fixed bottom-20 w-54">
-              <button
-                type="submit"
-                disabled={password.length < 3 || isLoading || isApiLoading}
-                className="w-full text-sm rounded-lg bg-mf-safety-300 hover:bg-mf-safety-400 disabled:bg-mf-ash-300 disabled:cursor-not-allowed transition-colors px-4 py-3 text-mf-milk-300 relative"
-              >
-                <span
-                  className={
-                    isLoading || isApiLoading ? "opacity-0" : "opacity-100"
-                  }
-                >
-                  {isApiLoading ? "Initializing..." : "Unlock"}
-                </span>
-                {(isLoading || isApiLoading) && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-5 h-5 border-2 border-mf-milk-300 border-t-transparent rounded-full animate-spin" />
-                  </div>
-                )}
-              </button>
-            </div>
-          </form>
-        </div>
+          <div className="fixed bottom-20 w-54">
+            <button
+              type="submit"
+              disabled={password.length < 3}
+              className="w-full text-sm rounded-lg bg-mf-safety-300 hover:bg-mf-safety-400 disabled:bg-mf-ash-300 disabled:cursor-not-allowed transition-colors px-4 py-3 text-mf-milk-300"
+            >
+              Unlock
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

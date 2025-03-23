@@ -3,15 +3,13 @@ import { Lock } from "lucide-react";
 
 import KeyringService from "../services/KeyringService";
 import MessageService from "../services/MessageService";
+import { useLock } from "../contexts/LockContext";
 import ConnectedSites from "../components/settings/ConnectedSites";
 import taoxyzLogo from "../../../public/icons/taoxyz.png";
 
-interface SettingsProps {
-  setIsLocked: (isLocked: boolean) => void;
-}
-
-const Settings = ({ setIsLocked }: SettingsProps) => {
+const Settings = () => {
   const navigate = useNavigate();
+  const { setIsLocked } = useLock();
 
   const handleLock = async () => {
     KeyringService.lockAll();

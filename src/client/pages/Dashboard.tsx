@@ -4,6 +4,7 @@ import { Copy } from "lucide-react";
 
 import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 import { useNotification } from "../contexts/NotificationContext";
+import { useWallet } from "../contexts/WalletContext";
 import WalletSelection from "../components/WalletSelection";
 import Portfolio from "../components/dashboard/Portfolio";
 import type { StakeTransaction } from "../../types/client";
@@ -20,25 +21,27 @@ export const Dashboard = () => {
   const navigate = useNavigate();
   const { showNotification } = useNotification();
   const { api } = usePolkadotApi();
-  const [address, setAddress] = useState<string | null>(null);
+  const { currentAddress } = useWallet();
   const [balance, setBalance] = useState<string | null>(null);
   const [stakes, setStakes] = useState<StakeTransaction[]>([]);
   const [copied, setCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (api) {
-      void handleAddressChange();
+    if (api && currentAddress) {
+      console.log("useEffect triggered with address:", currentAddress);
+      void fetchData(currentAddress);
     }
-  }, [api]);
+  }, [api, currentAddress]);
 
-  const fetchData = async (currentAddress: string): Promise<void> => {
-    if (!api || !currentAddress) return;
+  const fetchData = async (address: string): Promise<void> => {
+    if (!api || !address) return;
+    console.log("Fetching data for address:", address);
     setIsLoading(true);
 
     const [balanceResult, stakeResult] = await Promise.all([
-      api.getBalance(currentAddress),
-      api.getStake(currentAddress),
+      api.getBalance(address),
+      api.getStake(address),
     ]);
 
     if (!balanceResult) {
@@ -68,15 +71,9 @@ export const Dashboard = () => {
     setIsLoading(false);
   };
 
-  const handleAddressChange = async (): Promise<void> => {
-    const result = await chrome.storage.local.get("currentAddress");
-    setAddress(result.currentAddress as string);
-    await fetchData(result.currentAddress as string);
-  };
-
   const handleCopy = async (): Promise<void> => {
-    if (!address) return;
-    await navigator.clipboard.writeText(address);
+    if (!currentAddress) return;
+    await navigator.clipboard.writeText(currentAddress);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
     showNotification({
@@ -88,7 +85,12 @@ export const Dashboard = () => {
   return (
     <div className="flex flex-col items-center min-h-screen">
       <div className="w-74 [&>*]:w-full">
-        <WalletSelection onSelect={handleAddressChange} />
+        <WalletSelection
+          onSelect={() => {
+            console.log("Called function", currentAddress);
+            fetchData(currentAddress as string);
+          }}
+        />
         <div className="rounded-sm bg-mf-ash-500 p-3 flex justify-between mt-4">
           <div className="flex items-center justify-center space-x-2">
             <img src={taoxyz} alt="Taoxyz Logo" className="w-4 h-4" />
@@ -98,7 +100,9 @@ export const Dashboard = () => {
           </div>
           <div className="flex items-center text-xs text-mf-milk-300 space-x-1">
             <p>
-              {!address ? "" : `${address.slice(0, 6)}...${address.slice(-6)}`}
+              {!currentAddress
+                ? ""
+                : `${currentAddress.slice(0, 6)}...${currentAddress.slice(-6)}`}
             </p>
             <button
               onClick={() => void handleCopy()}
@@ -140,8 +144,10 @@ export const Dashboard = () => {
           <h2 className="text-xs text-mf-sybil-500 font-semibold">Portfolio</h2>
           <Portfolio
             stakes={stakes}
-            address={address as string}
-            onRefresh={() => fetchData(address as string)}
+            address={currentAddress as string}
+            onRefresh={() =>
+              currentAddress ? fetchData(currentAddress) : Promise.resolve()
+            }
           />
           {isLoading && (
             <div className="flex justify-center items-center h-16">

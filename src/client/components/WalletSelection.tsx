@@ -4,14 +4,16 @@ import { WalletCards, ChevronDown, ChevronUp, Plus, Trash } from "lucide-react";
 import type { KeyringPair } from "@polkadot/keyring/types";
 
 import KeyringService from "../services/KeyringService";
+import { useWallet } from "../contexts/WalletContext";
 
 interface WalletSelectionProps {
-  onSelect: () => void;
+  onSelect?: () => void;
 }
 
 // TODO: Error handling if there are no wallets - shouldn't even display the component
 const WalletSelection = ({ onSelect }: WalletSelectionProps) => {
   const navigate = useNavigate();
+  const { currentAddress, setCurrentAddress } = useWallet();
   const [wallet, setWallet] = useState<KeyringPair | null>(null);
   const [wallets, setWallets] = useState<KeyringPair[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -19,11 +21,11 @@ const WalletSelection = ({ onSelect }: WalletSelectionProps) => {
   useEffect(() => {
     getWallet();
     getWallets();
-  }, []);
+  }, [currentAddress]);
 
   const getWallet = async (): Promise<void> => {
-    const result = await chrome.storage.local.get("currentAddress");
-    const wallet = await KeyringService.getWallet(result.currentAddress);
+    if (!currentAddress) return;
+    const wallet = await KeyringService.getWallet(currentAddress);
     if (wallet instanceof Error) {
       setWallet(null);
     } else {
@@ -38,11 +40,9 @@ const WalletSelection = ({ onSelect }: WalletSelectionProps) => {
 
   const handleSelectWallet = async (wallet: KeyringPair): Promise<void> => {
     setWallet(wallet);
+    await setCurrentAddress(wallet.address);
     setIsExpanded(false);
-    await chrome.storage.local.set({
-      currentAddress: wallet.address,
-    });
-    onSelect();
+    onSelect?.();
   };
 
   const handleDeleteWallet = async (

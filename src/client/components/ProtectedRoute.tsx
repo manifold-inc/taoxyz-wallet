@@ -1,26 +1,19 @@
 import { Navigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+
+import { useWallet } from "../contexts/WalletContext";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const [hasAccess, setHasAccess] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const { currentAddress } = useWallet();
 
-  useEffect(() => {
-    const checkAccess = async () => {
-      const result = await chrome.storage.local.get("currentAddress");
-      setHasAccess(!!result.currentAddress);
-      setLoading(false);
-    };
-    checkAccess();
-  }, []);
+  if (!currentAddress) {
+    return <Navigate to="/create" replace />;
+  }
 
-  if (loading) return null;
-  if (!hasAccess) return <Navigate to="/" replace />;
-  return children;
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;
