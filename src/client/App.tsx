@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 
 import { PolkadotApiProvider } from "./contexts/PolkadotApiContext";
-import { LockProvider } from "./contexts/LockContext";
+import { LockProvider, useLock } from "./contexts/LockContext";
 import { WalletProvider } from "./contexts/WalletContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
 import MessageService from "./services/MessageService";
@@ -25,8 +25,9 @@ import Sign from "./components/popups/Sign";
 import Navigation from "./components/Navigation";
 
 const Content = () => {
-  const publicRoutes = ["/connect", "/sign", "/add-wallet", "/welcome"];
+  const { isLocked } = useLock();
   const location = useLocation();
+  const publicRoutes = ["/connect", "/sign", "/add-wallet", "/welcome"];
 
   return (
     <div className="flex flex-col items-center min-h-screen">
@@ -87,7 +88,7 @@ const Content = () => {
           }
         />
       </Routes>
-      {!publicRoutes.includes(location.pathname) && <Navigation />}
+      {!publicRoutes.includes(location.pathname) && !isLocked && <Navigation />}
     </div>
   );
 };

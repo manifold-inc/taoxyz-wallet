@@ -9,6 +9,7 @@ import WalletSelection from "./WalletSelection";
 import { NotificationType } from "../../types/client";
 import taoxyzLogo from "../../../public/icons/taoxyz.svg";
 
+// TODO: Handle edge case when user forgets password and has only one account
 const LockScreen = () => {
   const { setIsLocked } = useLock();
   const { showNotification } = useNotification();
@@ -76,7 +77,7 @@ const LockScreen = () => {
 
           <form
             onSubmit={handleUnlock}
-            className="flex flex-col items-center justify-center w-full mt-8"
+            className="flex flex-col items-center justify-center [&>*]:w-full mt-8"
             autoComplete="off"
           >
             <input
@@ -99,9 +100,7 @@ const LockScreen = () => {
             />
             <div className="h-8">
               {error && (
-                <p className="mt-2 text-xs text-left text-mf-safety-500">
-                  {error}
-                </p>
+                <p className="mt-2 text-xs text-mf-safety-500">{error}</p>
               )}
             </div>
 
