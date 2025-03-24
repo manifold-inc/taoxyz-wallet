@@ -84,6 +84,8 @@ const Stake = () => {
       setSelectedValidator(validator);
       setSelectedStake(stake);
       setStep(Step.CONFIRM_STAKE);
+      console.log("restoreStake", result.storeStakeTransaction);
+      console.log("states", selectedSubnet, selectedValidator, selectedStake);
     }
   };
 
@@ -227,6 +229,7 @@ const Stake = () => {
           return null;
         return (
           <ConfirmStake
+            stake={selectedStake}
             subnet={selectedSubnet}
             validator={selectedValidator}
             address={currentAddress as string}

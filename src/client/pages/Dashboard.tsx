@@ -27,8 +27,12 @@ export const Dashboard = () => {
   const [copied, setCopied] = useState(false);
   const prevFetchRef = useRef<string | null>(null);
 
-  const fetchData = async (address: string): Promise<void> => {
-    if (!api || !address || address === prevFetchRef.current) return;
+  const fetchData = async (
+    address: string,
+    forceRefresh = false
+  ): Promise<void> => {
+    if (!api || !address || (!forceRefresh && address === prevFetchRef.current))
+      return;
     prevFetchRef.current = address;
 
     const [balanceResult, stakeResult] = await Promise.all([
@@ -148,7 +152,9 @@ export const Dashboard = () => {
             stakes={stakes}
             address={currentAddress as string}
             onRefresh={() =>
-              currentAddress ? fetchData(currentAddress) : Promise.resolve()
+              currentAddress
+                ? fetchData(currentAddress, true)
+                : Promise.resolve()
             }
           />
         </div>

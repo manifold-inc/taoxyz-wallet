@@ -8,9 +8,14 @@ import KeyringService from "../../services/KeyringService";
 import MessageService from "../../services/MessageService";
 import { calculateSlippage } from "../../../utils/utils";
 import { NotificationType } from "../../../types/client";
-import type { Subnet, Validator } from "../../../types/client";
+import type {
+  Subnet,
+  Validator,
+  StakeTransaction,
+} from "../../../types/client";
 
 interface ConfirmStakeProps {
+  stake: StakeTransaction;
   subnet: Subnet;
   validator: Validator;
   address: string;
@@ -19,6 +24,7 @@ interface ConfirmStakeProps {
 
 // TODO: Display correct slippage and receive amount
 export const ConfirmStake = ({
+  stake,
   subnet,
   validator,
   address,
@@ -31,12 +37,17 @@ export const ConfirmStake = ({
   const [amount, setAmount] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const taoAmount = parseFloat(amount) || 0;
-  const totalCost = taoAmount;
+  const alphaAmount = parseFloat(amount) || 0;
+  const totalCost = alphaAmount;
   const slippageCalculation = useMemo(() => {
-    if (!subnet.alphaIn || !subnet.taoIn || !taoAmount) return null;
-    return calculateSlippage(subnet.alphaIn, subnet.taoIn, taoAmount, true);
-  }, [subnet.alphaIn, subnet.taoIn, taoAmount]);
+    if (!alphaAmount) return null;
+    console.log("ConfirmStake calculating slippage with:", {
+      currentStake: stake.tokens,
+      moveAmount: alphaAmount,
+      isMovingStake: true,
+    });
+    return calculateSlippage(stake.tokens, 0, alphaAmount, true);
+  }, [alphaAmount, stake.tokens]);
 
   const restoreTransaction = async () => {
     const result = await chrome.storage.local.get("storeStakeTransaction");
@@ -61,6 +72,7 @@ export const ConfirmStake = ({
     if (await KeyringService.isLocked(address)) {
       await chrome.storage.local.set({
         storeStakeTransaction: {
+          stake,
           subnet,
           validator,
           amount,
@@ -75,7 +87,7 @@ export const ConfirmStake = ({
   };
 
   const handleSubmit = async () => {
-    if (!api || !amount || isSubmitting || taoAmount > parseFloat(balance))
+    if (!api || !amount || isSubmitting || alphaAmount > parseFloat(balance))
       return;
     setIsSubmitting(true);
     const isAuthorized = await handleAuth();
@@ -87,11 +99,13 @@ export const ConfirmStake = ({
         type: NotificationType.Pending,
       });
 
-      const result = await api.createStake({
+      const result = await api.moveStake({
         address,
-        subnetId: subnet.id,
-        validatorHotkey: validator.hotkey,
-        amount: taoAmount,
+        fromHotkey: stake.validatorHotkey,
+        toHotkey: validator.hotkey,
+        fromSubnetId: stake.subnetId,
+        toSubnetId: subnet.id,
+        amount: alphaAmount,
       });
 
       showNotification({
@@ -161,18 +175,18 @@ export const ConfirmStake = ({
           <p className="ml-4 mt-2 text-mf-sybil-500">Balance: {balance}α</p>
         </div>
 
-        {taoAmount > 0 && slippageCalculation && (
+        {alphaAmount > 0 && slippageCalculation && (
           <div className="rounded-sm bg-mf-ash-500 p-4 space-y-4 text-xs mt-2">
             <div className="flex justify-between items-center">
               <span className="text-mf-silver-300">Your Price:</span>
               <span className="text-mf-sybil-500">
-                {taoAmount.toFixed(4)} α
+                {alphaAmount.toFixed(4)} α
               </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-mf-silver-300">You Receive:</span>
               <span className="text-mf-sybil-500">
-                {slippageCalculation.tokens.toFixed(6)} α
+                {slippageCalculation.tokens.toFixed(4)} α
               </span>
             </div>
             <div className="flex justify-between items-center">
