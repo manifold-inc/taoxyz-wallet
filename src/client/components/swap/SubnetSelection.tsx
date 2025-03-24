@@ -9,7 +9,6 @@ interface SubnetSelectionProps {
   onSelect: (subnet: Subnet) => void;
 }
 
-// TODO: Don't show root for swap, but show it for stake
 const SubnetSelection = ({
   subnets,
   selectedSubnet,
@@ -31,41 +30,41 @@ const SubnetSelection = ({
       {subnets.map((subnet) => {
         const isSelected = selectedSubnet?.id === subnet.id;
         return (
-          <div
+          <button
             key={subnet.id}
-            className={`w-full rounded-lg ${
-              isSelected
-                ? "bg-mf-ash-400 ring-1 ring-mf-safety-300"
-                : "bg-mf-ash-500 hover:bg-mf-ash-400"
-            } transition-colors px-3 py-2 cursor-pointer`}
             onClick={() => onSelect(subnet)}
+            className={`w-full text-left rounded-sm p-2 ${
+              isSelected
+                ? "bg-mf-ash-300 ring-1 ring-mf-safety-500"
+                : "bg-mf-ash-500 hover:bg-mf-ash-300"
+            } transition-colors space-y-1`}
           >
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <h3 className="text-xs font-semibold text-mf-silver-300">
-                  {subnet.name}
-                </h3>
-                <p className="text-xs text-mf-silver-300">
-                  Price: {subnet.price?.toFixed(4)} τ
-                </p>
+            <div className="flex items-center justify-between text-sm">
+              <h3 className="font-semibold text-mf-silver-300 flex items-center">
+                <span className="truncate w-16">{subnet.name}</span>
                 {isSelected && (
-                  <p
-                    className={`text-xs ${
+                  <span
+                    className={`ml-2 text-xs ${
                       !isLoadingValidators && validators.length > 0
-                        ? "text-mf-sybil-300"
-                        : "text-mf-safety-300"
+                        ? "text-mf-sybil-500"
+                        : "text-mf-safety-500"
                     }`}
                   >
                     {isLoadingValidators
-                      ? "Getting validators..."
+                      ? "Loading..."
                       : validators.length === 0
-                      ? "No validators available"
-                      : `${validators.length} validators available`}
-                  </p>
+                      ? "0 Validators"
+                      : `${validators.length} Validators`}
+                  </span>
                 )}
-              </div>
+              </h3>
+              <span className="text-mf-safety-500">α</span>
             </div>
-          </div>
+            <div className="flex items-center justify-between text-sm text-mf-milk-300">
+              <p>Subnet {subnet.id}</p>
+              <p>{subnet.price?.toFixed(4) ?? "-"}</p>
+            </div>
+          </button>
         );
       })}
     </div>

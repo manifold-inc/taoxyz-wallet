@@ -215,7 +215,7 @@ export const Swap = () => {
             className={`transition-colors ${
               step === Step.SELECT_SUBNET
                 ? "text-mf-ash-300 cursor-not-allowed"
-                : "text-mf-silver-300 hover:text-mf-milk-300"
+                : "text-mf-milk-300"
             }`}
           >
             <ArrowLeftToLine className="w-6 h-6" />
@@ -239,7 +239,7 @@ export const Swap = () => {
               (step === Step.SELECT_VALIDATOR && !selectedValidator) ||
               step === Step.CONFIRM_SWAP
                 ? "text-mf-ash-300 cursor-not-allowed"
-                : "text-mf-safety-300 hover:text-mf-milk-300"
+                : "text-mf-milk-300"
             }`}
           >
             <ArrowRightToLine className="w-6 h-6" />
@@ -255,7 +255,7 @@ export const Swap = () => {
           </p>
         </div>
 
-        <div className="rounded-sm bg-mf-ash-500 max-h-[calc(100vh-310px)] overflow-y-auto mt-8">
+        <div className="rounded-sm max-h-[calc(100vh-310px)] overflow-y-auto mt-8">
           {renderStep()}
         </div>
       </div>
