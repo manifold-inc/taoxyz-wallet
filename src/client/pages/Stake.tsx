@@ -86,9 +86,9 @@ const Stake = () => {
     }
   };
 
-  const getBalance = (): string | null => {
-    if (!selectedStake) return null;
-    const balance = selectedStake.tokens / 1e9;
+  const getBalance = (stake: StakeTransaction): string | null => {
+    if (!stake) return null;
+    const balance = stake.tokens / 1e9;
     return balance.toFixed(4);
   };
 
@@ -165,11 +165,12 @@ const Stake = () => {
         return;
       }
       setSelectedStake(stake);
-      setBalance(getBalance());
+      const balance = getBalance(stake);
+      setBalance(balance);
       await getSubnet(stake.subnetId);
       await getValidators(stake.subnetId, stake.validatorHotkey);
     },
-    [selectedStake, api, getBalance]
+    [selectedStake, api]
   );
 
   const handleValidatorSelect = (validator: Validator) => {
@@ -242,6 +243,7 @@ const Stake = () => {
     if (location.state?.selectedStake) {
       const stake = location.state.selectedStake;
       await getValidators(stake.subnetId, stake.validatorHotkey);
+      setBalance(getBalance(stake));
     }
   };
 
