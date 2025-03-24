@@ -37,7 +37,7 @@ const ExpandedStake = ({
     }, 2000);
   };
 
-  // TODO: Error handle if subnet price is not available also prefetch subnet when user hovers?
+  // TODO: Remove chart if subnet price is not available show notification
   return (
     <div className="mt-2">
       <div className="rounded-sm p-3 border border-mf-safety-500 bg-mf-ash-500">

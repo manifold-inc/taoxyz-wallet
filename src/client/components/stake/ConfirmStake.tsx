@@ -1,33 +1,34 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { usePolkadotApi } from "../../contexts/PolkadotApiContext";
 import { useNotification } from "../../contexts/NotificationContext";
+import { useLock } from "../../contexts/LockContext";
 import KeyringService from "../../services/KeyringService";
 import MessageService from "../../services/MessageService";
 import { calculateSlippage } from "../../../utils/utils";
-import type { Subnet, Validator } from "../../../types/client";
 import { NotificationType } from "../../../types/client";
+import type { Subnet, Validator } from "../../../types/client";
 
 interface ConfirmStakeProps {
   subnet: Subnet;
   validator: Validator;
-  balance: string;
   address: string;
+  balance: string;
 }
 
 export const ConfirmStake = ({
   subnet,
   validator,
-  balance,
   address,
+  balance,
 }: ConfirmStakeProps) => {
   const navigate = useNavigate();
   const { showNotification } = useNotification();
-  const { api, isLoading } = usePolkadotApi();
+  const { setIsLocked } = useLock();
+  const { api } = usePolkadotApi();
   const [amount, setAmount] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const taoAmount = parseFloat(amount) || 0;
   const totalCost = taoAmount;
@@ -36,17 +37,14 @@ export const ConfirmStake = ({
     return calculateSlippage(subnet.alphaIn, subnet.taoIn, taoAmount, true);
   }, [subnet.alphaIn, subnet.taoIn, taoAmount]);
 
-  useEffect(() => {
-    const initAmount = async () => {
-      const result = await chrome.storage.local.get("storeStakeTransaction");
-      if (result.storeStakeTransaction) {
-        const { amount } = result.storeStakeTransaction;
-        await chrome.storage.local.remove("storeStakeTransaction");
-        setAmount(amount);
-      }
-    };
-    initAmount();
-  }, []);
+  const restoreTransaction = async () => {
+    const result = await chrome.storage.local.get("storeStakeTransaction");
+    if (result.storeStakeTransaction) {
+      const { amount } = result.storeStakeTransaction;
+      await chrome.storage.local.remove("storeStakeTransaction");
+      setAmount(amount);
+    }
+  };
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -67,7 +65,7 @@ export const ConfirmStake = ({
           amount,
         },
       });
-      await chrome.storage.local.set({ walletLocked: true });
+      setIsLocked(true);
       MessageService.sendWalletsLocked();
       setIsSubmitting(false);
       return;
@@ -78,9 +76,8 @@ export const ConfirmStake = ({
     if (!api || !amount || isSubmitting || taoAmount > parseFloat(balance))
       return;
     setIsSubmitting(true);
-    setError(null);
     showNotification({
-      message: "Submitting transaction...",
+      message: "Submitting Transaction...",
       type: NotificationType.Pending,
     });
 
@@ -94,7 +91,7 @@ export const ConfirmStake = ({
       });
 
       showNotification({
-        message: "Transaction successful!",
+        message: "Transaction Successful!",
         type: NotificationType.Success,
         hash: result,
       });
@@ -104,25 +101,21 @@ export const ConfirmStake = ({
       }, 2000);
 
       setIsSubmitting(false);
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to stake";
-      setError(errorMessage);
+    } catch {
       showNotification({
-        message: errorMessage,
+        message: "Failed to Stake",
         type: NotificationType.Error,
       });
       setIsSubmitting(false);
     }
   };
 
-  if (isLoading) {
-    return <div>Loading API...</div>;
-  }
+  const init = async () => {
+    if (!api) return;
+    await restoreTransaction();
+  };
 
-  if (!api) {
-    return <div>API not initialized</div>;
-  }
+  void init();
 
   return (
     <div className="space-y-3 p-2">
@@ -197,12 +190,6 @@ export const ConfirmStake = ({
           </div>
         )}
 
-        {error && (
-          <div className="p-3 bg-mf-ash-300 text-mf-sybil-300 text-xs rounded-lg">
-            {error}
-          </div>
-        )}
-
         <button
           onClick={handleSubmit}
           disabled={
@@ -227,5 +214,3 @@ export const ConfirmStake = ({
     </div>
   );
 };
-
-export default ConfirmStake;
