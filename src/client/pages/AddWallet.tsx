@@ -51,10 +51,8 @@ const AddWallet = () => {
     setMode("display-mnemonic");
   };
 
-  // TODO: Possibly set currentAddress on the mnemonic display page
+  // TODO: Edge case where user closes extension after creating wallet
   const handleContinue = async (wallet: KeyringPair): Promise<void> => {
-    console.log("handleContinue", wallet);
-    console.log(wallet?.address);
     if (!wallet) {
       showNotification({
         type: NotificationType.Error,
@@ -63,9 +61,9 @@ const AddWallet = () => {
       return;
     }
 
-    setCurrentAddress(wallet.address);
-    setIsLocked(false);
-    MessageService.sendClearLockTimer();
+    await setCurrentAddress(wallet.address);
+    await setIsLocked(false);
+    await MessageService.sendClearLockTimer();
     navigate("/dashboard");
   };
 

@@ -11,7 +11,7 @@ const sendErrorResponse = (
   sendResponse({ success: false, error, details });
 };
 
-// Potentially sendMessage() Refactor
+// TODO: Potentially sendMessage() Refactor
 
 const MessageService = {
   async sendWalletsLocked() {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Copy } from "lucide-react";
 
@@ -25,18 +25,11 @@ export const Dashboard = () => {
   const [balance, setBalance] = useState<string | null>(null);
   const [stakes, setStakes] = useState<StakeTransaction[]>([]);
   const [copied, setCopied] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    if (api && currentAddress) {
-      void fetchData(currentAddress);
-    }
-  }, [api, currentAddress]);
+  const prevFetchRef = useRef<string | null>(null);
 
   const fetchData = async (address: string): Promise<void> => {
-    if (!api || !address) return;
-    console.log("Fetching data for address:", address);
-    setIsLoading(true);
+    if (!api || !address || address === prevFetchRef.current) return;
+    prevFetchRef.current = address;
 
     const [balanceResult, stakeResult] = await Promise.all([
       api.getBalance(address),
@@ -46,18 +39,19 @@ export const Dashboard = () => {
     if (!balanceResult) {
       showNotification({
         type: NotificationType.Error,
-        message: "Failed to get balance",
+        message: "Failed to Fetch Balance",
       });
       return;
     }
-    setBalance(balanceResult);
+
     if (!stakeResult) {
       showNotification({
         type: NotificationType.Error,
-        message: "Failed to get stake",
+        message: "Failed to Fetch Stakes",
       });
       return;
     }
+
     const formattedStakes = (stakeResult as unknown as StakeResponse[]).map(
       (stake) => ({
         subnetId: stake.netuid,
@@ -65,9 +59,9 @@ export const Dashboard = () => {
         tokens: stake.stake,
       })
     );
-    setStakes(formattedStakes);
 
-    setIsLoading(false);
+    setBalance(balanceResult);
+    setStakes(formattedStakes);
   };
 
   const handleCopy = async (): Promise<void> => {
@@ -77,24 +71,29 @@ export const Dashboard = () => {
     setTimeout(() => setCopied(false), 2000);
     showNotification({
       type: NotificationType.Success,
-      message: "Address copied",
+      message: "Address Copied",
     });
   };
+
+  if (api && currentAddress && currentAddress !== prevFetchRef.current) {
+    void fetchData(currentAddress);
+  }
 
   return (
     <div className="flex flex-col items-center min-h-screen">
       <div className="w-74 [&>*]:w-full">
         <WalletSelection
           onSelect={() => {
-            console.log("Called function", currentAddress);
-            fetchData(currentAddress as string);
+            if (currentAddress) {
+              void fetchData(currentAddress);
+            }
           }}
         />
         <div className="rounded-sm bg-mf-ash-500 p-3 flex justify-between mt-4">
           <div className="flex items-center justify-center space-x-2">
             <img src={taoxyz} alt="Taoxyz Logo" className="w-4 h-4" />
             <span className="text-xl text-mf-milk-300 font-semibold">
-              {!api ? "Loading..." : Number(balance).toFixed(4)}
+              {!api ? "Loading" : Number(balance).toFixed(4)}
             </span>
           </div>
           <div className="flex items-center text-xs text-mf-milk-300 space-x-1">
@@ -148,11 +147,6 @@ export const Dashboard = () => {
               currentAddress ? fetchData(currentAddress) : Promise.resolve()
             }
           />
-          {isLoading && (
-            <div className="flex justify-center items-center h-16">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-mf-milk-300" />
-            </div>
-          )}
         </div>
       </div>
     </div>

@@ -13,7 +13,7 @@ interface WalletSelectionProps {
 
 // TODO: Error handling if there are no wallets - shouldn't even display the component
 // TODO: When the user clicks off of it should collapse
-// TODO: If there are no wallets, no chevron in lock screen
+// TODO: If there are no wallets, no chevron
 const WalletSelection = ({ onSelect }: WalletSelectionProps) => {
   const navigate = useNavigate();
   const { isLocked } = useLock();

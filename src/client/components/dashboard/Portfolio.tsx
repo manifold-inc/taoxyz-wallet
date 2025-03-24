@@ -44,8 +44,8 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
 
   const handleAuth = async (): Promise<void> => {
     if (await KeyringService.isLocked(address)) {
-      setIsLocked(true);
-      MessageService.sendWalletsLocked();
+      await setIsLocked(true);
+      await MessageService.sendWalletsLocked();
       return;
     }
   };
