@@ -59,8 +59,6 @@ export const Swap = () => {
   const [isLoadingValidators, setIsLoadingValidators] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // TODO: Handle edge case if user swaps accounts mid transaction - clear local storage on swap accounts
-  // TODO: Restore the implementation in portfolio
   const restoreSwap = async () => {
     const result = await chrome.storage.local.get("storeSwapTransaction");
     if (result.storeSwapTransaction) {

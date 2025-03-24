@@ -27,6 +27,12 @@ const WalletSelection = ({ onSelect }: WalletSelectionProps) => {
     getWallets();
   }, [currentAddress]);
 
+  const clearSavedTransactions = async (): Promise<void> => {
+    await chrome.storage.local.remove("storeStakeTransaction");
+    await chrome.storage.local.remove("storeSwapTransaction");
+    await chrome.storage.local.remove("storeTransferTransaction");
+  };
+
   const getWallet = async (): Promise<void> => {
     if (!currentAddress) return;
     const wallet = await KeyringService.getWallet(currentAddress);
@@ -45,6 +51,7 @@ const WalletSelection = ({ onSelect }: WalletSelectionProps) => {
   const handleSelectWallet = async (wallet: KeyringPair): Promise<void> => {
     setWallet(wallet);
     await setCurrentAddress(wallet.address);
+    await clearSavedTransactions();
     setIsExpanded(false);
     onSelect?.();
   };
@@ -56,6 +63,7 @@ const WalletSelection = ({ onSelect }: WalletSelectionProps) => {
     event.stopPropagation();
     await KeyringService.deleteWallet(wallet.address);
     await getWallets();
+    await clearSavedTransactions();
   };
 
   return (

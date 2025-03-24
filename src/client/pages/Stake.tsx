@@ -75,7 +75,6 @@ const Stake = () => {
   const [isLoadingValidators, setIsLoadingValidators] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // TODO: Retest this
   const restoreStake = async () => {
     const result = await chrome.storage.local.get("storeStakeTransaction");
     if (result.storeStakeTransaction) {
@@ -84,8 +83,6 @@ const Stake = () => {
       setSelectedValidator(validator);
       setSelectedStake(stake);
       setStep(Step.CONFIRM_STAKE);
-      console.log("restoreStake", result.storeStakeTransaction);
-      console.log("states", selectedSubnet, selectedValidator, selectedStake);
     }
   };
 
