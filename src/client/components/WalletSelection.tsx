@@ -11,9 +11,6 @@ interface WalletSelectionProps {
   onSelect?: () => void;
 }
 
-// TODO: Error handling if there are no wallets - shouldn't even display the component
-// TODO: When the user clicks off of it should collapse
-// TODO: If there are no wallets, no chevron
 const WalletSelection = ({ onSelect }: WalletSelectionProps) => {
   const navigate = useNavigate();
   const { isLocked } = useLock();
@@ -68,7 +65,10 @@ const WalletSelection = ({ onSelect }: WalletSelectionProps) => {
 
   return (
     <div className="bg-mf-ash-500 mt-4 relative">
-      <div className="flex items-center justify-between p-2">
+      <div
+        className="flex items-center justify-between p-2 hover:bg-mf-night-500 transition-colors"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
         {wallet && (
           <>
             <div className="flex items-center gap-3">
@@ -82,13 +82,13 @@ const WalletSelection = ({ onSelect }: WalletSelectionProps) => {
                 </span>
               </div>
             </div>
-            <button onClick={() => setIsExpanded(!isExpanded)} className="p-1">
+            <div className="p-1">
               {isExpanded ? (
                 <ChevronUp className="w-6 h-6 text-mf-silver-300 p-1" />
               ) : (
                 <ChevronDown className="w-6 h-6 text-mf-silver-300 p-1" />
               )}
-            </button>
+            </div>
           </>
         )}
       </div>
