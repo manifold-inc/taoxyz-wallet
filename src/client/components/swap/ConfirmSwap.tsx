@@ -68,7 +68,7 @@ export const ConfirmSwap = ({
         },
       });
       await chrome.storage.local.set({ walletLocked: true });
-      MessageService.sendWalletsLockedMessage();
+      MessageService.sendWalletsLocked();
       setIsSubmitting(false);
       return;
     }

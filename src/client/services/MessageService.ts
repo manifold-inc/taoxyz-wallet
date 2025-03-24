@@ -14,7 +14,7 @@ const sendErrorResponse = (
 // Potentially sendMessage() Refactor
 
 const MessageService = {
-  async sendWalletsLockedMessage() {
+  async sendWalletsLocked() {
     await chrome.runtime.sendMessage({
       type: MESSAGE_TYPES.WALLETS_LOCKED,
     });
