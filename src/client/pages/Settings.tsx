@@ -11,7 +11,7 @@ const Settings = () => {
 
   const handleLock = async () => {
     KeyringService.lockAll();
-    MessageService.sendWalletsLocked();
+    await MessageService.sendWalletsLocked();
     await setIsLocked(true);
   };
 

@@ -67,23 +67,26 @@ export const ConfirmStake = ({
         },
       });
       setIsLocked(true);
-      MessageService.sendWalletsLocked();
+      await MessageService.sendWalletsLocked();
       setIsSubmitting(false);
-      return;
+      return false;
     }
+    return true;
   };
 
   const handleSubmit = async () => {
     if (!api || !amount || isSubmitting || taoAmount > parseFloat(balance))
       return;
     setIsSubmitting(true);
-    showNotification({
-      message: "Submitting Transaction...",
-      type: NotificationType.Pending,
-    });
+    const isAuthorized = await handleAuth();
+    if (!isAuthorized) return;
 
     try {
-      await handleAuth();
+      showNotification({
+        message: "Submitting Transaction...",
+        type: NotificationType.Pending,
+      });
+
       const result = await api.createStake({
         address,
         subnetId: subnet.id,
