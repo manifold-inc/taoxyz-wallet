@@ -31,7 +31,6 @@ export const ConfirmSwap = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const taoAmount = parseFloat(amount) || 0;
-  const totalCost = taoAmount;
   const slippageCalculation = useMemo(() => {
     if (!subnet.alphaIn || !subnet.taoIn || !taoAmount) return null;
     return calculateSlippage(subnet.alphaIn, subnet.taoIn, taoAmount, true);
@@ -192,10 +191,10 @@ export const ConfirmSwap = ({
           <button
             onClick={handleSubmit}
             disabled={
-              !amount || isSubmitting || !api || totalCost > parseFloat(balance)
+              !amount || isSubmitting || !api || taoAmount > parseFloat(balance)
             }
             className={`w-44 text-xs flex items-center justify-center rounded-sm transition-colors p-2 mt-4 text-semibold border-2 border-mf-sybil-500 ${
-              !amount || isSubmitting || !api || totalCost > parseFloat(balance)
+              !amount || isSubmitting || !api || taoAmount > parseFloat(balance)
                 ? "bg-mf-night-500 text-mf-milk-300 cursor-not-allowed"
                 : "bg-mf-sybil-500 text-mf-night-500"
             }`}

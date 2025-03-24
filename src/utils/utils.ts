@@ -14,24 +14,6 @@ export const calculateSlippage = (
   amount: number,
   toAlpha: boolean
 ): Slippage => {
-  // Moving stake between validators in the same subnet
-  if (toAlpha && taoIn === 0) {
-    const actualAmount = alphaIn - (alphaIn * alphaIn) / (alphaIn + amount);
-    const slippagePercentage = ((amount - actualAmount) / amount) * 100;
-
-    console.log("Stake movement calculation:", {
-      currentStake: alphaIn,
-      moveAmount: amount,
-      actualAmount,
-      slippagePercentage,
-    });
-
-    return {
-      tokens: actualAmount,
-      slippagePercentage,
-    };
-  }
-
   // Regular token swap calculations
   const amountRao = amount * 1e9;
   if (toAlpha) {

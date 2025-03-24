@@ -38,16 +38,11 @@ export const ConfirmStake = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const alphaAmount = parseFloat(amount) || 0;
-  const totalCost = alphaAmount;
+  // TODO: Figure out slippage calculation for stake movement
   const slippageCalculation = useMemo(() => {
-    if (!alphaAmount) return null;
-    console.log("ConfirmStake calculating slippage with:", {
-      currentStake: stake.tokens,
-      moveAmount: alphaAmount,
-      isMovingStake: true,
-    });
-    return calculateSlippage(stake.tokens, 0, alphaAmount, true);
-  }, [alphaAmount, stake.tokens]);
+    if (!alphaAmount || !subnet.taoIn || !stake.tokens) return null;
+    return calculateSlippage(stake.tokens, subnet.taoIn, alphaAmount, true);
+  }, [alphaAmount, stake.tokens, subnet.taoIn]);
 
   const restoreTransaction = async () => {
     const result = await chrome.storage.local.get("storeStakeTransaction");
@@ -208,10 +203,16 @@ export const ConfirmStake = ({
           <button
             onClick={handleSubmit}
             disabled={
-              !amount || isSubmitting || !api || totalCost > parseFloat(balance)
+              !amount ||
+              isSubmitting ||
+              !api ||
+              alphaAmount > parseFloat(balance)
             }
             className={`w-44 text-xs flex items-center justify-center rounded-sm transition-colors p-2 mt-4 text-semibold border-2 border-mf-sybil-500 ${
-              !amount || isSubmitting || !api || totalCost > parseFloat(balance)
+              !amount ||
+              isSubmitting ||
+              !api ||
+              alphaAmount > parseFloat(balance)
                 ? "bg-mf-night-500 text-mf-milk-300 cursor-not-allowed"
                 : "bg-mf-sybil-500 text-mf-night-500"
             }`}
