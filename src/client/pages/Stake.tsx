@@ -50,6 +50,7 @@ interface StakeResponse {
   stake: number;
 }
 
+// TODO: Validators are not ready when coming from portfolio
 const Stake = () => {
   const { showNotification } = useNotification();
   const { api } = usePolkadotApi();
@@ -98,11 +99,15 @@ const Stake = () => {
     try {
       const stakes = await api.getStake(address);
       if (stakes) {
-        const formattedStakes = (stakes as unknown as StakeResponse[]).map(
-          (stake) => ({
-            subnetId: stake.netuid,
-            validatorHotkey: stake.hotkey,
-            tokens: stake.stake,
+        const formattedStakes = await Promise.all(
+          (stakes as unknown as StakeResponse[]).map(async (stake) => {
+            const subnet = await api.getSubnet(stake.netuid);
+            return {
+              subnetId: stake.netuid,
+              subnetName: subnet?.name ?? `Subnet ${stake.netuid}`,
+              validatorHotkey: stake.hotkey,
+              tokens: stake.stake,
+            };
           })
         );
         setStakes(formattedStakes);

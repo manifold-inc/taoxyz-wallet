@@ -52,11 +52,15 @@ export const Dashboard = () => {
       return;
     }
 
-    const formattedStakes = (stakeResult as unknown as StakeResponse[]).map(
-      (stake) => ({
-        subnetId: stake.netuid,
-        validatorHotkey: stake.hotkey,
-        tokens: stake.stake,
+    const formattedStakes = await Promise.all(
+      (stakeResult as unknown as StakeResponse[]).map(async (stake) => {
+        const subnet = await api.getSubnet(stake.netuid);
+        return {
+          subnetId: stake.netuid,
+          subnetName: subnet?.name ?? `Subnet ${stake.netuid}`,
+          validatorHotkey: stake.hotkey,
+          tokens: stake.stake,
+        };
       })
     );
 

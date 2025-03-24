@@ -36,6 +36,7 @@ export interface Validator {
 
 export interface StakeTransaction {
   subnetId: number;
+  subnetName: string;
   validatorHotkey: string;
   tokens: number;
 }
