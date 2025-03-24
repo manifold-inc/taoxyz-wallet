@@ -1,11 +1,14 @@
-import { useState, useEffect, useCallback } from "react";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { useState, useCallback } from "react";
+import { ArrowLeftToLine, ArrowRightToLine } from "lucide-react";
 import taoxyzLogo from "../../../public/icons/taoxyz.svg";
 
+import { usePolkadotApi } from "../contexts/PolkadotApiContext";
+import { useNotification } from "../contexts/NotificationContext";
+import { useWallet } from "../contexts/WalletContext";
 import SubnetSelection from "../components/swap/SubnetSelection";
 import ValidatorSelection from "../components/swap/ValidatorSelection";
 import ConfirmSwap from "../components/swap/ConfirmSwap";
-import { usePolkadotApi } from "../contexts/PolkadotApiContext";
+import { NotificationType } from "../../types/client";
 import type { Subnet, Validator } from "../../types/client";
 
 enum Step {
@@ -17,11 +20,11 @@ enum Step {
 const getStepSubtext = (step: Step) => {
   switch (step) {
     case Step.SELECT_SUBNET:
-      return "Select a subnet";
+      return "Select Subnet";
     case Step.SELECT_VALIDATOR:
-      return "Select a validator";
+      return "Select Validator";
     case Step.CONFIRM_SWAP:
-      return "Review and confirm swap";
+      return "Confirm Swap";
     default:
       return "";
   }
@@ -41,76 +44,73 @@ const getStepTitle = (step: Step) => {
 };
 
 export const Swap = () => {
+  const { showNotification } = useNotification();
   const { api } = usePolkadotApi();
-  const [address, setAddress] = useState("");
+  const { currentAddress } = useWallet();
   const [step, setStep] = useState<Step>(Step.SELECT_SUBNET);
-  const [subnets, setSubnets] = useState<Subnet[]>([]);
+  const [subnets, setSubnets] = useState<Subnet[] | null>(null);
   const [selectedSubnet, setSelectedSubnet] = useState<Subnet | null>(null);
   const [validators, setValidators] = useState<Validator[]>([]);
-  const [balance, setBalance] = useState<string>("");
+  const [balance, setBalance] = useState<string | null>(null);
   const [selectedValidator, setSelectedValidator] = useState<Validator | null>(
     null
   );
   const [isLoadingSubnets, setIsLoadingSubnets] = useState(true);
   const [isLoadingValidators, setIsLoadingValidators] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  useEffect(() => {
-    if (!api) return;
-    getSubnets();
-    getBalance();
-    const initAddress = async () => {
-      const result = await chrome.storage.local.get("currentAddress");
-      setAddress(result.currentAddress as string);
-    };
-    initAddress();
-  }, [api]);
-
-  useEffect(() => {
-    const initSwap = async () => {
-      const result = await chrome.storage.local.get("storeSwapTransaction");
-      if (result.storeSwapTransaction) {
-        const { subnet, validator } = result.storeSwapTransaction;
-        setStep(Step.CONFIRM_SWAP);
-        setSelectedSubnet(subnet);
-        setSelectedValidator(validator);
-      }
-    };
-    initSwap();
-  }, []);
+  // TODO: Handle edge case if user swaps accounts mid transaction
+  const restoreSwap = async () => {
+    const result = await chrome.storage.local.get("storeSwapTransaction");
+    if (result.storeSwapTransaction) {
+      const { subnet, validator } = result.storeSwapTransaction;
+      setStep(Step.CONFIRM_SWAP);
+      setSelectedSubnet(subnet);
+      setSelectedValidator(validator);
+    }
+  };
 
   const getSubnets = async () => {
     if (!api) return;
+    setIsLoadingSubnets(true);
     try {
-      setIsLoadingSubnets(true);
       const subnets = await api.getSubnets();
       setSubnets(subnets ?? []);
-    } catch (error) {
-      console.error("Error loading subnets:", error);
+    } catch {
+      showNotification({
+        type: NotificationType.Error,
+        message: "Failed to Load Subnets",
+      });
     } finally {
       setIsLoadingSubnets(false);
     }
   };
 
   const getValidators = async (subnetId: number) => {
+    setIsLoadingValidators(true);
     try {
-      setIsLoadingValidators(true);
-      setValidators([]);
       const validators = await api?.getValidators(subnetId);
       setValidators(validators ?? []);
-    } catch (error) {
-      console.error("Error loading validators:", error);
+    } catch {
+      showNotification({
+        type: NotificationType.Error,
+        message: "Failed to Load Validators",
+      });
     } finally {
       setIsLoadingValidators(false);
     }
   };
 
   const getBalance = async () => {
-    if (!api || !address) return;
+    if (!api || !currentAddress) return;
     try {
-      const balance = await api.getBalance(address);
+      const balance = await api.getBalance(currentAddress);
       setBalance(balance);
-    } catch (error) {
-      console.error("Error fetching balance:", error);
+    } catch {
+      showNotification({
+        type: NotificationType.Error,
+        message: "Failed to Fetch Balance",
+      });
     }
   };
 
@@ -124,7 +124,7 @@ export const Swap = () => {
       setSelectedSubnet(subnet);
       await getValidators(subnet.id);
     },
-    [selectedSubnet, api]
+    [selectedSubnet, api, getValidators]
   );
 
   const handleValidatorSelect = (validator: Validator) => {
@@ -160,7 +160,7 @@ export const Swap = () => {
       case Step.SELECT_SUBNET:
         return (
           <SubnetSelection
-            subnets={subnets}
+            subnets={subnets ?? []}
             onSelect={handleSubnetSelect}
             isLoadingSubnets={isLoadingSubnets}
             selectedSubnet={selectedSubnet}
@@ -184,72 +184,79 @@ export const Swap = () => {
           <ConfirmSwap
             subnet={selectedSubnet}
             validator={selectedValidator}
-            balance={balance}
-            address={address}
+            balance={balance as string}
+            address={currentAddress as string}
           />
         );
     }
   };
 
+  const init = async () => {
+    if (isInitialized) return;
+    if (!api || !currentAddress) return;
+    setIsInitialized(true);
+    await restoreSwap();
+    if (api && currentAddress && subnets === null) {
+      await Promise.all([getSubnets(), getBalance()]);
+    }
+  };
+
+  if (!isInitialized) {
+    void init();
+  }
+
   return (
-    <div className="flex flex-col items-center min-h-screen">
-      <div className="h-20" />
-      <div className="flex flex-col items-center flex-1">
-        <div className="w-80 grid grid-cols-3 mb-8">
-          <div className="flex items-center justify-start pl-4">
-            <button
-              onClick={handleBack}
-              disabled={step === Step.SELECT_SUBNET}
-              className={`transition-colors ${
-                step === Step.SELECT_SUBNET
-                  ? "text-mf-ash-300 cursor-not-allowed"
-                  : "text-mf-silver-300 hover:text-mf-milk-300"
-              }`}
-            >
-              <ArrowLeft className="w-6 h-6" />
-            </button>
-          </div>
-          <div className="flex justify-center">
-            <img src={taoxyzLogo} alt="Taoxyz Logo" className="w-16 h-16" />
-          </div>
-          <div className="flex items-center justify-end pr-4">
-            <button
-              onClick={handleNext}
-              disabled={
-                (step === Step.SELECT_SUBNET &&
-                  (!selectedSubnet || validators.length === 0)) ||
-                (step === Step.SELECT_VALIDATOR && !selectedValidator) ||
-                step === Step.CONFIRM_SWAP
-              }
-              className={`transition-colors ${
-                (step === Step.SELECT_SUBNET &&
-                  (!selectedSubnet || validators.length === 0)) ||
-                (step === Step.SELECT_VALIDATOR && !selectedValidator) ||
-                step === Step.CONFIRM_SWAP
-                  ? "text-mf-ash-300 cursor-not-allowed"
-                  : "text-mf-safety-300 hover:text-mf-milk-300"
-              }`}
-            >
-              <ArrowRight className="w-6 h-6" />
-            </button>
-          </div>
+    <div className="flex flex-col items-center w-76 [&>*]:w-full">
+      <div className="grid grid-cols-3 mt-12">
+        <div className="flex items-center justify-start">
+          <button
+            onClick={handleBack}
+            disabled={step === Step.SELECT_SUBNET}
+            className={`transition-colors ${
+              step === Step.SELECT_SUBNET
+                ? "text-mf-ash-300 cursor-not-allowed"
+                : "text-mf-milk-300"
+            }`}
+          >
+            <ArrowLeftToLine className="w-6 h-6" />
+          </button>
+        </div>
+        <div className="flex items-center justify-center">
+          <img src={taoxyzLogo} alt="Taoxyz Logo" className="w-16 h-16" />
+        </div>
+        <div className="flex items-center justify-end">
+          <button
+            onClick={handleNext}
+            disabled={
+              (step === Step.SELECT_SUBNET &&
+                (!selectedSubnet || validators.length === 0)) ||
+              (step === Step.SELECT_VALIDATOR && !selectedValidator) ||
+              step === Step.CONFIRM_SWAP
+            }
+            className={`transition-colors ${
+              (step === Step.SELECT_SUBNET &&
+                (!selectedSubnet || validators.length === 0)) ||
+              (step === Step.SELECT_VALIDATOR && !selectedValidator) ||
+              step === Step.CONFIRM_SWAP
+                ? "text-mf-ash-300 cursor-not-allowed"
+                : "text-mf-milk-300"
+            }`}
+          >
+            <ArrowRightToLine className="w-6 h-6" />
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-8">
+        <div className="text-center">
+          <h1 className="text-lg text-mf-milk-300">{getStepTitle(step)}</h1>
+          <p className="text-xs text-mf-sybil-500 mt-1">
+            {getStepSubtext(step)}
+          </p>
         </div>
 
-        <div className="w-full max-w-md">
-          <div className="text-center mb-4">
-            <h1 className="text-lg font-semibold text-mf-silver-300">
-              {getStepTitle(step)}
-            </h1>
-            <p className="text-xs text-mf-silver-300 mt-1">
-              {getStepSubtext(step)}
-            </p>
-          </div>
-
-          <div className="w-80">
-            <div className="w-full rounded-lg bg-mf-ash-500 max-h-[calc(100vh-310px)] overflow-y-auto">
-              {renderStep()}
-            </div>
-          </div>
+        <div className="rounded-sm max-h-[calc(100vh-310px)] overflow-y-auto mt-8">
+          {renderStep()}
         </div>
       </div>
     </div>

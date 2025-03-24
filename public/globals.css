@@ -34,6 +34,10 @@ body {
   background-color: var(--color-mf-night-500);
 }
 
+input {
+  outline: none;
+}
+
 #root {
   width: 360px;
   min-height: 600px;

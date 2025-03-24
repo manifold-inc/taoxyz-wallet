@@ -3,23 +3,21 @@ import type { Subnet, Validator } from "../../../types/client";
 interface ValidatorSelectionProps {
   subnet: Subnet;
   validators: Validator[];
-  onSelect: (validator: Validator) => void;
   selectedValidator: Validator | null;
+  onSelect: (validator: Validator) => void;
 }
 
 const ValidatorSelection = ({
   validators,
-  onSelect,
   selectedValidator,
+  onSelect,
 }: ValidatorSelectionProps) => {
   if (validators.length === 0) {
     return (
       <div className="p-2">
-        <div className="w-full rounded-lg bg-mf-ash-500 px-3 py-4 ring-1 ring-mf-safety-300">
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <p className="text-xs text-mf-safety-300">No validators found</p>
-            </div>
+        <div className="w-full rounded-lg bg-mf-ash-500 px-3 py-4 ring-1 ring-mf-safety-500">
+          <div className="flex items-center justify-between flex-1">
+            <p className="text-xs text-mf-safety-500">No Validators Found</p>
           </div>
         </div>
       </div>
@@ -31,26 +29,24 @@ const ValidatorSelection = ({
       {validators.map((validator) => {
         const isSelected = selectedValidator?.hotkey === validator.hotkey;
         return (
-          <div
+          <button
             key={validator.hotkey}
-            className={`w-full rounded-lg ${
+            className={`w-full text-left rounded-sm p-2 ${
               isSelected
-                ? "bg-mf-ash-400 ring-1 ring-mf-safety-300"
-                : "bg-mf-ash-500 hover:bg-mf-ash-400"
-            } transition-colors px-3 py-2 cursor-pointer`}
+                ? "bg-mf-ash-300 border-2 border-mf-safety-500"
+                : "bg-mf-ash-500 hover:bg-mf-ash-300"
+            } transition-colors space-y-1`}
             onClick={() => onSelect(validator)}
           >
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <h3 className="text-xs font-semibold text-mf-milk-300">
-                  Validator {validator.index}
-                </h3>
-                <p className="text-xs text-mf-silver-300">
-                  {validator.hotkey.slice(0, 8)}...{validator.hotkey.slice(-8)}
-                </p>
-              </div>
+            <div className="flex items-center justify-between text-sm text-mf-silver-300 font-semibold">
+              <h3>Validator {validator.index}</h3>
             </div>
-          </div>
+            <div className="flex items-center justify-between text-xs text-mf-milk-300">
+              <p>
+                {validator.hotkey.slice(0, 6)}...{validator.hotkey.slice(-6)}
+              </p>
+            </div>
+          </button>
         );
       })}
     </div>
