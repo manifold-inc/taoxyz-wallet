@@ -2,11 +2,11 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { KeyringPair } from "@polkadot/keyring/types";
 
-import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 import MessageService from "../services/MessageService";
-import MnemonicDisplay from "../components/create/Mnemonic";
+import { useNotification } from "../contexts/NotificationContext";
+import MnemonicDisplay from "../components/create/MnemonicDisplay";
 import CreateForm from "../components/create/CreateForm";
-import Notification from "../components/Notification";
+import { NotificationType } from "../../types/client";
 import taoxyz from "../../../public/icons/taoxyz.svg";
 
 interface CreateProps {
@@ -15,11 +15,9 @@ interface CreateProps {
 
 export const Create = ({ setIsLocked }: CreateProps) => {
   const navigate = useNavigate();
-  const { isLoading } = usePolkadotApi();
+  const { showNotification } = useNotification();
   const [wallet, setWallet] = useState<KeyringPair | null>(null);
   const [mnemonic, setMnemonic] = useState<string>("");
-  const [notification, setNotification] = useState<string | null>(null);
-  const [showNotification, setShowNotification] = useState(false);
   const [showOptions, setShowOptions] = useState(true);
 
   const handleSuccess = async (
@@ -31,12 +29,11 @@ export const Create = ({ setIsLocked }: CreateProps) => {
   };
 
   const handleContinue = async (): Promise<void> => {
-    setNotification(null);
-    setShowNotification(false);
-
     if (!wallet) {
-      setNotification("Could not find wallet");
-      setShowNotification(true);
+      showNotification({
+        type: NotificationType.Error,
+        message: "Could not find wallet",
+      });
       return;
     }
     await chrome.storage.local.set({
@@ -50,30 +47,24 @@ export const Create = ({ setIsLocked }: CreateProps) => {
 
   return (
     <div className="flex flex-col items-center min-h-screen">
-      <Notification
-        message={notification as string}
-        show={showNotification}
-        onDismiss={() => setShowNotification(false)}
-      />
       <div className="flex flex-col items-center flex-1">
         <img src={taoxyz} alt="Taoxyz Logo" className="w-16 h-16 mt-24" />
 
-        {/* Could abstract this out */}
         {showOptions ? (
           <div className="flex flex-col items-center mt-4 space-y-4">
-            <h1 className="text-lg text-mf-milk-500">Add New Wallet</h1>
+            <h1 className="text-lg text-mf-milk-500">Add Wallet</h1>
             <div className="flex flex-col space-y-3">
               <button
                 onClick={() => setShowOptions(false)}
                 className="w-44 rounded-xs text-sm text-mf-night-500 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 transition-colors p-1.5"
               >
-                Create Wallet
+                Create
               </button>
               <button
                 onClick={() => navigate("/import")}
                 className="w-44 rounded-xs text-sm text-mf-safety-500 bg-mf-night-500 border-mf-night-500 hover:border-mf-safety-500 border-2 transition-colors p-1.5"
               >
-                Import Wallet
+                Import
               </button>
             </div>
           </div>
@@ -85,23 +76,14 @@ export const Create = ({ setIsLocked }: CreateProps) => {
             <CreateForm onSuccess={handleSuccess} />
           </div>
         ) : (
-          <>
-            <div className="text-center mb-6">
-              <h1 className="text-xl font-semibold text-mf-silver-300">
-                Recovery Phrase
-              </h1>
+          <div>
+            <div className="text-center text-lg text-mf-milk-500 mt-4">
+              <h1>Recovery Phrase</h1>
             </div>
-            <div className="flex flex-col flex-1 w-full">
-              <MnemonicDisplay
-                mnemonic={mnemonic}
-                onContinue={handleContinue}
-                isLoading={isLoading}
-              />
-            </div>
-          </>
+            <MnemonicDisplay mnemonic={mnemonic} onContinue={handleContinue} />
+          </div>
         )}
       </div>
-      {!mnemonic && !showOptions && <div className="h-20" />}
     </div>
   );
 };

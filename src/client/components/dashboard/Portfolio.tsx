@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { usePolkadotApi } from "../../contexts/PolkadotApiContext";
+import { useNotification } from "../../contexts/NotificationContext";
 import KeyringService from "../../services/KeyringService";
 import MessageService from "../../services/MessageService";
-import TransactionNotification from "../TransactionNotification";
 import StakeOverview from "../portfolio/StakeOverview";
 import ExpandedStake from "../portfolio/ExpandedStake";
 import type { StakeTransaction, Subnet } from "../../../types/client";
+import { NotificationType } from "../../../types/client";
 
 interface PortfolioProps {
   stakes: StakeTransaction[];
@@ -15,9 +16,9 @@ interface PortfolioProps {
   onRefresh: () => Promise<void>;
 }
 
-// TODO: Replace error handling with notification and refine spinner
 const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
   const navigate = useNavigate();
+  const { showNotification } = useNotification();
   const { api } = usePolkadotApi();
   const [selectedStake, setSelectedStake] = useState<StakeTransaction | null>(
     null
@@ -25,11 +26,6 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
   const [selectedSubnet, setSelectedSubnet] = useState<Subnet | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [txStatus, setTxStatus] = useState<{
-    type: "pending" | "success" | "error";
-    message: string;
-    hash?: string;
-  } | null>(null);
 
   useEffect(() => {
     init();
@@ -88,9 +84,9 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
   const handleSwap = async (): Promise<void> => {
     if (!api || !selectedStake) return;
     setError(null);
-    setTxStatus({
-      type: "pending",
+    showNotification({
       message: "Submitting transaction...",
+      type: NotificationType.Pending,
     });
 
     try {
@@ -103,9 +99,9 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
         amount: convertedStake,
       });
 
-      setTxStatus({
-        type: "success",
+      showNotification({
         message: "Transaction finalized!",
+        type: NotificationType.Success,
         hash: result,
       });
 
@@ -117,9 +113,9 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to swap";
       setError(errorMessage);
-      setTxStatus({
-        type: "error",
+      showNotification({
         message: errorMessage,
+        type: NotificationType.Error,
       });
     }
   };
@@ -177,14 +173,6 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
         <div className="mt-2 flex justify-center items-center h-16">
           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-mf-milk-300" />
         </div>
-      )}
-
-      {txStatus && (
-        <TransactionNotification
-          type={txStatus.type}
-          message={txStatus.message}
-          hash={txStatus.hash}
-        />
       )}
     </div>
   );

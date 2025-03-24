@@ -2,11 +2,12 @@ import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { usePolkadotApi } from "../../contexts/PolkadotApiContext";
+import { useNotification } from "../../contexts/NotificationContext";
 import KeyringService from "../../services/KeyringService";
 import MessageService from "../../services/MessageService";
-import TransactionNotification from "../TransactionNotification";
 import { calculateSlippage } from "../../../utils/utils";
 import type { Subnet, Validator } from "../../../types/client";
+import { NotificationType } from "../../../types/client";
 
 interface ConfirmSwapProps {
   subnet: Subnet;
@@ -22,15 +23,11 @@ export const ConfirmSwap = ({
   address,
 }: ConfirmSwapProps) => {
   const navigate = useNavigate();
+  const { showNotification } = useNotification();
   const { api, isLoading } = usePolkadotApi();
   const [amount, setAmount] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [txStatus, setTxStatus] = useState<{
-    type: "pending" | "success" | "error";
-    message: string;
-    hash?: string;
-  } | null>(null);
 
   const taoAmount = parseFloat(amount) || 0;
   const totalCost = taoAmount;
@@ -82,9 +79,9 @@ export const ConfirmSwap = ({
       return;
     setIsSubmitting(true);
     setError(null);
-    setTxStatus({
-      type: "pending",
+    showNotification({
       message: "Submitting transaction...",
+      type: NotificationType.Pending,
     });
 
     try {
@@ -96,9 +93,9 @@ export const ConfirmSwap = ({
         amount: taoAmount,
       });
 
-      setTxStatus({
-        type: "success",
+      showNotification({
         message: "Transaction successful!",
+        type: NotificationType.Success,
         hash: result,
       });
 
@@ -111,9 +108,9 @@ export const ConfirmSwap = ({
       const errorMessage =
         error instanceof Error ? error.message : "Failed to swap";
       setError(errorMessage);
-      setTxStatus({
-        type: "error",
+      showNotification({
         message: errorMessage,
+        type: NotificationType.Error,
       });
       setIsSubmitting(false);
     }
@@ -227,13 +224,6 @@ export const ConfirmSwap = ({
           )}
         </button>
       </div>
-      {txStatus && (
-        <TransactionNotification
-          type={txStatus.type}
-          message={txStatus.message}
-          hash={txStatus.hash}
-        />
-      )}
     </div>
   );
 };

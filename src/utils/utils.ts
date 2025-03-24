@@ -4,6 +4,10 @@ export const generateId = (): number => {
   return Math.floor(Math.random() * 1000000);
 };
 
+export const taoToRao = (amount: number): bigint => {
+  return BigInt(Math.floor(amount * 1e9));
+};
+
 export const calculateSlippage = (
   alphaIn: number,
   taoIn: number,

@@ -1,40 +1,40 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { usePolkadotApi } from "../../contexts/PolkadotApiContext";
+import { useNotification } from "../../contexts/NotificationContext";
 import KeyringService from "../../services/KeyringService";
 import MessageService from "../../services/MessageService";
-import TransactionNotification from "../TransactionNotification";
-import { usePolkadotApi } from "../../contexts/PolkadotApiContext";
 import { calculateSlippage } from "../../../utils/utils";
-import type {
-  Validator,
-  Subnet,
-  StakeTransaction,
-} from "../../../types/client";
+import type { Subnet, Validator } from "../../../types/client";
+import { NotificationType } from "../../../types/client";
 
 interface ConfirmStakeProps {
-  stake: StakeTransaction;
-  validator: Validator;
   subnet: Subnet;
+  validator: Validator;
+  balance: string;
   address: string;
 }
 
-const ConfirmStake = ({
-  stake,
-  validator,
+export const ConfirmStake = ({
   subnet,
+  validator,
+  balance,
   address,
 }: ConfirmStakeProps) => {
-  const { api, isLoading } = usePolkadotApi();
   const navigate = useNavigate();
+  const { showNotification } = useNotification();
+  const { api, isLoading } = usePolkadotApi();
   const [amount, setAmount] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [txStatus, setTxStatus] = useState<{
-    type: "pending" | "success" | "error";
-    message: string;
-    hash?: string;
-  } | null>(null);
+
+  const taoAmount = parseFloat(amount) || 0;
+  const totalCost = taoAmount;
+  const slippageCalculation = useMemo(() => {
+    if (!subnet.alphaIn || !subnet.taoIn || !taoAmount) return null;
+    return calculateSlippage(subnet.alphaIn, subnet.taoIn, taoAmount, true);
+  }, [subnet.alphaIn, subnet.taoIn, taoAmount]);
 
   useEffect(() => {
     const initAmount = async () => {
@@ -48,16 +48,9 @@ const ConfirmStake = ({
     initAmount();
   }, []);
 
-  const alphaAmount = parseFloat(amount) || 0;
-  const slippageCalculation = useMemo(() => {
-    if (!subnet.alphaIn || !alphaAmount) return null;
-    return calculateSlippage(subnet.alphaIn, 0, alphaAmount, true);
-  }, [subnet.alphaIn, alphaAmount]);
-
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value === "" || /^\d*\.?\d*$/.test(value)) {
-      // Validate amount
       const numValue = parseFloat(value);
       if (value === "" || (!isNaN(numValue) && numValue >= 0)) {
         setAmount(value);
@@ -71,7 +64,6 @@ const ConfirmStake = ({
         storeStakeTransaction: {
           subnet,
           validator,
-          stake,
           amount,
         },
       });
@@ -83,29 +75,27 @@ const ConfirmStake = ({
   };
 
   const handleSubmit = async () => {
-    if (!api || !amount || isSubmitting || alphaAmount > stake.tokens / 1e9)
+    if (!api || !amount || isSubmitting || taoAmount > parseFloat(balance))
       return;
     setIsSubmitting(true);
     setError(null);
-    setTxStatus({
-      type: "pending",
+    showNotification({
       message: "Submitting transaction...",
+      type: NotificationType.Pending,
     });
 
     try {
       await handleAuth();
-      const result = await api.moveStake({
+      const result = await api.createStake({
         address,
-        fromHotkey: stake.validatorHotkey,
-        toHotkey: validator.hotkey,
-        fromSubnetId: stake.subnetId,
-        toSubnetId: stake.subnetId,
-        amount: alphaAmount,
+        subnetId: subnet.id,
+        validatorHotkey: validator.hotkey,
+        amount: taoAmount,
       });
 
-      setTxStatus({
-        type: "success",
+      showNotification({
         message: "Transaction successful!",
+        type: NotificationType.Success,
         hash: result,
       });
 
@@ -116,72 +106,80 @@ const ConfirmStake = ({
       setIsSubmitting(false);
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Failed to move stake";
+        error instanceof Error ? error.message : "Failed to stake";
       setError(errorMessage);
-      setTxStatus({
-        type: "error",
+      showNotification({
         message: errorMessage,
+        type: NotificationType.Error,
       });
       setIsSubmitting(false);
     }
   };
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-16">
-        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-mf-milk-300" />
-      </div>
-    );
+    return <div>Loading API...</div>;
+  }
+
+  if (!api) {
+    return <div>API not initialized</div>;
   }
 
   return (
     <div className="space-y-3 p-2">
       <div className="rounded-lg bg-mf-ash-500 p-2 space-y-2">
         <div>
-          <p className="text-xs text-mf-silver-300">Current Validator</p>
-          <p className="text-xs text-mf-milk-300">
-            {stake.validatorHotkey.slice(0, 8)}...
-            {stake.validatorHotkey.slice(-8)}
+          <p className="text-xs text-mf-silver-300">Selected Subnet</p>
+          <p className="text-xs font-semibold text-mf-milk-300">
+            {subnet.name}
           </p>
         </div>
 
         <div>
-          <p className="text-xs text-mf-silver-300">New Validator</p>
+          <p className="text-xs text-mf-silver-300">Token Price</p>
+          <p className="text-xs font-semibold text-mf-milk-300">
+            {subnet.price} τ
+          </p>
+        </div>
+
+        <div>
+          <p className="text-xs text-mf-silver-300">Selected Validator</p>
           <p className="text-xs text-mf-milk-300">
             {validator.hotkey.slice(0, 8)}...{validator.hotkey.slice(-8)}
-          </p>
-        </div>
-
-        <div>
-          <p className="text-xs text-mf-silver-300">Available to Move</p>
-          <p className="text-xs font-semibold text-mf-milk-300">
-            {(stake.tokens / 1e9).toFixed(4)} α
           </p>
         </div>
       </div>
 
       <div className="space-y-2">
         <div>
-          <p className="text-xs text-mf-silver-300 mb-1">Amount to Move (α)</p>
+          <p className="text-xs text-mf-silver-300 mb-1">Stake Amount (τ)</p>
           <input
             type="text"
             inputMode="decimal"
             value={amount}
             onChange={handleAmountChange}
-            placeholder="Enter amount to move"
+            placeholder="Enter amount to stake"
             className="w-full px-3 py-2 text-xs rounded-lg bg-mf-ash-300 text-mf-milk-300 border-none focus:outline-none focus:ring-2 focus:ring-mf-safety-300"
           />
+          <p className="mt-1 text-xs text-mf-silver-300">
+            Available Balance: {balance} τ
+          </p>
         </div>
 
-        {alphaAmount > 0 && slippageCalculation && (
+        {taoAmount > 0 && slippageCalculation && (
           <div className="rounded-lg bg-mf-ash-300 p-3 space-y-2">
             <h3 className="text-xs font-medium text-mf-milk-300">
               Transaction Summary
             </h3>
             <div className="flex justify-between items-center">
-              <span className="text-xs text-mf-silver-300">Moving:</span>
+              <span className="text-xs text-mf-silver-300">You pay:</span>
               <span className="text-xs font-medium text-mf-milk-300">
-                {alphaAmount.toFixed(4)} α
+                {taoAmount.toFixed(4)} τ
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-mf-silver-300">You receive:</span>
+              <span className="text-xs font-medium text-mf-milk-300">
+                {slippageCalculation.tokens.toFixed(6)} α
               </span>
             </div>
             <div className="flex justify-between items-center">
@@ -200,16 +198,18 @@ const ConfirmStake = ({
         )}
 
         {error && (
-          <div className="p-3 bg-mf-ash-300 text-mf-safety-500 text-xs rounded-lg">
+          <div className="p-3 bg-mf-ash-300 text-mf-sybil-300 text-xs rounded-lg">
             {error}
           </div>
         )}
 
         <button
           onClick={handleSubmit}
-          disabled={isSubmitting || alphaAmount > stake.tokens / 1e9}
+          disabled={
+            !amount || isSubmitting || !api || totalCost > parseFloat(balance)
+          }
           className={`w-full text-xs flex items-center justify-center rounded-lg transition-colors px-4 py-3 mt-5 text-semibold text-mf-ash-300 ${
-            isSubmitting || alphaAmount > stake.tokens / 1e9 || !amount || !api
+            !amount || isSubmitting || !api || totalCost > parseFloat(balance)
               ? "bg-mf-ash-400 text-mf-milk-300 cursor-not-allowed"
               : "bg-mf-sybil-700 hover:bg-mf-sybil-500 active:bg-mf-sybil-700"
           }`}
@@ -220,17 +220,10 @@ const ConfirmStake = ({
               <span>Pending...</span>
             </div>
           ) : (
-            "Move Stake"
+            "Confirm"
           )}
         </button>
       </div>
-      {txStatus && (
-        <TransactionNotification
-          type={txStatus.type}
-          message={txStatus.message}
-          hash={txStatus.hash}
-        />
-      )}
     </div>
   );
 };

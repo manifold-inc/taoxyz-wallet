@@ -1,6 +1,9 @@
 import { ApiPromise, WsProvider } from "@polkadot/api";
+import type { EventRecord, ExtrinsicStatus } from "@polkadot/types/interfaces";
+import type { ISubmittableResult } from "@polkadot/types/types";
 
 import KeyringService from "../services/KeyringService";
+import { taoToRao } from "../../utils/utils";
 
 import type {
   BittensorSubnet,
@@ -24,13 +27,6 @@ class PolkadotApi {
     this.initPromise = this.initialize();
   }
 
-  public static getInstance(): PolkadotApi {
-    if (!PolkadotApi.instance) {
-      PolkadotApi.instance = new PolkadotApi();
-    }
-    return PolkadotApi.instance;
-  }
-
   private async initialize(): Promise<void> {
     console.log("[Client] Starting initialization");
     const provider = new WsProvider(this.endpoints.test);
@@ -47,6 +43,13 @@ class PolkadotApi {
     }
   }
 
+  public static getInstance(): PolkadotApi {
+    if (!PolkadotApi.instance) {
+      PolkadotApi.instance = new PolkadotApi();
+    }
+    return PolkadotApi.instance;
+  }
+
   public async getApi(): Promise<ApiPromise> {
     await this.initPromise;
     if (!this.api) {
@@ -56,7 +59,6 @@ class PolkadotApi {
     return this.api;
   }
 
-  // If trying to transfer entire balance use transferAll - possible implementation
   public async transfer({
     fromAddress,
     toAddress,
@@ -76,22 +78,14 @@ class PolkadotApi {
       if (wallet.isLocked) throw new Error("Wallet is locked");
       if (!toWallet.data.free) throw new Error("Invalid recipient address");
 
-      const amountInRao = BigInt(Math.floor(amount * 1e9));
+      const raoAmount = taoToRao(amount);
       return new Promise((resolve, reject) => {
         let unsubscribe: (() => void) | undefined;
 
         this.api.tx.balances
-          .transferAllowDeath(toAddress, amountInRao)
-          .signAndSend(wallet, ({ status, dispatchError, events = [] }) => {
-            // Only log state transitions
-            if (status.isReady) console.log("[Transaction] Ready to broadcast");
-            if (status.isBroadcast)
-              console.log("[Transaction] Broadcasted to network");
-            if (status.isInBlock)
-              console.log(
-                "[Transaction] Included in block:",
-                status.asInBlock.toHex()
-              );
+          .transferAllowDeath(toAddress, raoAmount)
+          .signAndSend(wallet, {}, (result: ISubmittableResult) => {
+            const { status, dispatchError, events = [] } = result;
 
             if (dispatchError) {
               if (unsubscribe) unsubscribe();
@@ -99,32 +93,20 @@ class PolkadotApi {
               return;
             }
 
-            if (status.isInBlock) {
-              // Check if the transaction was successful
-              const extrinsicFailed = events.find(
-                ({ event }) => event.method === "ExtrinsicFailed"
+            if (unsubscribe) {
+              this.handleTransactionStatus(
+                status,
+                events,
+                unsubscribe,
+                resolve,
+                reject
               );
-              if (extrinsicFailed) {
-                if (unsubscribe) unsubscribe();
-                reject(new Error("Transaction failed"));
-                return;
-              }
-
-              const extrinsicSuccess = events.find(
-                ({ event }) => event.method === "ExtrinsicSuccess"
-              );
-              if (extrinsicSuccess) {
-                console.log("[Transaction] Successful");
-                if (unsubscribe) unsubscribe();
-                resolve(status.asInBlock.toHex());
-              }
             }
           })
           .then((unsub) => {
             unsubscribe = unsub;
           })
           .catch((error) => {
-            console.error("[Transaction] Error:", error);
             if (unsubscribe) unsubscribe();
             reject(error);
           });
@@ -146,7 +128,6 @@ class PolkadotApi {
     }
   }
 
-  // TODO: Relook at error handling for api
   public async createStake({
     address,
     subnetId,
@@ -162,22 +143,14 @@ class PolkadotApi {
       const wallet = await KeyringService.getWallet(address);
       if (wallet instanceof Error) throw new Error(wallet.message);
 
-      const amountInRao = BigInt(Math.floor(amount * 1e9));
+      const raoAmount = taoToRao(amount);
       return new Promise((resolve, reject) => {
         let unsubscribe: (() => void) | undefined;
 
         this.api.tx.subtensorModule
-          .addStake(validatorHotkey, subnetId, amountInRao)
-          .signAndSend(wallet, ({ status, dispatchError, events = [] }) => {
-            // Only log state transitions
-            if (status.isReady) console.log("[Transaction] Ready to broadcast");
-            if (status.isBroadcast)
-              console.log("[Transaction] Broadcasted to network");
-            if (status.isInBlock)
-              console.log(
-                "[Transaction] Included in block:",
-                status.asInBlock.toHex()
-              );
+          .addStake(validatorHotkey, subnetId, raoAmount)
+          .signAndSend(wallet, {}, (result: ISubmittableResult) => {
+            const { status, dispatchError, events = [] } = result;
 
             if (dispatchError) {
               if (unsubscribe) unsubscribe();
@@ -185,32 +158,20 @@ class PolkadotApi {
               return;
             }
 
-            if (status.isInBlock) {
-              // Check if the transaction was successful
-              const extrinsicFailed = events.find(
-                ({ event }) => event.method === "ExtrinsicFailed"
+            if (unsubscribe) {
+              this.handleTransactionStatus(
+                status,
+                events,
+                unsubscribe,
+                resolve,
+                reject
               );
-              if (extrinsicFailed) {
-                if (unsubscribe) unsubscribe();
-                reject(new Error("Transaction failed"));
-                return;
-              }
-
-              const extrinsicSuccess = events.find(
-                ({ event }) => event.method === "ExtrinsicSuccess"
-              );
-              if (extrinsicSuccess) {
-                console.log("[Transaction] Successful");
-                if (unsubscribe) unsubscribe();
-                resolve(status.asInBlock.toHex());
-              }
             }
           })
           .then((unsub) => {
             unsubscribe = unsub;
           })
           .catch((error) => {
-            console.error("[Transaction] Error:", error);
             if (unsubscribe) unsubscribe();
             reject(error);
           });
@@ -232,31 +193,35 @@ class PolkadotApi {
     subnetId: number;
     amount: number;
   }): Promise<string> {
+    if (!this.api) throw new Error("API not initialized");
+
     try {
       const wallet = await KeyringService.getWallet(address);
       if (wallet instanceof Error) throw new Error(wallet.message);
 
-      const amountInRao = BigInt(Math.floor(amount * 1e9));
+      const raoAmount = taoToRao(amount);
       return new Promise((resolve, reject) => {
         let unsubscribe: (() => void) | undefined;
+
         this.api.tx.subtensorModule
-          .removeStake(validatorHotkey, subnetId, amountInRao)
-          .signAndSend(wallet, ({ status, dispatchError, events = [] }) => {
+          .removeStake(validatorHotkey, subnetId, raoAmount)
+          .signAndSend(wallet, {}, (result: ISubmittableResult) => {
+            const { status, dispatchError, events = [] } = result;
+
             if (dispatchError) {
               if (unsubscribe) unsubscribe();
               reject(new Error(dispatchError.toString()));
-            } else if (status.isInBlock) {
-              // Transaction is in a block
-              events.forEach(({ event: { method } }) => {
-                if (method === "ExtrinsicSuccess") {
-                  // Transaction is successful but not yet finalized
-                  console.log("Transaction in block");
-                }
-              });
-            } else if (status.isFinalized) {
-              // Transaction is finalized
-              if (unsubscribe) unsubscribe();
-              resolve(status.asFinalized.toHex());
+              return;
+            }
+
+            if (unsubscribe) {
+              this.handleTransactionStatus(
+                status,
+                events,
+                unsubscribe,
+                resolve,
+                reject
+              );
             }
           })
           .then((unsub) => {
@@ -292,27 +257,14 @@ class PolkadotApi {
       const wallet = await KeyringService.getWallet(address);
       if (wallet instanceof Error) throw new Error(wallet.message);
 
-      const amountInRao = BigInt(Math.floor(amount * 1e9));
+      const raoAmount = taoToRao(amount);
       return new Promise((resolve, reject) => {
         let unsubscribe: (() => void) | undefined;
+
         this.api.tx.subtensorModule
-          .moveStake(
-            fromHotkey,
-            toHotkey,
-            fromSubnetId,
-            toSubnetId,
-            amountInRao
-          )
-          .signAndSend(wallet, ({ status, dispatchError, events = [] }) => {
-            // Only log state transitions
-            if (status.isReady) console.log("[Transaction] Ready to broadcast");
-            if (status.isBroadcast)
-              console.log("[Transaction] Broadcasted to network");
-            if (status.isInBlock)
-              console.log(
-                "[Transaction] Included in block:",
-                status.asInBlock.toHex()
-              );
+          .moveStake(fromHotkey, toHotkey, fromSubnetId, toSubnetId, raoAmount)
+          .signAndSend(wallet, {}, (result: ISubmittableResult) => {
+            const { status, dispatchError, events = [] } = result;
 
             if (dispatchError) {
               if (unsubscribe) unsubscribe();
@@ -320,31 +272,20 @@ class PolkadotApi {
               return;
             }
 
-            if (status.isInBlock) {
-              const extrinsicFailed = events.find(
-                ({ event }) => event.method === "ExtrinsicFailed"
+            if (unsubscribe) {
+              this.handleTransactionStatus(
+                status,
+                events,
+                unsubscribe,
+                resolve,
+                reject
               );
-              if (extrinsicFailed) {
-                if (unsubscribe) unsubscribe();
-                reject(new Error("Transaction failed"));
-                return;
-              }
-
-              const extrinsicSuccess = events.find(
-                ({ event }) => event.method === "ExtrinsicSuccess"
-              );
-              if (extrinsicSuccess) {
-                console.log("[Transaction] Successful");
-                if (unsubscribe) unsubscribe();
-                resolve(status.asInBlock.toHex());
-              }
             }
           })
           .then((unsub) => {
             unsubscribe = unsub;
           })
           .catch((error) => {
-            console.error("[Transaction] Error:", error);
             if (unsubscribe) unsubscribe();
             reject(error);
           });
@@ -478,6 +419,50 @@ class PolkadotApi {
     } catch (error) {
       console.error("Error in getValidators:", error);
       throw error;
+    }
+  }
+
+  private handleTransactionStatus(
+    status: ExtrinsicStatus,
+    events: EventRecord[],
+    unsubscribe: () => void,
+    resolve: (value: string) => void,
+    reject: (reason: Error) => void
+  ): void {
+    switch (true) {
+      case status.isReady:
+        console.log("[Transaction] Ready to broadcast");
+        break;
+      case status.isBroadcast:
+        console.log("[Transaction] Broadcasted to network");
+        break;
+      case status.isInBlock: {
+        console.log(
+          "[Transaction] Included in block:",
+          status.asInBlock.toHex()
+        );
+
+        // Check for transaction failure
+        const extrinsicFailed = events.find(
+          ({ event }) => event.method === "ExtrinsicFailed"
+        );
+        if (extrinsicFailed) {
+          unsubscribe();
+          reject(new Error("Transaction failed"));
+          return;
+        }
+
+        // Check for transaction success
+        const extrinsicSuccess = events.find(
+          ({ event }) => event.method === "ExtrinsicSuccess"
+        );
+        if (extrinsicSuccess) {
+          console.log("[Transaction] Successful");
+          unsubscribe();
+          resolve(status.asInBlock.toHex());
+        }
+        break;
+      }
     }
   }
 

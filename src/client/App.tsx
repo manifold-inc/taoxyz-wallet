@@ -18,6 +18,7 @@ import Navigation from "./components/Navigation";
 
 import MessageService from "./services/MessageService";
 import { PolkadotApiProvider } from "./contexts/PolkadotApiContext";
+import { NotificationProvider } from "./contexts/NotificationContext";
 
 const Content = ({
   setIsLocked,
@@ -109,15 +110,17 @@ const App = () => {
 
   return (
     <PolkadotApiProvider>
-      <HashRouter>
-        <div>
-          {isLocked && currentAddress ? (
-            <LockScreen setIsLocked={setIsLocked} />
-          ) : (
-            <Content setIsLocked={setIsLocked} />
-          )}
-        </div>
-      </HashRouter>
+      <NotificationProvider>
+        <HashRouter>
+          <div>
+            {isLocked && currentAddress ? (
+              <LockScreen setIsLocked={setIsLocked} />
+            ) : (
+              <Content setIsLocked={setIsLocked} />
+            )}
+          </div>
+        </HashRouter>
+      </NotificationProvider>
     </PolkadotApiProvider>
   );
 };
