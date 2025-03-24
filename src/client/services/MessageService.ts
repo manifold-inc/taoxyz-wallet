@@ -11,10 +11,10 @@ const sendErrorResponse = (
   sendResponse({ success: false, error, details });
 };
 
-// Potentially sendMessage() Refactor
+// TODO: Potentially sendMessage() Refactor
 
 const MessageService = {
-  async sendWalletsLockedMessage() {
+  async sendWalletsLocked() {
     await chrome.runtime.sendMessage({
       type: MESSAGE_TYPES.WALLETS_LOCKED,
     });
@@ -40,7 +40,6 @@ const MessageService = {
     try {
       await chrome.storage.local.set({ walletLocked: true });
       KeyringService.lockAll();
-      window.location.reload();
       sendResponse({ success: true });
     } catch (error) {
       console.error("[MessageHandler] Error handling wallets locked:", error);

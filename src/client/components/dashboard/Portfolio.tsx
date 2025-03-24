@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { usePolkadotApi } from "../../contexts/PolkadotApiContext";
 import { useNotification } from "../../contexts/NotificationContext";
+import { useLock } from "../../contexts/LockContext";
 import KeyringService from "../../services/KeyringService";
 import MessageService from "../../services/MessageService";
 import StakeOverview from "../portfolio/StakeOverview";
@@ -18,56 +19,33 @@ interface PortfolioProps {
 
 const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
   const navigate = useNavigate();
+  const { setIsLocked } = useLock();
   const { showNotification } = useNotification();
   const { api } = usePolkadotApi();
   const [selectedStake, setSelectedStake] = useState<StakeTransaction | null>(
     null
   );
   const [selectedSubnet, setSelectedSubnet] = useState<Subnet | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    init();
-  }, [address]);
-
-  const init = async (): Promise<void> => {
-    setSelectedStake(null);
-    setSelectedSubnet(null);
-    const result = await chrome.storage.local.get("storeStakeSelection");
-    if (result.storeStakeSelection) {
-      setSelectedStake(result.storeStakeSelection);
-      await chrome.storage.local.remove("storeStakeSelection");
-    }
-  };
 
   const handleStakeSelect = async (stake: StakeTransaction): Promise<void> => {
-    setError(null);
-    try {
-      setIsLoading(true);
-      const subnet = await api?.getSubnet(stake.subnetId);
-      if (subnet) {
-        setSelectedSubnet(subnet);
-        setSelectedStake(stake);
-      }
-    } catch (error) {
-      setError(
-        error instanceof Error ? error.message : "Failed to fetch subnet"
-      );
+    const subnet = await api?.getSubnet(stake.subnetId);
+    if (subnet) {
+      setSelectedSubnet(subnet);
+      setSelectedStake(stake);
+    } else {
+      showNotification({
+        message: "Failed to Fetch Subnet",
+        type: NotificationType.Error,
+      });
       setSelectedStake(null);
       setSelectedSubnet(null);
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const handleAuth = async (): Promise<void> => {
     if (await KeyringService.isLocked(address)) {
-      await chrome.storage.local.set({ walletLocked: true });
-      await chrome.storage.local.set({
-        storeStakeSelection: selectedStake,
-      });
-      MessageService.sendWalletsLockedMessage();
+      await setIsLocked(true);
+      await MessageService.sendWalletsLocked();
       return;
     }
   };
@@ -83,10 +61,9 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
 
   const handleSwap = async (): Promise<void> => {
     if (!api || !selectedStake) return;
-    setError(null);
     showNotification({
-      message: "Submitting transaction...",
       type: NotificationType.Pending,
+      message: "Submitting Transaction...",
     });
 
     try {
@@ -100,7 +77,7 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
       });
 
       showNotification({
-        message: "Transaction finalized!",
+        message: "Transaction Successful!",
         type: NotificationType.Success,
         hash: result,
       });
@@ -109,17 +86,15 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
       setSelectedSubnet(null);
 
       onRefresh();
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to swap";
-      setError(errorMessage);
+    } catch {
       showNotification({
-        message: errorMessage,
+        message: "Failed to Swap Stake",
         type: NotificationType.Error,
       });
     }
   };
 
+  // TODO: Spinner style
   if (!api) {
     return (
       <div className="flex justify-center items-center h-16">
@@ -137,7 +112,6 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
           onClose={() => {
             setSelectedStake(null);
             setSelectedSubnet(null);
-            setError(null);
           }}
           onSwap={handleSwap}
           onMoveStake={handleMoveStake}
@@ -160,18 +134,6 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
               <p>No stakes</p>
             </div>
           )}
-        </div>
-      )}
-
-      {error && (
-        <div className="mt-2 p-3 bg-mf-ash-500 rounded-lg">
-          <p className="text-xs text-mf-safety-300 text-center">{error}</p>
-        </div>
-      )}
-
-      {isLoading && (
-        <div className="mt-2 flex justify-center items-center h-16">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-mf-milk-300" />
         </div>
       )}
     </div>

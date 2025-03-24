@@ -4,14 +4,20 @@ import { WalletCards, ChevronDown, ChevronUp, Plus, Trash } from "lucide-react";
 import type { KeyringPair } from "@polkadot/keyring/types";
 
 import KeyringService from "../services/KeyringService";
+import { useLock } from "../contexts/LockContext";
+import { useWallet } from "../contexts/WalletContext";
 
 interface WalletSelectionProps {
-  onSelect: () => void;
+  onSelect?: () => void;
 }
 
 // TODO: Error handling if there are no wallets - shouldn't even display the component
+// TODO: When the user clicks off of it should collapse
+// TODO: If there are no wallets, no chevron
 const WalletSelection = ({ onSelect }: WalletSelectionProps) => {
   const navigate = useNavigate();
+  const { isLocked } = useLock();
+  const { currentAddress, setCurrentAddress } = useWallet();
   const [wallet, setWallet] = useState<KeyringPair | null>(null);
   const [wallets, setWallets] = useState<KeyringPair[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -19,11 +25,11 @@ const WalletSelection = ({ onSelect }: WalletSelectionProps) => {
   useEffect(() => {
     getWallet();
     getWallets();
-  }, []);
+  }, [currentAddress]);
 
   const getWallet = async (): Promise<void> => {
-    const result = await chrome.storage.local.get("currentAddress");
-    const wallet = await KeyringService.getWallet(result.currentAddress);
+    if (!currentAddress) return;
+    const wallet = await KeyringService.getWallet(currentAddress);
     if (wallet instanceof Error) {
       setWallet(null);
     } else {
@@ -38,11 +44,9 @@ const WalletSelection = ({ onSelect }: WalletSelectionProps) => {
 
   const handleSelectWallet = async (wallet: KeyringPair): Promise<void> => {
     setWallet(wallet);
+    await setCurrentAddress(wallet.address);
     setIsExpanded(false);
-    await chrome.storage.local.set({
-      currentAddress: wallet.address,
-    });
-    onSelect();
+    onSelect?.();
   };
 
   const handleDeleteWallet = async (
@@ -116,18 +120,20 @@ const WalletSelection = ({ onSelect }: WalletSelectionProps) => {
               </div>
             ))}
 
-          <button
-            onClick={() => navigate("/create")}
-            className="w-full flex items-center gap-3 p-2 hover:bg-mf-night-500 transition-colors"
-          >
-            <div className="flex items-center justify-center bg-mf-safety-500 border border-mf-safety-500 rounded-sm p-1">
-              <Plus className="w-5 h-5 text-mf-ash-500" />
-            </div>
-            <div className="text-left text-mf-safety-500 text-xs">
-              <span>Add New Wallet</span>
-              <div></div>
-            </div>
-          </button>
+          {!isLocked && (
+            <button
+              onClick={() => navigate("/add-wallet")}
+              className="w-full flex items-center gap-3 p-2 hover:bg-mf-night-500 transition-colors"
+            >
+              <div className="flex items-center justify-center bg-mf-safety-500 border border-mf-safety-500 rounded-sm p-1">
+                <Plus className="w-5 h-5 text-mf-ash-500" />
+              </div>
+              <div className="text-left text-mf-safety-500 text-xs">
+                <span>Add New Wallet</span>
+                <div></div>
+              </div>
+            </button>
+          )}
         </div>
       )}
     </div>

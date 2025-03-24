@@ -1,18 +1,23 @@
 import { useState } from "react";
 import { Copy } from "lucide-react";
-
+import type { KeyringPair } from "@polkadot/keyring/types";
 interface MnemonicDisplayProps {
   mnemonic: string;
-  onContinue: () => void;
+  wallet: KeyringPair;
+  onContinue: (wallet: KeyringPair) => void;
 }
 
-const MnemonicDisplay = ({ mnemonic, onContinue }: MnemonicDisplayProps) => {
+const MnemonicDisplay = ({
+  mnemonic,
+  wallet,
+  onContinue,
+}: MnemonicDisplayProps) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopyMnemonic = async (): Promise<void> => {
     await navigator.clipboard.writeText(mnemonic);
     setCopied(true);
-    setTimeout(() => setCopied(false), 5000);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -21,11 +26,13 @@ const MnemonicDisplay = ({ mnemonic, onContinue }: MnemonicDisplayProps) => {
         <textarea
           value={mnemonic}
           readOnly
-          className="p-3 h-28 text-sm rounded-sm bg-mf-ash-300 text-mf-milk-300 border-none focus:outline-none focus:ring-2 focus:ring-mf-safety-500 w-full"
+          className={`p-3 h-28 text-sm rounded-sm bg-mf-ash-300 text-mf-milk-300 border-none focus:outline-none focus:ring-2 w-full ${
+            copied ? "focus:ring-mf-sybil-500" : "focus:ring-mf-safety-500"
+          }`}
         />
         <button
           onClick={handleCopyMnemonic}
-          className={`absolute right-2 top-3 transition-colors bg-mf-ash-300 ${
+          className={`absolute right-2 bottom-3 transition-colors bg-mf-ash-300 ${
             copied ? "text-mf-sybil-500" : "text-mf-safety-500"
           }`}
         >
@@ -46,8 +53,8 @@ const MnemonicDisplay = ({ mnemonic, onContinue }: MnemonicDisplayProps) => {
 
       <div className="flex flex-col items-center mt-8">
         <button
-          onClick={onContinue}
-          className="w-44 rounded-xs text-sm text-mf-night-500 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 transition-colors p-1.5"
+          onClick={() => onContinue(wallet)}
+          className="w-44 rounded-sm text-sm text-mf-night-500 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 transition-colors p-1.5"
         >
           <span>Continue</span>
         </button>

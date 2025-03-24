@@ -1,26 +1,30 @@
 import { Navigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+
+import { useWallet } from "../contexts/WalletContext";
+import { useLock } from "../contexts/LockContext";
+import LockScreen from "./LockScreen";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const [hasAccess, setHasAccess] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const { currentAddress, isLoading } = useWallet();
+  const { isLocked } = useLock();
 
-  useEffect(() => {
-    const checkAccess = async () => {
-      const result = await chrome.storage.local.get("currentAddress");
-      setHasAccess(!!result.currentAddress);
-      setLoading(false);
-    };
-    checkAccess();
-  }, []);
+  if (isLoading) {
+    return null;
+  }
 
-  if (loading) return null;
-  if (!hasAccess) return <Navigate to="/" replace />;
-  return children;
+  if (!currentAddress) {
+    return <Navigate to="/welcome" replace />;
+  }
+
+  if (isLocked) {
+    return <LockScreen />;
+  }
+
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;

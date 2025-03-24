@@ -1,126 +1,117 @@
-import { HashRouter, Routes, Route, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import {
+  HashRouter,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
 
-import Home from "./pages/Home";
-import Import from "./pages/Import";
+import { PolkadotApiProvider } from "./contexts/PolkadotApiContext";
+import { LockProvider, useLock } from "./contexts/LockContext";
+import { WalletProvider } from "./contexts/WalletContext";
+import { NotificationProvider } from "./contexts/NotificationContext";
+import MessageService from "./services/MessageService";
 import Dashboard from "./pages/Dashboard";
 import Swap from "./pages/Swap";
-import Create from "./pages/Create";
 import Stake from "./pages/Stake";
 import Transfer from "./pages/Transfer";
 import Settings from "./pages/Settings";
-
-import Sign from "./components/popups/Sign";
-import Connect from "./components/popups/Connect";
-import LockScreen from "./components/LockScreen";
+import Welcome from "./pages/Welcome";
+import AddWallet from "./pages/AddWallet";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Connect from "./components/popups/Connect";
+import Sign from "./components/popups/Sign";
 import Navigation from "./components/Navigation";
 
-import MessageService from "./services/MessageService";
-import { PolkadotApiProvider } from "./contexts/PolkadotApiContext";
-import { NotificationProvider } from "./contexts/NotificationContext";
-
-const Content = ({
-  setIsLocked,
-}: {
-  setIsLocked: (locked: boolean) => void;
-}) => {
+const Content = () => {
+  const { isLocked } = useLock();
   const location = useLocation();
+  const publicRoutes = ["/connect", "/sign", "/add-wallet", "/welcome"];
 
   return (
-    <>
-      {!["/connect", "/sign", "/create", "/import"].includes(
-        location.pathname
-      ) && <Navigation />}
-      <main>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route
-            path="/create"
-            element={<Create setIsLocked={setIsLocked} />}
-          />
-          <Route
-            path="/import"
-            element={<Import setIsLocked={setIsLocked} />}
-          />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/swap"
-            element={
-              <ProtectedRoute>
-                <Swap />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/stake"
-            element={
-              <ProtectedRoute>
-                <Stake />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/transfer"
-            element={
-              <ProtectedRoute>
-                <Transfer />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <ProtectedRoute>
-                <Settings setIsLocked={setIsLocked} />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/connect" element={<Connect />} />
-          <Route path="/sign" element={<Sign />} />
-        </Routes>
-      </main>
-    </>
+    <div className="flex flex-col items-center min-h-screen">
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/welcome" element={<Welcome />} />
+        <Route path="/add-wallet" element={<AddWallet />} />
+        <Route path="/connect" element={<Connect />} />
+        <Route path="/sign" element={<Sign />} />
+
+        {/* Protected Routes */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Navigate to="/dashboard" replace />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/swap"
+          element={
+            <ProtectedRoute>
+              <Swap />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/stake"
+          element={
+            <ProtectedRoute>
+              <Stake />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/transfer"
+          element={
+            <ProtectedRoute>
+              <Transfer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Settings />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+      {!publicRoutes.includes(location.pathname) && !isLocked && <Navigation />}
+    </div>
   );
 };
 
 const App = () => {
-  const [isLocked, setIsLocked] = useState(false);
-  const [currentAddress, setCurrentAddress] = useState<string | null>(null);
-
   useEffect(() => {
-    init();
     const cleanupListeners = MessageService.setupMessageListeners();
-    return cleanupListeners;
+    return () => {
+      cleanupListeners();
+    };
   }, []);
-
-  const init = async (): Promise<void> => {
-    const lockResult = await chrome.storage.local.get("walletLocked");
-    const addressResult = await chrome.storage.local.get("currentAddress");
-    setIsLocked(lockResult.walletLocked === true);
-    setCurrentAddress(addressResult.currentAddress);
-  };
 
   return (
     <PolkadotApiProvider>
-      <NotificationProvider>
-        <HashRouter>
-          <div>
-            {isLocked && currentAddress ? (
-              <LockScreen setIsLocked={setIsLocked} />
-            ) : (
-              <Content setIsLocked={setIsLocked} />
-            )}
-          </div>
-        </HashRouter>
-      </NotificationProvider>
+      <HashRouter>
+        <LockProvider>
+          <WalletProvider>
+            <NotificationProvider>
+              <Content />
+            </NotificationProvider>
+          </WalletProvider>
+        </LockProvider>
+      </HashRouter>
     </PolkadotApiProvider>
   );
 };

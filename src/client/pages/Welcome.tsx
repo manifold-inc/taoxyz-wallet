@@ -1,32 +1,20 @@
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { UserPlus, FolderInput } from "lucide-react";
 
 import Disclaimer from "../components/Disclaimer";
 import taoxyz from "../../../public/icons/taoxyz.svg";
 
-const Home = () => {
+const Welcome = () => {
   const navigate = useNavigate();
   const [showDisclaimer, setShowDisclaimer] = useState(false);
-
-  useEffect(() => {
-    init();
-  }, []);
-
-  const init = async (): Promise<void> => {
-    const resultAddress = await chrome.storage.local.get("currentAddress");
-    const resultLocked = await chrome.storage.local.get("walletLocked");
-    if (resultAddress.currentAddress && !resultLocked.walletLocked) {
-      navigate("/dashboard");
-    }
-  };
 
   return (
     <>
       {showDisclaimer ? (
         <Disclaimer onClose={() => setShowDisclaimer(false)} />
       ) : (
-        <div className="flex flex-col items-center min-h-screen">
+        <>
           <img src={taoxyz} alt="Taoxyz Logo" className="w-16 h-16 mt-24" />
 
           <div>
@@ -36,7 +24,9 @@ const Home = () => {
 
             <div className="space-y-5 flex flex-col items-center w-52 [&>*]:w-full text-base mt-8">
               <button
-                onClick={() => navigate("/create")}
+                onClick={() =>
+                  navigate("/add-wallet", { state: { mode: "create-wallet" } })
+                }
                 className="rounded-sm bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors p-3"
               >
                 <div className="flex justify-center items-center gap-2 mr-2">
@@ -45,7 +35,11 @@ const Home = () => {
                 </div>
               </button>
               <button
-                onClick={() => navigate("/import")}
+                onClick={() =>
+                  navigate("/add-wallet", {
+                    state: { mode: "import-mnemonic" },
+                  })
+                }
                 className="rounded-sm bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors p-3"
               >
                 <div className="flex justify-center items-center gap-2 mr-4">
@@ -63,10 +57,10 @@ const Home = () => {
               </div>
             </div>
           </div>
-        </div>
+        </>
       )}
     </>
   );
 };
 
-export default Home;
+export default Welcome;
