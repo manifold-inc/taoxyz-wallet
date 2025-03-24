@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { WalletCards, ChevronDown, ChevronUp, Plus, Trash } from "lucide-react";
 import type { KeyringPair } from "@polkadot/keyring/types";
@@ -7,22 +7,35 @@ import KeyringService from "../services/KeyringService";
 import { useLock } from "../contexts/LockContext";
 import { useWallet } from "../contexts/WalletContext";
 
-interface WalletSelectionProps {
-  onSelect?: () => void;
-}
-
-const WalletSelection = ({ onSelect }: WalletSelectionProps) => {
+const WalletSelection = () => {
   const navigate = useNavigate();
   const { isLocked } = useLock();
   const { currentAddress, setCurrentAddress } = useWallet();
   const [wallet, setWallet] = useState<KeyringPair | null>(null);
   const [wallets, setWallets] = useState<KeyringPair[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
+  const listenerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     getWallet();
     getWallets();
   }, [currentAddress]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        listenerRef.current &&
+        !listenerRef.current.contains(event.target as Node)
+      ) {
+        setIsExpanded(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const clearSavedTransactions = async (): Promise<void> => {
     await chrome.storage.local.remove("storeStakeTransaction");
@@ -50,7 +63,6 @@ const WalletSelection = ({ onSelect }: WalletSelectionProps) => {
     await setCurrentAddress(wallet.address);
     await clearSavedTransactions();
     setIsExpanded(false);
-    onSelect?.();
   };
 
   const handleDeleteWallet = async (
@@ -64,7 +76,7 @@ const WalletSelection = ({ onSelect }: WalletSelectionProps) => {
   };
 
   return (
-    <div className="bg-mf-ash-500 mt-4 relative">
+    <div className="bg-mf-ash-500 mt-4 relative" ref={listenerRef}>
       <div
         className="flex items-center justify-between p-2 hover:bg-mf-night-500 transition-colors"
         onClick={() => setIsExpanded(!isExpanded)}

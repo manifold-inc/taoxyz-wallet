@@ -90,13 +90,7 @@ export const Dashboard = () => {
   return (
     <div className="flex flex-col items-center min-h-screen">
       <div className="w-74 [&>*]:w-full">
-        <WalletSelection
-          onSelect={() => {
-            if (currentAddress) {
-              void fetchData(currentAddress);
-            }
-          }}
-        />
+        <WalletSelection />
         <div className="rounded-sm bg-mf-ash-500 p-3 flex justify-between mt-4">
           <div className="flex items-center justify-center space-x-2">
             <img src={taoxyz} alt="Taoxyz Logo" className="w-4 h-4" />
