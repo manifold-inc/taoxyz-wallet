@@ -196,7 +196,7 @@ export const Swap = () => {
     if (!api || !currentAddress) return;
     setIsInitialized(true);
     await restoreSwap();
-    if (api && currentAddress && subnets === null) {
+    if (subnets === null) {
       await Promise.all([getSubnets(), getBalance()]);
     }
   };

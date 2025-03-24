@@ -44,7 +44,6 @@ export const KeyringService = {
     return mnemonicValidate(mnemonic);
   },
 
-  // TODO: Figure out how to handle multiple wallets with the same name or make the names unique
   async getAddress(username: string): Promise<string | Error> {
     const wallets = this.getWallets();
     if (!wallets) return new Error("Keyring not initialized");
@@ -60,7 +59,6 @@ export const KeyringService = {
     return wallet;
   },
 
-  // TODO: Figure out error handling for walletselection, where does the notification display
   getWallets(): KeyringPair[] {
     return keyring.getPairs();
   },

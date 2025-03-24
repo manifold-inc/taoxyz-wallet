@@ -1,14 +1,16 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { useLocation } from "react-router-dom";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeftToLine, ArrowRightToLine } from "lucide-react";
 import taoxyzLogo from "../../../public/icons/taoxyz.svg";
 
+import { usePolkadotApi } from "../contexts/PolkadotApiContext";
+import { useNotification } from "../contexts/NotificationContext";
+import { useWallet } from "../contexts/WalletContext";
 import StakeSelection from "../components/stake/StakeSelection";
 import ValidatorSelection from "../components/swap/ValidatorSelection";
-import ConfirmStake from "../components/stake/ConfirmStake";
-
-import { usePolkadotApi } from "../contexts/PolkadotApiContext";
+import { ConfirmStake } from "../components/stake/ConfirmStake";
 import type { Validator, Subnet, StakeTransaction } from "../../types/client";
+import { NotificationType } from "../../types/client";
 
 enum Step {
   SELECT_STAKE,
@@ -19,11 +21,11 @@ enum Step {
 const getStepSubtext = (step: Step) => {
   switch (step) {
     case Step.SELECT_STAKE:
-      return "Select a stake";
+      return "Select Stake";
     case Step.SELECT_VALIDATOR:
-      return "Select a validator";
+      return "Select Validator";
     case Step.CONFIRM_STAKE:
-      return "Review and confirm stake";
+      return "Confirm Stake";
     default:
       return "";
   }
@@ -48,11 +50,12 @@ interface StakeResponse {
   stake: number;
 }
 
+// TODO: Validators are not ready when coming from portfolio
 const Stake = () => {
+  const { showNotification } = useNotification();
   const { api } = usePolkadotApi();
+  const { currentAddress } = useWallet();
   const location = useLocation();
-  const [address, setAddress] = useState("");
-
   const [step, setStep] = useState<Step>(
     location.state?.selectedStake ? Step.SELECT_VALIDATOR : Step.SELECT_STAKE
   );
@@ -70,62 +73,50 @@ const Stake = () => {
   const [isLoadingStakes, setIsLoadingStakes] = useState(true);
   const [isLoadingSubnet, setIsLoadingSubnet] = useState(false);
   const [isLoadingValidators, setIsLoadingValidators] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [balance, setBalance] = useState<string | null>(null);
 
-  useEffect(() => {
-    const init = async () => {
-      if (!api) return;
+  const restoreStake = async () => {
+    const result = await chrome.storage.local.get("storeStakeTransaction");
+    if (result.storeStakeTransaction) {
+      const { subnet, validator, stake } = result.storeStakeTransaction;
+      setStep(Step.CONFIRM_STAKE);
+      setSelectedSubnet(subnet);
+      setSelectedValidator(validator);
+      setSelectedStake(stake);
+    }
+  };
 
-      try {
-        const result = await chrome.storage.local.get("currentAddress");
-        const currentAddress = result.currentAddress as string;
-        setAddress(currentAddress);
-
-        if (currentAddress) {
-          await getStakes(currentAddress);
-          if (location.state?.selectedStake) {
-            const stake = location.state.selectedStake;
-            await getValidators(stake.subnetId, stake.validatorHotkey);
-          }
-        }
-      } catch (error) {
-        console.error("[Stake] Error initializing:", error);
-      }
-    };
-
-    init();
-  }, [api]);
-
-  useEffect(() => {
-    const initStake = async () => {
-      const result = await chrome.storage.local.get("storeStakeTransaction");
-      if (result.storeStakeTransaction) {
-        const { subnet, validator, stake } = result.storeStakeTransaction;
-        setStep(Step.CONFIRM_STAKE);
-        setSelectedSubnet(subnet);
-        setSelectedValidator(validator);
-        setSelectedStake(stake);
-      }
-    };
-    initStake();
-  }, []);
+  const getBalance = (stake: StakeTransaction): string | null => {
+    if (!stake) return null;
+    const balance = stake.tokens / 1e9;
+    return balance.toFixed(4);
+  };
 
   const getStakes = async (address: string) => {
     if (!api) return;
+    setIsLoadingStakes(true);
     try {
-      setIsLoadingStakes(true);
       const stakes = await api.getStake(address);
       if (stakes) {
-        const formattedStakes = (stakes as unknown as StakeResponse[]).map(
-          (stake) => ({
-            subnetId: stake.netuid,
-            validatorHotkey: stake.hotkey,
-            tokens: stake.stake,
+        const formattedStakes = await Promise.all(
+          (stakes as unknown as StakeResponse[]).map(async (stake) => {
+            const subnet = await api.getSubnet(stake.netuid);
+            return {
+              subnetId: stake.netuid,
+              subnetName: subnet?.name ?? `Subnet ${stake.netuid}`,
+              validatorHotkey: stake.hotkey,
+              tokens: stake.stake,
+            };
           })
         );
         setStakes(formattedStakes);
       }
-    } catch (error) {
-      console.error("[Client] Error loading stakes:", error);
+    } catch {
+      showNotification({
+        type: NotificationType.Error,
+        message: "Failed to Load Stakes",
+      });
     } finally {
       setIsLoadingStakes(false);
     }
@@ -133,29 +124,35 @@ const Stake = () => {
 
   const getSubnet = async (subnetId: number) => {
     if (!api) return;
+    setIsLoadingSubnet(true);
     try {
-      setIsLoadingSubnet(true);
       const subnet = await api.getSubnet(subnetId);
       setSelectedSubnet(subnet ?? null);
-    } catch (error) {
-      console.error("[Client] Error loading subnet:", error);
+    } catch {
+      showNotification({
+        type: NotificationType.Error,
+        message: "Failed to Load Subnet",
+      });
     } finally {
       setIsLoadingSubnet(false);
     }
   };
 
   const getValidators = async (subnetId: number, validatorHotkey: string) => {
+    if (!api) return;
+    setIsLoadingValidators(true);
     try {
-      setIsLoadingValidators(true);
-      setValidators([]);
-      const validators = await api?.getValidators(subnetId);
+      const validators = await api.getValidators(subnetId);
       const filteredValidators =
         validators?.filter(
           (validator) => validator.hotkey !== validatorHotkey
         ) ?? [];
       setValidators(filteredValidators);
-    } catch (error) {
-      console.error("[Client] Error loading validators:", error);
+    } catch {
+      showNotification({
+        type: NotificationType.Error,
+        message: "Failed to Load Validators",
+      });
     } finally {
       setIsLoadingValidators(false);
     }
@@ -169,9 +166,12 @@ const Stake = () => {
       ) {
         setSelectedStake(null);
         setValidators([]);
+        setBalance(null);
         return;
       }
       setSelectedStake(stake);
+      const balance = getBalance(stake);
+      setBalance(balance);
       await getSubnet(stake.subnetId);
       await getValidators(stake.subnetId, stake.validatorHotkey);
     },
@@ -207,12 +207,12 @@ const Stake = () => {
         return (
           <StakeSelection
             stakes={stakes}
-            onSelect={handleStakeSelect}
-            isLoading={isLoadingStakes}
             selectedStake={selectedStake}
             validators={validators}
-            isLoadingValidators={isLoadingValidators}
+            isLoading={isLoadingStakes}
             isLoadingSubnet={isLoadingSubnet}
+            isLoadingValidators={isLoadingValidators}
+            onSelect={handleStakeSelect}
           />
         );
       case Step.SELECT_VALIDATOR:
@@ -221,83 +221,99 @@ const Stake = () => {
           <ValidatorSelection
             subnet={selectedSubnet}
             validators={validators}
-            onSelect={handleValidatorSelect}
             selectedValidator={selectedValidator}
+            onSelect={handleValidatorSelect}
           />
         );
       case Step.CONFIRM_STAKE:
-        if (!selectedStake || !selectedSubnet || !selectedValidator)
+        if (!selectedStake || !selectedSubnet || !selectedValidator || !balance)
           return null;
         return (
           <ConfirmStake
-            stake={selectedStake}
             subnet={selectedSubnet}
             validator={selectedValidator}
-            address={address}
+            address={currentAddress as string}
+            balance={balance as string}
           />
         );
     }
   };
 
+  const init = async () => {
+    if (isInitialized) return;
+    if (!api || !currentAddress) return;
+    setIsInitialized(true);
+    await restoreStake();
+    await getStakes(currentAddress);
+    if (location.state?.selectedStake) {
+      const stake = location.state.selectedStake;
+      await getValidators(stake.subnetId, stake.validatorHotkey);
+      setBalance(getBalance(stake));
+    }
+  };
+
+  void init();
+
+  if (!isInitialized) {
+    return (
+      <div className="flex justify-center items-center h-16">
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-mf-milk-300" />
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col items-center min-h-screen">
-      <div className="h-20" />
-      <div className="flex flex-col items-center flex-1">
-        <div className="w-80 grid grid-cols-3 mb-8">
-          <div className="flex items-center justify-start pl-4">
-            <button
-              onClick={handleBack}
-              disabled={step === Step.SELECT_STAKE}
-              className={`transition-colors ${
-                step === Step.SELECT_STAKE
-                  ? "text-mf-ash-300 cursor-not-allowed"
-                  : "text-mf-silver-300 hover:text-mf-milk-300"
-              }`}
-            >
-              <ArrowLeft className="w-6 h-6" />
-            </button>
-          </div>
-          <div className="flex justify-center">
-            <img src={taoxyzLogo} alt="Taoxyz Logo" className="w-16 h-16" />
-          </div>
-          <div className="flex items-center justify-end pr-4">
-            <button
-              onClick={handleNext}
-              disabled={
-                (step === Step.SELECT_STAKE &&
-                  (!selectedStake || validators.length === 0)) ||
-                (step === Step.SELECT_VALIDATOR && !selectedValidator) ||
-                step === Step.CONFIRM_STAKE
-              }
-              className={`transition-colors ${
-                (step === Step.SELECT_STAKE &&
-                  (!selectedStake || validators.length === 0)) ||
-                (step === Step.SELECT_VALIDATOR && !selectedValidator) ||
-                step === Step.CONFIRM_STAKE
-                  ? "text-mf-ash-300 cursor-not-allowed"
-                  : "text-mf-safety-300 hover:text-mf-milk-300"
-              }`}
-            >
-              <ArrowRight className="w-6 h-6" />
-            </button>
-          </div>
+    <div className="flex flex-col items-center w-76 [&>*]:w-full">
+      <div className="grid grid-cols-3 mt-12">
+        <div className="flex items-center justify-start">
+          <button
+            onClick={handleBack}
+            disabled={step === Step.SELECT_STAKE}
+            className={`transition-colors ${
+              step === Step.SELECT_STAKE
+                ? "text-mf-ash-300 cursor-not-allowed"
+                : "text-mf-milk-300"
+            }`}
+          >
+            <ArrowLeftToLine className="w-6 h-6" />
+          </button>
+        </div>
+        <div className="flex items-center justify-center">
+          <img src={taoxyzLogo} alt="Taoxyz Logo" className="w-16 h-16" />
+        </div>
+        <div className="flex items-center justify-end">
+          <button
+            onClick={handleNext}
+            disabled={
+              (step === Step.SELECT_STAKE &&
+                (!selectedStake || validators.length === 0)) ||
+              (step === Step.SELECT_VALIDATOR && !selectedValidator) ||
+              step === Step.CONFIRM_STAKE
+            }
+            className={`transition-colors ${
+              (step === Step.SELECT_STAKE &&
+                (!selectedStake || validators.length === 0)) ||
+              (step === Step.SELECT_VALIDATOR && !selectedValidator) ||
+              step === Step.CONFIRM_STAKE
+                ? "text-mf-ash-300 cursor-not-allowed"
+                : "text-mf-milk-300"
+            }`}
+          >
+            <ArrowRightToLine className="w-6 h-6" />
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-8">
+        <div className="text-center">
+          <h1 className="text-lg text-mf-milk-300">{getStepTitle(step)}</h1>
+          <p className="text-xs text-mf-sybil-500 mt-1">
+            {getStepSubtext(step)}
+          </p>
         </div>
 
-        <div className="w-full max-w-md">
-          <div className="text-center mb-4">
-            <h1 className="text-lg font-semibold text-mf-silver-300">
-              {getStepTitle(step)}
-            </h1>
-            <p className="text-xs text-mf-silver-300 mt-1">
-              {getStepSubtext(step)}
-            </p>
-          </div>
-
-          <div className="w-80">
-            <div className="w-full rounded-lg bg-mf-ash-500 max-h-[calc(100vh-310px)] overflow-y-auto">
-              {renderStep()}
-            </div>
-          </div>
+        <div className="rounded-sm max-h-[calc(100vh-310px)] overflow-y-auto mt-8">
+          {renderStep()}
         </div>
       </div>
     </div>
