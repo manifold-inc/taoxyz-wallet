@@ -7,6 +7,7 @@ import { useLock } from "../contexts/LockContext";
 import { useWallet } from "../contexts/WalletContext";
 import KeyringService from "../services/KeyringService";
 import MessageService from "../services/MessageService";
+import { taoToRao } from "../../utils/utils";
 import { NotificationType } from "../../types/client";
 import taoxyzLogo from "../../../public/icons/taoxyz.svg";
 
@@ -25,6 +26,8 @@ const Transfer = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
+  const amountInRao = taoToRao(parseFloat(amount) || 0);
+  const balanceInRao = taoToRao(parseFloat(balance));
   const getBalance = async (address: string) => {
     if (!api) return;
     const balance = await api.getBalance(address);
@@ -38,13 +41,13 @@ const Transfer = () => {
     if (value === "" || /^\d*\.?\d*$/.test(value)) {
       const numValue = parseFloat(value);
       if (value === "" || (!isNaN(numValue) && numValue >= 0)) {
-        setAmount(value);
-
-        if (numValue > parseFloat(balance)) {
+        const amountInRao = value ? taoToRao(numValue) : 0n;
+        if (amountInRao > balanceInRao) {
           setAmountError("Insufficient Balance");
-        } else if (numValue === 0) {
+        } else if (amountInRao === 0n) {
           setAmountError("Amount Must Be Greater Than 0");
         }
+        setAmount(value);
       }
     }
   };
@@ -80,7 +83,7 @@ const Transfer = () => {
       const result = await api.transfer({
         fromAddress,
         toAddress,
-        amount: parseFloat(amount),
+        amountInRao,
       });
 
       showNotification({
@@ -168,7 +171,7 @@ const Transfer = () => {
               className={`w-full px-3 py-2 rounded-sm bg-mf-ash-300 text-mf-milk-300 border-2 text-xs ${
                 !amount
                   ? "border-transparent focus:border-mf-safety-500"
-                  : parseFloat(amount) > parseFloat(balance)
+                  : amountInRao > balanceInRao
                   ? "border-mf-safety-500"
                   : "border-mf-sybil-500"
               }`}
@@ -190,14 +193,14 @@ const Transfer = () => {
                 !amount ||
                 isSubmitting ||
                 !!amountError ||
-                parseFloat(amount) > parseFloat(balance)
+                amountInRao > balanceInRao
               }
               className={`w-44 text-xs flex items-center justify-center rounded-sm transition-colors p-2 text-semibold border-2 border-mf-sybil-500 ${
                 !toAddress ||
                 !amount ||
                 isSubmitting ||
                 !!amountError ||
-                parseFloat(amount) > parseFloat(balance)
+                amountInRao > balanceInRao
                   ? "bg-mf-night-500 text-mf-milk-300 cursor-not-allowed"
                   : "bg-mf-sybil-500 text-mf-night-500"
               }`}

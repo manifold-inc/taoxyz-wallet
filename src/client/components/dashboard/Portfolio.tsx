@@ -71,12 +71,11 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
         message: "Submitting Transaction...",
       });
 
-      const convertedStake = selectedStake.tokens / 1e9;
       const result = await api.removeStake({
         address,
         validatorHotkey: selectedStake.validatorHotkey,
         subnetId: selectedStake.subnetId,
-        amount: convertedStake,
+        amountInRao: BigInt(selectedStake.tokens),
       });
 
       showNotification({

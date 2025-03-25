@@ -6,7 +6,7 @@ import { useNotification } from "../../contexts/NotificationContext";
 import { useLock } from "../../contexts/LockContext";
 import KeyringService from "../../services/KeyringService";
 import MessageService from "../../services/MessageService";
-import { calculateSlippage } from "../../../utils/utils";
+import { calculateSlippage, taoToRao } from "../../../utils/utils";
 import { NotificationType } from "../../../types/client";
 import type {
   Subnet,
@@ -37,12 +37,18 @@ export const ConfirmStake = ({
   const [amount, setAmount] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const alphaAmount = parseFloat(amount) || 0;
+  const alphaAmountInRao: bigint = taoToRao(parseFloat(amount) || 0);
+  const balanceInRao: bigint = taoToRao(parseFloat(balance));
   // TODO: Figure out slippage calculation for stake movement
-  const slippageCalculation = useMemo(() => {
-    if (!alphaAmount || !subnet.taoIn || !stake.tokens) return null;
-    return calculateSlippage(stake.tokens, subnet.taoIn, alphaAmount, true);
-  }, [alphaAmount, stake.tokens, subnet.taoIn]);
+  const slippage = useMemo(() => {
+    if (!alphaAmountInRao || !subnet.taoIn || !stake.tokens) return null;
+    return calculateSlippage(
+      BigInt(stake.tokens),
+      BigInt(subnet.taoIn),
+      alphaAmountInRao,
+      true
+    );
+  }, [alphaAmountInRao, stake.tokens, subnet.taoIn]);
 
   const restoreTransaction = async () => {
     const result = await chrome.storage.local.get("storeStakeTransaction");
@@ -82,7 +88,7 @@ export const ConfirmStake = ({
   };
 
   const handleSubmit = async () => {
-    if (!api || !amount || isSubmitting || alphaAmount > parseFloat(balance))
+    if (!api || !amount || isSubmitting || alphaAmountInRao > balanceInRao)
       return;
     setIsSubmitting(true);
     const isAuthorized = await handleAuth();
@@ -100,7 +106,7 @@ export const ConfirmStake = ({
         toHotkey: validator.hotkey,
         fromSubnetId: stake.subnetId,
         toSubnetId: subnet.id,
-        amount: alphaAmount,
+        amountInRao: alphaAmountInRao,
       });
 
       showNotification({
@@ -162,7 +168,7 @@ export const ConfirmStake = ({
             className={`w-full px-3 py-2 rounded-sm bg-mf-ash-300 text-mf-milk-300 border-2 ${
               !amount
                 ? "border-transparent focus:border-mf-safety-500"
-                : parseFloat(amount) > parseFloat(balance)
+                : alphaAmountInRao > balanceInRao
                 ? "border-mf-safety-500"
                 : "border-mf-sybil-500"
             }`}
@@ -170,30 +176,30 @@ export const ConfirmStake = ({
           <p className="ml-4 mt-2 text-mf-sybil-500">Balance: {balance}α</p>
         </div>
 
-        {alphaAmount > 0 && slippageCalculation && (
+        {alphaAmountInRao > 0 && slippage && (
           <div className="rounded-sm bg-mf-ash-500 p-4 space-y-4 text-xs mt-2">
             <div className="flex justify-between items-center">
               <span className="text-mf-silver-300">Your Price:</span>
               <span className="text-mf-sybil-500">
-                {alphaAmount.toFixed(4)} α
+                {parseFloat(amount).toFixed(4)} α
               </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-mf-silver-300">You Receive:</span>
               <span className="text-mf-sybil-500">
-                {slippageCalculation.tokens.toFixed(4)} α
+                {slippage.tokens.toFixed(4)} α
               </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-mf-silver-300">Slippage:</span>
               <span
                 className={`${
-                  slippageCalculation.slippagePercentage > 5
+                  slippage.slippagePercentage > 5
                     ? "text-mf-safety-500"
                     : "text-mf-silver-300"
                 }`}
               >
-                {slippageCalculation.slippagePercentage.toFixed(2)}%
+                {slippage.slippagePercentage.toFixed(2)}%
               </span>
             </div>
           </div>
@@ -203,16 +209,10 @@ export const ConfirmStake = ({
           <button
             onClick={handleSubmit}
             disabled={
-              !amount ||
-              isSubmitting ||
-              !api ||
-              alphaAmount > parseFloat(balance)
+              !amount || isSubmitting || !api || alphaAmountInRao > balanceInRao
             }
             className={`w-44 text-xs flex items-center justify-center rounded-sm transition-colors p-2 mt-4 text-semibold border-2 border-mf-sybil-500 ${
-              !amount ||
-              isSubmitting ||
-              !api ||
-              alphaAmount > parseFloat(balance)
+              !amount || isSubmitting || !api || alphaAmountInRao > balanceInRao
                 ? "bg-mf-night-500 text-mf-milk-300 cursor-not-allowed"
                 : "bg-mf-sybil-500 text-mf-night-500"
             }`}
