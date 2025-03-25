@@ -26,8 +26,10 @@ const MnemonicDisplay = ({
         <textarea
           value={mnemonic}
           readOnly
-          className={`p-3 h-28 text-sm rounded-sm bg-mf-ash-300 text-mf-milk-300 border-none focus:outline-none focus:ring-2 w-full ${
-            copied ? "focus:ring-mf-sybil-500" : "focus:ring-mf-safety-500"
+          className={`p-3 h-28 text-base rounded-sm bg-mf-ash-300 text-mf-milk-300 border-none focus:outline-none w-full ${
+            copied
+              ? "border-2 border-mf-sybil-500"
+              : "border-2 border-mf-safety-500"
           }`}
         />
         <button
@@ -54,7 +56,7 @@ const MnemonicDisplay = ({
       <div className="flex flex-col items-center mt-8">
         <button
           onClick={() => onContinue(wallet)}
-          className="w-44 rounded-sm text-sm text-mf-night-500 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 transition-colors p-1.5"
+          className="w-44 border-sm text-sm text-mf-night-500 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 transition-colors p-1.5"
         >
           <span>Continue</span>
         </button>

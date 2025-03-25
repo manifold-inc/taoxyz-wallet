@@ -149,7 +149,6 @@ const WalletSelection = () => {
               </div>
               <div className="text-left text-mf-safety-500 text-xs">
                 <span>Add New Wallet</span>
-                <div></div>
               </div>
             </button>
           )}

@@ -1,6 +1,10 @@
 import { KeyringService } from "./KeyringService";
 import { MESSAGE_TYPES, ERROR_TYPES } from "../../types/messages";
-import type { ResponseMessage, ExtensionMessage } from "../../types/messages";
+import type {
+  ResponseMessage,
+  ExtensionMessage,
+  DappMessage,
+} from "../../types/messages";
 
 const sendErrorResponse = (
   sendResponse: (response: ResponseMessage) => void,
@@ -48,7 +52,7 @@ const MessageService = {
 
   setupMessageListeners() {
     const messageListener = (
-      message: ExtensionMessage,
+      message: ExtensionMessage | DappMessage,
       sender: chrome.runtime.MessageSender,
       sendResponse: (response: ResponseMessage | { approved: boolean }) => void
     ) => {
@@ -69,6 +73,8 @@ const MessageService = {
 
         case MESSAGE_TYPES.CONNECT_RESPONSE:
         case MESSAGE_TYPES.SIGN_RESPONSE:
+        case MESSAGE_TYPES.SIGN_REQUEST:
+        case MESSAGE_TYPES.CONNECT_REQUEST:
           return true;
 
         default:

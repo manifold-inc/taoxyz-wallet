@@ -192,7 +192,7 @@ const Transfer = () => {
                 !!amountError ||
                 amountInRao > balanceInRao
               }
-              className={`w-44 text-xs flex items-center justify-center rounded-sm transition-colors p-2 text-semibold border-2 border-mf-sybil-500 ${
+              className={`w-44 text-xs flex items-center justify-center border-sm transition-colors p-2 text-semibold border-2 border-mf-sybil-500 ${
                 !toAddress ||
                 !amount ||
                 isSubmitting ||

@@ -19,7 +19,7 @@ const Navigation = () => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 flex justify-center">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 flex bg-mf-night-500 justify-center">
       <div className="w-74 h-14">
         <div className="flex items-center justify-evenly h-full">
           {links.map((link) => (

@@ -198,7 +198,7 @@ export const ConfirmSwap = ({
             disabled={
               !amount || isSubmitting || !api || amountInRao > balanceInRao
             }
-            className={`w-44 text-xs flex items-center justify-center rounded-sm transition-colors p-2 mt-4 text-semibold border-2 border-mf-sybil-500 ${
+            className={`w-44 text-xs flex items-center justify-center border-sm transition-colors p-2 mt-4 text-semibold border-2 border-mf-sybil-500 ${
               !amount || isSubmitting || !api || amountInRao > balanceInRao
                 ? "bg-mf-night-500 text-mf-milk-300 cursor-not-allowed"
                 : "bg-mf-sybil-500 text-mf-night-500"
