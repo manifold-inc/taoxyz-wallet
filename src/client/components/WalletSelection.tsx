@@ -1,31 +1,48 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { WalletCards, ChevronDown, ChevronUp, Plus, Trash } from "lucide-react";
+import { WalletCards, ChevronDown, ChevronUp, Plus, X } from "lucide-react";
 import type { KeyringPair } from "@polkadot/keyring/types";
 
 import KeyringService from "../services/KeyringService";
 import { useLock } from "../contexts/LockContext";
 import { useWallet } from "../contexts/WalletContext";
 
-interface WalletSelectionProps {
-  onSelect?: () => void;
-}
-
-// TODO: Error handling if there are no wallets - shouldn't even display the component
-// TODO: When the user clicks off of it should collapse
-// TODO: If there are no wallets, no chevron
-const WalletSelection = ({ onSelect }: WalletSelectionProps) => {
+// TODO: Add confirmation for deleting wallet
+const WalletSelection = () => {
   const navigate = useNavigate();
   const { isLocked } = useLock();
   const { currentAddress, setCurrentAddress } = useWallet();
   const [wallet, setWallet] = useState<KeyringPair | null>(null);
   const [wallets, setWallets] = useState<KeyringPair[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
+  const listenerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     getWallet();
     getWallets();
   }, [currentAddress]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        listenerRef.current &&
+        !listenerRef.current.contains(event.target as Node)
+      ) {
+        setIsExpanded(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const clearSavedTransactions = async (): Promise<void> => {
+    await chrome.storage.local.remove("storeStakeTransaction");
+    await chrome.storage.local.remove("storeSwapTransaction");
+    await chrome.storage.local.remove("storeTransferTransaction");
+  };
 
   const getWallet = async (): Promise<void> => {
     if (!currentAddress) return;
@@ -45,8 +62,8 @@ const WalletSelection = ({ onSelect }: WalletSelectionProps) => {
   const handleSelectWallet = async (wallet: KeyringPair): Promise<void> => {
     setWallet(wallet);
     await setCurrentAddress(wallet.address);
+    await clearSavedTransactions();
     setIsExpanded(false);
-    onSelect?.();
   };
 
   const handleDeleteWallet = async (
@@ -56,11 +73,15 @@ const WalletSelection = ({ onSelect }: WalletSelectionProps) => {
     event.stopPropagation();
     await KeyringService.deleteWallet(wallet.address);
     await getWallets();
+    await clearSavedTransactions();
   };
 
   return (
-    <div className="bg-mf-ash-500 mt-4 relative">
-      <div className="flex items-center justify-between p-2">
+    <div className="bg-mf-ash-500 mt-4 relative" ref={listenerRef}>
+      <div
+        className="flex items-center justify-between p-2 hover:bg-mf-night-500 transition-colors"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
         {wallet && (
           <>
             <div className="flex items-center gap-3">
@@ -74,13 +95,13 @@ const WalletSelection = ({ onSelect }: WalletSelectionProps) => {
                 </span>
               </div>
             </div>
-            <button onClick={() => setIsExpanded(!isExpanded)} className="p-1">
+            <div className="p-1">
               {isExpanded ? (
                 <ChevronUp className="w-6 h-6 text-mf-silver-300 p-1" />
               ) : (
                 <ChevronDown className="w-6 h-6 text-mf-silver-300 p-1" />
               )}
-            </button>
+            </div>
           </>
         )}
       </div>
@@ -110,12 +131,9 @@ const WalletSelection = ({ onSelect }: WalletSelectionProps) => {
                 </button>
                 <button
                   onClick={(event) => handleDeleteWallet(w, event)}
-                  className="p-2 text-mf-milk-300 hover:text-mf-safety-500 transition-colors rounded-sm hover:bg-mf-night-500"
-                  aria-label={`Delete wallet ${
-                    (w.meta as { username: string }).username
-                  }`}
+                  className="text-mf-night-500 bg-mf-safety-500 rounded-sm hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 transition-colors mr-1"
                 >
-                  <Trash className="w-4 h-4" />
+                  <X className="w-5 h-5" />
                 </button>
               </div>
             ))}

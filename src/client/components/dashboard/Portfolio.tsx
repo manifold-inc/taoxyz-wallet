@@ -42,12 +42,13 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
     }
   };
 
-  const handleAuth = async (): Promise<void> => {
+  const handleAuth = async (): Promise<boolean> => {
     if (await KeyringService.isLocked(address)) {
       await setIsLocked(true);
       await MessageService.sendWalletsLocked();
-      return;
+      return false;
     }
+    return true;
   };
 
   const handleMoveStake = (): void => {
@@ -61,19 +62,20 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
 
   const handleSwap = async (): Promise<void> => {
     if (!api || !selectedStake) return;
-    showNotification({
-      type: NotificationType.Pending,
-      message: "Submitting Transaction...",
-    });
+    const isAuthorized = await handleAuth();
+    if (!isAuthorized) return;
 
     try {
-      await handleAuth();
-      const convertedStake = selectedStake.tokens / 1e9;
+      showNotification({
+        type: NotificationType.Pending,
+        message: "Submitting Transaction...",
+      });
+
       const result = await api.removeStake({
         address,
         validatorHotkey: selectedStake.validatorHotkey,
         subnetId: selectedStake.subnetId,
-        amount: convertedStake,
+        amountInRao: BigInt(selectedStake.tokens),
       });
 
       showNotification({
@@ -94,7 +96,6 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
     }
   };
 
-  // TODO: Spinner style
   if (!api) {
     return (
       <div className="flex justify-center items-center h-16">

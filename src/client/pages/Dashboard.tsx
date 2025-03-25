@@ -27,8 +27,12 @@ export const Dashboard = () => {
   const [copied, setCopied] = useState(false);
   const prevFetchRef = useRef<string | null>(null);
 
-  const fetchData = async (address: string): Promise<void> => {
-    if (!api || !address || address === prevFetchRef.current) return;
+  const fetchData = async (
+    address: string,
+    forceRefresh = false
+  ): Promise<void> => {
+    if (!api || !address || (!forceRefresh && address === prevFetchRef.current))
+      return;
     prevFetchRef.current = address;
 
     const [balanceResult, stakeResult] = await Promise.all([
@@ -86,13 +90,7 @@ export const Dashboard = () => {
   return (
     <div className="flex flex-col items-center min-h-screen">
       <div className="w-74 [&>*]:w-full">
-        <WalletSelection
-          onSelect={() => {
-            if (currentAddress) {
-              void fetchData(currentAddress);
-            }
-          }}
-        />
+        <WalletSelection />
         <div className="rounded-sm bg-mf-ash-500 p-3 flex justify-between mt-4">
           <div className="flex items-center justify-center space-x-2">
             <img src={taoxyz} alt="Taoxyz Logo" className="w-4 h-4" />
@@ -148,7 +146,9 @@ export const Dashboard = () => {
             stakes={stakes}
             address={currentAddress as string}
             onRefresh={() =>
-              currentAddress ? fetchData(currentAddress) : Promise.resolve()
+              currentAddress
+                ? fetchData(currentAddress, true)
+                : Promise.resolve()
             }
           />
         </div>

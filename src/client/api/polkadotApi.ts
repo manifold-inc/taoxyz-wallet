@@ -3,7 +3,6 @@ import type { EventRecord, ExtrinsicStatus } from "@polkadot/types/interfaces";
 import type { ISubmittableResult } from "@polkadot/types/types";
 
 import KeyringService from "../services/KeyringService";
-import { taoToRao } from "../../utils/utils";
 
 import type {
   BittensorSubnet,
@@ -62,11 +61,11 @@ class PolkadotApi {
   public async transfer({
     fromAddress,
     toAddress,
-    amount,
+    amountInRao,
   }: {
     fromAddress: string;
     toAddress: string;
-    amount: number;
+    amountInRao: bigint;
   }): Promise<string> {
     try {
       const wallet = await KeyringService.getWallet(fromAddress);
@@ -78,12 +77,11 @@ class PolkadotApi {
       if (wallet.isLocked) throw new Error("Wallet is locked");
       if (!toWallet.data.free) throw new Error("Invalid recipient address");
 
-      const raoAmount = taoToRao(amount);
       return new Promise((resolve, reject) => {
         let unsubscribe: (() => void) | undefined;
 
         this.api.tx.balances
-          .transferAllowDeath(toAddress, raoAmount)
+          .transferAllowDeath(toAddress, amountInRao)
           .signAndSend(wallet, {}, (result: ISubmittableResult) => {
             const { status, dispatchError, events = [] } = result;
 
@@ -132,23 +130,22 @@ class PolkadotApi {
     address,
     subnetId,
     validatorHotkey,
-    amount,
+    amountInRao,
   }: {
     address: string;
     subnetId: number;
     validatorHotkey: string;
-    amount: number;
+    amountInRao: bigint;
   }): Promise<string> {
     try {
       const wallet = await KeyringService.getWallet(address);
       if (wallet instanceof Error) throw new Error(wallet.message);
 
-      const raoAmount = taoToRao(amount);
       return new Promise((resolve, reject) => {
         let unsubscribe: (() => void) | undefined;
 
         this.api.tx.subtensorModule
-          .addStake(validatorHotkey, subnetId, raoAmount)
+          .addStake(validatorHotkey, subnetId, amountInRao)
           .signAndSend(wallet, {}, (result: ISubmittableResult) => {
             const { status, dispatchError, events = [] } = result;
 
@@ -186,12 +183,12 @@ class PolkadotApi {
     address,
     validatorHotkey,
     subnetId,
-    amount,
+    amountInRao,
   }: {
     address: string;
     validatorHotkey: string;
     subnetId: number;
-    amount: number;
+    amountInRao: bigint;
   }): Promise<string> {
     if (!this.api) throw new Error("API not initialized");
 
@@ -199,12 +196,11 @@ class PolkadotApi {
       const wallet = await KeyringService.getWallet(address);
       if (wallet instanceof Error) throw new Error(wallet.message);
 
-      const raoAmount = taoToRao(amount);
       return new Promise((resolve, reject) => {
         let unsubscribe: (() => void) | undefined;
 
         this.api.tx.subtensorModule
-          .removeStake(validatorHotkey, subnetId, raoAmount)
+          .removeStake(validatorHotkey, subnetId, amountInRao)
           .signAndSend(wallet, {}, (result: ISubmittableResult) => {
             const { status, dispatchError, events = [] } = result;
 
@@ -244,25 +240,30 @@ class PolkadotApi {
     toHotkey,
     fromSubnetId,
     toSubnetId,
-    amount,
+    amountInRao,
   }: {
     address: string;
     fromHotkey: string;
     toHotkey: string;
     fromSubnetId: number;
     toSubnetId: number;
-    amount: number;
+    amountInRao: bigint;
   }): Promise<string> {
     try {
       const wallet = await KeyringService.getWallet(address);
       if (wallet instanceof Error) throw new Error(wallet.message);
 
-      const raoAmount = taoToRao(amount);
       return new Promise((resolve, reject) => {
         let unsubscribe: (() => void) | undefined;
 
         this.api.tx.subtensorModule
-          .moveStake(fromHotkey, toHotkey, fromSubnetId, toSubnetId, raoAmount)
+          .moveStake(
+            fromHotkey,
+            toHotkey,
+            fromSubnetId,
+            toSubnetId,
+            amountInRao
+          )
           .signAndSend(wallet, {}, (result: ISubmittableResult) => {
             const { status, dispatchError, events = [] } = result;
 
@@ -442,7 +443,6 @@ class PolkadotApi {
           status.asInBlock.toHex()
         );
 
-        // Check for transaction failure
         const extrinsicFailed = events.find(
           ({ event }) => event.method === "ExtrinsicFailed"
         );
@@ -452,7 +452,6 @@ class PolkadotApi {
           return;
         }
 
-        // Check for transaction success
         const extrinsicSuccess = events.find(
           ({ event }) => event.method === "ExtrinsicSuccess"
         );

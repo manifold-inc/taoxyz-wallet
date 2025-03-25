@@ -24,7 +24,7 @@ const getStepSubtext = (step: Step) => {
     case Step.SELECT_VALIDATOR:
       return "Select Validator";
     case Step.CONFIRM_SWAP:
-      return "Confirm Swap";
+      return "Review and Confirm Swap";
     default:
       return "";
   }
@@ -59,14 +59,13 @@ export const Swap = () => {
   const [isLoadingValidators, setIsLoadingValidators] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // TODO: Handle edge case if user swaps accounts mid transaction
   const restoreSwap = async () => {
     const result = await chrome.storage.local.get("storeSwapTransaction");
     if (result.storeSwapTransaction) {
       const { subnet, validator } = result.storeSwapTransaction;
-      setStep(Step.CONFIRM_SWAP);
       setSelectedSubnet(subnet);
       setSelectedValidator(validator);
+      setStep(Step.CONFIRM_SWAP);
     }
   };
 

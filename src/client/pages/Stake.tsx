@@ -25,7 +25,7 @@ const getStepSubtext = (step: Step) => {
     case Step.SELECT_VALIDATOR:
       return "Select Validator";
     case Step.CONFIRM_STAKE:
-      return "Confirm Stake";
+      return "Review and Confirm Stake";
     default:
       return "";
   }
@@ -74,16 +74,15 @@ const Stake = () => {
   const [isLoadingSubnet, setIsLoadingSubnet] = useState(false);
   const [isLoadingValidators, setIsLoadingValidators] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [balance, setBalance] = useState<string | null>(null);
 
   const restoreStake = async () => {
     const result = await chrome.storage.local.get("storeStakeTransaction");
     if (result.storeStakeTransaction) {
       const { subnet, validator, stake } = result.storeStakeTransaction;
-      setStep(Step.CONFIRM_STAKE);
       setSelectedSubnet(subnet);
       setSelectedValidator(validator);
       setSelectedStake(stake);
+      setStep(Step.CONFIRM_STAKE);
     }
   };
 
@@ -166,12 +165,9 @@ const Stake = () => {
       ) {
         setSelectedStake(null);
         setValidators([]);
-        setBalance(null);
         return;
       }
       setSelectedStake(stake);
-      const balance = getBalance(stake);
-      setBalance(balance);
       await getSubnet(stake.subnetId);
       await getValidators(stake.subnetId, stake.validatorHotkey);
     },
@@ -226,14 +222,15 @@ const Stake = () => {
           />
         );
       case Step.CONFIRM_STAKE:
-        if (!selectedStake || !selectedSubnet || !selectedValidator || !balance)
+        if (!selectedStake || !selectedSubnet || !selectedValidator)
           return null;
         return (
           <ConfirmStake
+            stake={selectedStake}
             subnet={selectedSubnet}
             validator={selectedValidator}
             address={currentAddress as string}
-            balance={balance as string}
+            balance={getBalance(selectedStake) as string}
           />
         );
     }
@@ -247,19 +244,13 @@ const Stake = () => {
     await getStakes(currentAddress);
     if (location.state?.selectedStake) {
       const stake = location.state.selectedStake;
+      await getSubnet(stake.subnetId);
       await getValidators(stake.subnetId, stake.validatorHotkey);
-      setBalance(getBalance(stake));
     }
   };
 
-  void init();
-
   if (!isInitialized) {
-    return (
-      <div className="flex justify-center items-center h-16">
-        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-mf-milk-300" />
-      </div>
-    );
+    void init();
   }
 
   return (
