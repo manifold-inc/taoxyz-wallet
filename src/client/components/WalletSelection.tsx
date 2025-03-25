@@ -4,14 +4,12 @@ import { WalletCards, ChevronDown, ChevronUp, Plus, X } from "lucide-react";
 import type { KeyringPair } from "@polkadot/keyring/types";
 
 import KeyringService from "../services/KeyringService";
-import { useLock } from "../contexts/LockContext";
 import { useWallet } from "../contexts/WalletContext";
 
 // TODO: Do not show wallet deletion option in lockscreen
 // TODO: Add confirmation for deleting wallet
 const WalletSelection = () => {
   const navigate = useNavigate();
-  const { isLocked } = useLock();
   const { currentAddress, setCurrentAddress } = useWallet();
   const [wallet, setWallet] = useState<KeyringPair | null>(null);
   const [wallets, setWallets] = useState<KeyringPair[]>([]);
@@ -139,19 +137,17 @@ const WalletSelection = () => {
               </div>
             ))}
 
-          {!isLocked && (
-            <button
-              onClick={() => navigate("/add-wallet")}
-              className="w-full flex items-center gap-3 p-2 hover:bg-mf-night-500 transition-colors"
-            >
-              <div className="flex items-center justify-center bg-mf-safety-500 border border-mf-safety-500 rounded-sm p-1">
-                <Plus className="w-5 h-5 text-mf-ash-500" />
-              </div>
-              <div className="text-left text-mf-safety-500 text-xs">
-                <span>Add New Wallet</span>
-              </div>
-            </button>
-          )}
+          <button
+            onClick={() => navigate("/add-wallet")}
+            className="w-full flex items-center gap-3 p-2 hover:bg-mf-night-500 transition-colors"
+          >
+            <div className="flex items-center justify-center bg-mf-safety-500 border border-mf-safety-500 rounded-sm p-1">
+              <Plus className="w-5 h-5 text-mf-ash-500" />
+            </div>
+            <div className="text-left text-mf-safety-500 text-xs">
+              <span>Add New Wallet</span>
+            </div>
+          </button>
         </div>
       )}
     </div>
