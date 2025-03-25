@@ -6,10 +6,11 @@ import type {
   ExtensionMessage,
   MessagePayloadMap,
   ResponseMessage,
+  PopupInfo,
 } from "../types/messages";
 import { generateId } from "../utils/utils";
 
-// This is Service Worker Code.
+const activePopups = new Map<number, PopupInfo>();
 
 const getStoredRequest = async (key: string): Promise<StoredRequest> => {
   const result = await chrome.storage.local.get(key);
@@ -66,13 +67,59 @@ const sendErrorResponse = (
   sendResponse({ success: false, error, details });
 };
 
-const openPopup = async (route: string): Promise<chrome.windows.Window> => {
-  return await chrome.windows.create({
+const rejectRequest = async (popupInfo: PopupInfo): Promise<void> => {
+  console.log("[Background] Rejecting Request:", popupInfo);
+
+  let storedRequest = null;
+  switch (popupInfo.route) {
+    case "connect":
+      storedRequest = await getStoredRequest("connectRequest");
+      if (storedRequest) {
+        await sendMessageToTab(storedRequest.tabId, {
+          type: MESSAGE_TYPES.CONNECT_RESPONSE,
+          payload: {
+            approved: false,
+            wallets: [],
+          },
+        });
+        await cleanupRequest("connectRequest");
+      }
+      break;
+    case "sign":
+      storedRequest = await getStoredRequest("signRequest");
+      if (storedRequest) {
+        await sendMessageToTab(storedRequest.tabId, {
+          type: MESSAGE_TYPES.SIGN_RESPONSE,
+          payload: {
+            id: parseInt(storedRequest.requestId),
+            approved: false,
+          },
+        });
+        await cleanupRequest("signRequest");
+      }
+      break;
+    default:
+      console.log("[Background] Unknown Route:", popupInfo.route);
+      break;
+  }
+};
+
+const openPopup = async (
+  route: string,
+  origin: string
+): Promise<chrome.windows.Window> => {
+  const popup = await chrome.windows.create({
     url: chrome.runtime.getURL(`index.html#/${route}`),
     type: "popup",
     width: 366,
     height: 628,
   });
+
+  if (popup.id) {
+    activePopups.set(popup.id, { route, origin });
+  }
+
+  return popup;
 };
 
 async function handleConnectRequest(
@@ -91,6 +138,19 @@ async function handleConnectRequest(
   }
 
   try {
+    const existingPopupId = Array.from(activePopups.entries()).find(
+      ([_, popup]) => popup.origin === message.payload.origin
+    )?.[0];
+
+    if (existingPopupId) {
+      const existingPopup = activePopups.get(existingPopupId);
+      if (existingPopup) {
+        await chrome.windows.remove(existingPopupId);
+        activePopups.delete(existingPopupId);
+        await rejectRequest(existingPopup);
+      }
+    }
+
     const requestId = generateId();
     await storeRequest("connectRequest", {
       origin: message.payload.origin,
@@ -98,7 +158,7 @@ async function handleConnectRequest(
       tabId: sender.tab.id,
     });
 
-    await openPopup("connect");
+    await openPopup("connect", message.payload.origin);
     sendResponse({ success: true });
     console.log("[Background] New connect request:", requestId);
   } catch (error) {
@@ -173,6 +233,19 @@ async function handleSignRequest(
       return;
     }
 
+    const existingPopupId = Array.from(activePopups.entries()).find(
+      ([_, popup]) => popup.origin === origin
+    )?.[0];
+
+    if (existingPopupId) {
+      const existingPopup = activePopups.get(existingPopupId);
+      if (existingPopup) {
+        await chrome.windows.remove(existingPopupId);
+        activePopups.delete(existingPopupId);
+        await rejectRequest(existingPopup);
+      }
+    }
+
     const requestId = generateId();
     await storeRequest("signRequest", {
       address,
@@ -182,7 +255,7 @@ async function handleSignRequest(
       tabId: sender.tab.id,
     });
 
-    await openPopup("sign");
+    await openPopup("sign", origin);
     sendResponse({ success: true });
     console.log("[Background] Sign request initiated:", {
       requestId,
@@ -315,5 +388,20 @@ chrome.alarms.onAlarm.addListener((alarm) => {
         type: MESSAGE_TYPES.WALLETS_LOCKED,
       });
     });
+  }
+});
+
+// Popup close handler
+chrome.windows.onRemoved.addListener(async (windowId) => {
+  const popupInfo = activePopups.get(windowId);
+  if (!popupInfo) return;
+  activePopups.delete(windowId);
+
+  try {
+    const storageKey = `${popupInfo.route}Request`;
+    await getStoredRequest(storageKey);
+    await rejectRequest(popupInfo);
+  } catch {
+    console.log("[Background] Request Already Handled");
   }
 });

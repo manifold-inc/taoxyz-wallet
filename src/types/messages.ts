@@ -80,6 +80,11 @@ export interface SuccessResponse {
 
 export type ResponseMessage = ErrorResponse | SuccessResponse;
 
+export interface PopupInfo {
+  route: string;
+  origin: string;
+}
+
 export const MESSAGE_TYPES = {
   CONNECT_REQUEST: "dapp(connectRequest)",
   CONNECT_RESPONSE: "ext(connectResponse)",

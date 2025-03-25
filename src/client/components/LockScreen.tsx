@@ -9,7 +9,6 @@ import WalletSelection from "./WalletSelection";
 import { NotificationType } from "../../types/client";
 import taoxyzLogo from "../../../public/icons/taoxyz.svg";
 
-// TODO: Handle edge case when user forgets password and has only one account - 3, warning, allow if needed - destroy after 5 failed attempts
 const LockScreen = () => {
   const { setIsLocked } = useLock();
   const { showNotification } = useNotification();
