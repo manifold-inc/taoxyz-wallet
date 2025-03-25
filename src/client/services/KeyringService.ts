@@ -72,6 +72,7 @@ export const KeyringService = {
     }
   },
 
+  // TODO: Error handling consistent return error
   async sign(
     address: string,
     payload: SignerPayloadJSON,
@@ -123,7 +124,8 @@ export const KeyringService = {
       const permissions = (meta.websitePermissions as Permissions) || {};
 
       if (removeWebsite) {
-        permissions[origin] = undefined;
+        // eslint-disable-next-line
+        delete permissions[origin];
       } else {
         permissions[origin] = allowAccess;
       }
@@ -134,12 +136,16 @@ export const KeyringService = {
         [`permissions_${wallet.address}`]: { permissions },
       });
 
-      console.log("[KeyringService] Updated permissions:", {
-        address: wallet.address,
-        permissions: permissions,
-        origin,
-        allowAccess,
-      });
+      console.log(
+        "[KeyringService] Updated Permissions:",
+        {
+          address: wallet.address,
+          permissions: permissions,
+          origin,
+          allowAccess,
+        },
+        wallet.meta
+      );
       return true;
     } catch (error) {
       console.error("[KeyringService] Updating permissions failed:", error);

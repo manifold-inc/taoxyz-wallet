@@ -91,14 +91,14 @@ const ExpandedStake = ({
       <div className="flex mt-4 space-x-4">
         <button
           onClick={handleSwap}
-          className="flex-1 p-2 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 hover:border-mf-safety-500 transition-colors
+          className="flex-1 p-2 border-sm bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 hover:border-mf-safety-500 transition-colors
           "
         >
           Swap
         </button>
         <button
           onClick={onMoveStake}
-          className="flex-1 p-2 bg-mf-sybil-500 hover:bg-mf-night-500 hover:text-mf-sybil-500 border-2 border-mf-sybil-500 hover:border-mf-sybil-500 transition-colors"
+          className="flex-1 p-2 border-sm bg-mf-sybil-500 hover:bg-mf-night-500 hover:text-mf-sybil-500 border-2 border-mf-sybil-500 hover:border-mf-sybil-500 transition-colors"
         >
           Move
         </button>

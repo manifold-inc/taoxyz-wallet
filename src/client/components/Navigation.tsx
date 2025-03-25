@@ -19,17 +19,17 @@ const Navigation = () => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 flex justify-center">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 flex bg-mf-night-500 justify-center">
       <div className="w-74 h-14">
         <div className="flex items-center justify-evenly h-full">
           {links.map((link) => (
             <Link
               key={link.path}
               to={link.path}
-              className={`flex items-center hover:bg-mf-ash-500 p-4 ${
+              className={`flex items-center p-4 ${
                 location.pathname === link.path
-                  ? "text-mf-safety-500"
-                  : "text-mf-milk-300"
+                  ? "text-mf-safety-500 bg-mf-ash-500"
+                  : "text-mf-milk-300 hover:bg-mf-ash-500"
               }`}
             >
               {link.icon}

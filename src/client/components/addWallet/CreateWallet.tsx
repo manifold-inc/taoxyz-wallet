@@ -164,7 +164,7 @@ const CreateWallet = ({ onSuccess, onBack }: CreateWalletProps) => {
         <button
           type="button"
           onClick={onBack}
-          className="w-44 rounded-sm text-sm text-mf-safety-500 bg-mf-night-500 hover:bg-mf-safety-500 hover:text-mf-night-500 border-2 border-mf-safety-500 transition-colors p-1.5"
+          className="w-44 border-sm text-sm text-mf-safety-500 bg-mf-night-500 hover:bg-mf-safety-500 hover:text-mf-night-500 border-2 border-mf-safety-500 transition-colors p-1.5"
         >
           <span>Back</span>
         </button>
@@ -176,7 +176,7 @@ const CreateWallet = ({ onSuccess, onBack }: CreateWalletProps) => {
             usernameStatus !== "Valid Username" ||
             passwordStatus !== "Valid Password"
           }
-          className="w-44 rounded-sm text-sm text-mf-night-500 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 transition-colors p-1.5"
+          className="w-44 border-sm text-sm text-mf-night-500 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 transition-colors p-1.5"
         >
           <span>Create</span>
         </button>
