@@ -46,9 +46,9 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
     if (await KeyringService.isLocked(address)) {
       await setIsLocked(true);
       await MessageService.sendWalletsLocked();
-      return true;
+      return false;
     }
-    return false;
+    return true;
   };
 
   const handleMoveStake = (): void => {

@@ -60,9 +60,9 @@ const Transfer = () => {
       await setIsLocked(true);
       await MessageService.sendWalletsLocked();
       setIsSubmitting(false);
-      return true;
+      return false;
     }
-    return false;
+    return true;
   };
 
   const handleSubmit = async () => {
