@@ -24,22 +24,26 @@ const Connect = () => {
   const [wallets, setWallets] = useState<Wallet[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  const requestConnect = async () => {
+  const getRequest = async (): Promise<AuthRequest | null> => {
     try {
       const result = await chrome.storage.local.get(["connectRequest"]);
-      if (result.connectRequest) {
-        setRequest(result.connectRequest);
-      } else {
-        showNotification({
-          type: NotificationType.Error,
-          message: "Request Not Found",
-        });
-        setTimeout(() => {
-          window.close();
-        }, 2000);
-        return;
-      }
+      if (!result.connectRequest) throw new Error();
+      setRequest(result.connectRequest);
+      return result.connectRequest;
+    } catch {
+      showNotification({
+        type: NotificationType.Error,
+        message: "Failed to Get Request",
+      });
+      setTimeout(() => {
+        window.close();
+      }, 2000);
+      return null;
+    }
+  };
 
+  const loadWallets = async (request: AuthRequest) => {
+    try {
       const keyringWallets = await KeyringService.getWallets();
       const walletsWithPermissions = (
         await Promise.all(
@@ -47,10 +51,7 @@ const Connect = () => {
             const permissions = await KeyringService.getPermissions(
               wallet.address
             );
-            if (
-              result.connectRequest?.origin &&
-              permissions[result.connectRequest.origin] === false
-            ) {
+            if (request.origin && permissions[request.origin] === false) {
               return null;
             }
             const selectableWallet = {
@@ -72,7 +73,7 @@ const Connect = () => {
     } catch {
       showNotification({
         type: NotificationType.Error,
-        message: "Failed to Connect",
+        message: "Failed to Load Wallets",
       });
       setTimeout(() => {
         window.close();
@@ -82,10 +83,10 @@ const Connect = () => {
   };
 
   const toggleWallet = (address: string) => {
-    setWallets((prev) =>
-      prev.map((wallet) => ({
+    setWallets((wallets) =>
+      wallets.map((wallet) => ({
         ...wallet,
-        selected: wallet.address === address ? !wallet.selected : false,
+        selected: wallet.address === address,
       }))
     );
   };
@@ -159,7 +160,9 @@ const Connect = () => {
   const init = async () => {
     if (isInitialized) return;
     setIsInitialized(true);
-    await requestConnect();
+    const request = await getRequest();
+    if (!request) return;
+    await loadWallets(request);
   };
 
   if (!isInitialized) {
