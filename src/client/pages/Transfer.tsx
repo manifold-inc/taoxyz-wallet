@@ -11,7 +11,6 @@ import { taoToRao } from "../../utils/utils";
 import { NotificationType } from "../../types/client";
 import taoxyzLogo from "../../../public/icons/taoxyz.svg";
 
-// TODO: Error handling for invalid address
 const Transfer = () => {
   const navigate = useNavigate();
   const { setIsLocked } = useLock();
@@ -44,8 +43,6 @@ const Transfer = () => {
         const amountInRao = value ? taoToRao(numValue) : 0n;
         if (amountInRao > balanceInRao) {
           setAmountError("Insufficient Balance");
-        } else if (amountInRao === 0n) {
-          setAmountError("Amount Must Be Greater Than 0");
         }
         setAmount(value);
       }

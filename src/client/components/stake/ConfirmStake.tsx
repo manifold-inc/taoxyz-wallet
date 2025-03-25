@@ -39,7 +39,6 @@ export const ConfirmStake = ({
 
   const alphaAmountInRao: bigint = taoToRao(parseFloat(amount) || 0);
   const balanceInRao: bigint = taoToRao(parseFloat(balance));
-  // TODO: Figure out slippage calculation for stake movement
   const slippage = useMemo(() => {
     if (!alphaAmountInRao || !subnet.taoIn || !stake.tokens) return null;
     return calculateSlippage(

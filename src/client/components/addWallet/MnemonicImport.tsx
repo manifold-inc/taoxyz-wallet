@@ -10,28 +10,40 @@ const MnemonicImport = ({ onContinue, onBack }: MnemonicImportProps) => {
   const [mnemonic, setMnemonic] = useState("");
   const [mnemonicSelected, setMnemonicSelected] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isValid, setIsValid] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (event: React.FormEvent): void => {
-    event.preventDefault();
-    setError(null);
-
+  const validateMnemonic = () => {
     if (!mnemonic.trim()) {
       setError("Recovery Phrase is Required");
+      setIsValid(false);
       return;
     }
 
     const wordCount = mnemonic.trim().split(/\s+/).length;
     if (wordCount !== 12) {
       setError("Recovery Phrase Must Be 12 Words");
+      setIsValid(false);
       return;
     }
 
     if (!KeyringService.validateMnemonic(mnemonic.trim())) {
       setError("Recovery Phrase is Invalid");
+      setIsValid(false);
       return;
     }
 
-    onContinue(mnemonic.trim());
+    setIsValid(true);
+  };
+
+  const handleSubmit = (event: React.FormEvent): void => {
+    event.preventDefault();
+    setError(null);
+    setSubmitted(true);
+    validateMnemonic();
+    if (isValid) {
+      onContinue(mnemonic.trim());
+    }
   };
 
   return (
@@ -46,16 +58,21 @@ const MnemonicImport = ({ onContinue, onBack }: MnemonicImportProps) => {
         onChange={(e) => {
           setMnemonic(e.target.value);
           setError(null);
+          setSubmitted(false);
         }}
         onFocus={() => setMnemonicSelected(true)}
         onBlur={() => setMnemonicSelected(false)}
-        className={`p-3 h-28 text-sm rounded-sm bg-mf-ash-300 text-mf-milk-300 placeholder:text-mf-milk-300 border-none focus:outline-none focus:ring-2 ${
-          error ? "ring-2 ring-mf-safety-500" : "focus:ring-mf-safety-500"
+        className={`p-3 h-28 text-sm rounded-sm bg-mf-ash-300 text-mf-milk-300 placeholder:text-mf-milk-300 focus:outline-none ${
+          mnemonicSelected || submitted
+            ? `border-2 ${
+                isValid ? "border-mf-sybil-500" : "border-mf-safety-500"
+              }`
+            : "border-none"
         }`}
         placeholder="Enter 12 Word Recovery Phrase"
       />
       <div className="h-8">
-        {error && mnemonicSelected && (
+        {error && (mnemonicSelected || submitted) && (
           <p className="mt-2 text-xs text-left text-mf-safety-500">{error}</p>
         )}
       </div>
