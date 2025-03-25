@@ -16,8 +16,6 @@ interface Wallet extends InjectedAccount {
   selected: boolean;
 }
 
-// TODO: Close window if theres new request while open and automatically reject old one
-// TODO: Handle if user clicks on the x on the popup, automatically reject the request
 const Connect = () => {
   const { showNotification } = useNotification();
   const [request, setRequest] = useState<AuthRequest | null>(null);
