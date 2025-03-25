@@ -94,16 +94,16 @@ const CreateWallet = ({ onSuccess, onBack }: CreateWalletProps) => {
         onChange={handleUsernameChange}
         onFocus={() => setUsernameSelected(true)}
         onBlur={() => setUsernameSelected(false)}
-        className={`p-3 rounded-sm text-base text-mf-milk-300 bg-mf-ash-300 placeholder:text-mf-milk-300 border-none focus:outline-none focus:ring-2 ${
+        className={`p-3 rounded-sm text-base text-mf-milk-300 bg-mf-ash-300 placeholder:text-mf-milk-300 border-2 focus:outline-none ${
           usernameStatus === "Valid Username" && !usernameSelected
-            ? ""
+            ? "border-transparent"
             : usernameStatus === "Valid Username"
-            ? "ring-2 ring-mf-sybil-500"
+            ? "border-mf-sybil-500"
             : usernameSelected
-            ? "ring-2 ring-mf-safety-500"
+            ? "border-mf-safety-500"
             : usernameStatus
-            ? "ring-2 ring-mf-safety-500"
-            : ""
+            ? "border-mf-safety-500"
+            : "border-transparent focus:border-mf-safety-500"
         }`}
         placeholder="Enter Username"
         required
@@ -130,16 +130,16 @@ const CreateWallet = ({ onSuccess, onBack }: CreateWalletProps) => {
         onChange={handlePasswordChange}
         onFocus={() => setPasswordSelected(true)}
         onBlur={() => setPasswordSelected(false)}
-        className={`p-3 rounded-sm text-base text-mf-milk-300 bg-mf-ash-300 placeholder:text-mf-milk-300 border-none focus:outline-none focus:ring-2 ${
+        className={`p-3 rounded-sm text-base text-mf-milk-300 bg-mf-ash-300 placeholder:text-mf-milk-300 border-2 focus:outline-none ${
           passwordStatus === "Valid Password" && !passwordSelected
-            ? ""
+            ? "border-transparent"
             : passwordStatus === "Valid Password"
-            ? "ring-2 ring-mf-sybil-500"
+            ? "border-mf-sybil-500"
             : passwordSelected
-            ? "ring-2 ring-mf-safety-500"
+            ? "border-mf-safety-500"
             : passwordStatus
-            ? "ring-2 ring-mf-safety-500"
-            : ""
+            ? "border-mf-safety-500"
+            : "border-transparent focus:border-mf-safety-500"
         }`}
         placeholder="Enter Password"
         required

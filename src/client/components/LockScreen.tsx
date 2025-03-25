@@ -87,14 +87,14 @@ const LockScreen = () => {
               onFocus={() => setPasswordSelected(true)}
               onBlur={() => setPasswordSelected(false)}
               placeholder="Enter Password"
-              className={`p-3 rounded-sm text-base text-mf-milk-300 bg-mf-ash-300 placeholder:text-mf-milk-300 border-none focus:outline-none focus:ring-2 ${
+              className={`p-3 rounded-sm text-base text-mf-milk-300 bg-mf-ash-300 placeholder:text-mf-milk-300 border-2 focus:outline-none ${
                 error
-                  ? "ring-2 ring-mf-safety-500"
+                  ? "border-mf-safety-500"
                   : password.length >= 3
                   ? passwordSelected
-                    ? "ring-2 ring-mf-sybil-500"
-                    : ""
-                  : "focus:ring-mf-safety-500"
+                    ? "border-mf-sybil-500"
+                    : "border-transparent"
+                  : "border-transparent focus:border-mf-safety-500"
               }`}
               minLength={3}
             />
