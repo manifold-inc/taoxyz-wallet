@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, ChevronUp, X, ArrowLeftToLine } from "lucide-react";
+import { X, ArrowLeftToLine } from "lucide-react";
 import type { KeyringPair } from "@polkadot/keyring/types";
 
 import { useNotification } from "../../contexts/NotificationContext";
@@ -12,6 +12,7 @@ interface ConnectedSitesProps {
   onClose: () => void;
 }
 
+// TODO: Add cursor-pointer style to every element that can be clicked
 const ConnectedSites = ({ onClose }: ConnectedSitesProps) => {
   const { showNotification } = useNotification();
   const [websitePermissions, setWebsitePermissions] =
@@ -38,7 +39,7 @@ const ConnectedSites = ({ onClose }: ConnectedSitesProps) => {
             };
           }
 
-          if (hasAccess) permissionsPerWebsite[website].walletCount++;
+          permissionsPerWebsite[website].walletCount++;
           permissionsPerWebsite[website].wallets.push({
             address: wallet.address,
             username: (wallet.meta.username as string) || "Unnamed Wallet",
@@ -59,8 +60,10 @@ const ConnectedSites = ({ onClose }: ConnectedSitesProps) => {
   const handleWebsiteAccessToggle = async (
     website: string,
     address: string,
-    allowed: boolean
+    allowed: boolean,
+    event: React.MouseEvent
   ) => {
+    event.stopPropagation();
     try {
       await KeyringService.updatePermissions(website, address, allowed);
       loadPermissions();
@@ -72,7 +75,11 @@ const ConnectedSites = ({ onClose }: ConnectedSitesProps) => {
     }
   };
 
-  const handleRemoveWebsite = async (website: string) => {
+  const handleRemoveWebsite = async (
+    website: string,
+    event: React.MouseEvent
+  ) => {
+    event.stopPropagation();
     if (!window.confirm(`Remove access for ${website}?`)) return;
     try {
       for (const wallet of wallets) {
@@ -103,8 +110,8 @@ const ConnectedSites = ({ onClose }: ConnectedSitesProps) => {
   }
 
   return (
-    <div className="flex flex-col items-center min-h-screen">
-      <div className="relative flex justify-center items-center w-72 mt-12">
+    <div className="flex flex-col items-center h-screen">
+      <div className="relative flex justify-center items-center w-76 mt-12">
         <ArrowLeftToLine
           className="absolute left-3 w-6 h-6 text-mf-milk-500"
           onClick={onClose}
@@ -112,84 +119,87 @@ const ConnectedSites = ({ onClose }: ConnectedSitesProps) => {
         <img src={taoxyz} alt="Taoxyz Logo" className="w-16 h-16" />
       </div>
 
-      <div className="flex flex-col items-center w-72 [&>*]:w-full mt-4 space-y-4">
-        <div className="text-center text-lg text-mf-milk-300">
+      <div className="flex flex-col items-center w-76 [&>*]:w-full mt-4">
+        <div className="text-center text-lg text-mf-milk-300 mb-4">
           <h1>Connected Sites</h1>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-3 space-y-2 bg-mf-ash-500">
+        <div className="overflow-y-auto h-88 space-y-2 px-2 rounded-sm">
           {Object.entries(websitePermissions).map(
             ([website, { walletCount, wallets }]) => (
               <div
                 key={website}
-                className="border-2 border-mf-safety-500 rounded-sm"
+                className={`bg-mf-ash-500 relative border-2 ${
+                  expandedWebsite === website
+                    ? "border-mf-sybil-500"
+                    : "border-mf-ash-500"
+                }`}
               >
                 <div
-                  className="flex items-center justify-between p-3 cursor-pointer"
+                  className="flex items-center justify-between cursor-pointer p-2"
                   onClick={() =>
                     setExpandedWebsite(
                       expandedWebsite === website ? null : website
                     )
                   }
                 >
-                  <div className="flex items-center justify-between w-full">
-                    <div className="flex items-center space-x-2 flex-1 min-w-0">
-                      <span className="text-xs text-mf-milk-300 truncate">
-                        {website}
-                      </span>
-                      <span className="bg-mf-safety-300 text-mf-milk-300 text-xs px-2 rounded-lg shrink-0">
+                  <div className="flex items-center justify-between w-full space-x-2">
+                    <div className="flex items-center text-xs text-mf-milk-300 bg-mf-ash-300 rounded-xs p-1 flex-1 min-w-0">
+                      <span className="truncate">{website}</span>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <span className="bg-mf-sybil-500 text-mf-night-500 text-xs w-6 h-6 flex items-center justify-center border-2 border-mf-sybil-500 rounded-full">
                         {walletCount}
                       </span>
-                    </div>
-                    <div className="flex items-center space-x-2 ml-2 shrink-0">
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRemoveWebsite(website);
-                        }}
-                        className="text-mf-safety-500 hover:text-mf-safety-300"
+                        onClick={(event) => handleRemoveWebsite(website, event)}
+                        className="text-mf-night-500 bg-mf-safety-500 rounded-sm hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 transition-colors w-6 h-6 flex items-center justify-center"
                       >
                         <X className="w-4 h-4" />
                       </button>
-                      {expandedWebsite === website ? (
-                        <ChevronUp className="w-4 h-4 text-mf-silver-300" />
-                      ) : (
-                        <ChevronDown className="w-4 h-4 text-mf-silver-300" />
-                      )}
                     </div>
                   </div>
                 </div>
 
                 {expandedWebsite === website && (
-                  <div className="border-t border-mf-ash-500 px-3 py-2">
-                    <div className="space-y-2">
+                  <div className="border-t border-mf-ash-300">
+                    <div className="space-y-2 p-2">
                       {wallets.map((wallet) => (
                         <div
                           key={wallet.address}
-                          className="flex items-center justify-between py-1"
+                          className="flex items-center justify-between hover:bg-mf-night-500 transition-colors"
                         >
-                          <span className="text-xs text-mf-silver-300 truncate mr-4">
-                            {wallet.username}
-                            <span className="text-mf-silver-500 ml-1">
-                              ({wallet.address.slice(0, 4)}...
-                              {wallet.address.slice(-4)})
-                            </span>
-                          </span>
-                          <label className="relative inline-flex items-center cursor-pointer shrink-0">
-                            <input
-                              type="checkbox"
-                              checked={wallet.hasAccess}
-                              onChange={(e) =>
+                          <div className="flex items-center justify-between w-full space-x-2">
+                            <div className="flex items-center text-xs text-mf-milk-300 bg-mf-ash-300 rounded-xs p-1 space-x-2 flex-1 min-w-0">
+                              <span className="truncate">
+                                {wallet.username}
+                              </span>
+                              <span>
+                                ({wallet.address.slice(0, 6)}...
+                                {wallet.address.slice(-6)})
+                              </span>
+                            </div>
+                            <div
+                              className="relative inline-flex items-center cursor-pointer shrink-0"
+                              onClick={(event) => {
                                 handleWebsiteAccessToggle(
                                   website,
                                   wallet.address,
-                                  e.target.checked
-                                )
-                              }
-                              className="sr-only peer"
-                            />
-                            <div className="w-8 h-4 bg-mf-ash-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-mf-silver-300 after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-mf-safety-300"></div>
-                          </label>
+                                  !wallet.hasAccess,
+                                  event
+                                );
+                              }}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={wallet.hasAccess}
+                                readOnly
+                                className="sr-only peer"
+                              />
+                              <div className="w-14 h-6 bg-mf-ash-300 text-mf-safety-500 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-mf-safety-500 after:rounded-full after:h-4 after:w-6 after:transition-all peer-checked:after:bg-mf-sybil-500"></div>
+                            </div>
+                          </div>
                         </div>
                       ))}
                     </div>
