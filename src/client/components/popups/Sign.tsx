@@ -38,7 +38,7 @@ const Sign = () => {
     }
   };
 
-  const handleSign = async () => {
+  const handleResponse = async (approved: boolean) => {
     try {
       if (!request) {
         showNotification({
@@ -51,68 +51,55 @@ const Sign = () => {
         return;
       }
 
-      const type = checkPayloadType(request.data);
-      if (type === "INVALID") {
-        showNotification({
-          type: NotificationType.Error,
-          message: "Invalid Payload Format",
+      if (approved) {
+        const type = checkPayloadType(request.data);
+        if (type === "INVALID") {
+          showNotification({
+            type: NotificationType.Error,
+            message: "Invalid Payload Format",
+          });
+          setTimeout(() => {
+            window.close();
+          }, 3000);
+          return;
+        }
+
+        const signature: `0x${string}` = await KeyringService.sign(
+          request.address,
+          request.data as SignerPayloadJSON,
+          password
+        );
+
+        // TODO: Handle raw payload
+        const response: SignResponsePayload = {
+          id: parseInt(request.requestId),
+          signature,
+          approved: true,
+        };
+
+        await chrome.runtime.sendMessage({
+          type: MESSAGE_TYPES.SIGN_RESPONSE,
+          payload: response,
         });
-        setTimeout(() => {
-          window.close();
-        }, 3000);
-        return;
+      } else {
+        const response: SignResponsePayload = {
+          id: parseInt(request.requestId),
+          approved: false,
+        };
+
+        await chrome.runtime.sendMessage({
+          type: MESSAGE_TYPES.SIGN_RESPONSE,
+          payload: response,
+        });
       }
-
-      const signature: `0x${string}` = await KeyringService.sign(
-        request.address,
-        request.data as SignerPayloadJSON,
-        password
-      );
-
-      // TODO: Handle raw payload
-
-      const response: SignResponsePayload = {
-        id: parseInt(request.requestId),
-        signature,
-        approved: true,
-      };
-
-      await chrome.runtime.sendMessage({
-        type: MESSAGE_TYPES.SIGN_RESPONSE,
-        payload: response,
-      });
 
       window.close();
     } catch {
       showNotification({
         type: NotificationType.Error,
-        message: "Failed to Sign",
+        message: approved ? "Failed to Sign" : "Failed to Reject",
       });
     }
-  };
-
-  const handleCancel = async () => {
-    if (!request) {
-      showNotification({
-        type: NotificationType.Error,
-        message: "No Request Found",
-      });
-      setTimeout(() => {
-        window.close();
-      }, 3000);
-      return;
-    }
-
-    const response: SignResponsePayload = {
-      id: parseInt(request.requestId),
-      approved: false,
-    };
-
-    await chrome.runtime.sendMessage({
-      type: MESSAGE_TYPES.SIGN_RESPONSE,
-      payload: response,
-    });
-    window.close();
   };
 
   const checkPayloadType = (data: SignerPayloadJSON | SignerPayloadRaw) => {
@@ -132,26 +119,20 @@ const Sign = () => {
     if (type === "JSON") {
       const payload = request.data as SignerPayloadJSON;
       return (
-        <div className="grid grid-cols-[100px,1fr] gap-2">
-          <div className="text-mf-silver-500 truncate">
-            <p className="font-semibold">Method:</p>
-            <p className="text-mf-silver-500">{payload.method}</p>
+        <div className="flex">
+          <div className="flex flex-col flex-shrink-0">
+            <p className="text-mf-milk-300">Method:</p>
+            <p className="text-mf-milk-300">Block Hash:</p>
+            <p className="text-mf-milk-300">Genesis:</p>
+            <p className="text-mf-milk-300">Era:</p>
+            <p className="text-mf-milk-300">Nonce:</p>
           </div>
-          <div className="text-mf-silver-500 truncate">
-            <p className="font-semibold">Block Hash:</p>
-            <p className="text-mf-silver-500">{payload.blockHash}</p>
-          </div>
-          <div className="text-mf-silver-500 truncate">
-            <p className="font-semibold">Genesis:</p>
-            <p className="text-mf-silver-500">{payload.genesisHash}</p>
-          </div>
-          <div className="text-mf-silver-500 truncate">
-            <p className="font-semibold">Era:</p>
-            <p className="text-mf-silver-500">{payload.era}</p>
-          </div>
-          <div className="text-mf-silver-500 truncate">
-            <p className="font-semibold">Nonce:</p>
-            <p className="text-mf-silver-500">{payload.nonce}</p>
+          <div className="flex flex-col min-w-0 flex-1 ml-2">
+            <p className="text-mf-sybil-500 truncate">{payload.method}</p>
+            <p className="text-mf-sybil-500 truncate">{payload.blockHash}</p>
+            <p className="text-mf-sybil-500 truncate">{payload.genesisHash}</p>
+            <p className="text-mf-sybil-500 truncate">{payload.era}</p>
+            <p className="text-mf-sybil-500 truncate">{payload.nonce}</p>
           </div>
         </div>
       );
@@ -160,14 +141,14 @@ const Sign = () => {
     if (type === "RAW") {
       const payload = request.data as SignerPayloadRaw;
       return (
-        <div className="grid grid-cols-[100px,1fr] gap-2">
-          <div className="text-mf-silver-500 truncate">
-            <p className="font-semibold">Data:</p>
-            <p className="text-mf-silver-500">{payload.data}</p>
+        <div className="flex space-x-2">
+          <div className="flex flex-col">
+            <p className="text-mf-milk-300">Data:</p>
+            <p className="text-mf-milk-300">Type:</p>
           </div>
-          <div className="text-mf-silver-500 truncate">
-            <p className="font-semibold">Type:</p>
-            <p className="text-mf-silver-500">Raw Signature</p>
+          <div className="flex flex-col min-w-0">
+            <p className="text-mf-sybil-500 truncate">{payload.data}</p>
+            <p className="text-mf-sybil-500 truncate">Raw Signature</p>
           </div>
         </div>
       );
@@ -188,67 +169,55 @@ const Sign = () => {
   }
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header with logo */}
-      <div className="px-4 pb-4 pt-6 border-b border-mf-ash-500 flex items-center justify-center gap-2">
-        <img src={taoxyz} alt="Taoxyz Logo" className="w-6 h-6" />
-        <p className="text-mf-silver-300 text-lg font-semibold pl-2">
-          Confirm Transaction
-        </p>
+    <div className="flex flex-col items-center h-full">
+      <div className="flex flex-col justify-center items-center space-y-2">
+        <img src={taoxyz} alt="Taoxyz Logo" className="w-16 h-16 mt-12" />
+        <h1 className="text-lg text-mf-milk-300">Sign Request</h1>
       </div>
 
-      {/* Main content */}
-      <div className="flex-1 p-4 space-y-4">
-        {/* Key Information */}
-        <div className="bg-mf-ash-500/30 border border-mf-sybil-700 rounded-lg p-4">
-          <div className="space-y-2 text-mf-silver-500 text-xs">
-            <div className="flex gap-2 items-center">
-              <span className="font-semibold">Origin:</span>
-              <span>{request?.origin}</span>
-            </div>
-            <div className="flex gap-2 items-center">
-              <span className="font-semibold">Address:</span>
-              <span>{request?.address.slice(0, 16)}...</span>
-            </div>
-          </div>
+      <div className="mt-6 bg-mf-ash-500 border-sm border-2 border-mf-sybil-500 p-3 text-sm flex space-x-2 w-80">
+        <div className="flex flex-col">
+          <p className="text-mf-milk-300">Origin</p>
+          <p className="text-mf-milk-300">Address</p>
         </div>
-
-        {/* Transaction Details */}
-        <div className="bg-mf-ash-500/20 rounded-lg p-4">
-          <div className="text-xs text-mf-safety-500 mb-2 font-semibold">
-            Details
-          </div>
-          <div className="space-y-2">{renderPayload()}</div>
+        <div className="flex flex-col min-w-0">
+          <p className="text-mf-sybil-500 truncate">{request?.origin}</p>
+          <p className="text-mf-sybil-500">
+            {request?.address.slice(0, 6)}...{request?.address.slice(-6)}
+          </p>
         </div>
       </div>
 
-      {/* Footer with password and buttons */}
-      <div className="border-t border-mf-ash-500 p-4 space-y-4">
+      <div className="mt-4 w-80 [&>*]:w-full bg-mf-ash-500 border-sm border-2 border-mf-ash-500 p-2">
+        {renderPayload()}
+      </div>
+
+      <div className="mt-4 w-80 [&>*]:w-full space-y-4">
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Enter password to sign"
-          className="w-full px-3 py-2 text-sm bg-mf-ash-500/30 border border-mf-ash-500 rounded-lg focus:outline-none focus:ring-1 focus:ring-mf-sybil-500 text-mf-silver-500 placeholder-mf-silver-500"
+          placeholder="Enter Password to Sign"
+          className="p-2 text-sm bg-mf-ash-500 border-2 border-mf-ash-500 border-sm focus:outline-none focus:border-mf-sybil-500 text-mf-silver-500 placeholder-mf-silver-500"
         />
 
         <div className="flex space-x-2">
           <button
-            onClick={handleSign}
-            disabled={!password}
-            className={`flex-1 text-sm rounded-lg px-4 py-3 transition-colors ${
-              !password
-                ? "bg-mf-ash-500 text-mf-silver-500 cursor-not-allowed"
-                : "bg-mf-sybil-700 hover:bg-mf-sybil-500 text-mf-ash-500"
-            }`}
-          >
-            Sign
-          </button>
-          <button
-            onClick={handleCancel}
-            className="flex-1 text-sm rounded-lg bg-mf-ash-500 hover:bg-mf-ash-400 px-4 py-3 text-mf-safety-300 transition-colors"
+            onClick={() => handleResponse(false)}
+            className="flex-1 text-sm border-2 border-sm border-mf-safety-500 bg-mf-ash-500 hover:bg-mf-safety-500 hover:text-mf-night-500 p-2 text-mf-safety-500 transition-colors"
           >
             Reject
+          </button>
+          <button
+            onClick={() => handleResponse(true)}
+            disabled={!password}
+            className={`flex-1 text-sm border-2 border-sm border-mf-sybil-500 ${
+              !password
+                ? "bg-mf-ash-500 text-mf-silver-500 cursor-not-allowed"
+                : "bg-mf-sybil-500 hover:bg-mf-night-500 hover:text-mf-sybil-500 text-mf-night-500"
+            } p-2 transition-colors`}
+          >
+            Sign
           </button>
         </div>
       </div>
