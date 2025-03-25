@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { InjectedAccount } from "@polkadot/extension-inject/types";
 
+import { useNotification } from "../../contexts/NotificationContext";
 import KeyringService from "../../services/KeyringService";
+import { NotificationType } from "../../../types/client";
 import { MESSAGE_TYPES } from "../../../types/messages";
 import taoxyzLogo from "../../../../public/icons/taoxyz.svg";
 
@@ -14,57 +16,70 @@ interface Wallet extends InjectedAccount {
   selected: boolean;
 }
 
+// TODO: Close window if theres new request while open and automatically reject old one
+// TODO: Handle if user clicks on the x on the popup, automatically reject the request
 const Connect = () => {
+  const { showNotification } = useNotification();
   const [request, setRequest] = useState<AuthRequest | null>(null);
   const [wallets, setWallets] = useState<Wallet[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  useEffect(() => {
-    const requestConnect = async () => {
-      try {
-        const result = await chrome.storage.local.get(["connectRequest"]);
-        if (result.connectRequest) {
-          setRequest(result.connectRequest);
-        }
-
-        const keyringWallets = await KeyringService.getWallets();
-        const walletsWithPermissions = (
-          await Promise.all(
-            keyringWallets.map(async (wallet) => {
-              const permissions = await KeyringService.getPermissions(
-                wallet.address
-              );
-              if (
-                result.connectRequest?.origin &&
-                permissions[result.connectRequest.origin] === false
-              ) {
-                return null;
-              }
-              const selectableWallet = {
-                address: wallet.address,
-                genesisHash: null,
-                name: (wallet.meta?.username as string) || "Unnamed Wallet",
-                type: "sr25519" as const,
-                meta: {
-                  source: "taoxyz-wallet",
-                },
-                selected: false,
-              };
-              return selectableWallet;
-            })
-          )
-        ).filter((wallet) => wallet !== null);
-
-        setWallets(walletsWithPermissions);
-      } catch (error) {
-        console.error("Failed to connect:", error);
-      } finally {
-        setLoading(false);
+  const requestConnect = async () => {
+    try {
+      const result = await chrome.storage.local.get(["connectRequest"]);
+      if (result.connectRequest) {
+        setRequest(result.connectRequest);
+      } else {
+        showNotification({
+          type: NotificationType.Error,
+          message: "Request Not Found",
+        });
+        setTimeout(() => {
+          window.close();
+        }, 2000);
+        return;
       }
-    };
 
-    requestConnect();
-  }, []);
+      const keyringWallets = await KeyringService.getWallets();
+      const walletsWithPermissions = (
+        await Promise.all(
+          keyringWallets.map(async (wallet) => {
+            const permissions = await KeyringService.getPermissions(
+              wallet.address
+            );
+            if (
+              result.connectRequest?.origin &&
+              permissions[result.connectRequest.origin] === false
+            ) {
+              return null;
+            }
+            const selectableWallet = {
+              address: wallet.address,
+              genesisHash: null,
+              name: (wallet.meta?.username as string) || "Unnamed Wallet",
+              type: "sr25519" as const,
+              meta: {
+                source: "taoxyz-wallet",
+              },
+              selected: false,
+            };
+            return selectableWallet;
+          })
+        )
+      ).filter((wallet) => wallet !== null);
+
+      setWallets(walletsWithPermissions);
+    } catch {
+      showNotification({
+        type: NotificationType.Error,
+        message: "Failed to Connect",
+      });
+      setTimeout(() => {
+        window.close();
+      }, 2000);
+      return;
+    }
+  };
 
   const toggleWallet = (address: string) => {
     setWallets((prev) =>
@@ -76,9 +91,18 @@ const Connect = () => {
   };
 
   const handleResponse = async (approved: boolean) => {
-    if (!request) return;
-
     try {
+      if (!request) {
+        showNotification({
+          type: NotificationType.Error,
+          message: "Request Not Found",
+        });
+        setTimeout(() => {
+          window.close();
+        }, 2000);
+        return;
+      }
+
       const selectedWallet = wallets.find((wallet) => wallet.selected);
       const selectedWallets = selectedWallet
         ? [{ ...selectedWallet, selected: undefined }]
@@ -91,8 +115,15 @@ const Connect = () => {
             selectedWallet.address,
             approved
           );
-        } catch (error) {
-          console.error("[Connect] Error updating permissions:", error);
+        } catch {
+          showNotification({
+            type: NotificationType.Error,
+            message: "Failed to Update Permissions",
+          });
+          setTimeout(() => {
+            window.close();
+          }, 2000);
+          return;
         }
       }
 
@@ -106,101 +137,91 @@ const Connect = () => {
         },
       });
 
-      if (!response?.success) {
-        console.error("[Connect] Response was not successful");
+      if (!response.success) {
+        showNotification({
+          type: NotificationType.Error,
+          message: "Failed to Send Response",
+        });
       }
 
       window.close();
-    } catch (error) {
-      console.error("[Connect] Error sending response:", error);
-      window.close();
+    } catch {
+      showNotification({
+        type: NotificationType.Error,
+        message: "Failed to Send Response",
+      });
+      setTimeout(() => {
+        window.close();
+      }, 2000);
     }
   };
 
-  if (loading)
-    return (
-      <div className="flex items-center justify-center text-mf-silver-300">
-        Loading...
-      </div>
-    );
-  if (!request)
-    return (
-      <div className="flex items-center justify-center text-mf-silver-300">
-        No pending request
-      </div>
-    );
+  const init = async () => {
+    if (isInitialized) return;
+    setIsInitialized(true);
+    await requestConnect();
+  };
+
+  if (!isInitialized) {
+    void init();
+  }
 
   return (
-    <div className="flex flex-col items-center overflow-hidden">
-      <div className="h-12" />
-      <div className="flex flex-col items-center w-72">
-        <img src={taoxyzLogo} alt="Taoxyz Logo" className="w-16 h-16 mb-6" />
+    <div className="flex flex-col items-center w-full">
+      <div className="flex flex-col justify-center items-center space-y-2">
+        <img src={taoxyzLogo} alt="Taoxyz Logo" className="w-16 h-16 mt-12" />
+        <h1 className="text-lg text-mf-milk-300">Connection Request</h1>
+      </div>
 
-        <div className="w-full">
-          <div className="text-center mb-4">
-            <h1 className="text-xl font-semibold text-mf-silver-300">
-              Connection Request
-            </h1>
-          </div>
+      <div className="mt-6 bg-mf-ash-500 rounded-sm p-3 text-sm flex flex-col justify-start w-80">
+        <p className="text-mf-sybil-500">{request?.origin}</p>
+        <p className="text-mf-milk-300">Wants to connect to your wallet</p>
+      </div>
 
-          <div className="bg-mf-ash-500/30 border border-mf-ash-500 rounded-lg p-2.5 mb-4 text-xs">
-            <p className="text-mf-sybil-500">{request.origin}</p>
-            <p className="text-mf-silver-300">
-              is requesting to connect to your wallet
-            </p>
-          </div>
-
-          <div className="mb-4">
-            <div className="space-y-2">
-              {wallets.map((wallet) => (
-                <label
-                  key={wallet.address}
-                  className={`flex items-center p-2 bg-mf-ash-500/30 border rounded-lg hover:bg-mf-ash-500/50 cursor-pointer transition-colors ${
-                    wallet.selected
-                      ? "border-mf-safety-500 ring-1 ring-mf-safety-500"
-                      : "border-mf-ash-500"
-                  }`}
-                >
-                  <div className="custom-checkbox">
-                    <input
-                      type="checkbox"
-                      checked={wallet.selected}
-                      onChange={() => toggleWallet(wallet.address)}
-                    />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="font-medium text-xs text-mf-silver-300">
-                      {wallet.name}
-                    </div>
-                    <div className="text-xs text-mf-silver-500">
-                      {`${wallet.address.slice(0, 8)}...${wallet.address.slice(
-                        -8
-                      )}`}
-                    </div>
-                  </div>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex space-x-2">
+      <div className="mt-4 w-80 [&>*]:w-full">
+        <div className="h-60 space-y-3 rounded-sm overflow-y-scroll">
+          {wallets.map((wallet) => (
             <button
-              onClick={() => handleResponse(true)}
-              disabled={!wallets.some((wallet) => wallet.selected)}
-              className="flex-1 text-sm rounded-lg bg-mf-safety-500 hover:bg-mf-safety-300 disabled:bg-mf-ash-500 disabled:cursor-not-allowed px-4 py-3 text-mf-milk-300 transition-colors"
+              key={wallet.address}
+              onClick={() => toggleWallet(wallet.address)}
+              className={`w-full flex items-start text-left py-2 px-4 bg-mf-ash-500 cursor-pointer transition-colors`}
             >
-              Approve
+              <div className="flex items-center space-x-3">
+                <div className="custom-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={wallet.selected}
+                    readOnly
+                    className="pointer-events-none"
+                  />
+                </div>
+                <div className="flex flex-col text-sm">
+                  <p className="text-mf-sybil-500">{wallet.name}</p>
+                  <p className="text-mf-milk-300">
+                    {wallet.address.slice(0, 6)}...{wallet.address.slice(-6)}
+                  </p>
+                </div>
+              </div>
             </button>
-            <button
-              onClick={() => handleResponse(false)}
-              className="flex-1 text-sm rounded-lg bg-mf-ash-500 hover:bg-mf-ash-400 px-4 py-3 text-mf-safety-300 transition-colors"
-            >
-              Reject
-            </button>
-          </div>
+          ))}
+        </div>
+
+        <div className="flex space-x-2 mt-4">
+          <button
+            onClick={() => handleResponse(false)}
+            className="flex-1 text-sm border-2 border-sm border-mf-safety-500 bg-mf-ash-500 hover:bg-mf-safety-500 hover:text-mf-night-500 p-2 text-mf-safety-500 transition-colors"
+          >
+            Reject
+          </button>
+          <button
+            onClick={() => handleResponse(true)}
+            disabled={!wallets.some((wallet) => wallet.selected)}
+            className="flex-1 text-sm border-2 border-sm border-mf-sybil-500 bg-mf-sybil-500 hover:bg-mf-night-500 hover:text-mf-sybil-500 p-2 text-mf-night-500 transition-colors"
+          >
+            Approve
+          </button>
         </div>
       </div>
-      <div className="h-12" />
     </div>
   );
 };
