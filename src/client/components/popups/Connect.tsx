@@ -35,7 +35,7 @@ const Connect = () => {
       });
       setTimeout(() => {
         window.close();
-      }, 2000);
+      }, 3000);
       return null;
     }
   };
@@ -75,7 +75,7 @@ const Connect = () => {
       });
       setTimeout(() => {
         window.close();
-      }, 2000);
+      }, 3000);
       return;
     }
   };
@@ -98,7 +98,7 @@ const Connect = () => {
         });
         setTimeout(() => {
           window.close();
-        }, 2000);
+        }, 3000);
         return;
       }
 
@@ -121,7 +121,7 @@ const Connect = () => {
           });
           setTimeout(() => {
             window.close();
-          }, 2000);
+          }, 3000);
           return;
         }
       }
@@ -151,7 +151,7 @@ const Connect = () => {
       });
       setTimeout(() => {
         window.close();
-      }, 2000);
+      }, 3000);
     }
   };
 

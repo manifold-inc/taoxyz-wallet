@@ -396,5 +396,12 @@ chrome.windows.onRemoved.addListener(async (windowId) => {
   const popupInfo = activePopups.get(windowId);
   if (!popupInfo) return;
   activePopups.delete(windowId);
-  await rejectRequest(popupInfo);
+
+  try {
+    const storageKey = `${popupInfo.route}Request`;
+    await getStoredRequest(storageKey);
+    await rejectRequest(popupInfo);
+  } catch {
+    console.log("[Background] Request Already Handled");
+  }
 });
