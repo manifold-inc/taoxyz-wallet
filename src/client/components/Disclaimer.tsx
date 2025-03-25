@@ -39,7 +39,7 @@ const Disclaimer = ({ onClose }: DisclaimerProps) => {
           <li>
             We do not gather addresses, keys, or other personal information.
           </li>
-          <p>For support or questions, please contact hello@manifoldlabs.inc</p>
+          <p>For support or questions, please contact devs@manifoldlabs.inc</p>
         </ul>
       </div>
     </div>

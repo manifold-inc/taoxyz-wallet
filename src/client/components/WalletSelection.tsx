@@ -7,6 +7,7 @@ import KeyringService from "../services/KeyringService";
 import { useLock } from "../contexts/LockContext";
 import { useWallet } from "../contexts/WalletContext";
 
+// TODO: Do not show wallet deletion option in lockscreen
 // TODO: Add confirmation for deleting wallet
 const WalletSelection = () => {
   const navigate = useNavigate();
