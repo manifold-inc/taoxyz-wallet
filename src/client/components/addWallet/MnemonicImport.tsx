@@ -57,7 +57,6 @@ const MnemonicImport = ({ onContinue, onBack }: MnemonicImportProps) => {
     setSubmitted(true);
     const isValid = await validateMnemonic();
     if (isValid) {
-      console.log("Calling onContinue with mnemonic:", mnemonic.trim());
       onContinue(mnemonic.trim());
     }
   };
