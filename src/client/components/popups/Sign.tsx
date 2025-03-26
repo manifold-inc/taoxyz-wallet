@@ -6,6 +6,8 @@ import type {
 
 import KeyringService from "../../services/KeyringService";
 import { useNotification } from "../../contexts/NotificationContext";
+import { useWallet } from "../../contexts/WalletContext";
+import MessageService from "../../services/MessageService";
 import ConfirmAction from "../ConfirmAction";
 import { NotificationType } from "../../../types/client";
 import { MESSAGE_TYPES } from "../../../types/messages";
@@ -14,10 +16,10 @@ import type {
   SignResponsePayload,
 } from "../../../types/messages";
 import taoxyz from "../../../../public/icons/taoxyz.svg";
-import MessageService from "../../services/MessageService";
 
 const Sign = () => {
   const { showNotification } = useNotification();
+  const { setCurrentAddress } = useWallet();
   const [request, setRequest] = useState<StoredSignRequest | null>(null);
   const [password, setPassword] = useState("");
   const [showForgetPassword, setShowForgetPassword] = useState(false);
@@ -202,17 +204,11 @@ const Sign = () => {
         onConfirm={async () => {
           setShowForgetPassword(false);
           KeyringService.deleteWallet(request?.address as string);
-          await chrome.storage.local.remove("storeStakeTransaction");
-          await chrome.storage.local.remove("storeSwapTransaction");
-          await chrome.storage.local.remove("storeTransferTransaction");
-
           const wallets = await KeyringService.getWallets();
           if (wallets.length === 0) {
-            await chrome.storage.local.remove("currentAddress");
+            await setCurrentAddress(null);
           } else {
-            await chrome.storage.local.set({
-              currentAddress: wallets[0].address,
-            });
+            await setCurrentAddress(wallets[0].address);
             await MessageService.sendWalletsLocked();
             await KeyringService.lockWallets();
           }

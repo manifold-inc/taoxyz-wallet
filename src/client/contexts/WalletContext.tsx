@@ -23,6 +23,9 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     address: string | null
   ): Promise<void> => {
     await chrome.storage.local.set({ currentAddress: address });
+    await chrome.storage.local.remove("storeTransferTransaction");
+    await chrome.storage.local.remove("storeStakeTransaction");
+    await chrome.storage.local.remove("storeSwapTransaction");
     setCurrentAddress(address);
   };
 
