@@ -25,7 +25,7 @@ const getStepSubtext = (step: Step) => {
     case Step.SELECT_VALIDATOR:
       return "Select Validator";
     case Step.CONFIRM_MOVE_STAKE:
-      return "Review and Confirm Stake";
+      return "Review Move Stake";
     default:
       return "";
   }

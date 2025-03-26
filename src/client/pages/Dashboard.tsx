@@ -127,13 +127,13 @@ export const Dashboard = () => {
               onClick={() => navigate("/add-stake")}
               className="w-1/3 p-1 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 hover:border-mf-safety-500 border-sm transition-colors cursor-pointer"
             >
-              <span>Add Stake</span>
+              <span>Add</span>
             </button>
             <button
               onClick={() => navigate("/move-stake")}
               className="w-1/3 p-1 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 hover:border-mf-safety-500 border-sm transition-colors cursor-pointer"
             >
-              <span>Move Stake</span>
+              <span>Move</span>
             </button>
             <button
               onClick={() => navigate("/transfer")}
