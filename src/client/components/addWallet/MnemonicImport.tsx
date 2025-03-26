@@ -1,19 +1,23 @@
 import { useState } from "react";
+
+import { useNotification } from "../../contexts/NotificationContext";
 import KeyringService from "../../services/KeyringService";
+import { NotificationType } from "../../../types/client";
 
 interface MnemonicImportProps {
-  onContinue: (mnemonic: string) => void;
+  onContinue: (mnemonic: string) => Promise<void>;
   onBack: () => void;
 }
 
 const MnemonicImport = ({ onContinue, onBack }: MnemonicImportProps) => {
+  const { showNotification } = useNotification();
   const [mnemonic, setMnemonic] = useState("");
   const [mnemonicSelected, setMnemonicSelected] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isValid, setIsValid] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const validateMnemonic = () => {
+  const validateMnemonic = async (): Promise<void> => {
     if (!mnemonic.trim()) {
       setError("Recovery Phrase is Required");
       setIsValid(false);
@@ -33,14 +37,24 @@ const MnemonicImport = ({ onContinue, onBack }: MnemonicImportProps) => {
       return;
     }
 
+    const isDuplicate = await KeyringService.checkDuplicate(mnemonic.trim());
+    if (isDuplicate) {
+      showNotification({
+        type: NotificationType.Error,
+        message: "Wallet Already Exists",
+      });
+      setIsValid(false);
+      return;
+    }
+
     setIsValid(true);
   };
 
-  const handleSubmit = (event: React.FormEvent): void => {
+  const handleSubmit = async (event: React.FormEvent): Promise<void> => {
     event.preventDefault();
     setError(null);
     setSubmitted(true);
-    validateMnemonic();
+    await validateMnemonic();
     if (isValid) {
       onContinue(mnemonic.trim());
     }
@@ -62,7 +76,7 @@ const MnemonicImport = ({ onContinue, onBack }: MnemonicImportProps) => {
         }}
         onFocus={() => setMnemonicSelected(true)}
         onBlur={() => setMnemonicSelected(false)}
-        className={`p-3 h-28 text-base rounded-sm bg-mf-ash-300 text-mf-milk-300 placeholder:text-mf-milk-300 focus:outline-none ${
+        className={`p-3 h-36 text-base rounded-sm bg-mf-ash-300 text-mf-milk-300 placeholder:text-mf-milk-300 focus:outline-none resize-none ${
           mnemonicSelected || submitted
             ? `border-2 ${
                 isValid ? "border-mf-sybil-500" : "border-mf-safety-500"
@@ -81,13 +95,13 @@ const MnemonicImport = ({ onContinue, onBack }: MnemonicImportProps) => {
         <button
           type="button"
           onClick={onBack}
-          className="w-44 border-sm text-sm text-mf-safety-500 bg-mf-night-500 border-mf-night-500 hover:border-mf-safety-500 border-2 transition-colors p-1.5"
+          className="w-44 border-sm text-sm text-mf-safety-500 bg-mf-night-500 border-mf-night-500 hover:border-mf-safety-500 border-2 transition-colors p-1.5 cursor-pointer"
         >
           <span>Back</span>
         </button>
         <button
           type="submit"
-          className="w-44 border-sm text-sm text-mf-night-500 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 transition-colors p-1.5"
+          className="w-44 border-sm text-sm text-mf-night-500 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 transition-colors p-1.5 cursor-pointer"
         >
           <span>Continue</span>
         </button>

@@ -9,7 +9,17 @@ import type { Permissions } from "../../types/client";
 const registry = new TypeRegistry();
 
 export const KeyringService = {
-  // TODO: Prevent users from adding wallets with the same mnemonic
+  async checkDuplicate(mnemonic: string): Promise<boolean | Error> {
+    try {
+      const wallets = this.getWallets();
+      const address = keyring.createFromUri(mnemonic).address;
+      const isDuplicate = wallets.some((wallet) => wallet.address === address);
+      return isDuplicate;
+    } catch {
+      return new Error("Failed to Verify Wallet");
+    }
+  },
+
   async addWallet(
     mnemonic: string,
     username: string,
@@ -20,10 +30,10 @@ export const KeyringService = {
         username,
         websitePermissions: {} as Permissions,
       } as KeyringPair$Meta);
-      if (!result.pair) return new Error("Failed to add wallet");
+      if (!result.pair) return new Error("Failed to Add Wallet");
       return result.pair;
     } catch {
-      return new Error("Failed to add wallet");
+      return new Error("Failed to Add Wallet");
     }
   },
 
