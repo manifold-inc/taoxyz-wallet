@@ -6,9 +6,9 @@ import taoxyzLogo from "../../../public/icons/taoxyz.svg";
 import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 import { useNotification } from "../contexts/NotificationContext";
 import { useWallet } from "../contexts/WalletContext";
-import StakeSelection from "../components/stake/StakeSelection";
+import StakeSelection from "../components/moveStake/StakeSelection";
 import ValidatorSelection from "../components/swap/ValidatorSelection";
-import { ConfirmStake } from "../components/stake/ConfirmStake";
+import { ConfirmStake } from "../components/moveStake/ConfirmStake";
 import type { Validator, Subnet, StakeTransaction } from "../../types/client";
 import { NotificationType } from "../../types/client";
 
@@ -34,9 +34,9 @@ const getStepSubtext = (step: Step) => {
 const getStepTitle = (step: Step) => {
   switch (step) {
     case Step.SELECT_STAKE:
-      return "Add Stake";
+      return "Move Stake";
     case Step.SELECT_VALIDATOR:
-      return "Add Stake";
+      return "Move Stake";
     case Step.CONFIRM_STAKE:
       return "Confirm Stake";
     default:
@@ -50,7 +50,7 @@ interface StakeResponse {
   stake: number;
 }
 
-const Stake = () => {
+const MoveStake = () => {
   const { showNotification } = useNotification();
   const { api } = usePolkadotApi();
   const { currentAddress } = useWallet();
@@ -310,4 +310,4 @@ const Stake = () => {
   );
 };
 
-export default Stake;
+export default MoveStake;

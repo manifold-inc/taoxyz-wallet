@@ -54,7 +54,7 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
   };
 
   const handleMoveStake = (): void => {
-    navigate("/stake", {
+    navigate("/move-stake", {
       state: {
         selectedStake,
         selectedSubnet,

@@ -22,7 +22,6 @@ interface ConfirmStakeProps {
   balance: string;
 }
 
-// TODO: Display correct slippage and receive amount
 export const ConfirmStake = ({
   stake,
   subnet,
