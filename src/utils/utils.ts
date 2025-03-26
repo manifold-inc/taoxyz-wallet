@@ -7,6 +7,7 @@ export const generateId = (): number => {
 };
 
 export const taoToRao = (amount: number): bigint => {
+  if (isNaN(amount)) return BigInt(0);
   return BigInt(Math.floor(amount * 1e9));
 };
 

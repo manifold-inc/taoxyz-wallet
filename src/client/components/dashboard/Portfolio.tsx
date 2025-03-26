@@ -8,6 +8,7 @@ import KeyringService from "../../services/KeyringService";
 import MessageService from "../../services/MessageService";
 import StakeOverview from "../portfolio/StakeOverview";
 import ExpandedStake from "../portfolio/ExpandedStake";
+import ConfirmAction from "../ConfirmAction";
 import type { StakeTransaction, Subnet } from "../../../types/client";
 import { NotificationType } from "../../../types/client";
 
@@ -26,6 +27,7 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
     null
   );
   const [selectedSubnet, setSelectedSubnet] = useState<Subnet | null>(null);
+  const [showSwapConfirm, setShowSwapConfirm] = useState(false);
 
   const handleStakeSelect = async (stake: StakeTransaction): Promise<void> => {
     const subnet = await api?.getSubnet(stake.subnetId);
@@ -65,7 +67,22 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
     const isAuthorized = await handleAuth();
     if (!isAuthorized) return;
 
+    setShowSwapConfirm(true);
+  };
+
+  const handleConfirmSwap = async (): Promise<void> => {
+    if (!api || !selectedStake) return;
+    setShowSwapConfirm(false);
+
     try {
+      if (!selectedStake.tokens || isNaN(selectedStake.tokens)) {
+        showNotification({
+          type: NotificationType.Error,
+          message: "Invalid stake amount",
+        });
+        return;
+      }
+
       showNotification({
         type: NotificationType.Pending,
         message: "Submitting Transaction...",
@@ -88,7 +105,8 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
       setSelectedSubnet(null);
 
       onRefresh();
-    } catch {
+    } catch (error) {
+      console.error("Swap error:", error);
       showNotification({
         message: "Failed to Swap Stake",
         type: NotificationType.Error,
@@ -106,6 +124,19 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
 
   return (
     <div>
+      <ConfirmAction
+        isOpen={showSwapConfirm}
+        title="Confirm Swap"
+        message={
+          selectedStake
+            ? `Are you sure you want to swap ${(
+                selectedStake.tokens / 1e9
+              ).toFixed(4)} α from Subnet ${selectedStake.subnetId}?`
+            : ""
+        }
+        onConfirm={handleConfirmSwap}
+        onCancel={() => setShowSwapConfirm(false)}
+      />
       {selectedStake ? (
         <ExpandedStake
           stake={selectedStake}
@@ -116,7 +147,6 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
           }}
           onSwap={handleSwap}
           onMoveStake={handleMoveStake}
-          onRefresh={onRefresh}
         />
       ) : (
         <div className="w-full max-h-76 overflow-y-auto portfolio-container mt-2">

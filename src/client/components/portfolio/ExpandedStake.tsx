@@ -11,7 +11,6 @@ interface ExpandedStakeProps {
   onClose: () => void;
   onSwap: () => void;
   onMoveStake: () => void;
-  onRefresh: () => Promise<void>;
 }
 
 const ExpandedStake = ({
@@ -20,7 +19,6 @@ const ExpandedStake = ({
   onClose,
   onSwap,
   onMoveStake,
-  onRefresh,
 }: ExpandedStakeProps) => {
   const [copied, setCopied] = useState(false);
 
@@ -28,13 +26,6 @@ const ExpandedStake = ({
     navigator.clipboard.writeText(stake.validatorHotkey);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleSwap = () => {
-    onSwap();
-    setTimeout(() => {
-      onRefresh();
-    }, 2000);
   };
 
   // TODO: Remove chart if subnet price is not available show notification
@@ -90,9 +81,8 @@ const ExpandedStake = ({
 
       <div className="flex mt-4 space-x-4">
         <button
-          onClick={handleSwap}
-          className="flex-1 p-2 border-sm bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 hover:border-mf-safety-500 transition-colors
-          "
+          onClick={onSwap}
+          className="flex-1 p-2 border-sm bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 hover:border-mf-safety-500 transition-colors"
         >
           Swap
         </button>
