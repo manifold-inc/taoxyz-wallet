@@ -128,8 +128,8 @@ const StakeChart = ({ data, subnetId }: StakeChartProps) => {
             marginBottom: "6px",
           }}
           formatter={(value: string) => [
-            `α${parseFloat(value).toFixed(4)}`,
-            "Stake",
+            `${parseFloat(value).toFixed(4)}α`,
+            "Price",
           ]}
         />
         <Area

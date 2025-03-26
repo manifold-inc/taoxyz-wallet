@@ -5,7 +5,7 @@ import KeyringService from "../../services/KeyringService";
 import { NotificationType } from "../../../types/client";
 
 interface MnemonicImportProps {
-  onContinue: (mnemonic: string) => Promise<void>;
+  onContinue: (mnemonic: string) => void;
   onBack: () => void;
 }
 
