@@ -10,19 +10,19 @@ import { taoToRao, slippageStakeCalculation } from "../../../utils/utils";
 import { NotificationType } from "../../../types/client";
 import type { Subnet, Validator } from "../../../types/client";
 
-interface ConfirmSwapProps {
+interface ConfirmAddStakeProps {
   subnet: Subnet;
   validator: Validator;
   balance: string;
   address: string;
 }
 
-export const ConfirmSwap = ({
+const ConfirmAddStake = ({
   subnet,
   validator,
   balance,
   address,
-}: ConfirmSwapProps) => {
+}: ConfirmAddStakeProps) => {
   const navigate = useNavigate();
   const { showNotification } = useNotification();
   const { setIsLocked } = useLock();
@@ -43,10 +43,10 @@ export const ConfirmSwap = ({
   }, [subnet.alphaIn, subnet.taoIn, amountInRao]);
 
   const restoreTransaction = async () => {
-    const result = await chrome.storage.local.get("storeSwapTransaction");
-    if (result.storeSwapTransaction) {
-      const { amount } = result.storeSwapTransaction;
-      await chrome.storage.local.remove("storeSwapTransaction");
+    const result = await chrome.storage.local.get("storeAddStakeTransaction");
+    if (result.storeAddStakeTransaction) {
+      const { amount } = result.storeAddStakeTransaction;
+      await chrome.storage.local.remove("storeAddStakeTransaction");
       setAmount(amount);
     }
   };
@@ -64,7 +64,7 @@ export const ConfirmSwap = ({
   const handleAuth = async () => {
     if (await KeyringService.isLocked(address)) {
       await chrome.storage.local.set({
-        storeSwapTransaction: {
+        storeAddStakeTransaction: {
           subnet,
           validator,
           amount,
@@ -108,7 +108,7 @@ export const ConfirmSwap = ({
       }, 2000);
     } catch {
       showNotification({
-        message: "Failed to Swap",
+        message: "Failed to Add Stake",
         type: NotificationType.Error,
       });
     } finally {
@@ -222,4 +222,4 @@ export const ConfirmSwap = ({
   );
 };
 
-export default ConfirmSwap;
+export default ConfirmAddStake;

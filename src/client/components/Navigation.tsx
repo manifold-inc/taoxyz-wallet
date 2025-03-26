@@ -12,7 +12,7 @@ const Navigation = () => {
 
   const links = [
     { path: "/dashboard", icon: <House className="w-7 h-7" /> },
-    { path: "/swap", icon: <Plus className="w-7 h-7" /> },
+    { path: "/add-stake", icon: <Plus className="w-7 h-7" /> },
     { path: "/move-stake", icon: <ArrowLeftRight className="w-7 h-7" /> },
     { path: "/transfer", icon: <CornerUpRight className="w-7 h-7" /> },
     { path: "/settings", icon: <Settings className="w-7 h-7" /> },

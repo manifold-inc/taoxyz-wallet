@@ -124,16 +124,16 @@ export const Dashboard = () => {
         <div className="mt-3">
           <div className="flex justify-between rounded-sm text-sm text-mf-night-500 transition-colors space-x-2">
             <button
-              onClick={() => navigate("/swap")}
+              onClick={() => navigate("/add-stake")}
               className="w-1/3 p-1 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 hover:border-mf-safety-500 border-sm transition-colors cursor-pointer"
             >
-              <span>Swap</span>
+              <span>Add Stake</span>
             </button>
             <button
               onClick={() => navigate("/move-stake")}
               className="w-1/3 p-1 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 hover:border-mf-safety-500 border-sm transition-colors cursor-pointer"
             >
-              <span>Move</span>
+              <span>Move Stake</span>
             </button>
             <button
               onClick={() => navigate("/transfer")}

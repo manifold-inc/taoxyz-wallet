@@ -5,16 +5,16 @@ import taoxyzLogo from "../../../public/icons/taoxyz.svg";
 import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 import { useNotification } from "../contexts/NotificationContext";
 import { useWallet } from "../contexts/WalletContext";
-import SubnetSelection from "../components/swap/SubnetSelection";
-import ValidatorSelection from "../components/swap/ValidatorSelection";
-import ConfirmSwap from "../components/swap/ConfirmSwap";
+import SubnetSelection from "../components/addStake/SubnetSelection";
+import ValidatorSelection from "../components/addStake/ValidatorSelection";
+import ConfirmAddStake from "../components/addStake/ConfirmAddStake";
 import { NotificationType } from "../../types/client";
 import type { Subnet, Validator } from "../../types/client";
 
 enum Step {
   SELECT_SUBNET,
   SELECT_VALIDATOR,
-  CONFIRM_SWAP,
+  SELECT_CONFIRM_ADD_STAKE,
 }
 
 const getStepSubtext = (step: Step) => {
@@ -23,8 +23,8 @@ const getStepSubtext = (step: Step) => {
       return "Select Subnet";
     case Step.SELECT_VALIDATOR:
       return "Select Validator";
-    case Step.CONFIRM_SWAP:
-      return "Review and Confirm Swap";
+    case Step.SELECT_CONFIRM_ADD_STAKE:
+      return "Review and Confirm Add Stake";
     default:
       return "";
   }
@@ -33,17 +33,17 @@ const getStepSubtext = (step: Step) => {
 const getStepTitle = (step: Step) => {
   switch (step) {
     case Step.SELECT_SUBNET:
-      return "Swap Tokens";
+      return "Add Stake";
     case Step.SELECT_VALIDATOR:
-      return "Swap Tokens";
-    case Step.CONFIRM_SWAP:
-      return "Confirm Swap";
+      return "Add Stake";
+    case Step.SELECT_CONFIRM_ADD_STAKE:
+      return "Confirm Add Stake";
     default:
       return "";
   }
 };
 
-export const Swap = () => {
+export const AddStake = () => {
   const { showNotification } = useNotification();
   const { api } = usePolkadotApi();
   const { currentAddress } = useWallet();
@@ -59,13 +59,13 @@ export const Swap = () => {
   const [isLoadingValidators, setIsLoadingValidators] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  const restoreSwap = async () => {
-    const result = await chrome.storage.local.get("storeSwapTransaction");
-    if (result.storeSwapTransaction) {
-      const { subnet, validator } = result.storeSwapTransaction;
+  const restoreAddStake = async () => {
+    const result = await chrome.storage.local.get("storeAddStakeTransaction");
+    if (result.storeAddStakeTransaction) {
+      const { subnet, validator } = result.storeAddStakeTransaction;
       setSelectedSubnet(subnet);
       setSelectedValidator(validator);
-      setStep(Step.CONFIRM_SWAP);
+      setStep(Step.SELECT_CONFIRM_ADD_STAKE);
     }
   };
 
@@ -135,7 +135,7 @@ export const Swap = () => {
       setStep(Step.SELECT_SUBNET);
       setSelectedSubnet(null);
       setSelectedValidator(null);
-    } else if (step === Step.CONFIRM_SWAP) {
+    } else if (step === Step.SELECT_CONFIRM_ADD_STAKE) {
       setStep(Step.SELECT_VALIDATOR);
       setSelectedValidator(null);
     }
@@ -150,7 +150,7 @@ export const Swap = () => {
       setStep(Step.SELECT_VALIDATOR);
       setValidators(validators);
     } else if (step === Step.SELECT_VALIDATOR && selectedValidator) {
-      setStep(Step.CONFIRM_SWAP);
+      setStep(Step.SELECT_CONFIRM_ADD_STAKE);
     }
   };
 
@@ -178,10 +178,10 @@ export const Swap = () => {
             onSelect={handleValidatorSelect}
           />
         );
-      case Step.CONFIRM_SWAP:
+      case Step.SELECT_CONFIRM_ADD_STAKE:
         if (!selectedSubnet || !selectedValidator) return null;
         return (
-          <ConfirmSwap
+          <ConfirmAddStake
             subnet={selectedSubnet}
             validator={selectedValidator}
             balance={balance as string}
@@ -195,7 +195,7 @@ export const Swap = () => {
     if (isInitialized) return;
     if (!api || !currentAddress) return;
     setIsInitialized(true);
-    await restoreSwap();
+    await restoreAddStake();
     if (subnets === null) {
       await Promise.all([getSubnets(), getBalance()]);
     }
@@ -231,13 +231,13 @@ export const Swap = () => {
               (step === Step.SELECT_SUBNET &&
                 (!selectedSubnet || validators.length === 0)) ||
               (step === Step.SELECT_VALIDATOR && !selectedValidator) ||
-              step === Step.CONFIRM_SWAP
+              step === Step.SELECT_CONFIRM_ADD_STAKE
             }
             className={`transition-colors cursor-pointer ${
               (step === Step.SELECT_SUBNET &&
                 (!selectedSubnet || validators.length === 0)) ||
               (step === Step.SELECT_VALIDATOR && !selectedValidator) ||
-              step === Step.CONFIRM_SWAP
+              step === Step.SELECT_CONFIRM_ADD_STAKE
                 ? "text-mf-ash-300 cursor-not-allowed"
                 : "text-mf-milk-300"
             }`}
@@ -263,4 +263,4 @@ export const Swap = () => {
   );
 };
 
-export default Swap;
+export default AddStake;
