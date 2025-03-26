@@ -33,9 +33,9 @@ const SubnetSelection = ({
           <button
             key={subnet.id}
             onClick={() => onSelect(subnet)}
-            className={`w-full text-left rounded-sm p-2 ${
+            className={`w-full text-left border-sm p-2 border-2 border-mf-ash-500 ${
               isSelected
-                ? "bg-mf-ash-300 border-2 border-mf-safety-500"
+                ? "bg-mf-ash-300 border-mf-safety-500"
                 : "bg-mf-ash-500 hover:bg-mf-ash-300"
             } transition-colors space-y-1`}
           >

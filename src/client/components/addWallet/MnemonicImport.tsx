@@ -17,24 +17,24 @@ const MnemonicImport = ({ onContinue, onBack }: MnemonicImportProps) => {
   const [isValid, setIsValid] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const validateMnemonic = async (): Promise<void> => {
+  const validateMnemonic = async (): Promise<boolean> => {
     if (!mnemonic.trim()) {
       setError("Recovery Phrase is Required");
       setIsValid(false);
-      return;
+      return false;
     }
 
     const wordCount = mnemonic.trim().split(/\s+/).length;
     if (wordCount !== 12) {
       setError("Recovery Phrase Must Be 12 Words");
       setIsValid(false);
-      return;
+      return false;
     }
 
     if (!KeyringService.validateMnemonic(mnemonic.trim())) {
       setError("Recovery Phrase is Invalid");
       setIsValid(false);
-      return;
+      return false;
     }
 
     const isDuplicate = await KeyringService.checkDuplicate(mnemonic.trim());
@@ -44,18 +44,20 @@ const MnemonicImport = ({ onContinue, onBack }: MnemonicImportProps) => {
         message: "Wallet Already Exists",
       });
       setIsValid(false);
-      return;
+      return false;
     }
 
     setIsValid(true);
+    return true;
   };
 
   const handleSubmit = async (event: React.FormEvent): Promise<void> => {
     event.preventDefault();
     setError(null);
     setSubmitted(true);
-    await validateMnemonic();
+    const isValid = await validateMnemonic();
     if (isValid) {
+      console.log("Calling onContinue with mnemonic:", mnemonic.trim());
       onContinue(mnemonic.trim());
     }
   };
@@ -76,12 +78,10 @@ const MnemonicImport = ({ onContinue, onBack }: MnemonicImportProps) => {
         }}
         onFocus={() => setMnemonicSelected(true)}
         onBlur={() => setMnemonicSelected(false)}
-        className={`p-3 h-36 text-base rounded-sm bg-mf-ash-300 text-mf-milk-300 placeholder:text-mf-milk-300 focus:outline-none resize-none ${
+        className={`p-3 h-36 text-base rounded-sm bg-mf-ash-300 text-mf-milk-300 placeholder:text-mf-milk-300 border-2 border-mf-ash-300 focus:outline-none resize-none ${
           mnemonicSelected || submitted
-            ? `border-2 ${
-                isValid ? "border-mf-sybil-500" : "border-mf-safety-500"
-              }`
-            : "border-none"
+            ? `${isValid ? "border-mf-sybil-500" : "border-mf-safety-500"}`
+            : "border-mf-ash-300"
         }`}
         placeholder="Enter 12 Word Recovery Phrase"
       />

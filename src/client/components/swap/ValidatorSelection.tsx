@@ -18,7 +18,7 @@ const ValidatorSelection = ({
     return (
       <div className="p-2">
         <div className="w-full flex items-center justify-center rounded-sm bg-mf-ash-500 p-2">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-mf-silver-300" />
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-mf-milk-300" />
         </div>
       </div>
     );
@@ -27,7 +27,7 @@ const ValidatorSelection = ({
   if (validators.length === 0 && !isLoading) {
     return (
       <div className="p-2">
-        <div className="w-full rounded-sm bg-mf-ash-500 p-2 space-y-1">
+        <div className="w-full border-sm bg-mf-ash-500 p-2 space-y-1 border-2 border-mf-ash-300">
           <div className="flex items-center justify-between text-sm text-mf-silver-300 font-semibold">
             <h3>No Validators Found</h3>
           </div>
@@ -46,9 +46,9 @@ const ValidatorSelection = ({
         return (
           <button
             key={validator.hotkey}
-            className={`w-full text-left rounded-sm p-2 cursor-pointer ${
+            className={`w-full text-left border-sm p-2 border-2 border-mf-ash-500 cursor-pointer ${
               isSelected
-                ? "bg-mf-ash-300 border-2 border-mf-safety-500"
+                ? "bg-mf-ash-300 border-mf-safety-500"
                 : "bg-mf-ash-500 hover:bg-mf-ash-300"
             } transition-colors space-y-1`}
             onClick={() => onSelect(validator)}

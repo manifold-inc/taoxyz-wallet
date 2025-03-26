@@ -91,6 +91,7 @@ export const KeyringService = {
     if (wallet instanceof Error) return new Error(wallet.message);
     try {
       wallet.decodePkcs8(password);
+      if (wallet.isLocked) return new Error("Wallet is Locked");
 
       registry.setSignedExtensions(payload.signedExtensions);
       const extrinsicPayload = registry.createType(
@@ -146,7 +147,7 @@ export const KeyringService = {
     }
   },
 
-  lockAll(): boolean | Error {
+  lockWallets(): boolean | Error {
     const pairs = keyring.getPairs();
     if (!pairs) return new Error("Keyring not initialized");
     try {

@@ -38,9 +38,9 @@ const StakeSelection = ({
           <button
             key={`${stake.subnetId}-${stake.validatorHotkey}`}
             onClick={() => onSelect(stake)}
-            className={`w-full text-left rounded-sm p-2 ${
+            className={`w-full text-left rounded-sm p-2 border-sm border-2 border-mf-ash-500 ${
               isSelected
-                ? "bg-mf-ash-300 border-2 border-mf-safety-500"
+                ? "bg-mf-ash-300 border-mf-safety-500"
                 : "bg-mf-ash-500 hover:bg-mf-ash-300"
             } transition-colors space-y-1`}
           >

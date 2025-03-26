@@ -84,6 +84,7 @@ const WalletSelection = () => {
   const confirmDelete = async (): Promise<void> => {
     if (!walletToDelete) return;
     await KeyringService.deleteWallet(walletToDelete.address);
+    await chrome.storage.local.remove(`permissions_${walletToDelete.address}`);
     await getWallets();
     await clearSavedTransactions();
     setWalletToDelete(null);

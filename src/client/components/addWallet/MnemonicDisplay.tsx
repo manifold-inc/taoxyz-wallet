@@ -26,10 +26,8 @@ const MnemonicDisplay = ({
         <textarea
           value={mnemonic}
           readOnly
-          className={`p-3 h-36 text-base rounded-sm bg-mf-ash-300 text-mf-milk-300 border-none focus:outline-none w-full resize-none ${
-            copied
-              ? "border-2 border-mf-sybil-500"
-              : "border-2 border-mf-safety-500"
+          className={`p-3 h-36 text-base rounded-sm bg-mf-ash-300 text-mf-milk-300 border-2 border-mf-ash-300 focus:outline-none w-full resize-none ${
+            copied ? "border-mf-sybil-500" : "border-mf-safety-500"
           }`}
         />
         <button
