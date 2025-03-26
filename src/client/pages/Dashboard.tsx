@@ -95,7 +95,11 @@ export const Dashboard = () => {
           <div className="flex items-center justify-center space-x-2">
             <img src={taoxyz} alt="Taoxyz Logo" className="w-4 h-4" />
             <span className="text-xl text-mf-milk-300 font-semibold">
-              {!balance ? "Loading" : Number(balance).toFixed(4)}
+              {!balance
+                ? "Loading"
+                : Number(balance) === 0
+                ? "0"
+                : Number(balance).toFixed(4)}
             </span>
           </div>
           <div className="flex items-center text-xs text-mf-milk-300 space-x-1">
