@@ -11,7 +11,7 @@ interface ExpandedStakeProps {
   stake: StakeTransaction;
   subnet: Subnet | null;
   onClose: () => void;
-  onSwap: () => void;
+  onRemoveStake: () => void;
   onMoveStake: () => void;
 }
 
@@ -28,7 +28,7 @@ const ExpandedStake = ({
   stake,
   subnet,
   onClose,
-  onSwap,
+  onRemoveStake,
   onMoveStake,
 }: ExpandedStakeProps) => {
   const { showNotification } = useNotification();
@@ -140,10 +140,10 @@ const ExpandedStake = ({
 
       <div className="flex mt-4 space-x-4">
         <button
-          onClick={onSwap}
+          onClick={onRemoveStake}
           className="flex-1 p-2 border-sm bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 hover:border-mf-safety-500 transition-colors cursor-pointer"
         >
-          Swap
+          Remove
         </button>
         <button
           onClick={onMoveStake}
