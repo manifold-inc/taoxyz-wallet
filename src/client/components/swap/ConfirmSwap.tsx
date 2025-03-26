@@ -6,9 +6,9 @@ import { useNotification } from "../../contexts/NotificationContext";
 import { useLock } from "../../contexts/LockContext";
 import KeyringService from "../../services/KeyringService";
 import MessageService from "../../services/MessageService";
-import { calculateSlippage, taoToRao } from "../../../utils/utils";
-import type { Subnet, Validator } from "../../../types/client";
+import { taoToRao, slippageStakeCalculation } from "../../../utils/utils";
 import { NotificationType } from "../../../types/client";
+import type { Subnet, Validator } from "../../../types/client";
 
 interface ConfirmSwapProps {
   subnet: Subnet;
@@ -34,7 +34,7 @@ export const ConfirmSwap = ({
   const balanceInRao = taoToRao(parseFloat(balance));
   const slippage = useMemo(() => {
     if (!subnet.alphaIn || !subnet.taoIn || !amountInRao) return null;
-    return calculateSlippage(
+    return slippageStakeCalculation(
       BigInt(subnet.alphaIn),
       BigInt(subnet.taoIn),
       amountInRao,
@@ -174,7 +174,7 @@ export const ConfirmSwap = ({
             <div className="flex justify-between items-center">
               <span className="text-mf-silver-300">You Receive:</span>
               <span className="text-mf-sybil-500">
-                {slippage.tokens.toFixed(4)} τ
+                {slippage.tokens.toFixed(4)} α
               </span>
             </div>
             <div className="flex justify-between items-center">
@@ -188,6 +188,10 @@ export const ConfirmSwap = ({
               >
                 {slippage.slippagePercentage.toFixed(2)}%
               </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-mf-silver-300">Fee:</span>
+              <span className="text-mf-safety-500">0.00005 τ</span>
             </div>
           </div>
         )}

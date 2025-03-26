@@ -95,7 +95,11 @@ export const Dashboard = () => {
           <div className="flex items-center justify-center space-x-2">
             <img src={taoxyz} alt="Taoxyz Logo" className="w-4 h-4" />
             <span className="text-xl text-mf-milk-300 font-semibold">
-              {!balance ? "Loading" : Number(balance).toFixed(4)}
+              {!balance
+                ? "Loading"
+                : Number(balance) === 0
+                ? "0"
+                : Number(balance).toFixed(4)}
             </span>
           </div>
           <div className="flex items-center text-xs text-mf-milk-300 space-x-1">
@@ -121,19 +125,19 @@ export const Dashboard = () => {
           <div className="flex justify-between rounded-sm text-sm text-mf-night-500 transition-colors space-x-2">
             <button
               onClick={() => navigate("/swap")}
-              className="w-1/3 p-1 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 hover:border-mf-safety-500 border-sm transition-colors"
+              className="w-1/3 p-1 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 hover:border-mf-safety-500 border-sm transition-colors cursor-pointer"
             >
               <span>Swap</span>
             </button>
             <button
               onClick={() => navigate("/stake")}
-              className="w-1/3 p-1 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 hover:border-mf-safety-500 border-sm transition-colors"
+              className="w-1/3 p-1 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 hover:border-mf-safety-500 border-sm transition-colors cursor-pointer"
             >
               <span>Stake</span>
             </button>
             <button
               onClick={() => navigate("/transfer")}
-              className="w-1/3 p-1 bg-mf-sybil-500 hover:bg-mf-night-500 hover:text-mf-sybil-500 border-2 border-mf-sybil-500 hover:border-mf-sybil-500 border-sm transition-colors"
+              className="w-1/3 p-1 bg-mf-sybil-500 hover:bg-mf-night-500 hover:text-mf-sybil-500 border-2 border-mf-sybil-500 hover:border-mf-sybil-500 border-sm transition-colors cursor-pointer"
             >
               <span>Transfer</span>
             </button>

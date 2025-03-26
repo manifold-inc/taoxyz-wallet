@@ -8,6 +8,7 @@ import KeyringService from "../../services/KeyringService";
 import MessageService from "../../services/MessageService";
 import StakeOverview from "../portfolio/StakeOverview";
 import ExpandedStake from "../portfolio/ExpandedStake";
+import ConfirmAction from "../ConfirmAction";
 import type { StakeTransaction, Subnet } from "../../../types/client";
 import { NotificationType } from "../../../types/client";
 
@@ -26,6 +27,7 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
     null
   );
   const [selectedSubnet, setSelectedSubnet] = useState<Subnet | null>(null);
+  const [showRemoveStakeConfirm, setShowRemoveStakeConfirm] = useState(false);
 
   const handleStakeSelect = async (stake: StakeTransaction): Promise<void> => {
     const subnet = await api?.getSubnet(stake.subnetId);
@@ -60,12 +62,27 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
     });
   };
 
-  const handleSwap = async (): Promise<void> => {
+  const handleRemoveStake = async (): Promise<void> => {
     if (!api || !selectedStake) return;
     const isAuthorized = await handleAuth();
     if (!isAuthorized) return;
 
+    setShowRemoveStakeConfirm(true);
+  };
+
+  const handleConfirmRemoveStake = async (): Promise<void> => {
+    if (!api || !selectedStake) return;
+    setShowRemoveStakeConfirm(false);
+
     try {
+      if (!selectedStake.tokens || isNaN(selectedStake.tokens)) {
+        showNotification({
+          type: NotificationType.Error,
+          message: "Invalid Stake Amount",
+        });
+        return;
+      }
+
       showNotification({
         type: NotificationType.Pending,
         message: "Submitting Transaction...",
@@ -90,7 +107,7 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
       onRefresh();
     } catch {
       showNotification({
-        message: "Failed to Swap Stake",
+        message: "Failed to Remove Stake",
         type: NotificationType.Error,
       });
     }
@@ -106,6 +123,19 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
 
   return (
     <div>
+      <ConfirmAction
+        isOpen={showRemoveStakeConfirm}
+        title="Confirm Remove Stake"
+        message={
+          selectedStake
+            ? `Are you sure you want to remove your stake of ${(
+                selectedStake.tokens / 1e9
+              ).toFixed(4)} α from Subnet ${selectedStake.subnetId}?`
+            : ""
+        }
+        onConfirm={handleConfirmRemoveStake}
+        onCancel={() => setShowRemoveStakeConfirm(false)}
+      />
       {selectedStake ? (
         <ExpandedStake
           stake={selectedStake}
@@ -114,9 +144,8 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
             setSelectedStake(null);
             setSelectedSubnet(null);
           }}
-          onSwap={handleSwap}
+          onRemoveStake={handleRemoveStake}
           onMoveStake={handleMoveStake}
-          onRefresh={onRefresh}
         />
       ) : (
         <div className="w-full max-h-76 overflow-y-auto portfolio-container mt-2">

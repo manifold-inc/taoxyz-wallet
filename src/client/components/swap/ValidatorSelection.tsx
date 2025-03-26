@@ -4,20 +4,35 @@ interface ValidatorSelectionProps {
   subnet: Subnet;
   validators: Validator[];
   selectedValidator: Validator | null;
+  isLoading?: boolean;
   onSelect: (validator: Validator) => void;
 }
 
 const ValidatorSelection = ({
   validators,
   selectedValidator,
+  isLoading = true,
   onSelect,
 }: ValidatorSelectionProps) => {
-  if (validators.length === 0) {
+  if (isLoading) {
     return (
       <div className="p-2">
-        <div className="w-full rounded-lg bg-mf-ash-500 px-3 py-4 ring-1 ring-mf-safety-500">
-          <div className="flex items-center justify-between flex-1">
-            <p className="text-xs text-mf-safety-500">No Validators Found</p>
+        <div className="w-full flex items-center justify-center rounded-sm bg-mf-ash-500 p-2">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-mf-milk-300" />
+        </div>
+      </div>
+    );
+  }
+
+  if (validators.length === 0 && !isLoading) {
+    return (
+      <div className="p-2">
+        <div className="w-full border-sm bg-mf-ash-500 p-2 space-y-1 border-2 border-mf-ash-300">
+          <div className="flex items-center justify-between text-sm text-mf-silver-300 font-semibold">
+            <h3>No Validators Found</h3>
+          </div>
+          <div className="flex items-center justify-between text-xs text-mf-milk-300">
+            <p>Please try again later</p>
           </div>
         </div>
       </div>
@@ -31,9 +46,9 @@ const ValidatorSelection = ({
         return (
           <button
             key={validator.hotkey}
-            className={`w-full text-left rounded-sm p-2 ${
+            className={`w-full text-left border-sm p-2 border-2 border-mf-ash-500 cursor-pointer ${
               isSelected
-                ? "bg-mf-ash-300 border-2 border-mf-safety-500"
+                ? "bg-mf-ash-300 border-mf-safety-500"
                 : "bg-mf-ash-500 hover:bg-mf-ash-300"
             } transition-colors space-y-1`}
             onClick={() => onSelect(validator)}

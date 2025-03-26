@@ -9,7 +9,17 @@ import type { Permissions } from "../../types/client";
 const registry = new TypeRegistry();
 
 export const KeyringService = {
-  // TODO: Prevent users from adding wallets with the same mnemonic
+  async checkDuplicate(mnemonic: string): Promise<boolean | Error> {
+    try {
+      const wallets = this.getWallets();
+      const address = keyring.createFromUri(mnemonic).address;
+      const isDuplicate = wallets.some((wallet) => wallet.address === address);
+      return isDuplicate;
+    } catch {
+      return new Error("Failed to Verify Wallet");
+    }
+  },
+
   async addWallet(
     mnemonic: string,
     username: string,
@@ -20,10 +30,10 @@ export const KeyringService = {
         username,
         websitePermissions: {} as Permissions,
       } as KeyringPair$Meta);
-      if (!result.pair) return new Error("Failed to add wallet");
+      if (!result.pair) return new Error("Failed to Add Wallet");
       return result.pair;
     } catch {
-      return new Error("Failed to add wallet");
+      return new Error("Failed to Add Wallet");
     }
   },
 
@@ -31,7 +41,7 @@ export const KeyringService = {
     const wallet = this.getWallet(address);
     if (wallet instanceof Error) return false;
 
-    wallet.decodePkcs8(password);
+    wallet.unlock(password);
     if (wallet.isLocked) return false;
     return true;
   },
@@ -72,16 +82,16 @@ export const KeyringService = {
     }
   },
 
-  // TODO: Error handling consistent return error
   async sign(
     address: string,
     payload: SignerPayloadJSON,
     password: string
-  ): Promise<`0x${string}`> {
+  ): Promise<`0x${string}` | Error> {
     const wallet = await this.getWallet(address);
-    if (wallet instanceof Error) throw new Error(wallet.message);
+    if (wallet instanceof Error) return new Error(wallet.message);
     try {
-      wallet.decodePkcs8(password);
+      this.unlockWallet(address, password);
+      if (wallet.isLocked) return new Error("Wallet is Locked");
 
       registry.setSignedExtensions(payload.signedExtensions);
       const extrinsicPayload = registry.createType(
@@ -94,21 +104,15 @@ export const KeyringService = {
 
       const { signature } = extrinsicPayload.sign(wallet);
       return signature;
-    } catch (error) {
-      console.error("[KeyringService] Signing failed:", error);
-      throw error;
+    } catch {
+      return new Error("Failed to Sign Transaction");
     }
   },
 
-  async getPermissions(address: string): Promise<Permissions> {
+  async getPermissions(address: string): Promise<Permissions | Error> {
     const wallet = await this.getWallet(address);
-    if (wallet instanceof Error) throw new Error(wallet.message);
-    try {
-      return (wallet.meta.websitePermissions as Permissions) || {};
-    } catch (error) {
-      console.error("[KeyringService] Error getting permissions:", error);
-      throw error;
-    }
+    if (wallet instanceof Error) return new Error(wallet.message);
+    return (wallet.meta.websitePermissions as Permissions) || {};
   },
 
   async updatePermissions(
@@ -116,9 +120,10 @@ export const KeyringService = {
     address: string,
     allowAccess: boolean,
     removeWebsite = false
-  ): Promise<boolean> {
+  ): Promise<boolean | Error> {
     const wallet = await this.getWallet(address);
-    if (wallet instanceof Error) throw new Error(wallet.message);
+    if (wallet instanceof Error) return new Error(wallet.message);
+
     try {
       const meta = { ...wallet.meta };
       const permissions = (meta.websitePermissions as Permissions) || {};
@@ -136,47 +141,31 @@ export const KeyringService = {
         [`permissions_${wallet.address}`]: { permissions },
       });
 
-      console.log(
-        "[KeyringService] Updated Permissions:",
-        {
-          address: wallet.address,
-          permissions: permissions,
-          origin,
-          allowAccess,
-        },
-        wallet.meta
-      );
       return true;
-    } catch (error) {
-      console.error("[KeyringService] Updating permissions failed:", error);
-      return false;
+    } catch {
+      return new Error("Failed to Update Permissions");
     }
   },
 
-  lockAll(): void {
+  lockWallets(): boolean | Error {
     const pairs = keyring.getPairs();
-    if (!pairs) throw new Error("Keyring not initialized");
+    if (!pairs) return new Error("Keyring not initialized");
     try {
       pairs.forEach((pair) => {
         if (!pair.isLocked) {
           pair.lock();
         }
       });
-    } catch (error) {
-      console.error("[KeyringService] Error locking all wallets:", error);
-      throw error;
+      return true;
+    } catch {
+      return new Error("Failed to Lock All Wallets");
     }
   },
 
-  isLocked(address: string): boolean {
+  isLocked(address: string): boolean | Error {
     const wallet = this.getWallet(address);
-    if (wallet instanceof Error) throw new Error(wallet.message);
-    try {
-      return wallet.isLocked;
-    } catch (error) {
-      console.error("[KeyringService] Error checking lock status:", error);
-      return true;
-    }
+    if (wallet instanceof Error) return new Error(wallet.message);
+    return wallet.isLocked;
   },
 };
 

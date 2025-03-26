@@ -56,7 +56,7 @@ export const Swap = () => {
     null
   );
   const [isLoadingSubnets, setIsLoadingSubnets] = useState(true);
-  const [isLoadingValidators, setIsLoadingValidators] = useState(false);
+  const [isLoadingValidators, setIsLoadingValidators] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
 
   const restoreSwap = async () => {
@@ -173,8 +173,9 @@ export const Swap = () => {
           <ValidatorSelection
             subnet={selectedSubnet}
             validators={validators}
-            onSelect={handleValidatorSelect}
             selectedValidator={selectedValidator}
+            isLoading={isLoadingValidators}
+            onSelect={handleValidatorSelect}
           />
         );
       case Step.CONFIRM_SWAP:
@@ -211,7 +212,7 @@ export const Swap = () => {
           <button
             onClick={handleBack}
             disabled={step === Step.SELECT_SUBNET}
-            className={`transition-colors ${
+            className={`transition-colors cursor-pointer ${
               step === Step.SELECT_SUBNET
                 ? "text-mf-ash-300 cursor-not-allowed"
                 : "text-mf-milk-300"
@@ -232,7 +233,7 @@ export const Swap = () => {
               (step === Step.SELECT_VALIDATOR && !selectedValidator) ||
               step === Step.CONFIRM_SWAP
             }
-            className={`transition-colors ${
+            className={`transition-colors cursor-pointer ${
               (step === Step.SELECT_SUBNET &&
                 (!selectedSubnet || validators.length === 0)) ||
               (step === Step.SELECT_VALIDATOR && !selectedValidator) ||

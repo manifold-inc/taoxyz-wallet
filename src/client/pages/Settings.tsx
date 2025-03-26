@@ -14,7 +14,7 @@ const Settings = () => {
   const [showConnectedSites, setShowConnectedSites] = useState(false);
 
   const handleLock = async () => {
-    KeyringService.lockAll();
+    KeyringService.lockWallets();
     await MessageService.sendWalletsLocked();
     await setIsLocked(true);
   };
@@ -41,7 +41,7 @@ const Settings = () => {
                 <div className="text-center space-y-1">
                   <h2 className="text-lg text-mf-milk-300">Settings</h2>
                   <button onClick={() => setShowDisclaimer(true)}>
-                    <span className="text-xs text-mf-safety-500 hover:text-mf-safety-300 transition-colors underline underline-offset-2 decoration-mf-safety-500 hover:decoration-mf-safety-300">
+                    <span className="text-xs text-mf-safety-500 hover:text-mf-safety-300 transition-colors underline underline-offset-2 decoration-mf-safety-500 hover:decoration-mf-safety-300 cursor-pointer">
                       Disclaimer
                     </span>
                   </button>
@@ -62,14 +62,14 @@ const Settings = () => {
                 <div className="flex justify-center space-x-4 mt-4">
                   <button
                     onClick={handleLock}
-                    className="w-44 p-1 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 hover:border-mf-safety-500 border-sm transition-colors"
+                    className="w-44 p-1 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 hover:border-mf-safety-500 border-sm transition-colors cursor-pointer"
                   >
                     <span>Lock Wallet</span>
                   </button>
 
                   <button
                     onClick={() => setShowConnectedSites(true)}
-                    className="w-44 p-1 bg-mf-sybil-500 hover:bg-mf-night-500 hover:text-mf-sybil-500 border-2 border-mf-sybil-500 hover:border-mf-sybil-500 border-sm transition-colors"
+                    className="w-44 p-1 bg-mf-sybil-500 hover:bg-mf-night-500 hover:text-mf-sybil-500 border-2 border-mf-sybil-500 hover:border-mf-sybil-500 border-sm transition-colors cursor-pointer"
                   >
                     <span>View Sites</span>
                   </button>

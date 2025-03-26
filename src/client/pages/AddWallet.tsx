@@ -51,7 +51,6 @@ const AddWallet = () => {
     setMode("display-mnemonic");
   };
 
-  // TODO: Edge case where user closes extension after creating wallet
   const handleContinue = async (wallet: KeyringPair): Promise<void> => {
     if (!wallet) {
       showNotification({
@@ -92,7 +91,7 @@ const AddWallet = () => {
               onClick={() => {
                 setMode("create-wallet");
               }}
-              className="rounded-sm bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors p-3"
+              className="rounded-sm bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors p-3 cursor-pointer"
             >
               <div className="flex justify-center items-center gap-2 mr-2">
                 <UserPlus className="text-mf-safety-500 w-5 h-5" />
@@ -103,7 +102,7 @@ const AddWallet = () => {
               onClick={() => {
                 setMode("import-mnemonic");
               }}
-              className="rounded-sm bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors p-3"
+              className="rounded-sm bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors p-3 cursor-pointer"
             >
               <div className="flex justify-center items-center gap-2 mr-4">
                 <FolderInput className="text-mf-safety-500 w-5 h-5" />

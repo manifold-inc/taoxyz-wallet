@@ -41,7 +41,7 @@ const MessageService = {
   ) {
     try {
       await chrome.storage.local.set({ walletLocked: true });
-      KeyringService.lockAll();
+      KeyringService.lockWallets();
       sendResponse({ success: true });
     } catch (error) {
       console.error("[MessageHandler] Error handling wallets locked:", error);

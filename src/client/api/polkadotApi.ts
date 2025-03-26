@@ -27,15 +27,15 @@ class PolkadotApi {
   }
 
   private async initialize(): Promise<void> {
-    console.log("[Client] Starting initialization");
-    const provider = new WsProvider(this.endpoints.test);
+    console.log("[Client] Initializing API");
+    const provider = new WsProvider(this.endpoints.main);
     try {
       if (this.api?.isConnected) {
         await this.api.disconnect();
       }
 
       this.api = await ApiPromise.create({ provider });
-      console.log(`[Client] Connected to the endpoint: ${this.endpoints.test}`);
+      console.log(`[Client] Connected to Endpoint: ${this.endpoints.main}`);
     } catch (error) {
       console.error("Error in initialize:", error);
       throw error;
@@ -52,8 +52,7 @@ class PolkadotApi {
   public async getApi(): Promise<ApiPromise> {
     await this.initPromise;
     if (!this.api) {
-      console.error("Error in getApi");
-      throw new Error("API not initialized");
+      throw new Error("API Not Initialized");
     }
     return this.api;
   }
@@ -74,8 +73,8 @@ class PolkadotApi {
       )) as unknown as SubstrateAccount;
 
       if (wallet instanceof Error) throw new Error(wallet.message);
-      if (wallet.isLocked) throw new Error("Wallet is locked");
-      if (!toWallet.data.free) throw new Error("Invalid recipient address");
+      if (wallet.isLocked) throw new Error("Wallet is Locked");
+      if (!toWallet.data.free) throw new Error("Invalid Recipient Address");
 
       return new Promise((resolve, reject) => {
         let unsubscribe: (() => void) | undefined;
@@ -110,7 +109,7 @@ class PolkadotApi {
           });
       });
     } catch (error) {
-      console.error("Error in transfer:", error);
+      console.error("Error in Transfer:", error);
       throw error;
     }
   }
@@ -121,7 +120,7 @@ class PolkadotApi {
         await this.api.call.stakeInfoRuntimeApi.getStakeInfoForColdkey(address);
       return stake.toJSON();
     } catch (error) {
-      console.error("Error in getStake:", error);
+      console.error("Error in Get Stake:", error);
       throw error;
     }
   }
@@ -174,7 +173,7 @@ class PolkadotApi {
           });
       });
     } catch (error) {
-      console.error("Error in createStake:", error);
+      console.error("Error in Create Stake:", error);
       throw error;
     }
   }
@@ -229,7 +228,7 @@ class PolkadotApi {
           });
       });
     } catch (error) {
-      console.error("Error in removeStake:", error);
+      console.error("Error in Remove Stake:", error);
       throw error;
     }
   }
@@ -292,7 +291,7 @@ class PolkadotApi {
           });
       });
     } catch (error) {
-      console.error("Error in moveStake:", error);
+      console.error("Error in Move Stake:", error);
       throw error;
     }
   }
@@ -304,7 +303,7 @@ class PolkadotApi {
       const balanceInTao = (account.data.free / 1e9).toFixed(4);
       return balanceInTao;
     } catch (error) {
-      console.error("Error in getBalance:", error);
+      console.error("Error in Get Balance:", error);
       throw error;
     }
   }
@@ -345,7 +344,7 @@ class PolkadotApi {
 
       return btSubnets;
     } catch (error) {
-      console.error("Error in getSubnets:", error);
+      console.error("Error in Get Subnets:", error);
       throw error;
     }
   }
@@ -382,7 +381,7 @@ class PolkadotApi {
       };
       return subnet;
     } catch (error) {
-      console.error("Error in getSubnet:", error);
+      console.error("Error in Get Subnet:", error);
       throw error;
     }
   }
@@ -418,7 +417,7 @@ class PolkadotApi {
 
       return validators;
     } catch (error) {
-      console.error("Error in getValidators:", error);
+      console.error("Error in Get Validators:", error);
       throw error;
     }
   }
@@ -432,14 +431,14 @@ class PolkadotApi {
   ): void {
     switch (true) {
       case status.isReady:
-        console.log("[Transaction] Ready to broadcast");
+        console.log("[Transaction] Ready to Broadcast");
         break;
       case status.isBroadcast:
-        console.log("[Transaction] Broadcasted to network");
+        console.log("[Transaction] Broadcasted to Network");
         break;
       case status.isInBlock: {
         console.log(
-          "[Transaction] Included in block:",
+          "[Transaction] Included in Block:",
           status.asInBlock.toHex()
         );
 

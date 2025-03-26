@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   AreaChart,
   Area,
@@ -9,6 +9,7 @@ import {
 } from "recharts";
 
 interface StakeChartProps {
+  data: PriceResponse[];
   subnetId: number;
 }
 
@@ -23,26 +24,17 @@ interface ChartDataPoint {
   timestamp: string;
 }
 
-interface ApiResponse {
-  data: PriceResponse[];
-}
-
-const StakeChart = ({ subnetId }: StakeChartProps) => {
+const StakeChart = ({ data, subnetId }: StakeChartProps) => {
   const [priceData, setPriceData] = useState<ChartDataPoint[]>([]);
-
-  useEffect(() => {
-    fetchSubnetPrice();
-  }, [subnetId]);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const addTimestamps = (data: PriceResponse[]): ChartDataPoint[] => {
     const now = new Date();
     const sevenDaysAgo = new Date(now);
     sevenDaysAgo.setDate(now.getDate() - 7);
 
-    // Calculate time interval between points
     const timeInterval = (now.getTime() - sevenDaysAgo.getTime()) / data.length;
 
-    // Reverse the mapping so newest data is at the end
     return [...data].reverse().map((point, index) => {
       const pointTime = new Date(sevenDaysAgo.getTime() + timeInterval * index);
       return {
@@ -57,44 +49,29 @@ const StakeChart = ({ subnetId }: StakeChartProps) => {
     });
   };
 
-  const fetchSubnetPrice = async () => {
-    try {
-      const response = await fetch(
-        "https://taoxyz.vercel.app/api/subnets/price",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            allSubnets: false,
-            netuid: subnetId,
-          }),
-        }
-      );
-
-      const { data } = (await response.json()) as ApiResponse;
-      const dataWithTimestamps = addTimestamps(data);
-      setPriceData(dataWithTimestamps);
-    } catch (error) {
-      console.error("Error fetching subnet price:", error);
-    }
-  };
-
   const calculateYAxisDomain = (data: ChartDataPoint[]) => {
-    if (data.length === 0) return [0, 1]; // Default range if no data
+    if (data.length === 0) return [0, 1];
 
-    // Calculate average price
     const prices = data.map((point) => parseFloat(point.price));
     const avgPrice =
       prices.reduce((sum, price) => sum + price, 0) / prices.length;
 
-    // Set range to ±20% of average
-    const minPrice = avgPrice * 0.8; // 20% below average
-    const maxPrice = avgPrice * 1.2; // 20% above average
+    const minPrice = avgPrice * 0.8;
+    const maxPrice = avgPrice * 1.2;
 
     return [minPrice, maxPrice];
   };
+
+  const init = async () => {
+    const dataWithTimestamps = addTimestamps(data);
+    setPriceData(dataWithTimestamps);
+    setIsInitialized(true);
+  };
+
+  if (!isInitialized) {
+    void init();
+    setIsInitialized(true);
+  }
 
   return (
     <ResponsiveContainer width="100%" height="100%">
@@ -151,8 +128,8 @@ const StakeChart = ({ subnetId }: StakeChartProps) => {
             marginBottom: "6px",
           }}
           formatter={(value: string) => [
-            `α${parseFloat(value).toFixed(4)}`,
-            "Stake",
+            `${parseFloat(value).toFixed(4)}α`,
+            "Price",
           ]}
         />
         <Area

@@ -1,46 +1,104 @@
 import type { Slippage } from "../types/client";
 
-const RAO_MULTIPLIER = 1_000_000_000n;
-
 export const generateId = (): number => {
   return Math.floor(Math.random() * 1000000);
 };
 
 export const taoToRao = (amount: number): bigint => {
+  if (isNaN(amount)) return BigInt(0);
   return BigInt(Math.floor(amount * 1e9));
 };
 
-export const calculateSlippage = (
+export const raoToTao = (amount: bigint): number => {
+  return Number(amount) / 1e9;
+};
+
+export const slippageStakeCalculation = (
   alphaIn: bigint,
   taoIn: bigint,
   amountInRao: bigint,
   toAlpha: boolean
 ): Slippage => {
-  if (toAlpha) {
-    const idealAmount = (alphaIn * amountInRao) / taoIn;
-    const actualAmount = (alphaIn * amountInRao) / (taoIn + amountInRao);
-    const slippagePercentageBigInt =
-      ((idealAmount - actualAmount) * 100n * RAO_MULTIPLIER) / idealAmount;
+  let slippage: bigint;
+  let slippagePercentage: number;
+  const k = alphaIn * taoIn;
 
-    const tokens = Number(actualAmount) / 1e9;
-    const slippagePercentage = Number(slippagePercentageBigInt) / 1e9;
+  if (toAlpha) {
+    const newTaoIn = taoIn + amountInRao;
+    const newAlphaIn = k / newTaoIn;
+    const alphaReturned = alphaIn - newAlphaIn;
+    const alphaIdeal = (alphaIn / taoIn) * amountInRao;
+
+    if (alphaIdeal > alphaReturned) {
+      slippage = alphaIdeal - alphaReturned;
+    } else {
+      slippage = 0n;
+    }
+
+    if (slippage + alphaReturned != 0n) {
+      slippagePercentage =
+        (100 * Number(slippage)) / Number(slippage + alphaReturned);
+    } else {
+      slippagePercentage = 0;
+    }
 
     return {
-      tokens,
+      tokens: raoToTao(alphaReturned),
       slippagePercentage,
     };
   } else {
-    const idealAmount = (taoIn * amountInRao) / alphaIn;
-    const actualAmount = (taoIn * amountInRao) / (alphaIn + amountInRao);
-    const slippagePercentageBigInt =
-      ((idealAmount - actualAmount) * 100n * RAO_MULTIPLIER) / idealAmount;
+    const newAlphaIn = alphaIn + amountInRao;
+    const newTaoReserve = k / newAlphaIn;
+    const taoReturned = taoIn - newTaoReserve;
+    const taoIdeal = (taoIn / alphaIn) * amountInRao;
 
-    const tokens = Number(actualAmount) / 1e9;
-    const slippagePercentage = Number(slippagePercentageBigInt) / 1e9;
+    if (taoIdeal > taoReturned) {
+      slippage = taoIdeal - taoReturned;
+    } else {
+      slippage = 0n;
+    }
+
+    if (slippage + taoReturned != 0n) {
+      slippagePercentage =
+        (100 * Number(slippage)) / Number(slippage + taoReturned);
+    } else {
+      slippagePercentage = 0;
+    }
 
     return {
-      tokens,
+      tokens: raoToTao(taoReturned),
       slippagePercentage,
     };
   }
+};
+
+export const slippageMoveStakeCalculation = (
+  alphaIn: bigint,
+  taoIn: bigint,
+  amountInRao: bigint
+): Slippage => {
+  const unstakeResult = slippageStakeCalculation(
+    alphaIn,
+    taoIn,
+    amountInRao,
+    false
+  );
+  const newAlphaIn = alphaIn - taoToRao(unstakeResult.tokens);
+  const newTaoIn = taoIn + amountInRao;
+
+  const restakeResult = slippageStakeCalculation(
+    newAlphaIn,
+    newTaoIn,
+    taoToRao(unstakeResult.tokens),
+    true
+  );
+
+  const totalTokens = restakeResult.tokens;
+  const totalSlippagePercentage =
+    unstakeResult.slippagePercentage + restakeResult.slippagePercentage;
+
+  return {
+    tokens: totalTokens,
+    slippagePercentage: totalSlippagePercentage,
+  };
 };
