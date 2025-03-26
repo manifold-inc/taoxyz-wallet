@@ -6,7 +6,7 @@ import { useNotification } from "../../contexts/NotificationContext";
 import { useLock } from "../../contexts/LockContext";
 import KeyringService from "../../services/KeyringService";
 import MessageService from "../../services/MessageService";
-import { calculateSlippage, taoToRao } from "../../../utils/utils";
+import { taoToRao, slippageStakeCalculation } from "../../../utils/utils";
 import { NotificationType } from "../../../types/client";
 import type {
   Subnet,
@@ -41,11 +41,10 @@ export const ConfirmStake = ({
   const balanceInRao: bigint = taoToRao(parseFloat(balance));
   const slippage = useMemo(() => {
     if (!alphaAmountInRao || !subnet.taoIn || !stake.tokens) return null;
-    return calculateSlippage(
+    return slippageStakeCalculation(
       BigInt(stake.tokens),
       BigInt(subnet.taoIn),
-      alphaAmountInRao,
-      true
+      alphaAmountInRao
     );
   }, [alphaAmountInRao, stake.tokens, subnet.taoIn]);
 
@@ -200,6 +199,10 @@ export const ConfirmStake = ({
               >
                 {slippage.slippagePercentage.toFixed(2)}%
               </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-mf-silver-300">Fee:</span>
+              <span className="text-mf-safety-500">0.00005 τ</span>
             </div>
           </div>
         )}
