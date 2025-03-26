@@ -13,7 +13,7 @@ export const raoToTao = (amount: bigint): number => {
   return Number(amount) / 1e9;
 };
 
-export const slippageSwapCalculation = (
+export const slippageStakeCalculation = (
   alphaIn: bigint,
   taoIn: bigint,
   amountInRao: bigint,
@@ -47,7 +47,6 @@ export const slippageSwapCalculation = (
       slippagePercentage,
     };
   } else {
-    // TODO: Verify this is correct
     const newAlphaIn = alphaIn + amountInRao;
     const newTaoReserve = k / newAlphaIn;
     const taoReturned = taoIn - newTaoReserve;
@@ -73,40 +72,28 @@ export const slippageSwapCalculation = (
   }
 };
 
-// TODO: Verify this is correct
-export const slippageStakeCalculation = (
+export const slippageMoveStakeCalculation = (
   alphaIn: bigint,
   taoIn: bigint,
   amountInRao: bigint
 ): Slippage => {
-  const unstakeResult = slippageSwapCalculation(
+  const unstakeResult = slippageStakeCalculation(
     alphaIn,
     taoIn,
     amountInRao,
     false
   );
-  console.log("input", alphaIn, taoIn, amountInRao);
-  console.log("unstakeResult", unstakeResult);
-
   const newAlphaIn = alphaIn - taoToRao(unstakeResult.tokens);
   const newTaoIn = taoIn + amountInRao;
 
-  console.log("new alpha and tao", newAlphaIn, newTaoIn);
-
-  const restakeResult = slippageSwapCalculation(
+  const restakeResult = slippageStakeCalculation(
     newAlphaIn,
     newTaoIn,
     taoToRao(unstakeResult.tokens),
     true
   );
 
-  console.log("restakeResult", restakeResult);
-
-  // Total tokens received after both operations
   const totalTokens = restakeResult.tokens;
-
-  // Calculate total slippage percentage
-  // This is the sum of both slippage percentages since they're sequential operations
   const totalSlippagePercentage =
     unstakeResult.slippagePercentage + restakeResult.slippagePercentage;
 

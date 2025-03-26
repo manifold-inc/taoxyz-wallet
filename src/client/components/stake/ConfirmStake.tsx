@@ -6,7 +6,7 @@ import { useNotification } from "../../contexts/NotificationContext";
 import { useLock } from "../../contexts/LockContext";
 import KeyringService from "../../services/KeyringService";
 import MessageService from "../../services/MessageService";
-import { taoToRao, slippageStakeCalculation } from "../../../utils/utils";
+import { taoToRao, slippageMoveStakeCalculation } from "../../../utils/utils";
 import { NotificationType } from "../../../types/client";
 import type {
   Subnet,
@@ -40,13 +40,13 @@ export const ConfirmStake = ({
   const alphaAmountInRao: bigint = taoToRao(parseFloat(amount) || 0);
   const balanceInRao: bigint = taoToRao(parseFloat(balance));
   const slippage = useMemo(() => {
-    if (!alphaAmountInRao || !subnet.taoIn || !stake.tokens) return null;
-    return slippageStakeCalculation(
-      BigInt(stake.tokens),
+    if (!alphaAmountInRao || !subnet.taoIn || !subnet.alphaIn) return null;
+    return slippageMoveStakeCalculation(
+      BigInt(subnet.alphaIn),
       BigInt(subnet.taoIn),
       alphaAmountInRao
     );
-  }, [alphaAmountInRao, stake.tokens, subnet.taoIn]);
+  }, [alphaAmountInRao, subnet.taoIn, subnet.alphaIn]);
 
   const restoreTransaction = async () => {
     const result = await chrome.storage.local.get("storeStakeTransaction");
