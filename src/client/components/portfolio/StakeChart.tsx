@@ -53,11 +53,8 @@ const StakeChart = ({ data, subnetId }: StakeChartProps) => {
     if (data.length === 0) return [0, 1];
 
     const prices = data.map((point) => parseFloat(point.price));
-    const avgPrice =
-      prices.reduce((sum, price) => sum + price, 0) / prices.length;
-
-    const minPrice = avgPrice * 0.8;
-    const maxPrice = avgPrice * 1.2;
+    const minPrice = Math.min(...prices) - 1;
+    const maxPrice = Math.max(...prices) + 1;
 
     return [minPrice, maxPrice];
   };
