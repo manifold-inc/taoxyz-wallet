@@ -14,7 +14,7 @@ import type {
   StakeTransaction,
 } from "../../../types/client";
 
-interface ConfirmStakeProps {
+interface ConfirmMoveStakeProps {
   stake: StakeTransaction;
   subnet: Subnet;
   validator: Validator;
@@ -22,13 +22,13 @@ interface ConfirmStakeProps {
   balance: string;
 }
 
-export const ConfirmStake = ({
+const ConfirmMoveStake = ({
   stake,
   subnet,
   validator,
   address,
   balance,
-}: ConfirmStakeProps) => {
+}: ConfirmMoveStakeProps) => {
   const navigate = useNavigate();
   const { showNotification } = useNotification();
   const { setIsLocked } = useLock();
@@ -231,3 +231,5 @@ export const ConfirmStake = ({
     </div>
   );
 };
+
+export default ConfirmMoveStake;
