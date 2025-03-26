@@ -41,7 +41,7 @@ export const KeyringService = {
     const wallet = this.getWallet(address);
     if (wallet instanceof Error) return false;
 
-    wallet.decodePkcs8(password);
+    wallet.unlock(password);
     if (wallet.isLocked) return false;
     return true;
   },
@@ -90,7 +90,7 @@ export const KeyringService = {
     const wallet = await this.getWallet(address);
     if (wallet instanceof Error) return new Error(wallet.message);
     try {
-      wallet.decodePkcs8(password);
+      this.unlockWallet(address, password);
       if (wallet.isLocked) return new Error("Wallet is Locked");
 
       registry.setSignedExtensions(payload.signedExtensions);
