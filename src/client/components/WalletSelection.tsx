@@ -8,7 +8,6 @@ import { useWallet } from "../contexts/WalletContext";
 import KeyringService from "../services/KeyringService";
 import ConfirmAction from "./ConfirmAction";
 
-// TODO: Add confirmation for deleting wallet
 const WalletSelection = () => {
   const navigate = useNavigate();
   const { currentAddress, setCurrentAddress } = useWallet();

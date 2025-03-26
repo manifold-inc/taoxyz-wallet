@@ -4,6 +4,7 @@ import type { KeyringPair } from "@polkadot/keyring/types";
 
 import { useNotification } from "../../contexts/NotificationContext";
 import KeyringService from "../../services/KeyringService";
+import ConfirmAction from "../ConfirmAction";
 import { NotificationType } from "../../../types/client";
 import type { Permissions, PermissionsPerWebsite } from "../../../types/client";
 import taoxyz from "../../../../public/icons/taoxyz.svg";
@@ -12,7 +13,6 @@ interface ConnectedSitesProps {
   onClose: () => void;
 }
 
-// TODO: Add cursor-pointer style to every element that can be clicked
 const ConnectedSites = ({ onClose }: ConnectedSitesProps) => {
   const { showNotification } = useNotification();
   const [websitePermissions, setWebsitePermissions] =
@@ -20,6 +20,7 @@ const ConnectedSites = ({ onClose }: ConnectedSitesProps) => {
   const [expandedWebsite, setExpandedWebsite] = useState<string | null>(null);
   const [wallets, setWallets] = useState<KeyringPair[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [websiteToRemove, setWebsiteToRemove] = useState<string | null>(null);
 
   const loadPermissions = async () => {
     try {
@@ -80,11 +81,16 @@ const ConnectedSites = ({ onClose }: ConnectedSitesProps) => {
     event: React.MouseEvent
   ) => {
     event.stopPropagation();
-    if (!window.confirm(`Remove access for ${website}?`)) return;
+    setWebsiteToRemove(website);
+  };
+
+  const confirmRemoveWebsite = async () => {
+    if (!websiteToRemove) return;
+
     try {
       for (const wallet of wallets) {
         await KeyringService.updatePermissions(
-          website,
+          websiteToRemove,
           wallet.address,
           false,
           true
@@ -97,6 +103,7 @@ const ConnectedSites = ({ onClose }: ConnectedSitesProps) => {
         message: "Failed to Remove Website",
       });
     }
+    setWebsiteToRemove(null);
   };
 
   const init = async () => {
@@ -111,6 +118,15 @@ const ConnectedSites = ({ onClose }: ConnectedSitesProps) => {
 
   return (
     <div className="flex flex-col items-center h-screen">
+      <ConfirmAction
+        isOpen={!!websiteToRemove}
+        title="Remove Website"
+        message={`Are you sure you want to remove access for ${
+          websiteToRemove || ""
+        }?`}
+        onConfirm={confirmRemoveWebsite}
+        onCancel={() => setWebsiteToRemove(null)}
+      />
       <div className="relative flex justify-center items-center w-76 mt-12">
         <ArrowLeftToLine
           className="absolute left-3 w-6 h-6 text-mf-milk-500"
