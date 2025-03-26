@@ -50,7 +50,6 @@ interface StakeResponse {
   stake: number;
 }
 
-// TODO: Validators are not ready when coming from portfolio
 const Stake = () => {
   const { showNotification } = useNotification();
   const { api } = usePolkadotApi();
@@ -71,8 +70,8 @@ const Stake = () => {
     null
   );
   const [isLoadingStakes, setIsLoadingStakes] = useState(true);
-  const [isLoadingSubnet, setIsLoadingSubnet] = useState(false);
-  const [isLoadingValidators, setIsLoadingValidators] = useState(false);
+  const [isLoadingSubnet, setIsLoadingSubnet] = useState(true);
+  const [isLoadingValidators, setIsLoadingValidators] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
 
   const restoreStake = async () => {
@@ -218,6 +217,7 @@ const Stake = () => {
             subnet={selectedSubnet}
             validators={validators}
             selectedValidator={selectedValidator}
+            isLoading={isLoadingValidators}
             onSelect={handleValidatorSelect}
           />
         );
@@ -244,7 +244,6 @@ const Stake = () => {
     await getStakes(currentAddress);
     if (location.state?.selectedStake) {
       const stake = location.state.selectedStake;
-      await getSubnet(stake.subnetId);
       await getValidators(stake.subnetId, stake.validatorHotkey);
     }
   };
@@ -260,7 +259,7 @@ const Stake = () => {
           <button
             onClick={handleBack}
             disabled={step === Step.SELECT_STAKE}
-            className={`transition-colors ${
+            className={`transition-colors cursor-pointer ${
               step === Step.SELECT_STAKE
                 ? "text-mf-ash-300 cursor-not-allowed"
                 : "text-mf-milk-300"
@@ -281,7 +280,7 @@ const Stake = () => {
               (step === Step.SELECT_VALIDATOR && !selectedValidator) ||
               step === Step.CONFIRM_STAKE
             }
-            className={`transition-colors ${
+            className={`transition-colors cursor-pointer ${
               (step === Step.SELECT_STAKE &&
                 (!selectedStake || validators.length === 0)) ||
               (step === Step.SELECT_VALIDATOR && !selectedValidator) ||

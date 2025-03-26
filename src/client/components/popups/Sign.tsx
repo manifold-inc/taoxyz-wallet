@@ -64,11 +64,22 @@ const Sign = () => {
           return;
         }
 
-        const signature: `0x${string}` = await KeyringService.sign(
+        const signature = await KeyringService.sign(
           request.address,
           request.data as SignerPayloadJSON,
           password
         );
+
+        if (signature instanceof Error) {
+          showNotification({
+            type: NotificationType.Error,
+            message: signature.message,
+          });
+          setTimeout(() => {
+            window.close();
+          }, 3000);
+          return;
+        }
 
         // TODO: Handle raw payload
         const response: SignResponsePayload = {

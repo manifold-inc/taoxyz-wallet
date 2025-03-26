@@ -49,6 +49,7 @@ const Connect = () => {
             const permissions = await KeyringService.getPermissions(
               wallet.address
             );
+            if (permissions instanceof Error) return null;
             if (request.origin && permissions[request.origin] === false) {
               return null;
             }
