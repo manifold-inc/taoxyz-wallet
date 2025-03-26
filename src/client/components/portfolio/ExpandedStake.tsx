@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { ChevronUp, Copy } from "lucide-react";
 
+import { useNotification } from "../../contexts/NotificationContext";
+import StakeChart from "./StakeChart";
+import { NotificationType } from "../../../types/client";
 import type { StakeTransaction, Subnet } from "../../../types/client";
 import taoxyz from "../../../../public/icons/taoxyz.png";
-import StakeChart from "./StakeChart";
 
 interface ExpandedStakeProps {
   stake: StakeTransaction;
@@ -13,6 +15,15 @@ interface ExpandedStakeProps {
   onMoveStake: () => void;
 }
 
+interface ApiResponse {
+  data: PriceResponse[];
+}
+
+interface PriceResponse {
+  netuid: number;
+  price: string;
+}
+
 const ExpandedStake = ({
   stake,
   subnet,
@@ -20,7 +31,40 @@ const ExpandedStake = ({
   onSwap,
   onMoveStake,
 }: ExpandedStakeProps) => {
+  const { showNotification } = useNotification();
   const [copied, setCopied] = useState(false);
+  const [priceData, setPriceData] = useState<PriceResponse[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  const fetchSubnetPrice = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(
+        "https://taoxyz.vercel.app/api/subnets/price",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            allSubnets: false,
+            netuid: stake.subnetId,
+          }),
+        }
+      );
+
+      const { data } = (await response.json()) as ApiResponse;
+      setPriceData(data);
+    } catch {
+      showNotification({
+        type: NotificationType.Error,
+        message: "Failed to Fetch Subnet Price History",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleCopy = () => {
     navigator.clipboard.writeText(stake.validatorHotkey);
@@ -28,7 +72,16 @@ const ExpandedStake = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // TODO: Remove chart if subnet price is not available show notification
+  const init = async () => {
+    await fetchSubnetPrice();
+    setIsInitialized(true);
+  };
+
+  if (!isInitialized) {
+    void init();
+    setIsInitialized(true);
+  }
+
   return (
     <div className="mt-2">
       <div className="rounded-sm p-3 border border-mf-safety-500 bg-mf-ash-500">
@@ -54,9 +107,15 @@ const ExpandedStake = ({
           </div>
         </div>
 
-        <div className="h-38">
-          <StakeChart subnetId={stake.subnetId} />
-        </div>
+        {isLoading ? (
+          <div className="h-38 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-mf-milk-300" />
+          </div>
+        ) : priceData.length > 0 ? (
+          <div className="h-38">
+            <StakeChart data={priceData} subnetId={stake.subnetId} />
+          </div>
+        ) : null}
 
         <div className="text-mf-milk-300 flex items-center justify-between">
           <div className="flex items-center gap-2">
