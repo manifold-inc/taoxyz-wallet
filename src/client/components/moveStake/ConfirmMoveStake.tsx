@@ -6,6 +6,8 @@ import { useNotification } from "../../contexts/NotificationContext";
 import { useLock } from "../../contexts/LockContext";
 import KeyringService from "../../services/KeyringService";
 import MessageService from "../../services/MessageService";
+import SlippageDisplay from "../common/SlippageDisplay";
+import ConfirmAction from "../common/ConfirmAction";
 import { taoToRao, slippageMoveStakeCalculation } from "../../../utils/utils";
 import { NotificationType } from "../../../types/client";
 import type {
@@ -13,7 +15,6 @@ import type {
   Validator,
   StakeTransaction,
 } from "../../../types/client";
-import SlippageDisplay from "../common/SlippageDisplay";
 
 interface ConfirmMoveStakeProps {
   stake: StakeTransaction;
@@ -36,6 +37,7 @@ const ConfirmMoveStake = ({
   const { api } = usePolkadotApi();
   const [amount, setAmount] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const alphaAmountInRao: bigint = taoToRao(parseFloat(amount) || 0);
   const balanceInRao: bigint = taoToRao(parseFloat(balance));
@@ -86,6 +88,15 @@ const ConfirmMoveStake = ({
   };
 
   const handleSubmit = async () => {
+    if (slippage && slippage.slippagePercentage >= 1) {
+      setShowConfirm(true);
+    } else {
+      await confirmSubmit();
+      setShowConfirm(false);
+    }
+  };
+
+  const confirmSubmit = async () => {
     if (!api || !amount || isSubmitting || alphaAmountInRao > balanceInRao)
       return;
     setIsSubmitting(true);
@@ -135,76 +146,96 @@ const ConfirmMoveStake = ({
   void init();
 
   return (
-    <div className="p-2">
-      <div className="rounded-sm bg-mf-ash-500 p-4 space-y-4 text-xs">
-        <div>
-          <p className="font-semibold text-mf-silver-300">Selected Subnet</p>
-          <p className="text-mf-sybil-500">{subnet.name}</p>
+    <>
+      <div className="p-2">
+        <div className="rounded-sm bg-mf-ash-500 p-4 space-y-4 text-xs">
+          <div>
+            <p className="font-semibold text-mf-silver-300">Selected Subnet</p>
+            <p className="text-mf-sybil-500">{subnet.name}</p>
+          </div>
+
+          <div>
+            <p className="font-semibold text-mf-silver-300">Token Price</p>
+            <p className="text-mf-sybil-500">{subnet.price} τ</p>
+          </div>
+
+          <div>
+            <p className="font-semibold text-mf-silver-300">
+              Selected Validator
+            </p>
+            <p className="text-mf-sybil-500">
+              {validator.hotkey.slice(0, 6)}...{validator.hotkey.slice(-6)}
+            </p>
+          </div>
         </div>
 
-        <div>
-          <p className="font-semibold text-mf-silver-300">Token Price</p>
-          <p className="text-mf-sybil-500">{subnet.price} τ</p>
-        </div>
+        <div className="space-y-4 mt-4">
+          <div className="text-xs">
+            <input
+              type="text"
+              inputMode="decimal"
+              value={amount}
+              onChange={handleAmountChange}
+              placeholder="Enter Amount (α)"
+              className={`w-full px-3 py-2 rounded-sm bg-mf-ash-300 text-mf-milk-300 border-2 ${
+                !amount
+                  ? "border-transparent focus:border-mf-safety-500"
+                  : alphaAmountInRao > balanceInRao
+                  ? "border-mf-safety-500"
+                  : "border-mf-sybil-500"
+              }`}
+            />
+            <p className="ml-4 mt-2 text-mf-sybil-500">Balance: {balance}α</p>
+          </div>
 
-        <div>
-          <p className="font-semibold text-mf-silver-300">Selected Validator</p>
-          <p className="text-mf-sybil-500">
-            {validator.hotkey.slice(0, 6)}...{validator.hotkey.slice(-6)}
-          </p>
+          {alphaAmountInRao > 0 && slippage && (
+            <SlippageDisplay
+              amount={amount}
+              slippage={slippage}
+              isRoot={subnet.id === 0}
+              moveStake={true}
+            />
+          )}
+
+          <div className="flex justify-center">
+            <button
+              onClick={handleSubmit}
+              disabled={
+                !amount ||
+                isSubmitting ||
+                !api ||
+                alphaAmountInRao > balanceInRao
+              }
+              className={`w-44 text-xs flex items-center justify-center border-sm transition-colors p-2 mt-4 text-semibold border-2 border-mf-sybil-500 ${
+                !amount ||
+                isSubmitting ||
+                !api ||
+                alphaAmountInRao > balanceInRao
+                  ? "bg-mf-night-500 text-mf-milk-300 cursor-not-allowed"
+                  : "bg-mf-sybil-500 text-mf-night-500"
+              }`}
+            >
+              {isSubmitting ? (
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-mf-milk-300" />
+                </div>
+              ) : (
+                "Confirm"
+              )}
+            </button>
+          </div>
         </div>
       </div>
-
-      <div className="space-y-4 mt-4">
-        <div className="text-xs">
-          <input
-            type="text"
-            inputMode="decimal"
-            value={amount}
-            onChange={handleAmountChange}
-            placeholder="Enter Amount (α)"
-            className={`w-full px-3 py-2 rounded-sm bg-mf-ash-300 text-mf-milk-300 border-2 ${
-              !amount
-                ? "border-transparent focus:border-mf-safety-500"
-                : alphaAmountInRao > balanceInRao
-                ? "border-mf-safety-500"
-                : "border-mf-sybil-500"
-            }`}
-          />
-          <p className="ml-4 mt-2 text-mf-sybil-500">Balance: {balance}α</p>
-        </div>
-
-        {alphaAmountInRao > 0 && slippage && (
-          <SlippageDisplay
-            amount={amount}
-            slippage={slippage}
-            tokenSymbol="α"
-          />
-        )}
-
-        <div className="flex justify-center">
-          <button
-            onClick={handleSubmit}
-            disabled={
-              !amount || isSubmitting || !api || alphaAmountInRao > balanceInRao
-            }
-            className={`w-44 text-xs flex items-center justify-center border-sm transition-colors p-2 mt-4 text-semibold border-2 border-mf-sybil-500 ${
-              !amount || isSubmitting || !api || alphaAmountInRao > balanceInRao
-                ? "bg-mf-night-500 text-mf-milk-300 cursor-not-allowed"
-                : "bg-mf-sybil-500 text-mf-night-500"
-            }`}
-          >
-            {isSubmitting ? (
-              <div className="flex items-center justify-center">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-mf-milk-300" />
-              </div>
-            ) : (
-              "Confirm"
-            )}
-          </button>
-        </div>
-      </div>
-    </div>
+      <ConfirmAction
+        isOpen={showConfirm}
+        title="Confirm Transaction"
+        message={`The slippage for this transaction is ${slippage?.slippagePercentage.toFixed(
+          2
+        )}%. Are you sure you want to proceed?`}
+        onConfirm={confirmSubmit}
+        onCancel={() => setShowConfirm(false)}
+      />
+    </>
   );
 };
 

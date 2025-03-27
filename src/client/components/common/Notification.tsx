@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { CheckCircle, XCircle, Loader } from "lucide-react";
 
-import { NotificationType } from "../../types/client";
+import { NotificationType } from "../../../types/client";
 
 interface NotificationProps {
   type: NotificationType;
