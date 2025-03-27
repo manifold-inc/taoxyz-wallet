@@ -255,9 +255,7 @@ export const AddStake = () => {
           </p>
         </div>
 
-        <div className="rounded-sm max-h-[calc(100vh-310px)] overflow-y-auto mt-8">
-          {renderStep()}
-        </div>
+        <div className="rounded-sm mt-8">{renderStep()}</div>
       </div>
     </div>
   );
