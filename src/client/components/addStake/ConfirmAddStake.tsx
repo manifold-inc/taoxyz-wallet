@@ -42,9 +42,10 @@ const ConfirmAddStake = ({
       BigInt(subnet.alphaIn),
       BigInt(subnet.taoIn),
       amountInRao,
-      true
+      true,
+      subnet.id !== 0
     );
-  }, [subnet.alphaIn, subnet.taoIn, amountInRao]);
+  }, [subnet.alphaIn, subnet.taoIn, amountInRao, subnet.id]);
 
   const restoreTransaction = async () => {
     const result = await chrome.storage.local.get("storeAddStakeTransaction");
@@ -93,7 +94,14 @@ const ConfirmAddStake = ({
   };
 
   const confirmSubmit = async () => {
-    if (!api || !amount || isSubmitting || amountInRao > balanceInRao) return;
+    if (
+      !api ||
+      !amount ||
+      isSubmitting ||
+      amountInRao > balanceInRao ||
+      amountInRao === 0n
+    )
+      return;
     setIsSubmitting(true);
     const isAuthorized = await handleAuth();
     if (!isAuthorized) return;
@@ -176,7 +184,11 @@ const ConfirmAddStake = ({
             <button
               onClick={handleSubmit}
               disabled={
-                !amount || isSubmitting || !api || amountInRao > balanceInRao
+                !amount ||
+                isSubmitting ||
+                !api ||
+                amountInRao > balanceInRao ||
+                amountInRao === 0n
               }
               className={`w-44 text-xs flex items-center justify-center border-sm transition-colors p-2 mt-4 text-semibold border-2 border-mf-sybil-500 ${
                 !amount || isSubmitting || !api || amountInRao > balanceInRao

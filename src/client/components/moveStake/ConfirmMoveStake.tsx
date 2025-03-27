@@ -53,10 +53,10 @@ const ConfirmMoveStake = ({
   }, [alphaAmountInRao, subnet.taoIn, subnet.alphaIn]);
 
   const restoreTransaction = async () => {
-    const result = await chrome.storage.local.get("storeStakeTransaction");
-    if (result.storeStakeTransaction) {
-      const { amount } = result.storeStakeTransaction;
-      await chrome.storage.local.remove("storeStakeTransaction");
+    const result = await chrome.storage.local.get("storeMoveStakeTransaction");
+    if (result.storeMoveStakeTransaction) {
+      const { amount } = result.storeMoveStakeTransaction;
+      await chrome.storage.local.remove("storeMoveStakeTransaction");
       setAmount(amount);
     }
   };
@@ -74,7 +74,7 @@ const ConfirmMoveStake = ({
   const handleAuth = async () => {
     if (await KeyringService.isLocked(address)) {
       await chrome.storage.local.set({
-        storeStakeTransaction: {
+        storeMoveStakeTransaction: {
           stake,
           subnet,
           validator,
@@ -99,7 +99,13 @@ const ConfirmMoveStake = ({
   };
 
   const confirmSubmit = async () => {
-    if (!api || !amount || isSubmitting || alphaAmountInRao > balanceInRao)
+    if (
+      !api ||
+      !amount ||
+      isSubmitting ||
+      alphaAmountInRao > balanceInRao ||
+      alphaAmountInRao === 0n
+    )
       return;
     setIsSubmitting(true);
     const isAuthorized = await handleAuth();
@@ -150,7 +156,7 @@ const ConfirmMoveStake = ({
   return (
     <>
       <div className="p-2 max-h-[calc(100vh-280px)] overflow-y-auto">
-        <div className="border-2 border-mf-ash-500 border-sm bg-mf-ash-500 p-4 space-y-4 text-xs">
+        <div className="border-2 border-mf-ash-500 border-sm bg-mf-ash-500 p-2 space-y-4 text-xs">
           <div>
             <p className="font-semibold text-mf-silver-300">Selected Subnet</p>
             <p className="text-mf-sybil-500">{subnet.name}</p>
@@ -190,7 +196,8 @@ const ConfirmMoveStake = ({
                 !amount ||
                 isSubmitting ||
                 !api ||
-                alphaAmountInRao > balanceInRao
+                alphaAmountInRao > balanceInRao ||
+                alphaAmountInRao === 0n
               }
               className={`w-44 text-xs flex items-center justify-center border-sm transition-colors p-2 mt-4 text-semibold border-2 border-mf-sybil-500 ${
                 !amount ||

@@ -21,10 +21,34 @@ const SlippageDisplay = ({
   isRoot = false,
   handleAmountChange,
 }: SlippageDisplayProps) => {
-  const fee = moveStake ? 0.00005 : 0.0001;
-  const payToken = isRoot ? "τ" : "α";
-  const receiveToken = isRoot ? "τ" : "α";
+  const fee = moveStake ? 0.0001 : 0.00005;
   const receiveAmount = isRoot ? parseFloat(amount) : slippage?.tokens || 0;
+
+  let payToken: string;
+  if (moveStake) {
+    if (isRoot) {
+      payToken = "τ";
+    } else {
+      payToken = "α";
+    }
+  } else {
+    payToken = "τ";
+  }
+
+  let receiveToken: string;
+  if (moveStake) {
+    if (isRoot) {
+      receiveToken = "τ";
+    } else {
+      receiveToken = "α";
+    }
+  } else {
+    if (isRoot) {
+      receiveToken = "τ";
+    } else {
+      receiveToken = "α";
+    }
+  }
 
   const formatNumber = (num: number) => {
     return Math.floor(num * 10000) / 10000;
@@ -47,7 +71,9 @@ const SlippageDisplay = ({
               : "border-mf-sybil-500"
           }`}
         />
-        <p className="ml-4 mt-2 text-mf-sybil-500">Balance: {balance}τ</p>
+        <p className="ml-2 mt-2 text-mf-sybil-500">
+          Balance: {`${balance} ${payToken}`}
+        </p>
       </div>
       {amountInRao > 0 && slippage && (
         <div className="border-2 border-mf-ash-500 rounded-sm bg-mf-ash-500 p-2 space-y-2 text-xs mt-2">
