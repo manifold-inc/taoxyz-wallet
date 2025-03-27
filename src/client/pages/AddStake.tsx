@@ -255,7 +255,7 @@ export const AddStake = () => {
           </p>
         </div>
 
-        <div className="rounded-sm mt-8">{renderStep()}</div>
+        <div className="mt-2">{renderStep()}</div>
       </div>
     </div>
   );
