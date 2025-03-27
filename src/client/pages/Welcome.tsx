@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { UserPlus, FolderInput } from "lucide-react";
 
-import Disclaimer from "../components/Disclaimer";
+import Disclaimer from "../components/common/Disclaimer";
 import taoxyz from "../../../public/icons/taoxyz.svg";
 
 const Welcome = () => {

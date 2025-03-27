@@ -5,7 +5,7 @@ import { Copy } from "lucide-react";
 import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 import { useNotification } from "../contexts/NotificationContext";
 import { useWallet } from "../contexts/WalletContext";
-import WalletSelection from "../components/WalletSelection";
+import WalletSelection from "../components/common/WalletSelection";
 import Portfolio from "../components/dashboard/Portfolio";
 import type { StakeTransaction } from "../../types/client";
 import { NotificationType } from "../../types/client";

@@ -9,6 +9,7 @@ import MessageService from "../../services/MessageService";
 import { taoToRao, slippageStakeCalculation } from "../../../utils/utils";
 import { NotificationType } from "../../../types/client";
 import type { Subnet, Validator } from "../../../types/client";
+import SlippageDisplay from "../common/SlippageDisplay";
 
 interface ConfirmAddStakeProps {
   subnet: Subnet;
@@ -164,36 +165,11 @@ const ConfirmAddStake = ({
         </div>
 
         {amountInRao > 0 && slippage && (
-          <div className="rounded-sm bg-mf-ash-500 p-4 space-y-4 text-xs mt-2">
-            <div className="flex justify-between items-center">
-              <span className="text-mf-silver-300">Your Price:</span>
-              <span className="text-mf-sybil-500">
-                {parseFloat(amount).toFixed(4)} τ
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-mf-silver-300">You Receive:</span>
-              <span className="text-mf-sybil-500">
-                {slippage.tokens.toFixed(4)} α
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-mf-silver-300">Slippage:</span>
-              <span
-                className={`${
-                  slippage.slippagePercentage > 5
-                    ? "text-mf-safety-500"
-                    : "text-mf-silver-300"
-                }`}
-              >
-                {slippage.slippagePercentage.toFixed(2)}%
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-mf-silver-300">Fee:</span>
-              <span className="text-mf-safety-500">0.00005 τ</span>
-            </div>
-          </div>
+          <SlippageDisplay
+            amount={amount}
+            slippage={slippage}
+            tokenSymbol="τ"
+          />
         )}
 
         <div className="flex justify-center">

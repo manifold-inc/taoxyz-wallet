@@ -8,7 +8,7 @@ import KeyringService from "../../services/KeyringService";
 import MessageService from "../../services/MessageService";
 import StakeOverview from "../portfolio/StakeOverview";
 import ExpandedStake from "../portfolio/ExpandedStake";
-import ConfirmAction from "../ConfirmAction";
+import ConfirmAction from "../common/ConfirmAction";
 import type { StakeTransaction, Subnet } from "../../../types/client";
 import { NotificationType } from "../../../types/client";
 

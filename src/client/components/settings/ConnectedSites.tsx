@@ -4,7 +4,7 @@ import type { KeyringPair } from "@polkadot/keyring/types";
 
 import { useNotification } from "../../contexts/NotificationContext";
 import KeyringService from "../../services/KeyringService";
-import ConfirmAction from "../ConfirmAction";
+import ConfirmAction from "../common/ConfirmAction";
 import { NotificationType } from "../../../types/client";
 import type { Permissions, PermissionsPerWebsite } from "../../../types/client";
 import taoxyz from "../../../../public/icons/taoxyz.svg";

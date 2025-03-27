@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { WalletCards, ChevronDown, ChevronUp, Plus, X } from "lucide-react";
 import type { KeyringPair } from "@polkadot/keyring/types";
 
-import { useLock } from "../contexts/LockContext";
-import { useWallet } from "../contexts/WalletContext";
-import KeyringService from "../services/KeyringService";
+import { useLock } from "../../contexts/LockContext";
+import { useWallet } from "../../contexts/WalletContext";
+import KeyringService from "../../services/KeyringService";
 import ConfirmAction from "./ConfirmAction";
 
 const WalletSelection = () => {
