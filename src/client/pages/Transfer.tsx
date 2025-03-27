@@ -125,8 +125,8 @@ const Transfer = () => {
         </div>
       </div>
 
-      <div className="rounded-sm mt-4">
-        <div className="bg-mf-ash-500 rounded-sm p-3">
+      <div className="mt-4">
+        <div className="border-sm border-2 border-mf-ash-500 bg-mf-ash-500 rounded-sm p-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <img src={taoxyzLogo} alt="Taoxyz Logo" className="w-4 h-4" />
@@ -151,7 +151,7 @@ const Transfer = () => {
             value={toAddress}
             onChange={(e) => setToAddress(e.target.value)}
             placeholder="Enter Recipient Address"
-            className={`w-full px-3 py-2 text-xs rounded-sm bg-mf-ash-300 text-mf-milk-300 border-2 ${
+            className={`w-full px-3 py-2 text-xs border-sm bg-mf-ash-300 text-mf-milk-300 border-2 border-mf-ash-500 ${
               !toAddress
                 ? "border-transparent focus:border-mf-safety-500"
                 : "border-mf-sybil-500"
@@ -165,7 +165,7 @@ const Transfer = () => {
               value={amount}
               onChange={handleAmountChange}
               placeholder="Enter Amount (τ)"
-              className={`w-full px-3 py-2 rounded-sm bg-mf-ash-300 text-mf-milk-300 border-2 text-xs ${
+              className={`w-full px-3 py-2 border-sm bg-mf-ash-300 text-mf-milk-300 border-2 border-mf-ash-500 text-xs ${
                 !amount
                   ? "border-transparent focus:border-mf-safety-500"
                   : amountInRao > balanceInRao
