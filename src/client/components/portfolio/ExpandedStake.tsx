@@ -54,8 +54,8 @@ const ExpandedStake = ({
         }
       );
 
-      const { data } = (await response.json()) as ApiResponse;
-      setPriceData(data);
+      const data: ApiResponse = await response.json();
+      setPriceData(data.data);
     } catch {
       showNotification({
         type: NotificationType.Error,

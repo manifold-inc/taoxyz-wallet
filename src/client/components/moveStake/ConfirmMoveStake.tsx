@@ -6,12 +6,15 @@ import { useNotification } from "../../contexts/NotificationContext";
 import { useLock } from "../../contexts/LockContext";
 import KeyringService from "../../services/KeyringService";
 import MessageService from "../../services/MessageService";
+import SlippageDisplay from "../common/SlippageDisplay";
+import ConfirmAction from "../common/ConfirmAction";
 import { taoToRao, slippageMoveStakeCalculation } from "../../../utils/utils";
 import { NotificationType } from "../../../types/client";
 import type {
   Subnet,
   Validator,
   StakeTransaction,
+  Slippage,
 } from "../../../types/client";
 
 interface ConfirmMoveStakeProps {
@@ -35,11 +38,13 @@ const ConfirmMoveStake = ({
   const { api } = usePolkadotApi();
   const [amount, setAmount] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const alphaAmountInRao: bigint = taoToRao(parseFloat(amount) || 0);
   const balanceInRao: bigint = taoToRao(parseFloat(balance));
-  const slippage = useMemo(() => {
-    if (!alphaAmountInRao || !subnet.taoIn || !subnet.alphaIn) return null;
+
+  const slippage: Slippage | undefined = useMemo(() => {
+    if (!alphaAmountInRao || !subnet.taoIn || !subnet.alphaIn) return undefined;
     return slippageMoveStakeCalculation(
       BigInt(subnet.alphaIn),
       BigInt(subnet.taoIn),
@@ -48,10 +53,10 @@ const ConfirmMoveStake = ({
   }, [alphaAmountInRao, subnet.taoIn, subnet.alphaIn]);
 
   const restoreTransaction = async () => {
-    const result = await chrome.storage.local.get("storeStakeTransaction");
-    if (result.storeStakeTransaction) {
-      const { amount } = result.storeStakeTransaction;
-      await chrome.storage.local.remove("storeStakeTransaction");
+    const result = await chrome.storage.local.get("storeMoveStakeTransaction");
+    if (result.storeMoveStakeTransaction) {
+      const { amount } = result.storeMoveStakeTransaction;
+      await chrome.storage.local.remove("storeMoveStakeTransaction");
       setAmount(amount);
     }
   };
@@ -69,7 +74,7 @@ const ConfirmMoveStake = ({
   const handleAuth = async () => {
     if (await KeyringService.isLocked(address)) {
       await chrome.storage.local.set({
-        storeStakeTransaction: {
+        storeMoveStakeTransaction: {
           stake,
           subnet,
           validator,
@@ -85,7 +90,22 @@ const ConfirmMoveStake = ({
   };
 
   const handleSubmit = async () => {
-    if (!api || !amount || isSubmitting || alphaAmountInRao > balanceInRao)
+    if (slippage && slippage.slippagePercentage >= 1) {
+      setShowConfirm(true);
+    } else {
+      await confirmSubmit();
+      setShowConfirm(false);
+    }
+  };
+
+  const confirmSubmit = async () => {
+    if (
+      !api ||
+      !amount ||
+      isSubmitting ||
+      alphaAmountInRao > balanceInRao ||
+      alphaAmountInRao === 0n
+    )
       return;
     setIsSubmitting(true);
     const isAuthorized = await handleAuth();
@@ -134,101 +154,81 @@ const ConfirmMoveStake = ({
   void init();
 
   return (
-    <div className="p-2">
-      <div className="rounded-sm bg-mf-ash-500 p-4 space-y-4 text-xs">
-        <div>
-          <p className="font-semibold text-mf-silver-300">Selected Subnet</p>
-          <p className="text-mf-sybil-500">{subnet.name}</p>
-        </div>
-
-        <div>
-          <p className="font-semibold text-mf-silver-300">Token Price</p>
-          <p className="text-mf-sybil-500">{subnet.price} τ</p>
-        </div>
-
-        <div>
-          <p className="font-semibold text-mf-silver-300">Selected Validator</p>
-          <p className="text-mf-sybil-500">
-            {validator.hotkey.slice(0, 6)}...{validator.hotkey.slice(-6)}
-          </p>
-        </div>
-      </div>
-
-      <div className="space-y-4 mt-4">
-        <div className="text-xs">
-          <input
-            type="text"
-            inputMode="decimal"
-            value={amount}
-            onChange={handleAmountChange}
-            placeholder="Enter Amount (α)"
-            className={`w-full px-3 py-2 rounded-sm bg-mf-ash-300 text-mf-milk-300 border-2 ${
-              !amount
-                ? "border-transparent focus:border-mf-safety-500"
-                : alphaAmountInRao > balanceInRao
-                ? "border-mf-safety-500"
-                : "border-mf-sybil-500"
-            }`}
-          />
-          <p className="ml-4 mt-2 text-mf-sybil-500">Balance: {balance}α</p>
-        </div>
-
-        {alphaAmountInRao > 0 && slippage && (
-          <div className="rounded-sm bg-mf-ash-500 p-4 space-y-4 text-xs mt-2">
-            <div className="flex justify-between items-center">
-              <span className="text-mf-silver-300">Your Price:</span>
-              <span className="text-mf-sybil-500">
-                {parseFloat(amount).toFixed(4)} α
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-mf-silver-300">You Receive:</span>
-              <span className="text-mf-sybil-500">
-                {slippage.tokens.toFixed(4)} α
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-mf-silver-300">Slippage:</span>
-              <span
-                className={`${
-                  slippage.slippagePercentage > 5
-                    ? "text-mf-safety-500"
-                    : "text-mf-silver-300"
-                }`}
-              >
-                {slippage.slippagePercentage.toFixed(2)}%
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-mf-silver-300">Fee:</span>
-              <span className="text-mf-safety-500">0.00005 τ</span>
-            </div>
+    <>
+      <div className="p-2 max-h-[calc(100vh-280px)] overflow-y-auto">
+        <div className="border-2 border-mf-ash-500 border-sm bg-mf-ash-500 p-2 space-y-4 text-xs">
+          <div>
+            <p className="font-semibold text-mf-silver-300">Selected Subnet</p>
+            <p className="text-mf-sybil-500">{subnet.name}</p>
           </div>
-        )}
 
-        <div className="flex justify-center">
-          <button
-            onClick={handleSubmit}
-            disabled={
-              !amount || isSubmitting || !api || alphaAmountInRao > balanceInRao
-            }
-            className={`w-44 text-xs flex items-center justify-center border-sm transition-colors p-2 mt-4 text-semibold border-2 border-mf-sybil-500 ${
-              !amount || isSubmitting || !api || alphaAmountInRao > balanceInRao
-                ? "bg-mf-night-500 text-mf-milk-300 cursor-not-allowed"
-                : "bg-mf-sybil-500 text-mf-night-500"
-            }`}
-          >
-            {isSubmitting ? (
-              <div className="flex items-center justify-center">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-mf-milk-300" />
-              </div>
-            ) : (
-              "Confirm"
-            )}
-          </button>
+          <div>
+            <p className="font-semibold text-mf-silver-300">Token Price</p>
+            <p className="text-mf-sybil-500">{subnet.price} τ</p>
+          </div>
+
+          <div>
+            <p className="font-semibold text-mf-silver-300">
+              Selected Validator
+            </p>
+            <p className="text-mf-sybil-500">
+              {validator.hotkey.slice(0, 6)}...{validator.hotkey.slice(-6)}
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-4 mt-4">
+          <SlippageDisplay
+            amount={amount}
+            balance={balance}
+            balanceInRao={balanceInRao}
+            amountInRao={alphaAmountInRao}
+            slippage={slippage ?? undefined}
+            isRoot={subnet.id === 0}
+            moveStake={true}
+            handleAmountChange={handleAmountChange}
+          />
+
+          <div className="flex justify-center">
+            <button
+              onClick={handleSubmit}
+              disabled={
+                !amount ||
+                isSubmitting ||
+                !api ||
+                alphaAmountInRao > balanceInRao ||
+                alphaAmountInRao === 0n
+              }
+              className={`w-44 text-xs flex items-center justify-center border-sm transition-colors p-2 mt-4 text-semibold border-2 border-mf-sybil-500 ${
+                !amount ||
+                isSubmitting ||
+                !api ||
+                alphaAmountInRao > balanceInRao
+                  ? "bg-mf-night-500 text-mf-milk-300 cursor-not-allowed"
+                  : "bg-mf-sybil-500 text-mf-night-500"
+              }`}
+            >
+              {isSubmitting ? (
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-mf-milk-300" />
+                </div>
+              ) : (
+                "Confirm"
+              )}
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+      <ConfirmAction
+        isOpen={showConfirm}
+        title="Confirm Transaction"
+        message={`The slippage for this transaction is ${slippage?.slippagePercentage.toFixed(
+          2
+        )}%. Are you sure you want to proceed?`}
+        onConfirm={confirmSubmit}
+        onCancel={() => setShowConfirm(false)}
+      />
+    </>
   );
 };
 

@@ -1,5 +1,5 @@
 import { ArrowLeftToLine } from "lucide-react";
-import taoxyz from "../../../public/icons/taoxyz.svg";
+import taoxyz from "../../../../public/icons/taoxyz.svg";
 
 interface DisclaimerProps {
   onClose: () => void;

@@ -8,7 +8,7 @@ import KeyringService from "../../services/KeyringService";
 import { useNotification } from "../../contexts/NotificationContext";
 import { useWallet } from "../../contexts/WalletContext";
 import MessageService from "../../services/MessageService";
-import ConfirmAction from "../ConfirmAction";
+import ConfirmAction from "../common/ConfirmAction";
 import { NotificationType } from "../../../types/client";
 import { MESSAGE_TYPES } from "../../../types/messages";
 import type {

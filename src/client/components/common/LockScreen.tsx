@@ -1,13 +1,13 @@
 import { useState } from "react";
 
-import { useLock } from "../contexts/LockContext";
-import { useWallet } from "../contexts/WalletContext";
-import { useNotification } from "../contexts/NotificationContext";
-import KeyringService from "../services/KeyringService";
-import MessageService from "../services/MessageService";
-import WalletSelection from "./WalletSelection";
-import { NotificationType } from "../../types/client";
-import taoxyzLogo from "../../../public/icons/taoxyz.svg";
+import { useLock } from "../../contexts/LockContext";
+import { useWallet } from "../../contexts/WalletContext";
+import { useNotification } from "../../contexts/NotificationContext";
+import KeyringService from "../../services/KeyringService";
+import MessageService from "../../services/MessageService";
+import WalletSelection from "../common/WalletSelection";
+import { NotificationType } from "../../../types/client";
+import taoxyz from "../../../../public/icons/taoxyz.svg";
 
 const LockScreen = () => {
   const { setIsLocked } = useLock();
@@ -18,16 +18,16 @@ const LockScreen = () => {
   const [error, setError] = useState<string | null>(null);
 
   const handlePasswordChange = (
-    e: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>
   ): void => {
-    setPassword(e.target.value);
+    setPassword(event.target.value);
     setError(null);
   };
 
   const handleUnlock = async (
-    e: React.FormEvent<HTMLFormElement>
+    event: React.FormEvent<HTMLFormElement>
   ): Promise<void> => {
-    e.preventDefault();
+    event.preventDefault();
     if (password.length < 3) return;
 
     if (!currentAddress) {
@@ -68,7 +68,7 @@ const LockScreen = () => {
       <div className="w-74 [&>*]:w-full mt-4">
         <WalletSelection />
         <div className="flex flex-col items-center justify-center mt-8">
-          <img src={taoxyzLogo} alt="Taoxyz Logo" className="w-16 h-16" />
+          <img src={taoxyz} alt="Taoxyz Logo" className="w-16 h-16" />
 
           <div className="text-center text-lg text-mf-milk-500 mt-4">
             <h1>Unlock Wallet</h1>

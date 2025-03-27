@@ -6,7 +6,7 @@ import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 import { useNotification } from "../contexts/NotificationContext";
 import { useWallet } from "../contexts/WalletContext";
 import SubnetSelection from "../components/addStake/SubnetSelection";
-import ValidatorSelection from "../components/addStake/ValidatorSelection";
+import ValidatorSelection from "../components/common/ValidatorSelection";
 import ConfirmAddStake from "../components/addStake/ConfirmAddStake";
 import { NotificationType } from "../../types/client";
 import type { Subnet, Validator } from "../../types/client";

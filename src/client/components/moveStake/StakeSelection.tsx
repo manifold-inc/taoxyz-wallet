@@ -82,7 +82,9 @@ const StakeSelection = ({
                       </span>
                     )}
                   </h3>
-                  <span className="text-mf-safety-500">α</span>
+                  <span className="text-mf-safety-500">
+                    {stake.subnetId === 0 ? "τ" : "α"}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between text-sm text-mf-milk-300">
                   <p>

@@ -3,8 +3,8 @@ import { useState } from "react";
 import { useLock } from "../contexts/LockContext";
 import KeyringService from "../services/KeyringService";
 import MessageService from "../services/MessageService";
-import Disclaimer from "../components/Disclaimer";
-import WalletSelection from "../components/WalletSelection";
+import Disclaimer from "../components/common/Disclaimer";
+import WalletSelection from "../components/common/WalletSelection";
 import ConnectedSites from "../components/settings/ConnectedSites";
 import taoxyzLogo from "../../../public/icons/taoxyz.svg";
 

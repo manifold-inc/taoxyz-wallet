@@ -15,7 +15,9 @@ const StakeOverview = ({ stake, onClick }: StakeOverviewProps) => {
         <h3 className="font-semibold text-mf-silver-300">
           Subnet {stake.subnetId}
         </h3>
-        <span className="text-mf-safety-300">α</span>
+        <span className="text-mf-safety-300">
+          {stake.subnetId === 0 ? "τ" : "α"}
+        </span>
       </div>
       <div className="flex items-center justify-between text-sm text-mf-milk-300">
         <p>

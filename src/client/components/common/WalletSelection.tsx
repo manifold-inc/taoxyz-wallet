@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { WalletCards, ChevronDown, ChevronUp, Plus, X } from "lucide-react";
 import type { KeyringPair } from "@polkadot/keyring/types";
 
-import { useLock } from "../contexts/LockContext";
-import { useWallet } from "../contexts/WalletContext";
-import KeyringService from "../services/KeyringService";
+import { useLock } from "../../contexts/LockContext";
+import { useWallet } from "../../contexts/WalletContext";
+import KeyringService from "../../services/KeyringService";
 import ConfirmAction from "./ConfirmAction";
 
 const WalletSelection = () => {
@@ -104,7 +104,7 @@ const WalletSelection = () => {
                   <WalletCards className="w-5 h-5 text-mf-night-500" />
                 </div>
                 <div className="text-left text-mf-milk-300 text-xs flex flex-col">
-                  <span>{(wallet.meta as { username: string }).username}</span>
+                  <span>{wallet.meta.name || "Unknown"}</span>
                   <span className="text-mf-sybil-500">
                     {wallet.address.slice(0, 6)}...{wallet.address.slice(-6)}
                   </span>
@@ -138,7 +138,7 @@ const WalletSelection = () => {
                       <WalletCards className="w-5 h-5 text-mf-sybil-500" />
                     </div>
                     <div className="text-left text-mf-milk-300 text-xs">
-                      <span>{(w.meta as { username: string }).username}</span>
+                      <span>{w.meta.name || "Unknown"}</span>
                       <div className="text-mf-sybil-500">
                         {w.address.slice(0, 6)}...{w.address.slice(-6)}
                       </div>
@@ -173,7 +173,7 @@ const WalletSelection = () => {
         isOpen={!!walletToDelete}
         title="Delete Wallet"
         message={`Are you sure you want to delete the wallet "${
-          walletToDelete?.meta?.username || "Unknown"
+          walletToDelete?.meta.name || "Unknown"
         }"? This wallet cannot be recovered without its recovery phrase.`}
         onConfirm={confirmDelete}
         onCancel={() => setWalletToDelete(null)}
