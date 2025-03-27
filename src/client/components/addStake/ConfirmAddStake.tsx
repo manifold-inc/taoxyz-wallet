@@ -139,8 +139,8 @@ const ConfirmAddStake = ({
 
   return (
     <>
-      <div className="p-2">
-        <div className="rounded-sm bg-mf-ash-500 p-4 space-y-4 text-xs">
+      <div className="p-2 max-h-[calc(100vh-280px)] overflow-y-auto">
+        <div className="border-2 border-mf-ash-500 border-sm bg-mf-ash-500 p-2 space-y-4 text-xs">
           <div>
             <p className="font-semibold text-mf-silver-300">Selected Subnet</p>
             <p className="text-mf-sybil-500">{subnet.name}</p>
