@@ -33,6 +33,7 @@
   "scripts": {
     "dev": "bun run scripts/build.ts --watch",
     "build": "bun run lint && bun run scripts/build.ts",
-    "lint": "npx eslint . --format=stylish"
+    "lint": "npx eslint . --format=stylish",
+    "build:firefox": "web-ext build -s dists/firefox -a ./dists/firefox_zip"
   }
 }

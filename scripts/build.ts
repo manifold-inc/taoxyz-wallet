@@ -41,14 +41,9 @@ async function copyAssets() {
       "./dists/firefox/manifest.json",
     );
 
-    await copyFile(
-      "./public/icons/taoxyz.png",
-      "./dists/chrome/icons/taoxyz.png",
-    );
-    await copyFile(
-      "./public/icons/taoxyz.png",
-      "./dists/firefox/icons/taoxyz.png",
-    );
+    await cp("./public/icons", "./dists/chrome/icons", { recursive: true });
+    await cp("./public/icons", "./dists/firefox/icons", { recursive: true });
+
     await copyFile("./public/index.html", "./dists/chrome/index.html");
     await copyFile("./public/index.html", "./dists/firefox/index.html");
   } catch (error) {
@@ -61,7 +56,7 @@ async function main() {
   try {
     await cleanDist();
     const result = await build(config);
-    await cp("./dists/chrome", "./dists/firefox", {"recursive": true});
+    await cp("./dists/chrome", "./dists/firefox", { recursive: true });
     if (!result.success) {
       console.error("Build logs:", result.logs);
       throw new Error(`Build failed with errors: ${result.logs}`);
