@@ -6,16 +6,16 @@ import taoxyzLogo from "../../../public/icons/taoxyz.svg";
 import { usePolkadotApi } from "../contexts/PolkadotApiContext";
 import { useNotification } from "../contexts/NotificationContext";
 import { useWallet } from "../contexts/WalletContext";
-import StakeSelection from "../components/stake/StakeSelection";
-import ValidatorSelection from "../components/swap/ValidatorSelection";
-import { ConfirmStake } from "../components/stake/ConfirmStake";
+import StakeSelection from "../components/moveStake/StakeSelection";
+import ValidatorSelection from "../components/addStake/ValidatorSelection";
+import ConfirmMoveStake from "../components/moveStake/ConfirmMoveStake";
 import type { Validator, Subnet, StakeTransaction } from "../../types/client";
 import { NotificationType } from "../../types/client";
 
 enum Step {
   SELECT_STAKE,
   SELECT_VALIDATOR,
-  CONFIRM_STAKE,
+  CONFIRM_MOVE_STAKE,
 }
 
 const getStepSubtext = (step: Step) => {
@@ -24,8 +24,8 @@ const getStepSubtext = (step: Step) => {
       return "Select Stake";
     case Step.SELECT_VALIDATOR:
       return "Select Validator";
-    case Step.CONFIRM_STAKE:
-      return "Review and Confirm Stake";
+    case Step.CONFIRM_MOVE_STAKE:
+      return "Review Move Stake";
     default:
       return "";
   }
@@ -34,10 +34,10 @@ const getStepSubtext = (step: Step) => {
 const getStepTitle = (step: Step) => {
   switch (step) {
     case Step.SELECT_STAKE:
-      return "Add Stake";
+      return "Move Stake";
     case Step.SELECT_VALIDATOR:
-      return "Add Stake";
-    case Step.CONFIRM_STAKE:
+      return "Move Stake";
+    case Step.CONFIRM_MOVE_STAKE:
       return "Confirm Stake";
     default:
       return "";
@@ -50,7 +50,7 @@ interface StakeResponse {
   stake: number;
 }
 
-const Stake = () => {
+const MoveStake = () => {
   const { showNotification } = useNotification();
   const { api } = usePolkadotApi();
   const { currentAddress } = useWallet();
@@ -74,14 +74,14 @@ const Stake = () => {
   const [isLoadingValidators, setIsLoadingValidators] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  const restoreStake = async () => {
-    const result = await chrome.storage.local.get("storeStakeTransaction");
-    if (result.storeStakeTransaction) {
-      const { subnet, validator, stake } = result.storeStakeTransaction;
+  const restoreMoveStake = async () => {
+    const result = await chrome.storage.local.get("storeMoveStakeTransaction");
+    if (result.storeMoveStakeTransaction) {
+      const { subnet, validator, stake } = result.storeMoveStakeTransaction;
       setSelectedSubnet(subnet);
       setSelectedValidator(validator);
       setSelectedStake(stake);
-      setStep(Step.CONFIRM_STAKE);
+      setStep(Step.CONFIRM_MOVE_STAKE);
     }
   };
 
@@ -182,7 +182,7 @@ const Stake = () => {
       setStep(Step.SELECT_STAKE);
       setSelectedStake(null);
       setSelectedSubnet(null);
-    } else if (step === Step.CONFIRM_STAKE) {
+    } else if (step === Step.CONFIRM_MOVE_STAKE) {
       setStep(Step.SELECT_VALIDATOR);
       setSelectedValidator(null);
     }
@@ -192,7 +192,7 @@ const Stake = () => {
     if (step === Step.SELECT_STAKE && selectedStake) {
       setStep(Step.SELECT_VALIDATOR);
     } else if (step === Step.SELECT_VALIDATOR && selectedValidator) {
-      setStep(Step.CONFIRM_STAKE);
+      setStep(Step.CONFIRM_MOVE_STAKE);
     }
   };
 
@@ -221,11 +221,11 @@ const Stake = () => {
             onSelect={handleValidatorSelect}
           />
         );
-      case Step.CONFIRM_STAKE:
+      case Step.CONFIRM_MOVE_STAKE:
         if (!selectedStake || !selectedSubnet || !selectedValidator)
           return null;
         return (
-          <ConfirmStake
+          <ConfirmMoveStake
             stake={selectedStake}
             subnet={selectedSubnet}
             validator={selectedValidator}
@@ -240,7 +240,7 @@ const Stake = () => {
     if (isInitialized) return;
     if (!api || !currentAddress) return;
     setIsInitialized(true);
-    await restoreStake();
+    await restoreMoveStake();
     await getStakes(currentAddress);
     if (location.state?.selectedStake) {
       const stake = location.state.selectedStake;
@@ -278,13 +278,13 @@ const Stake = () => {
               (step === Step.SELECT_STAKE &&
                 (!selectedStake || validators.length === 0)) ||
               (step === Step.SELECT_VALIDATOR && !selectedValidator) ||
-              step === Step.CONFIRM_STAKE
+              step === Step.CONFIRM_MOVE_STAKE
             }
             className={`transition-colors cursor-pointer ${
               (step === Step.SELECT_STAKE &&
                 (!selectedStake || validators.length === 0)) ||
               (step === Step.SELECT_VALIDATOR && !selectedValidator) ||
-              step === Step.CONFIRM_STAKE
+              step === Step.CONFIRM_MOVE_STAKE
                 ? "text-mf-ash-300 cursor-not-allowed"
                 : "text-mf-milk-300"
             }`}
@@ -302,12 +302,10 @@ const Stake = () => {
           </p>
         </div>
 
-        <div className="rounded-sm max-h-[calc(100vh-310px)] overflow-y-auto mt-8">
-          {renderStep()}
-        </div>
+        <div className="mt-2">{renderStep()}</div>
       </div>
     </div>
   );
 };
 
-export default Stake;
+export default MoveStake;

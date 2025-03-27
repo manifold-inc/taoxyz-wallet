@@ -6,23 +6,29 @@ import { useNotification } from "../../contexts/NotificationContext";
 import { useLock } from "../../contexts/LockContext";
 import KeyringService from "../../services/KeyringService";
 import MessageService from "../../services/MessageService";
-import { taoToRao, slippageStakeCalculation } from "../../../utils/utils";
+import { taoToRao, slippageMoveStakeCalculation } from "../../../utils/utils";
 import { NotificationType } from "../../../types/client";
-import type { Subnet, Validator } from "../../../types/client";
+import type {
+  Subnet,
+  Validator,
+  StakeTransaction,
+} from "../../../types/client";
 
-interface ConfirmSwapProps {
+interface ConfirmMoveStakeProps {
+  stake: StakeTransaction;
   subnet: Subnet;
   validator: Validator;
-  balance: string;
   address: string;
+  balance: string;
 }
 
-export const ConfirmSwap = ({
+const ConfirmMoveStake = ({
+  stake,
   subnet,
   validator,
-  balance,
   address,
-}: ConfirmSwapProps) => {
+  balance,
+}: ConfirmMoveStakeProps) => {
   const navigate = useNavigate();
   const { showNotification } = useNotification();
   const { setIsLocked } = useLock();
@@ -30,23 +36,22 @@ export const ConfirmSwap = ({
   const [amount, setAmount] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const amountInRao = taoToRao(parseFloat(amount) || 0);
-  const balanceInRao = taoToRao(parseFloat(balance));
+  const alphaAmountInRao: bigint = taoToRao(parseFloat(amount) || 0);
+  const balanceInRao: bigint = taoToRao(parseFloat(balance));
   const slippage = useMemo(() => {
-    if (!subnet.alphaIn || !subnet.taoIn || !amountInRao) return null;
-    return slippageStakeCalculation(
+    if (!alphaAmountInRao || !subnet.taoIn || !subnet.alphaIn) return null;
+    return slippageMoveStakeCalculation(
       BigInt(subnet.alphaIn),
       BigInt(subnet.taoIn),
-      amountInRao,
-      true
+      alphaAmountInRao
     );
-  }, [subnet.alphaIn, subnet.taoIn, amountInRao]);
+  }, [alphaAmountInRao, subnet.taoIn, subnet.alphaIn]);
 
   const restoreTransaction = async () => {
-    const result = await chrome.storage.local.get("storeSwapTransaction");
-    if (result.storeSwapTransaction) {
-      const { amount } = result.storeSwapTransaction;
-      await chrome.storage.local.remove("storeSwapTransaction");
+    const result = await chrome.storage.local.get("storeStakeTransaction");
+    if (result.storeStakeTransaction) {
+      const { amount } = result.storeStakeTransaction;
+      await chrome.storage.local.remove("storeStakeTransaction");
       setAmount(amount);
     }
   };
@@ -64,7 +69,8 @@ export const ConfirmSwap = ({
   const handleAuth = async () => {
     if (await KeyringService.isLocked(address)) {
       await chrome.storage.local.set({
-        storeSwapTransaction: {
+        storeStakeTransaction: {
+          stake,
           subnet,
           validator,
           amount,
@@ -79,7 +85,8 @@ export const ConfirmSwap = ({
   };
 
   const handleSubmit = async () => {
-    if (!api || !amount || isSubmitting || amountInRao > balanceInRao) return;
+    if (!api || !amount || isSubmitting || alphaAmountInRao > balanceInRao)
+      return;
     setIsSubmitting(true);
     const isAuthorized = await handleAuth();
     if (!isAuthorized) return;
@@ -90,11 +97,13 @@ export const ConfirmSwap = ({
         type: NotificationType.Pending,
       });
 
-      const result = await api.createStake({
+      const result = await api.moveStake({
         address,
-        subnetId: subnet.id,
-        validatorHotkey: validator.hotkey,
-        amountInRao,
+        fromHotkey: stake.validatorHotkey,
+        toHotkey: validator.hotkey,
+        fromSubnetId: stake.subnetId,
+        toSubnetId: subnet.id,
+        amountInRao: alphaAmountInRao,
       });
 
       showNotification({
@@ -106,12 +115,13 @@ export const ConfirmSwap = ({
       setTimeout(() => {
         navigate("/dashboard");
       }, 2000);
+
+      setIsSubmitting(false);
     } catch {
       showNotification({
-        message: "Failed to Swap",
+        message: "Failed to Stake",
         type: NotificationType.Error,
       });
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -151,24 +161,24 @@ export const ConfirmSwap = ({
             inputMode="decimal"
             value={amount}
             onChange={handleAmountChange}
-            placeholder="Enter Amount (τ)"
+            placeholder="Enter Amount (α)"
             className={`w-full px-3 py-2 rounded-sm bg-mf-ash-300 text-mf-milk-300 border-2 ${
               !amount
                 ? "border-transparent focus:border-mf-safety-500"
-                : amountInRao > balanceInRao
+                : alphaAmountInRao > balanceInRao
                 ? "border-mf-safety-500"
                 : "border-mf-sybil-500"
             }`}
           />
-          <p className="ml-4 mt-2 text-mf-sybil-500">Balance: {balance}τ</p>
+          <p className="ml-4 mt-2 text-mf-sybil-500">Balance: {balance}α</p>
         </div>
 
-        {amountInRao > 0 && slippage && (
+        {alphaAmountInRao > 0 && slippage && (
           <div className="rounded-sm bg-mf-ash-500 p-4 space-y-4 text-xs mt-2">
             <div className="flex justify-between items-center">
               <span className="text-mf-silver-300">Your Price:</span>
               <span className="text-mf-sybil-500">
-                {parseFloat(amount).toFixed(4)} τ
+                {parseFloat(amount).toFixed(4)} α
               </span>
             </div>
             <div className="flex justify-between items-center">
@@ -200,10 +210,10 @@ export const ConfirmSwap = ({
           <button
             onClick={handleSubmit}
             disabled={
-              !amount || isSubmitting || !api || amountInRao > balanceInRao
+              !amount || isSubmitting || !api || alphaAmountInRao > balanceInRao
             }
             className={`w-44 text-xs flex items-center justify-center border-sm transition-colors p-2 mt-4 text-semibold border-2 border-mf-sybil-500 ${
-              !amount || isSubmitting || !api || amountInRao > balanceInRao
+              !amount || isSubmitting || !api || alphaAmountInRao > balanceInRao
                 ? "bg-mf-night-500 text-mf-milk-300 cursor-not-allowed"
                 : "bg-mf-sybil-500 text-mf-night-500"
             }`}
@@ -222,4 +232,4 @@ export const ConfirmSwap = ({
   );
 };
 
-export default ConfirmSwap;
+export default ConfirmMoveStake;

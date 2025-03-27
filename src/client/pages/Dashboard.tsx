@@ -91,7 +91,7 @@ export const Dashboard = () => {
     <div className="flex flex-col items-center min-h-screen">
       <div className="w-74 [&>*]:w-full">
         <WalletSelection />
-        <div className="rounded-sm bg-mf-ash-500 p-3 flex justify-between mt-4">
+        <div className="border-sm border-2 border-mf-ash-500 bg-mf-ash-500 p-3 flex justify-between mt-4">
           <div className="flex items-center justify-center space-x-2">
             <img src={taoxyz} alt="Taoxyz Logo" className="w-4 h-4" />
             <span className="text-xl text-mf-milk-300 font-semibold">
@@ -124,16 +124,16 @@ export const Dashboard = () => {
         <div className="mt-3">
           <div className="flex justify-between rounded-sm text-sm text-mf-night-500 transition-colors space-x-2">
             <button
-              onClick={() => navigate("/swap")}
+              onClick={() => navigate("/add-stake")}
               className="w-1/3 p-1 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 hover:border-mf-safety-500 border-sm transition-colors cursor-pointer"
             >
-              <span>Swap</span>
+              <span>Add</span>
             </button>
             <button
-              onClick={() => navigate("/stake")}
+              onClick={() => navigate("/move-stake")}
               className="w-1/3 p-1 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 hover:border-mf-safety-500 border-sm transition-colors cursor-pointer"
             >
-              <span>Stake</span>
+              <span>Move</span>
             </button>
             <button
               onClick={() => navigate("/transfer")}

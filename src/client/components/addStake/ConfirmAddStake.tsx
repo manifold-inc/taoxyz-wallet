@@ -6,30 +6,23 @@ import { useNotification } from "../../contexts/NotificationContext";
 import { useLock } from "../../contexts/LockContext";
 import KeyringService from "../../services/KeyringService";
 import MessageService from "../../services/MessageService";
-import { taoToRao, slippageMoveStakeCalculation } from "../../../utils/utils";
+import { taoToRao, slippageStakeCalculation } from "../../../utils/utils";
 import { NotificationType } from "../../../types/client";
-import type {
-  Subnet,
-  Validator,
-  StakeTransaction,
-} from "../../../types/client";
+import type { Subnet, Validator } from "../../../types/client";
 
-interface ConfirmStakeProps {
-  stake: StakeTransaction;
+interface ConfirmAddStakeProps {
   subnet: Subnet;
   validator: Validator;
-  address: string;
   balance: string;
+  address: string;
 }
 
-// TODO: Display correct slippage and receive amount
-export const ConfirmStake = ({
-  stake,
+const ConfirmAddStake = ({
   subnet,
   validator,
-  address,
   balance,
-}: ConfirmStakeProps) => {
+  address,
+}: ConfirmAddStakeProps) => {
   const navigate = useNavigate();
   const { showNotification } = useNotification();
   const { setIsLocked } = useLock();
@@ -37,22 +30,23 @@ export const ConfirmStake = ({
   const [amount, setAmount] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const alphaAmountInRao: bigint = taoToRao(parseFloat(amount) || 0);
-  const balanceInRao: bigint = taoToRao(parseFloat(balance));
+  const amountInRao = taoToRao(parseFloat(amount) || 0);
+  const balanceInRao = taoToRao(parseFloat(balance));
   const slippage = useMemo(() => {
-    if (!alphaAmountInRao || !subnet.taoIn || !subnet.alphaIn) return null;
-    return slippageMoveStakeCalculation(
+    if (!subnet.alphaIn || !subnet.taoIn || !amountInRao) return null;
+    return slippageStakeCalculation(
       BigInt(subnet.alphaIn),
       BigInt(subnet.taoIn),
-      alphaAmountInRao
+      amountInRao,
+      true
     );
-  }, [alphaAmountInRao, subnet.taoIn, subnet.alphaIn]);
+  }, [subnet.alphaIn, subnet.taoIn, amountInRao]);
 
   const restoreTransaction = async () => {
-    const result = await chrome.storage.local.get("storeStakeTransaction");
-    if (result.storeStakeTransaction) {
-      const { amount } = result.storeStakeTransaction;
-      await chrome.storage.local.remove("storeStakeTransaction");
+    const result = await chrome.storage.local.get("storeAddStakeTransaction");
+    if (result.storeAddStakeTransaction) {
+      const { amount } = result.storeAddStakeTransaction;
+      await chrome.storage.local.remove("storeAddStakeTransaction");
       setAmount(amount);
     }
   };
@@ -70,8 +64,7 @@ export const ConfirmStake = ({
   const handleAuth = async () => {
     if (await KeyringService.isLocked(address)) {
       await chrome.storage.local.set({
-        storeStakeTransaction: {
-          stake,
+        storeAddStakeTransaction: {
           subnet,
           validator,
           amount,
@@ -86,8 +79,7 @@ export const ConfirmStake = ({
   };
 
   const handleSubmit = async () => {
-    if (!api || !amount || isSubmitting || alphaAmountInRao > balanceInRao)
-      return;
+    if (!api || !amount || isSubmitting || amountInRao > balanceInRao) return;
     setIsSubmitting(true);
     const isAuthorized = await handleAuth();
     if (!isAuthorized) return;
@@ -98,13 +90,11 @@ export const ConfirmStake = ({
         type: NotificationType.Pending,
       });
 
-      const result = await api.moveStake({
+      const result = await api.createStake({
         address,
-        fromHotkey: stake.validatorHotkey,
-        toHotkey: validator.hotkey,
-        fromSubnetId: stake.subnetId,
-        toSubnetId: subnet.id,
-        amountInRao: alphaAmountInRao,
+        subnetId: subnet.id,
+        validatorHotkey: validator.hotkey,
+        amountInRao,
       });
 
       showNotification({
@@ -116,13 +106,12 @@ export const ConfirmStake = ({
       setTimeout(() => {
         navigate("/dashboard");
       }, 2000);
-
-      setIsSubmitting(false);
     } catch {
       showNotification({
-        message: "Failed to Stake",
+        message: "Failed to Add Stake",
         type: NotificationType.Error,
       });
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -162,24 +151,24 @@ export const ConfirmStake = ({
             inputMode="decimal"
             value={amount}
             onChange={handleAmountChange}
-            placeholder="Enter Amount (α)"
+            placeholder="Enter Amount (τ)"
             className={`w-full px-3 py-2 rounded-sm bg-mf-ash-300 text-mf-milk-300 border-2 ${
               !amount
                 ? "border-transparent focus:border-mf-safety-500"
-                : alphaAmountInRao > balanceInRao
+                : amountInRao > balanceInRao
                 ? "border-mf-safety-500"
                 : "border-mf-sybil-500"
             }`}
           />
-          <p className="ml-4 mt-2 text-mf-sybil-500">Balance: {balance}α</p>
+          <p className="ml-4 mt-2 text-mf-sybil-500">Balance: {balance}τ</p>
         </div>
 
-        {alphaAmountInRao > 0 && slippage && (
+        {amountInRao > 0 && slippage && (
           <div className="rounded-sm bg-mf-ash-500 p-4 space-y-4 text-xs mt-2">
             <div className="flex justify-between items-center">
               <span className="text-mf-silver-300">Your Price:</span>
               <span className="text-mf-sybil-500">
-                {parseFloat(amount).toFixed(4)} α
+                {parseFloat(amount).toFixed(4)} τ
               </span>
             </div>
             <div className="flex justify-between items-center">
@@ -211,10 +200,10 @@ export const ConfirmStake = ({
           <button
             onClick={handleSubmit}
             disabled={
-              !amount || isSubmitting || !api || alphaAmountInRao > balanceInRao
+              !amount || isSubmitting || !api || amountInRao > balanceInRao
             }
             className={`w-44 text-xs flex items-center justify-center border-sm transition-colors p-2 mt-4 text-semibold border-2 border-mf-sybil-500 ${
-              !amount || isSubmitting || !api || alphaAmountInRao > balanceInRao
+              !amount || isSubmitting || !api || amountInRao > balanceInRao
                 ? "bg-mf-night-500 text-mf-milk-300 cursor-not-allowed"
                 : "bg-mf-sybil-500 text-mf-night-500"
             }`}
@@ -232,3 +221,5 @@ export const ConfirmStake = ({
     </div>
   );
 };
+
+export default ConfirmAddStake;

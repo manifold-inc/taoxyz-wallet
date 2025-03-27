@@ -46,8 +46,8 @@ const WalletSelection = () => {
   }, []);
 
   const clearSavedTransactions = async (): Promise<void> => {
-    await chrome.storage.local.remove("storeStakeTransaction");
-    await chrome.storage.local.remove("storeSwapTransaction");
+    await chrome.storage.local.remove("storeMoveStakeTransaction");
+    await chrome.storage.local.remove("storeAddStakeTransaction");
     await chrome.storage.local.remove("storeTransferTransaction");
   };
 

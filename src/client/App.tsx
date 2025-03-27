@@ -13,8 +13,8 @@ import { WalletProvider } from "./contexts/WalletContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
 import MessageService from "./services/MessageService";
 import Dashboard from "./pages/Dashboard";
-import Swap from "./pages/Swap";
-import Stake from "./pages/Stake";
+import AddStake from "./pages/AddStake";
+import MoveStake from "./pages/MoveStake";
 import Transfer from "./pages/Transfer";
 import Settings from "./pages/Settings";
 import Welcome from "./pages/Welcome";
@@ -56,18 +56,18 @@ const Content = () => {
           }
         />
         <Route
-          path="/swap"
+          path="/add-stake"
           element={
             <ProtectedRoute>
-              <Swap />
+              <AddStake />
             </ProtectedRoute>
           }
         />
         <Route
-          path="/stake"
+          path="/move-stake"
           element={
             <ProtectedRoute>
-              <Stake />
+              <MoveStake />
             </ProtectedRoute>
           }
         />

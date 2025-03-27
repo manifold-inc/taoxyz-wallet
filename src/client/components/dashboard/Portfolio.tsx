@@ -54,7 +54,7 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
   };
 
   const handleMoveStake = (): void => {
-    navigate("/stake", {
+    navigate("/move-stake", {
       state: {
         selectedStake,
         selectedSubnet,
@@ -122,7 +122,7 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
   }
 
   return (
-    <div>
+    <>
       <ConfirmAction
         isOpen={showRemoveStakeConfirm}
         title="Confirm Remove Stake"
@@ -160,13 +160,13 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
               ))}
             </div>
           ) : (
-            <div className="rounded-sm p-2 bg-mf-ash-500 text-sm text-mf-milk-300">
-              <p>No stakes</p>
+            <div className="border-sm border-2 border-mf-ash-500 p-2 bg-mf-ash-500 text-sm text-mf-milk-300">
+              <p>No Stakes</p>
             </div>
           )}
         </div>
       )}
-    </div>
+    </>
   );
 };
 
