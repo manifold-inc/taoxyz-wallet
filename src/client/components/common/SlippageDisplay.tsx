@@ -1,3 +1,4 @@
+import { formatNumber } from "../../../utils/utils";
 import type { Slippage } from "../../../types/client";
 
 interface SlippageDisplayProps {
@@ -49,10 +50,6 @@ const SlippageDisplay = ({
       receiveToken = "α";
     }
   }
-
-  const formatNumber = (num: number) => {
-    return Math.floor(num * 10000) / 10000;
-  };
 
   return (
     <>

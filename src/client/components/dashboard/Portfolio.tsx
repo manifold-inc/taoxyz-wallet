@@ -9,8 +9,9 @@ import MessageService from "../../services/MessageService";
 import StakeOverview from "../portfolio/StakeOverview";
 import ExpandedStake from "../portfolio/ExpandedStake";
 import ConfirmAction from "../common/ConfirmAction";
-import type { StakeTransaction, Subnet } from "../../../types/client";
+import { formatNumber } from "../../../utils/utils";
 import { NotificationType } from "../../../types/client";
+import type { StakeTransaction, Subnet } from "../../../types/client";
 
 interface PortfolioProps {
   stakes: StakeTransaction[];
@@ -128,9 +129,11 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
         title="Confirm Remove Stake"
         message={
           selectedStake
-            ? `Are you sure you want to remove your stake of ${(
+            ? `Are you sure you want to remove your stake of ${formatNumber(
                 selectedStake.tokens / 1e9
-              ).toFixed(4)} α from Subnet ${selectedStake.subnetId}?`
+              )} ${selectedStake.subnetId === 0 ? "τ" : "α"} from Subnet ${
+                selectedStake.subnetId
+              }?`
             : ""
         }
         onConfirm={handleConfirmRemoveStake}
@@ -148,7 +151,7 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
           onMoveStake={handleMoveStake}
         />
       ) : (
-        <div className="w-full max-h-76 overflow-y-auto portfolio-container mt-2">
+        <div className="w-full max-h-74 overflow-y-auto portfolio-container mt-2">
           {stakes.length > 0 ? (
             <div className="space-y-3">
               {stakes.map((stake, index) => (

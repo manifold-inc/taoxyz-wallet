@@ -4,6 +4,10 @@ export const generateId = (): number => {
   return Math.floor(Math.random() * 1000000);
 };
 
+export const formatNumber = (num: number): number => {
+  return Math.floor(num * 10000) / 10000;
+};
+
 export const taoToRao = (amount: number): bigint => {
   if (isNaN(amount)) return BigInt(0);
   return BigInt(Math.floor(amount * 1e9));
