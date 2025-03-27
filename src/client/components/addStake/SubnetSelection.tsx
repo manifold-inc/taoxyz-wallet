@@ -77,7 +77,9 @@ const SubnetSelection = ({
                         </span>
                       )}
                     </h3>
-                    <span className="text-mf-safety-500">α</span>
+                    <span className="text-mf-safety-500">
+                      {subnet.id === 0 ? "τ" : "α"}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between text-sm text-mf-milk-300">
                     <p>Subnet {subnet.id}</p>
