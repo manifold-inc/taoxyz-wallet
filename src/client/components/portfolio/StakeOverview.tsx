@@ -9,7 +9,7 @@ const StakeOverview = ({ stake, onClick }: StakeOverviewProps) => {
   return (
     <button
       onClick={onClick}
-      className="w-full text-left rounded-sm p-2 bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors space-y-1"
+      className="w-full text-left border-sm border-2 border-mf-ash-500 cursor-pointer p-2 bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors space-y-1"
     >
       <div className="flex items-center justify-between text-sm">
         <h3 className="font-semibold text-mf-silver-300">
