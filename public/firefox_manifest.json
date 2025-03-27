@@ -1,0 +1,57 @@
+{
+  "manifest_version": 3,
+  "name": "Taoxyz Wallet",
+  "version": "1.0.0",
+  "description": "A wallet extension for the Bittensor network",
+  "permissions": [
+    "storage",
+    "alarms"
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "opers@manifold.inc"
+    }
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  },
+  "action": {
+    "default_popup": "index.html",
+    "default_icon": {
+      "16": "icons/taoxyz.png",
+      "48": "icons/taoxyz.png",
+      "128": "icons/taoxyz.png"
+    }
+  },
+  "background": {
+    "scripts": [
+      "background/background.js"
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content/content.js"
+      ],
+      "run_at": "document_start"
+    }
+  ],
+  "icons": {
+    "16": "icons/taoxyz.png",
+    "48": "icons/taoxyz.png",
+    "128": "icons/taoxyz.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "content/inject.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ]
+}

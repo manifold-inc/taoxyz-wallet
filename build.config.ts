@@ -7,7 +7,7 @@ const config: BuildConfig = {
     "./src/content/content.ts",
     "./src/content/inject.ts",
   ],
-  outdir: "./dist",
+  outdir: "./dists/chrome",
   target: "browser",
   format: "esm",
   minify: process.env.NODE_ENV === "production",
