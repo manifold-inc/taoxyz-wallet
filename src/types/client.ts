@@ -54,7 +54,7 @@ export type PermissionsPerWebsite = Record<
     walletCount: number;
     wallets: {
       address: string;
-      username: string;
+      name: string;
       hasAccess: boolean;
     }[];
   }

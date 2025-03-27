@@ -43,7 +43,7 @@ const ConnectedSites = ({ onClose }: ConnectedSitesProps) => {
           permissionsPerWebsite[website].walletCount++;
           permissionsPerWebsite[website].wallets.push({
             address: wallet.address,
-            username: (wallet.meta.username as string) || "Unnamed Wallet",
+            name: (wallet.meta.name as string) || "Unnamed Wallet",
             hasAccess: hasAccess as boolean,
           });
         });
@@ -188,9 +188,7 @@ const ConnectedSites = ({ onClose }: ConnectedSitesProps) => {
                         >
                           <div className="flex items-center justify-between w-full space-x-2">
                             <div className="flex items-center text-xs text-mf-milk-300 bg-mf-ash-300 rounded-xs p-1 space-x-2 flex-1 min-w-0">
-                              <span className="truncate">
-                                {wallet.username}
-                              </span>
+                              <span className="truncate">{wallet.name}</span>
                               <span>
                                 ({wallet.address.slice(0, 6)}...
                                 {wallet.address.slice(-6)})

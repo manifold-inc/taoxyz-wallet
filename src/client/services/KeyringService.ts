@@ -22,12 +22,12 @@ export const KeyringService = {
 
   async addWallet(
     mnemonic: string,
-    username: string,
+    name: string,
     password: string
   ): Promise<KeyringPair | Error> {
     try {
       const result = await keyring.addUri(mnemonic, password, {
-        username,
+        name,
         websitePermissions: {} as Permissions,
       } as KeyringPair$Meta);
       if (!result.pair) return new Error("Failed to Add Wallet");
@@ -54,10 +54,10 @@ export const KeyringService = {
     return mnemonicValidate(mnemonic);
   },
 
-  async getAddress(username: string): Promise<string | Error> {
+  async getAddress(name: string): Promise<string | Error> {
     const wallets = this.getWallets();
     if (!wallets) return new Error("Keyring not initialized");
-    const wallet = wallets.find((wallet) => wallet.meta.username === username);
+    const wallet = wallets.find((wallet) => wallet.meta.name === name);
     if (!wallet) return new Error("Wallet not found");
 
     return wallet.address;

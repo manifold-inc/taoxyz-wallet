@@ -12,19 +12,19 @@ interface ImportWalletProps {
 
 const ImportWallet = ({ mnemonic, onSuccess }: ImportWalletProps) => {
   const { showNotification } = useNotification();
-  const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
-  const [usernameSelected, setUsernameSelected] = useState(false);
+  const [nameSelected, setNameSelected] = useState(false);
   const [passwordSelected, setPasswordSelected] = useState(false);
-  const [usernameStatus, setUsernameStatus] = useState<string | null>(null);
+  const [nameStatus, setNameStatus] = useState<string | null>(null);
   const [passwordStatus, setPasswordStatus] = useState<string | null>(null);
 
-  const validateUsername = (value: string): boolean => {
+  const validateName = (value: string): boolean => {
     if (value.trim().length < 3) {
-      setUsernameStatus("Minimum 3 Characters Required");
+      setNameStatus("Minimum 3 Characters Required");
       return false;
     }
-    setUsernameStatus(null);
+    setNameStatus(null);
     return true;
   };
 
@@ -37,17 +37,15 @@ const ImportWallet = ({ mnemonic, onSuccess }: ImportWalletProps) => {
     return true;
   };
 
-  const handleUsernameChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ): void => {
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const value = e.target.value;
-    setUsername(value);
+    setName(value);
     if (value.length > 0) {
-      if (validateUsername(value)) {
-        setUsernameStatus("Valid Username");
+      if (validateName(value)) {
+        setNameStatus("Valid Wallet Name");
       }
     } else {
-      setUsernameStatus(null);
+      setNameStatus(null);
     }
   };
 
@@ -67,11 +65,11 @@ const ImportWallet = ({ mnemonic, onSuccess }: ImportWalletProps) => {
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
-    if (!validateUsername(username) || !validatePassword(password)) {
+    if (!validateName(name) || !validatePassword(password)) {
       return;
     }
 
-    const wallet = await KeyringService.addWallet(mnemonic, username, password);
+    const wallet = await KeyringService.addWallet(mnemonic, name, password);
     if (wallet instanceof Error) {
       showNotification({
         type: NotificationType.Error,
@@ -89,36 +87,36 @@ const ImportWallet = ({ mnemonic, onSuccess }: ImportWalletProps) => {
     >
       <input
         type="text"
-        value={username}
-        onChange={handleUsernameChange}
-        onFocus={() => setUsernameSelected(true)}
-        onBlur={() => setUsernameSelected(false)}
+        value={name}
+        onChange={handleNameChange}
+        onFocus={() => setNameSelected(true)}
+        onBlur={() => setNameSelected(false)}
         className={`p-3 rounded-sm text-base text-mf-milk-300 bg-mf-ash-300 placeholder:text-mf-milk-300 border-2 focus:outline-none ${
-          usernameStatus === "Valid Username" && !usernameSelected
+          nameStatus === "Valid Wallet Name" && !nameSelected
             ? "border-transparent"
-            : usernameStatus === "Valid Username"
+            : nameStatus === "Valid Wallet Name"
             ? "border-mf-sybil-500"
-            : usernameSelected
+            : nameSelected
             ? "border-mf-safety-500"
-            : usernameStatus
+            : nameStatus
             ? "border-mf-safety-500"
             : "border-transparent focus:border-mf-safety-500"
         }`}
-        placeholder="Enter Username"
+        placeholder="Wallet Name"
         required
       />
       <div className="h-8">
-        {usernameStatus && (
+        {nameStatus && (
           <p
             className={`mt-2 text-xs text-left ${
-              usernameStatus === "Valid Username" && !usernameSelected
+              nameStatus === "Valid Wallet Name" && !nameSelected
                 ? "hidden"
-                : usernameStatus === "Valid Username"
+                : nameStatus === "Valid Wallet Name"
                 ? "text-mf-sybil-500"
                 : "text-mf-safety-500"
             }`}
           >
-            {usernameStatus}
+            {nameStatus}
           </p>
         )}
       </div>
@@ -140,7 +138,7 @@ const ImportWallet = ({ mnemonic, onSuccess }: ImportWalletProps) => {
             ? "border-mf-safety-500"
             : "border-transparent focus:border-mf-safety-500"
         }`}
-        placeholder="Enter Password"
+        placeholder="Password"
         required
       />
       <div className="h-8">
@@ -163,9 +161,9 @@ const ImportWallet = ({ mnemonic, onSuccess }: ImportWalletProps) => {
         <button
           type="submit"
           disabled={
-            !username ||
+            !name ||
             !password ||
-            usernameStatus !== "Valid Username" ||
+            nameStatus !== "Valid Wallet Name" ||
             passwordStatus !== "Valid Password"
           }
           className="w-44 border-sm text-sm text-mf-night-500 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 transition-colors p-1.5"

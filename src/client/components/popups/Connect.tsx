@@ -56,7 +56,7 @@ const Connect = () => {
             const selectableWallet = {
               address: wallet.address,
               genesisHash: null,
-              name: (wallet.meta?.username as string) || "Unnamed Wallet",
+              name: (wallet.meta?.name as string) || "Unnamed Wallet",
               type: "sr25519" as const,
               meta: {
                 source: "taoxyz-wallet",
