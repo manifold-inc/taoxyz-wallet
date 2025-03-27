@@ -1,18 +1,25 @@
+import type { Slippage } from "../../../types/client";
+
 interface SlippageDisplayProps {
   amount: string;
-  slippage: {
-    tokens: number;
-    slippagePercentage: number;
-  };
+  balance: string;
+  balanceInRao: bigint;
+  amountInRao: bigint;
+  slippage?: Slippage;
   isRoot?: boolean;
   moveStake?: boolean;
+  handleAmountChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 const SlippageDisplay = ({
   amount,
+  balance,
+  amountInRao,
+  balanceInRao,
   slippage,
   moveStake = false,
   isRoot = false,
+  handleAmountChange,
 }: SlippageDisplayProps) => {
   const fee = moveStake ? 0.00005 : 0.0001;
   const payToken = isRoot && moveStake ? "τ" : "α";
@@ -24,36 +31,55 @@ const SlippageDisplay = ({
 
   return (
     <>
-      <div className="rounded-sm bg-mf-ash-500 p-4 space-y-4 text-xs mt-2">
-        <div className="flex justify-between items-center">
-          <span className="text-mf-silver-300">Your Price:</span>
-          <span className="text-mf-sybil-500">
-            {formatNumber(parseFloat(amount))} {payToken}
-          </span>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-mf-silver-300">You Receive:</span>
-          <span className="text-mf-sybil-500">
-            {formatNumber(slippage.tokens)} {receiveToken}
-          </span>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-mf-silver-300">Slippage:</span>
-          <span
-            className={`${
-              slippage.slippagePercentage > 5
-                ? "text-mf-safety-500"
-                : "text-mf-silver-300"
-            }`}
-          >
-            {slippage.slippagePercentage.toFixed(2)}%
-          </span>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-mf-silver-300">Fee:</span>
-          <span className="text-mf-safety-500">{fee} τ</span>
-        </div>
+      <div className="text-xs">
+        <input
+          type="text"
+          inputMode="decimal"
+          value={amount}
+          onChange={handleAmountChange}
+          placeholder="Enter Amount (τ)"
+          className={`w-full px-3 py-2 rounded-sm bg-mf-ash-300 text-mf-milk-300 border-2 ${
+            !amount
+              ? "border-transparent focus:border-mf-safety-500"
+              : amountInRao > balanceInRao
+              ? "border-mf-safety-500"
+              : "border-mf-sybil-500"
+          }`}
+        />
+        <p className="ml-4 mt-2 text-mf-sybil-500">Balance: {balance}τ</p>
       </div>
+      {amountInRao > 0 && slippage && (
+        <div className="rounded-sm bg-mf-ash-500 p-4 space-y-4 text-xs mt-2">
+          <div className="flex justify-between items-center">
+            <span className="text-mf-silver-300">Your Price:</span>
+            <span className="text-mf-sybil-500">
+              {formatNumber(parseFloat(amount))} {payToken}
+            </span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-mf-silver-300">You Receive:</span>
+            <span className="text-mf-sybil-500">
+              {formatNumber(slippage?.tokens || 0)} {receiveToken}
+            </span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-mf-silver-300">Slippage:</span>
+            <span
+              className={`${
+                slippage?.slippagePercentage > 5
+                  ? "text-mf-safety-500"
+                  : "text-mf-silver-300"
+              }`}
+            >
+              {slippage.slippagePercentage.toFixed(2)}%
+            </span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-mf-silver-300">Fee:</span>
+            <span className="text-mf-safety-500">{fee} τ</span>
+          </div>
+        </div>
+      )}
     </>
   );
 };

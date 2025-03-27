@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { usePolkadotApi } from "../../contexts/PolkadotApiContext";
@@ -8,9 +8,9 @@ import KeyringService from "../../services/KeyringService";
 import MessageService from "../../services/MessageService";
 import SlippageDisplay from "../common/SlippageDisplay";
 import ConfirmAction from "../common/ConfirmAction";
-import { taoToRao, slippageStakeCalculation } from "../../../utils/utils";
+import { slippageStakeCalculation, taoToRao } from "../../../utils/utils";
 import { NotificationType } from "../../../types/client";
-import type { Subnet, Validator } from "../../../types/client";
+import type { Slippage, Subnet, Validator } from "../../../types/client";
 
 interface ConfirmAddStakeProps {
   subnet: Subnet;
@@ -35,8 +35,9 @@ const ConfirmAddStake = ({
 
   const amountInRao = taoToRao(parseFloat(amount) || 0);
   const balanceInRao = taoToRao(parseFloat(balance));
-  const slippage = useMemo(() => {
-    if (!subnet.alphaIn || !subnet.taoIn || !amountInRao) return null;
+
+  const slippage: Slippage | undefined = useMemo(() => {
+    if (!subnet.alphaIn || !subnet.taoIn || !amountInRao) return undefined;
     return slippageStakeCalculation(
       BigInt(subnet.alphaIn),
       BigInt(subnet.taoIn),
@@ -161,31 +162,15 @@ const ConfirmAddStake = ({
         </div>
 
         <div className="space-y-4 mt-4">
-          <div className="text-xs">
-            <input
-              type="text"
-              inputMode="decimal"
-              value={amount}
-              onChange={handleAmountChange}
-              placeholder="Enter Amount (τ)"
-              className={`w-full px-3 py-2 rounded-sm bg-mf-ash-300 text-mf-milk-300 border-2 ${
-                !amount
-                  ? "border-transparent focus:border-mf-safety-500"
-                  : amountInRao > balanceInRao
-                  ? "border-mf-safety-500"
-                  : "border-mf-sybil-500"
-              }`}
-            />
-            <p className="ml-4 mt-2 text-mf-sybil-500">Balance: {balance}τ</p>
-          </div>
-
-          {amountInRao > 0 && slippage && (
-            <SlippageDisplay
-              amount={amount}
-              slippage={slippage}
-              isRoot={subnet.id === 0}
-            />
-          )}
+          <SlippageDisplay
+            amount={amount}
+            balance={balance}
+            balanceInRao={balanceInRao}
+            amountInRao={amountInRao}
+            slippage={slippage ?? undefined}
+            isRoot={subnet.id === 0}
+            handleAmountChange={handleAmountChange}
+          />
 
           <div className="flex justify-center">
             <button

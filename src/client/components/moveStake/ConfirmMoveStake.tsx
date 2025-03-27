@@ -14,6 +14,7 @@ import type {
   Subnet,
   Validator,
   StakeTransaction,
+  Slippage,
 } from "../../../types/client";
 
 interface ConfirmMoveStakeProps {
@@ -41,8 +42,9 @@ const ConfirmMoveStake = ({
 
   const alphaAmountInRao: bigint = taoToRao(parseFloat(amount) || 0);
   const balanceInRao: bigint = taoToRao(parseFloat(balance));
-  const slippage = useMemo(() => {
-    if (!alphaAmountInRao || !subnet.taoIn || !subnet.alphaIn) return null;
+
+  const slippage: Slippage | undefined = useMemo(() => {
+    if (!alphaAmountInRao || !subnet.taoIn || !subnet.alphaIn) return undefined;
     return slippageMoveStakeCalculation(
       BigInt(subnet.alphaIn),
       BigInt(subnet.taoIn),
@@ -170,32 +172,16 @@ const ConfirmMoveStake = ({
         </div>
 
         <div className="space-y-4 mt-4">
-          <div className="text-xs">
-            <input
-              type="text"
-              inputMode="decimal"
-              value={amount}
-              onChange={handleAmountChange}
-              placeholder="Enter Amount (α)"
-              className={`w-full px-3 py-2 rounded-sm bg-mf-ash-300 text-mf-milk-300 border-2 ${
-                !amount
-                  ? "border-transparent focus:border-mf-safety-500"
-                  : alphaAmountInRao > balanceInRao
-                  ? "border-mf-safety-500"
-                  : "border-mf-sybil-500"
-              }`}
-            />
-            <p className="ml-4 mt-2 text-mf-sybil-500">Balance: {balance}α</p>
-          </div>
-
-          {alphaAmountInRao > 0 && slippage && (
-            <SlippageDisplay
-              amount={amount}
-              slippage={slippage}
-              isRoot={subnet.id === 0}
-              moveStake={true}
-            />
-          )}
+          <SlippageDisplay
+            amount={amount}
+            balance={balance}
+            balanceInRao={balanceInRao}
+            amountInRao={alphaAmountInRao}
+            slippage={slippage ?? undefined}
+            isRoot={subnet.id === 0}
+            moveStake={true}
+            handleAmountChange={handleAmountChange}
+          />
 
           <div className="flex justify-center">
             <button
