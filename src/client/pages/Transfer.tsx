@@ -33,6 +33,16 @@ const Transfer = () => {
     setBalance(balance);
   };
 
+  const restoreTransaction = async (): Promise<void> => {
+    const result = await chrome.storage.local.get("storeTransferTransaction");
+    if (result.storeTransferTransaction) {
+      const { toAddress, amount } = result.storeTransferTransaction;
+      await chrome.storage.local.remove("storeTransferTransaction");
+      setToAddress(toAddress);
+      setAmount(amount);
+    }
+  };
+
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setAmountError(null);
@@ -49,7 +59,7 @@ const Transfer = () => {
     }
   };
 
-  const handleAuth = async () => {
+  const handleAuth = async (): Promise<boolean> => {
     if (await KeyringService.isLocked(fromAddress)) {
       await chrome.storage.local.set({
         storeTransferTransaction: {
@@ -65,7 +75,7 @@ const Transfer = () => {
     return true;
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (): Promise<void> => {
     if (!api || !fromAddress || !toAddress || !amount || isSubmitting) return;
     setIsSubmitting(true);
     const isAuthorized = await handleAuth();
@@ -108,6 +118,7 @@ const Transfer = () => {
     await Promise.all([
       setFromAddress(currentAddress),
       getBalance(currentAddress),
+      restoreTransaction(),
     ]);
   };
 
