@@ -11,7 +11,6 @@ const reactRoot = createRoot(root);
 
 cryptoWaitReady().then(() => {
   keyring.loadAll({ type: "sr25519" });
-  console.log(`[Client] Initial Pairs: ${JSON.stringify(keyring.getPairs())}`);
   reactRoot.render(
     <React.StrictMode>
       <App />

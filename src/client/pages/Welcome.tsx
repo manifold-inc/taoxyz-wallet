@@ -1,12 +1,14 @@
-import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { UserPlus, FolderInput } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { UserPlus, FolderInput, ArrowLeft } from "lucide-react";
 
+import { useWallet } from "../contexts/WalletContext";
 import Disclaimer from "../components/common/Disclaimer";
 import taoxyz from "../../../public/icons/taoxyz.svg";
 
 const Welcome = () => {
   const navigate = useNavigate();
+  const { currentAddress } = useWallet();
   const [showDisclaimer, setShowDisclaimer] = useState(false);
 
   return (
@@ -47,6 +49,17 @@ const Welcome = () => {
                   <span className="text-mf-milk-500">Import</span>
                 </div>
               </button>
+              {currentAddress && (
+                <button
+                  onClick={() => navigate("/dashboard")}
+                  className="rounded-sm bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors p-3"
+                >
+                  <div className="flex justify-center items-center gap-2 mr-9">
+                    <ArrowLeft className="text-mf-safety-500 w-5 h-5" />
+                    <span className="text-mf-milk-500">Back</span>
+                  </div>
+                </button>
+              )}
 
               <div className="flex justify-center mt-2">
                 <button onClick={() => setShowDisclaimer(true)}>

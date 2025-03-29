@@ -7,7 +7,7 @@ export interface Subnet {
   id: number;
   name: string;
   tokenSymbol?: string;
-  price?: number;
+  price: number;
   tempo?: number;
   lastStep?: number;
   blocksSinceLastStep?: number;
@@ -29,9 +29,19 @@ export interface Subnet {
 }
 
 export interface Validator {
+  name: string | null;
   index: number;
   hotkey: string;
   coldkey: string;
+}
+
+export interface ValidatorIdentity {
+  name: `0x${string}`;
+  description: string;
+  discord: string;
+  githubRepo: string;
+  image: string;
+  url: string;
 }
 
 export interface StakeTransaction {
@@ -93,6 +103,7 @@ export interface BittensorMetagraph {
   coldkeys: string[];
   active: boolean[];
   validatorPermit: boolean[];
+  identities: string[];
   netuid: number;
 }
 

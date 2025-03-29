@@ -9,6 +9,7 @@ import { useWallet } from "../contexts/WalletContext";
 import StakeSelection from "../components/moveStake/StakeSelection";
 import ValidatorSelection from "../components/common/ValidatorSelection";
 import ConfirmMoveStake from "../components/moveStake/ConfirmMoveStake";
+import { formatNumber, raoToTao } from "../../utils/utils";
 import type { Validator, Subnet, StakeTransaction } from "../../types/client";
 import { NotificationType } from "../../types/client";
 
@@ -87,8 +88,7 @@ const MoveStake = () => {
 
   const getBalance = (stake: StakeTransaction): string | null => {
     if (!stake) return null;
-    const balance = stake.tokens / 1e9;
-    return balance.toFixed(4);
+    return formatNumber(raoToTao(BigInt(stake.tokens))).toString();
   };
 
   const getStakes = async (address: string) => {

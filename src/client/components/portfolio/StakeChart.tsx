@@ -53,10 +53,13 @@ const StakeChart = ({ data, subnetId }: StakeChartProps) => {
     if (data.length === 0) return [0, 1];
 
     const prices = data.map((point) => parseFloat(point.price));
-    const minPrice = Math.min(...prices) - 1;
-    const maxPrice = Math.max(...prices) + 1;
+    const minPrice = Math.min(...prices);
+    const maxPrice = Math.max(...prices);
 
-    return [minPrice, maxPrice];
+    const range = maxPrice - minPrice;
+    const padding = Math.max(range * 0.1, 0.0001);
+
+    return [Math.max(0, minPrice - padding), maxPrice + padding];
   };
 
   const init = async () => {
@@ -104,7 +107,7 @@ const StakeChart = ({ data, subnetId }: StakeChartProps) => {
           axisLine={false}
           tickLine={false}
           tick={{ fill: "#9CA3AF", fontSize: 10 }}
-          tickFormatter={(value) => `α${parseFloat(value).toFixed(4)}`}
+          tickFormatter={(value) => `${parseFloat(value).toFixed(4)}τ`}
           width={60}
           tickSize={2}
           tickMargin={2}
@@ -125,7 +128,7 @@ const StakeChart = ({ data, subnetId }: StakeChartProps) => {
             marginBottom: "6px",
           }}
           formatter={(value: string) => [
-            `${parseFloat(value).toFixed(4)}α`,
+            `${parseFloat(value).toFixed(4)}τ`,
             "Price",
           ]}
         />
