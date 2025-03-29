@@ -73,7 +73,7 @@ const ValidatorSelection = ({
                 onClick={() => onSelect(validator)}
               >
                 <div className="flex items-center justify-between text-sm text-mf-silver-300 font-semibold">
-                  <h3>Validator {validator.index}</h3>
+                  <h3>{validator.name || `Validator ${validator.index}`}</h3>
                 </div>
                 <div className="flex items-center justify-between text-xs text-mf-milk-300">
                   <p>

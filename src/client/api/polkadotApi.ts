@@ -10,6 +10,7 @@ import type {
   Subnet,
   Validator,
   SubstrateAccount,
+  ValidatorIdentity,
 } from "../../types/client";
 
 class PolkadotApi {
@@ -189,7 +190,7 @@ class PolkadotApi {
     subnetId: number;
     amountInRao: bigint;
   }): Promise<string> {
-    if (!this.api) throw new Error("API not initialized");
+    if (!this.api) throw new Error("API Not Initialized");
 
     try {
       const wallet = await KeyringService.getWallet(address);
@@ -398,7 +399,7 @@ class PolkadotApi {
         !btMetagraph.active ||
         !btMetagraph.validatorPermit
       ) {
-        throw new Error("Invalid metagraph data structure");
+        throw new Error("Invalid Metagraph");
       }
 
       const validators: Validator[] = [];
@@ -407,10 +408,24 @@ class PolkadotApi {
           btMetagraph.active[i] === true &&
           btMetagraph.validatorPermit[i] === true
         ) {
+          let name = null;
+          const identity = btMetagraph.identities[
+            i
+          ] as unknown as ValidatorIdentity;
+          if (identity) {
+            const hexString = identity.name.replace("0x", "");
+            const bytes = new Uint8Array(
+              hexString.match(/.{1,2}/g)?.map((byte) => parseInt(byte, 16)) ||
+                []
+            );
+            name = new TextDecoder().decode(bytes);
+          }
+
           validators.push({
             index: i,
             hotkey: btMetagraph.hotkeys[i] || "unknown",
             coldkey: btMetagraph.coldkeys[i] || "unknown",
+            name: name,
           });
         }
       }
