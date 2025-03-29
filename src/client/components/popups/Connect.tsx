@@ -85,7 +85,12 @@ const Connect = () => {
     setWallets((wallets) =>
       wallets.map((wallet) => ({
         ...wallet,
-        selected: wallet.address === address,
+        selected:
+          wallets.length === 1
+            ? wallet.address === address
+              ? !wallet.selected
+              : false
+            : wallet.address === address,
       }))
     );
   };
@@ -211,14 +216,14 @@ const Connect = () => {
         <div className="flex space-x-2 mt-4">
           <button
             onClick={() => handleResponse(false)}
-            className="flex-1 text-sm border-2 border-sm border-mf-safety-500 bg-mf-ash-500 hover:bg-mf-safety-500 hover:text-mf-night-500 p-2 text-mf-safety-500 transition-colors"
+            className="flex-1 cursor-pointer text-sm border-2 border-sm border-mf-safety-500 bg-mf-ash-500 hover:bg-mf-safety-500 hover:text-mf-night-500 p-2 text-mf-safety-500 transition-colors"
           >
             Reject
           </button>
           <button
             onClick={() => handleResponse(true)}
             disabled={!wallets.some((wallet) => wallet.selected)}
-            className="flex-1 text-sm border-2 border-sm border-mf-sybil-500 bg-mf-sybil-500 hover:bg-mf-night-500 hover:text-mf-sybil-500 p-2 text-mf-night-500 transition-colors"
+            className="flex-1 cursor-pointer text-sm border-2 border-sm border-mf-sybil-500 bg-mf-sybil-500 hover:bg-mf-night-500 hover:text-mf-sybil-500 p-2 text-mf-night-500 transition-colors"
           >
             Approve
           </button>
