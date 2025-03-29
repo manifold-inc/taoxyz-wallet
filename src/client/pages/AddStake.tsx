@@ -10,6 +10,7 @@ import ValidatorSelection from "../components/common/ValidatorSelection";
 import ConfirmAddStake from "../components/addStake/ConfirmAddStake";
 import { NotificationType } from "../../types/client";
 import type { Subnet, Validator } from "../../types/client";
+import { formatNumber } from "../../utils/utils";
 
 enum Step {
   SELECT_SUBNET,
@@ -103,7 +104,8 @@ export const AddStake = () => {
   const getBalance = async () => {
     if (!api || !currentAddress) return;
     try {
-      const balance = await api.getBalance(currentAddress);
+      const result = await api.getBalance(currentAddress);
+      const balance = formatNumber(result).toString();
       setBalance(balance);
     } catch {
       showNotification({

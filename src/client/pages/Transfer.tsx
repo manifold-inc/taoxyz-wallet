@@ -29,7 +29,8 @@ const Transfer = () => {
   const balanceInRao = taoToRao(parseFloat(balance));
   const getBalance = async (address: string) => {
     if (!api) return;
-    const balance = await api.getBalance(address);
+    const result = await api.getBalance(address);
+    const balance = formatNumber(result).toString();
     setBalance(balance);
   };
 

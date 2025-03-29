@@ -7,7 +7,7 @@ export interface Subnet {
   id: number;
   name: string;
   tokenSymbol?: string;
-  price?: number;
+  price: number;
   tempo?: number;
   lastStep?: number;
   blocksSinceLastStep?: number;

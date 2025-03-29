@@ -12,6 +12,7 @@ import type {
   SubstrateAccount,
   ValidatorIdentity,
 } from "../../types/client";
+import { raoToTao } from "../../utils/utils";
 
 class PolkadotApi {
   private api!: ApiPromise;
@@ -297,12 +298,12 @@ class PolkadotApi {
     }
   }
 
-  public async getBalance(address: string): Promise<string> {
+  public async getBalance(address: string): Promise<number> {
     try {
       const result = await this.api.query.system.account(address);
       const account = result.toJSON() as unknown as SubstrateAccount;
-      const balanceInTao = (account.data.free / 1e9).toFixed(4);
-      return balanceInTao;
+      const balance = raoToTao(BigInt(account.data.free));
+      return balance;
     } catch (error) {
       console.error("Error in Get Balance:", error);
       throw error;
