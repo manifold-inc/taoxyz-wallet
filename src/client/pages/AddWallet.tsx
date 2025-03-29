@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { UserPlus, FolderInput } from "lucide-react";
 import type { KeyringPair } from "@polkadot/keyring/types";
 
 import { useNotification } from "../contexts/NotificationContext";
@@ -32,7 +31,7 @@ const AddWallet = () => {
   const { setIsLocked } = useLock();
   const { setCurrentAddress } = useWallet();
   const [mode, setMode] = useState<WalletMode>(
-    (location.state as AddWalletState)?.mode || "select"
+    (location.state as AddWalletState)?.mode
   );
   const [mnemonic, setMnemonic] = useState<string>("");
   const [wallet, setWallet] = useState<KeyringPair | null>(null);
@@ -68,8 +67,6 @@ const AddWallet = () => {
 
   const getTitle = () => {
     switch (mode) {
-      case "select":
-        return "Add Wallet";
       case "create-wallet":
         return "Create Wallet";
       case "import-wallet":
@@ -84,39 +81,11 @@ const AddWallet = () => {
 
   const renderContent = () => {
     switch (mode) {
-      case "select":
-        return (
-          <div className="flex flex-col items-center space-y-5 mt-8 w-52 [&>*]:w-full text-base">
-            <button
-              onClick={() => {
-                setMode("create-wallet");
-              }}
-              className="rounded-sm bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors p-3 cursor-pointer"
-            >
-              <div className="flex justify-center items-center gap-2 mr-2">
-                <UserPlus className="text-mf-safety-500 w-5 h-5" />
-                <span className="text-mf-milk-500">Create</span>
-              </div>
-            </button>
-            <button
-              onClick={() => {
-                setMode("import-mnemonic");
-              }}
-              className="rounded-sm bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors p-3 cursor-pointer"
-            >
-              <div className="flex justify-center items-center gap-2 mr-4">
-                <FolderInput className="text-mf-safety-500 w-5 h-5" />
-                <span className="text-mf-milk-500">Import</span>
-              </div>
-            </button>
-          </div>
-        );
-
       case "create-wallet":
         return (
           <CreateWallet
             onSuccess={handleCreateWalletSuccess}
-            onBack={() => setMode("select")}
+            onBack={() => navigate("/welcome")}
           />
         );
 
@@ -143,9 +112,12 @@ const AddWallet = () => {
         return (
           <MnemonicImport
             onContinue={handleImportMnemonic}
-            onBack={() => setMode("select")}
+            onBack={() => navigate("/welcome")}
           />
         );
+
+      default:
+        return null;
     }
   };
 

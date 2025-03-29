@@ -156,7 +156,7 @@ const WalletSelection = () => {
               ))}
 
             <button
-              onClick={() => navigate("/add-wallet")}
+              onClick={() => navigate("/welcome")}
               className="w-full flex items-center gap-3 p-2 hover:bg-mf-night-500 transition-colors"
             >
               <div className="flex items-center justify-center bg-mf-safety-500 border border-mf-safety-500 rounded-sm p-1">

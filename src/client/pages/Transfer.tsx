@@ -7,7 +7,7 @@ import { useLock } from "../contexts/LockContext";
 import { useWallet } from "../contexts/WalletContext";
 import KeyringService from "../services/KeyringService";
 import MessageService from "../services/MessageService";
-import { taoToRao } from "../../utils/utils";
+import { formatNumber, taoToRao } from "../../utils/utils";
 import { NotificationType } from "../../types/client";
 import taoxyzLogo from "../../../public/icons/taoxyz.svg";
 
@@ -142,7 +142,7 @@ const Transfer = () => {
             <div className="flex items-center space-x-3">
               <img src={taoxyzLogo} alt="Taoxyz Logo" className="w-4 h-4" />
               <span className="text-xl text-mf-milk-300 font-semibold">
-                {!api ? "Loading" : Number(balance).toFixed(4)}
+                {!api ? "Loading" : formatNumber(parseFloat(balance))}
               </span>
             </div>
             <p className="text-sm text-mf-milk-300">
