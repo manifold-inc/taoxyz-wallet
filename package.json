@@ -32,8 +32,9 @@
   },
   "scripts": {
     "dev": "bun run scripts/build.ts --watch",
-    "build": "bun run lint && bun run scripts/build.ts",
+    "build": "bun run lint && bun run scripts/build.ts && bun run zip:firefox && bun run zip",
     "lint": "npx eslint . --format=stylish",
-    "build:firefox": "web-ext build -s dists/firefox -a ./dists/firefox_zip"
+    "zip:firefox": "web-ext build -s dists/firefox -a ./dists/firefox_zip",
+    "zip": "zip -r -x './node_modules/*' -x './.git/*' -x './dists/*' -X './dists/taoxyz-wallet-source.zip' ."
   }
 }
