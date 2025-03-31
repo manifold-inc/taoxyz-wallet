@@ -3,6 +3,7 @@ import { ChevronUp, Copy } from "lucide-react";
 
 import { useNotification } from "../../contexts/NotificationContext";
 import StakeChart from "./StakeChart";
+import { raoToTao } from "../../../utils/utils";
 import { NotificationType } from "../../../types/client";
 import type { StakeTransaction, Subnet } from "../../../types/client";
 import taoxyz from "../../../../public/icons/taoxyz.png";
@@ -55,7 +56,17 @@ const ExpandedStake = ({
       );
 
       const data: ApiResponse = await response.json();
-      setPriceData(data.data);
+      const convertedData = data.data.map((price) => {
+        const converted = {
+          netuid: price.netuid,
+          price:
+            Number(price.price) < 1
+              ? price.price
+              : raoToTao(BigInt(Number(price.price))).toString(),
+        };
+        return converted;
+      });
+      setPriceData(convertedData);
     } catch {
       showNotification({
         type: NotificationType.Error,
