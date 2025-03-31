@@ -28,6 +28,7 @@ export const Dashboard = () => {
   const [totalBalance, setTotalBalance] = useState<number | null>(null);
   const [stakes, setStakes] = useState<StakeTransaction[]>([]);
   const [copied, setCopied] = useState(false);
+  const [usdToTao, setUsdToTao] = useState<number | null>(null);
   const prevFetchRef = useRef<string | null>(null);
 
   const fetchData = async (
@@ -102,6 +103,35 @@ export const Dashboard = () => {
     }
   };
 
+  const fetchUSDToTao = async (): Promise<void> => {
+    setIsLoading(true);
+    try {
+      const params = new URLSearchParams();
+      params.append(
+        "ids[]",
+        "0x410f41de235f2db824e562ea7ab2d3d3d4ff048316c61d629c0b93f58584e1af"
+      );
+
+      const response = await fetch(
+        `https://hermes.pyth.network/v2/updates/price/latest?${params}`,
+        {
+          method: "GET",
+        }
+      );
+      const data = await response.json();
+      const priceData = data.parsed[0].price;
+      const price = priceData.price * Math.pow(10, priceData.expo);
+      setUsdToTao(price);
+    } catch {
+      showNotification({
+        type: NotificationType.Error,
+        message: "Failed to Fetch USD to TAO Price",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleCopy = async (): Promise<void> => {
     if (!currentAddress) return;
     await navigator.clipboard.writeText(currentAddress);
@@ -115,14 +145,16 @@ export const Dashboard = () => {
 
   if (api && currentAddress && currentAddress !== prevFetchRef.current) {
     void fetchData(currentAddress);
+    void fetchUSDToTao();
   }
 
   return (
     <div className="flex flex-col items-center min-h-screen">
       <div className="w-74 [&>*]:w-full">
         <WalletSelection />
-        <div className=" mt-2 border-sm border-2 border-mf-ash-500 bg-mf-ash-500 p-3 space-y-2">
+        <div className="mt-2 border-sm border-2 border-mf-ash-500 bg-mf-ash-500 p-3 space-y-2">
           <div className="flex items-center justify-between">
+            {/* Total Balance */}
             <div className="flex items-center space-x-2">
               <img src={taoxyz} alt="Taoxyz Logo" className="w-4 h-4" />
               <span className="text-xl text-mf-milk-300 font-semibold">
@@ -134,6 +166,7 @@ export const Dashboard = () => {
               </span>
               <span className="text-xs text-mf-silver-300">Total</span>
             </div>
+            {/* Address */}
             <div className="flex items-center text-xs text-mf-milk-300 space-x-1">
               <p>
                 {!currentAddress || !totalBalance
@@ -156,6 +189,7 @@ export const Dashboard = () => {
               </button>
             </div>
           </div>
+          {/* Free Balance */}
           <div className="flex items-center space-x-2">
             <img src={taoxyz} alt="Taoxyz Logo" className="w-4 h-4" />
             <span className="text-sm text-mf-sybil-500 font-semibold">
@@ -166,6 +200,30 @@ export const Dashboard = () => {
                 : formatNumber(Number(balance))}
             </span>
             <span className="text-xs text-mf-sybil-500">Free</span>
+          </div>
+          <div className="flex items-center justify-between">
+            {/* Total Value */}
+            <div className="flex items-center">
+              <div className="flex items-center space-x-2">
+                <span className="text-base ml-1 text-mf-sybil-500">$</span>
+                <span className="text-sm ml-0.5 text-mf-milk-300 font-semibold">
+                  {!usdToTao
+                    ? "Loading..."
+                    : `${formatNumber(usdToTao * Number(totalBalance)).toFixed(
+                        2
+                      )}`}
+                </span>
+                <span className="text-xs text-mf-milk-300">Value</span>
+              </div>
+              {/* Price */}
+              <div className="flex ml-12 items-center space-x-2">
+                <span className="text-xs text-mf-milk-300">
+                  {!usdToTao
+                    ? ""
+                    : `Price: $${formatNumber(usdToTao).toFixed(2)}`}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
