@@ -1,15 +1,29 @@
 # taoxyz-wallet
 
-To install dependencies:
+## Required programs
+
+- web-ext https://github.com/mozilla/web-ext
+- bun https://bun.sh/docs/installation
+
+To install node dependencies:
 
 ```bash
 bun install
 ```
 
-To run:
+To compile:
+
+```
+bun run build
+bun run build:firefox
+```
+
+Dist will be in `./dists/firefox_zip`
+
+## Chrome
+
+To Run
 
 ```bash
 bun run index.ts
 ```
-
-This project was created using `bun init` in bun v1.2.0. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.

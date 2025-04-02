@@ -1,10 +1,26 @@
-import { copyFile, mkdir, rm } from "node:fs/promises";
+import { copyFile, mkdir, rm, cp } from "node:fs/promises";
 import { build } from "bun";
+import { exec } from "child_process";
+import { promisify } from "util";
 import config from "../build.config";
+
+const execAsync = promisify(exec);
+
+async function buildTailwind() {
+  try {
+    await execAsync(
+      "bunx tailwindcss -i ./public/globals.css -o ./dists/chrome/globals.css --minify",
+    );
+    await copyFile("./dists/chrome/globals.css", "./dists/firefox/globals.css");
+  } catch (error) {
+    console.error("Error building Tailwind CSS:", error);
+    throw error;
+  }
+}
 
 async function cleanDist() {
   try {
-    await rm("./dist", { recursive: true, force: true });
+    await rm("./dists", { recursive: true, force: true });
   } catch (error) {
     console.error("Error cleaning dist:", error);
   }
@@ -12,13 +28,27 @@ async function cleanDist() {
 
 async function copyAssets() {
   try {
-    await mkdir("./dist/public", { recursive: true });
-    await copyFile("./manifest.json", "./dist/manifest.json");
-    await copyFile("./src/ui/popup.html", "./dist/popup.html");
-    await copyFile("./public/tao.png", "./dist/public/tao.png");
-    await copyFile("./public/globals.css", "./dist/public/globals.css");
+    await mkdir("./dists", { recursive: true });
+    await mkdir("./dists/firefox/icons", { recursive: true });
+    await mkdir("./dists/chrome/icons", { recursive: true });
+
+    await copyFile(
+      "./public/chrome_manifest.json",
+      "./dists/chrome/manifest.json",
+    );
+    await copyFile(
+      "./public/firefox_manifest.json",
+      "./dists/firefox/manifest.json",
+    );
+
+    await cp("./public/icons", "./dists/chrome/icons", { recursive: true });
+    await cp("./public/icons", "./dists/firefox/icons", { recursive: true });
+
+    await copyFile("./public/index.html", "./dists/chrome/index.html");
+    await copyFile("./public/index.html", "./dists/firefox/index.html");
   } catch (error) {
     console.error("Error copying assets:", error);
+    throw error;
   }
 }
 
@@ -26,12 +56,19 @@ async function main() {
   try {
     await cleanDist();
     const result = await build(config);
+    await cp("./dists/chrome", "./dists/firefox", { recursive: true });
     if (!result.success) {
-      throw new Error("Build failed");
+      console.error("Build logs:", result.logs);
+      throw new Error(`Build failed with errors: ${result.logs}`);
     }
+
+    await buildTailwind();
     await copyAssets();
   } catch (error) {
     console.error("Build error:", error);
+    if (error instanceof Error) {
+      console.error("Error stack:", error.stack);
+    }
     process.exit(1);
   }
 }
