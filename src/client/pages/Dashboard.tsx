@@ -83,7 +83,7 @@ export const Dashboard = () => {
         })
       );
 
-      let totalBalance = 0;
+      let totalBalance = balanceResult;
 
       for (const stake of formattedStakes) {
         const subnet = subnetsResult.find(
