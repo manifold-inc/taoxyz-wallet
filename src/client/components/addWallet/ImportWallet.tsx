@@ -166,7 +166,7 @@ const ImportWallet = ({ mnemonic, onSuccess }: ImportWalletProps) => {
             nameStatus !== "Valid Wallet Name" ||
             passwordStatus !== "Valid Password"
           }
-          className="w-44 border-sm text-sm text-mf-night-500 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 transition-colors p-1.5"
+          className="w-44 border-sm text-sm text-mf-night-500 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 transition-colors p-1.5 cursor-pointer"
         >
           <span>Import</span>
         </button>

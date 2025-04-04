@@ -21,7 +21,6 @@ window.addEventListener("message", (event) => {
   if (event.origin !== window.location.origin) return;
   if (event.data.source?.startsWith("react-devtools")) return;
 
-  console.log("[Content] Received message:", event.data);
   const message = event.data;
 
   if (!message || typeof message !== "object") {
@@ -74,7 +73,6 @@ chrome.runtime.onMessage.addListener(
         return true;
       }
 
-      console.log("[Content] Forwarding background response to dApp:", message);
       window.postMessage(message, window.location.origin);
       sendResponse();
     }

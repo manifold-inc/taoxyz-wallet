@@ -32,7 +32,7 @@ const MnemonicDisplay = ({
         />
         <button
           onClick={handleCopyMnemonic}
-          className={`absolute right-2 bottom-3 transition-colors bg-mf-ash-300 ${
+          className={`absolute right-2 bottom-3 transition-colors cursor-pointer bg-mf-ash-300 ${
             copied ? "text-mf-sybil-500" : "text-mf-safety-500"
           }`}
         >

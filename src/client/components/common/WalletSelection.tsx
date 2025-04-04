@@ -94,7 +94,7 @@ const WalletSelection = () => {
     <>
       <div className="bg-mf-ash-500 mt-4 relative" ref={listenerRef}>
         <div
-          className="flex items-center justify-between p-2 hover:bg-mf-night-500 transition-colors"
+          className="flex items-center justify-between p-2 hover:bg-mf-night-500 transition-colors cursor-pointer"
           onClick={() => setIsExpanded(!isExpanded)}
         >
           {wallet && (
@@ -132,7 +132,7 @@ const WalletSelection = () => {
                 >
                   <button
                     onClick={() => handleSelectWallet(w)}
-                    className="flex items-center gap-3 flex-1 text-left"
+                    className="flex items-center gap-3 flex-1 text-left cursor-pointer"
                   >
                     <div className="flex items-center justify-center bg-mf-night-500 border border-mf-sybil-500 rounded-sm p-1">
                       <WalletCards className="w-5 h-5 text-mf-sybil-500" />
@@ -147,7 +147,7 @@ const WalletSelection = () => {
                   {!isLocked && (
                     <button
                       onClick={(event) => handleDeleteWallet(w, event)}
-                      className="text-mf-night-500 bg-mf-safety-500 rounded-sm hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 transition-colors mr-1"
+                      className="text-mf-night-500 bg-mf-safety-500 rounded-sm hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 transition-colors mr-1 cursor-pointer"
                     >
                       <X className="w-5 h-5" />
                     </button>
@@ -157,7 +157,7 @@ const WalletSelection = () => {
 
             <button
               onClick={() => navigate("/welcome")}
-              className="w-full flex items-center gap-3 p-2 hover:bg-mf-night-500 transition-colors"
+              className="w-full flex items-center gap-3 p-2 hover:bg-mf-night-500 transition-colors cursor-pointer"
             >
               <div className="flex items-center justify-center bg-mf-safety-500 border border-mf-safety-500 rounded-sm p-1">
                 <Plus className="w-5 h-5 text-mf-ash-500" />

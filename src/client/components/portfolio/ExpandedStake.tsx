@@ -41,19 +41,16 @@ const ExpandedStake = ({
   const fetchSubnetPrice = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(
-        "https://taoxyz.vercel.app/api/subnets/price",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            allSubnets: false,
-            netuid: stake.subnetId,
-          }),
-        }
-      );
+      const response = await fetch("https://tao.xyz/api/subnets/price", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          allSubnets: false,
+          netuid: stake.subnetId,
+        }),
+      });
 
       const data: ApiResponse = await response.json();
       const convertedData = data.data.map((price) => {
@@ -81,6 +78,10 @@ const ExpandedStake = ({
     navigator.clipboard.writeText(stake.validatorHotkey);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+    showNotification({
+      type: NotificationType.Success,
+      message: "Validator Hotkey Copied",
+    });
   };
 
   const init = async () => {
@@ -95,7 +96,7 @@ const ExpandedStake = ({
 
   return (
     <div className="mt-2">
-      <div className="rounded-sm p-3 border border-mf-safety-500 bg-mf-ash-500">
+      <div className="border-sm px-3 py-2 border border-mf-safety-500 bg-mf-ash-500">
         <div className="flex justify-between">
           <div>
             <h3 className="text-sm font-semibold text-mf-milk-300">
@@ -119,11 +120,11 @@ const ExpandedStake = ({
         </div>
 
         {isLoading ? (
-          <div className="h-38 flex items-center justify-center">
+          <div className="h-28 flex items-center justify-center">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-mf-milk-300" />
           </div>
         ) : priceData.length > 0 ? (
-          <div className="h-38">
+          <div className="h-28">
             <StakeChart data={priceData} subnetId={stake.subnetId} />
           </div>
         ) : null}
@@ -135,7 +136,10 @@ const ExpandedStake = ({
               {stake.validatorHotkey.slice(0, 6)}...
               {stake.validatorHotkey.slice(-6)}
             </p>
-            <button onClick={handleCopy} className="transition-colors">
+            <button
+              onClick={handleCopy}
+              className="transition-colors cursor-pointer"
+            >
               <Copy
                 className={`w-3 h-3 ${
                   copied ? "text-mf-sybil-500" : "text-mf-milk-300"
@@ -143,7 +147,7 @@ const ExpandedStake = ({
               />
             </button>
           </div>
-          <button onClick={onClose} className="p-1">
+          <button onClick={onClose} className="p-1 cursor-pointer">
             <ChevronUp className="w-5 h-5 text-mf-milk-300" />
           </button>
         </div>

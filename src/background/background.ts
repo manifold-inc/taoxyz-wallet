@@ -25,12 +25,18 @@ const storeRequest = async (
   data: StoredRequest | StoredSignRequest
 ): Promise<void> => {
   await chrome.storage.local.set({ [key]: data });
+<<<<<<< HEAD
   console.log(`[Background] Stored ${key}:`, data);
+=======
+>>>>>>> f5da8aa (feat: update dashboard with price display and chart improvements)
 };
 
 const cleanupRequest = async (key: string): Promise<void> => {
   await chrome.storage.local.remove(key);
+<<<<<<< HEAD
   console.log(`[Background] Cleaned up ${key}`);
+=======
+>>>>>>> f5da8aa (feat: update dashboard with price display and chart improvements)
 };
 
 const sendMessageToTab = async <T extends keyof MessagePayloadMap>(
@@ -45,10 +51,13 @@ const sendMessageToTab = async <T extends keyof MessagePayloadMap>(
     }
 
     await chrome.tabs.sendMessage(tabId, message);
+<<<<<<< HEAD
     console.log(
       `[Background] Response sent to tab ${tabId}, message:`,
       message
     );
+=======
+>>>>>>> f5da8aa (feat: update dashboard with price display and chart improvements)
   } catch (error) {
     console.error(
       `[Background] Failed to send message to tab ${tabId}:`,
@@ -68,8 +77,11 @@ const sendErrorResponse = (
 };
 
 const rejectRequest = async (popupInfo: PopupInfo): Promise<void> => {
+<<<<<<< HEAD
   console.log("[Background] Rejecting Request:", popupInfo);
 
+=======
+>>>>>>> f5da8aa (feat: update dashboard with price display and chart improvements)
   let storedRequest = null;
   switch (popupInfo.route) {
     case "connect":
@@ -160,7 +172,10 @@ async function handleConnectRequest(
 
     await openPopup("connect", message.payload.origin);
     sendResponse({ success: true });
+<<<<<<< HEAD
     console.log("[Background] New connect request:", requestId);
+=======
+>>>>>>> f5da8aa (feat: update dashboard with price display and chart improvements)
   } catch (error) {
     console.error("[Background] Error handling connect request:", error);
     sendErrorResponse(sendResponse, ERROR_TYPES.UNKNOWN_ERROR, error);
@@ -190,7 +205,10 @@ async function handleConnectResponse(
 
     await cleanupRequest("connectRequest");
     sendResponse({ success: true });
+<<<<<<< HEAD
     console.log("[Background] Connect response handled successfully");
+=======
+>>>>>>> f5da8aa (feat: update dashboard with price display and chart improvements)
   } catch (error) {
     console.error("[Background] Error handling connect response:", error);
     sendErrorResponse(sendResponse, ERROR_TYPES.UNKNOWN_ERROR, error);
@@ -222,9 +240,12 @@ async function handleSignRequest(
     const approved = permissions[origin] === true;
 
     if (!approved) {
+<<<<<<< HEAD
       console.log(
         `[Background] Permission denied for ${origin} to sign with ${address}`
       );
+=======
+>>>>>>> f5da8aa (feat: update dashboard with price display and chart improvements)
       await sendMessageToTab(sender.tab.id, {
         type: MESSAGE_TYPES.SIGN_RESPONSE,
         payload: { id: message.payload.id, approved: false },
@@ -257,11 +278,14 @@ async function handleSignRequest(
 
     await openPopup("sign", origin);
     sendResponse({ success: true });
+<<<<<<< HEAD
     console.log("[Background] Sign request initiated:", {
       requestId,
       origin,
       tabId: sender.tab.id,
     });
+=======
+>>>>>>> f5da8aa (feat: update dashboard with price display and chart improvements)
   } catch (error) {
     sendErrorResponse(sendResponse, ERROR_TYPES.UNKNOWN_ERROR, error);
   }
@@ -289,7 +313,10 @@ async function handleSignResponse(
 
     await cleanupRequest("signRequest");
     sendResponse({ success: true });
+<<<<<<< HEAD
     console.log("[Background] Sign response handled successfully");
+=======
+>>>>>>> f5da8aa (feat: update dashboard with price display and chart improvements)
   } catch (error) {
     console.error("[Background] Error handling sign response:", error);
     sendErrorResponse(sendResponse, ERROR_TYPES.UNKNOWN_ERROR, error);
@@ -301,7 +328,10 @@ async function handleWalletsLocked(
   sendResponse: (response: { success: boolean; error?: string }) => void
 ) {
   try {
+<<<<<<< HEAD
     console.log("[Background] Wallets locked");
+=======
+>>>>>>> f5da8aa (feat: update dashboard with price display and chart improvements)
     await chrome.runtime.sendMessage({
       type: MESSAGE_TYPES.WALLETS_LOCKED,
     });
@@ -318,7 +348,10 @@ async function handleStartLockTimer(
 ) {
   try {
     chrome.alarms.create("lockTimer", { delayInMinutes: 15 });
+<<<<<<< HEAD
     console.log("[Background] Lock timer started");
+=======
+>>>>>>> f5da8aa (feat: update dashboard with price display and chart improvements)
     sendResponse({ success: true });
   } catch (error) {
     console.error("[Background] Error starting lock timer:", error);
@@ -339,8 +372,11 @@ async function handleClearLockTimer(
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+<<<<<<< HEAD
   console.log("[Background] Message received:", message);
 
+=======
+>>>>>>> f5da8aa (feat: update dashboard with price display and chart improvements)
   switch (message.type) {
     case MESSAGE_TYPES.CONNECT_REQUEST:
       handleConnectRequest(message, sender, sendResponse);
@@ -381,9 +417,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 // When timer goes up, lock all accounts
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === "lockTimer") {
+<<<<<<< HEAD
     console.log("[Background] Lock timer finished");
     chrome.storage.local.set({ walletLocked: true }, () => {
       console.log("[Background] Set walletLocked to true");
+=======
+    chrome.storage.local.set({ walletLocked: true }, () => {
+>>>>>>> f5da8aa (feat: update dashboard with price display and chart improvements)
       chrome.runtime.sendMessage({
         type: MESSAGE_TYPES.WALLETS_LOCKED,
       });
