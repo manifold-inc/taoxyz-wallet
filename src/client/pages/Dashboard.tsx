@@ -33,7 +33,7 @@ export const Dashboard = () => {
 
   const fetchData = async (
     address: string,
-    forceRefresh = false
+    forceRefresh = false,
   ): Promise<void> => {
     if (!api || !address || (!forceRefresh && address === prevFetchRef.current))
       return;
@@ -80,14 +80,14 @@ export const Dashboard = () => {
             validatorHotkey: stake.hotkey,
             tokens: stake.stake,
           };
-        })
+        }),
       );
 
-      let totalBalance = 0;
+      let totalBalance = balanceResult;
 
       for (const stake of formattedStakes) {
         const subnet = subnetsResult.find(
-          (subnet) => subnet.id === stake.subnetId
+          (subnet) => subnet.id === stake.subnetId,
         ) as Subnet;
 
         if (subnet) {
@@ -109,14 +109,14 @@ export const Dashboard = () => {
       const params = new URLSearchParams();
       params.append(
         "ids[]",
-        "0x410f41de235f2db824e562ea7ab2d3d3d4ff048316c61d629c0b93f58584e1af"
+        "0x410f41de235f2db824e562ea7ab2d3d3d4ff048316c61d629c0b93f58584e1af",
       );
 
       const response = await fetch(
         `https://hermes.pyth.network/v2/updates/price/latest?${params}`,
         {
           method: "GET",
-        }
+        },
       );
       const data = await response.json();
       const priceData = data.parsed[0].price;
@@ -161,8 +161,8 @@ export const Dashboard = () => {
                 {!totalBalance
                   ? "Loading"
                   : Number(totalBalance) === 0
-                  ? "0"
-                  : formatNumber(Number(totalBalance))}
+                    ? "0"
+                    : formatNumber(Number(totalBalance))}
               </span>
               <span className="text-xs text-mf-silver-300">Total</span>
             </div>
@@ -172,8 +172,8 @@ export const Dashboard = () => {
                 {!currentAddress || !totalBalance
                   ? ""
                   : `${currentAddress.slice(0, 4)}...${currentAddress.slice(
-                      -4
-                    )}`}
+                    -4,
+                  )}`}
               </p>
               <button
                 onClick={() => void handleCopy()}
@@ -181,9 +181,8 @@ export const Dashboard = () => {
               >
                 {currentAddress && totalBalance && (
                   <Copy
-                    className={`w-3 h-3 ${
-                      copied ? "text-mf-sybil-500" : "text-mf-milk-300"
-                    }`}
+                    className={`w-3 h-3 ${copied ? "text-mf-sybil-500" : "text-mf-milk-300"
+                      }`}
                   />
                 )}
               </button>
@@ -196,8 +195,8 @@ export const Dashboard = () => {
               {!balance
                 ? "Loading"
                 : Number(balance) === 0
-                ? "0"
-                : formatNumber(Number(balance))}
+                  ? "0"
+                  : formatNumber(Number(balance))}
             </span>
             <span className="text-xs text-mf-sybil-500">Free</span>
           </div>
@@ -210,8 +209,8 @@ export const Dashboard = () => {
                   {!usdToTao
                     ? "Loading..."
                     : `${formatNumber(usdToTao * Number(totalBalance)).toFixed(
-                        2
-                      )}`}
+                      2,
+                    )}`}
                 </span>
                 <span className="text-xs text-mf-milk-300">Value</span>
               </div>
