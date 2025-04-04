@@ -298,7 +298,7 @@ class PolkadotApi {
     }
   }
 
-  public async getBalance(address: string): Promise<number> {
+  public async getBalance(address: string): Promise<number | null> {
     try {
       const result = await this.api.query.system.account(address);
       const account = result.toJSON() as unknown as SubstrateAccount;
@@ -306,7 +306,7 @@ class PolkadotApi {
       return balance;
     } catch (error) {
       console.error("Error in Get Balance:", error);
-      throw error;
+      return null;
     }
   }
 
@@ -447,17 +447,10 @@ class PolkadotApi {
   ): void {
     switch (true) {
       case status.isReady:
-        console.log("[Transaction] Ready to Broadcast");
         break;
       case status.isBroadcast:
-        console.log("[Transaction] Broadcasted to Network");
         break;
       case status.isInBlock: {
-        console.log(
-          "[Transaction] Included in Block:",
-          status.asInBlock.toHex()
-        );
-
         const extrinsicFailed = events.find(
           ({ event }) => event.method === "ExtrinsicFailed"
         );
@@ -471,7 +464,6 @@ class PolkadotApi {
           ({ event }) => event.method === "ExtrinsicSuccess"
         );
         if (extrinsicSuccess) {
-          console.log("[Transaction] Successful");
           unsubscribe();
           resolve(status.asInBlock.toHex());
         }

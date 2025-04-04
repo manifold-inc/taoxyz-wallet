@@ -29,7 +29,7 @@ const Welcome = () => {
                 onClick={() =>
                   navigate("/add-wallet", { state: { mode: "create-wallet" } })
                 }
-                className="rounded-sm bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors p-3"
+                className="rounded-sm bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors p-3 cursor-pointer"
               >
                 <div className="flex justify-center items-center gap-2 mr-2">
                   <UserPlus className="text-mf-safety-500 w-5 h-5" />
@@ -42,7 +42,7 @@ const Welcome = () => {
                     state: { mode: "import-mnemonic" },
                   })
                 }
-                className="rounded-sm bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors p-3"
+                className="rounded-sm bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors p-3 cursor-pointer"
               >
                 <div className="flex justify-center items-center gap-2 mr-4">
                   <FolderInput className="text-mf-safety-500 w-5 h-5" />
@@ -52,7 +52,7 @@ const Welcome = () => {
               {currentAddress && (
                 <button
                   onClick={() => navigate("/dashboard")}
-                  className="rounded-sm bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors p-3"
+                  className="rounded-sm bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors p-3 cursor-pointer"
                 >
                   <div className="flex justify-center items-center gap-2 mr-9">
                     <ArrowLeft className="text-mf-safety-500 w-5 h-5" />
@@ -63,7 +63,7 @@ const Welcome = () => {
 
               <div className="flex justify-center mt-2">
                 <button onClick={() => setShowDisclaimer(true)}>
-                  <span className="text-xs text-mf-safety-500 hover:text-mf-safety-300 transition-colors underline underline-offset-2 decoration-mf-safety-500 hover:decoration-mf-safety-300">
+                  <span className="text-xs text-mf-safety-500 hover:text-mf-safety-300 transition-colors underline underline-offset-2 decoration-mf-safety-500 hover:decoration-mf-safety-300 cursor-pointer">
                     Disclaimer
                   </span>
                 </button>

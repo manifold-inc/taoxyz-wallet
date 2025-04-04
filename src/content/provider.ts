@@ -26,10 +26,6 @@ const dappMessageHandler = <T extends keyof MessagePayloadMap>(
 ) => {
   const handler = (event: MessageEvent<ExtensionMessage>) => {
     if (event.data.type === messageType) {
-      console.log(
-        `[Provider] Received ${messageType} response:`,
-        event.data.payload
-      );
       window.removeEventListener("message", handler);
       callback(event.data.payload as MessagePayloadMap[T]);
     }
@@ -44,8 +40,8 @@ const walletsHandler = (wallets: InjectedAccount[]) => {
     },
     subscribe: (cb: (wallets: InjectedAccount[]) => void) => {
       cb(wallets);
-      return () => {
-        console.log("[Provider] Cleaning up wallet subscription");
+      return (): void => {
+        // No-op unsubscribe function
       };
     },
   };
@@ -114,14 +110,12 @@ const signerHandler = () => ({
 });
 
 const sendMessage = (message: DappMessage) => {
-  console.log(`[Provider] Sending ${message.type}:`, message);
   window.postMessage(message, message.payload.origin);
 };
 
 export const TaoxyzWalletProvider: InjectedWindowProvider = {
   enable: async (): Promise<Injected> => {
     const origin = window.location.origin;
-    console.log(`[Provider] Enable requested from origin:`, origin);
 
     return new Promise((resolve, reject) => {
       const handleAuthResponse = dappMessageHandler(
@@ -131,11 +125,6 @@ export const TaoxyzWalletProvider: InjectedWindowProvider = {
             reject(new Error(ERROR_TYPES.CONNECTION_REJECTED));
             return;
           }
-          console.log(
-            "[Provider] Connection approved with",
-            response.wallets.length,
-            "wallets"
-          );
           resolve({
             accounts: walletsHandler(response.wallets),
             signer: signerHandler(),

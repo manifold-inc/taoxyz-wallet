@@ -22,6 +22,7 @@ interface ChartDataPoint {
   netuid: number;
   price: string;
   timestamp: string;
+  displayDate: string;
 }
 
 const StakeChart = ({ data, subnetId }: StakeChartProps) => {
@@ -39,11 +40,15 @@ const StakeChart = ({ data, subnetId }: StakeChartProps) => {
       const pointTime = new Date(sevenDaysAgo.getTime() + timeInterval * index);
       return {
         ...point,
-        timestamp: pointTime.toLocaleDateString("en-US", {
+        timestamp: pointTime.toLocaleString("en-US", {
           month: "short",
           day: "numeric",
           hour: "2-digit",
           minute: "2-digit",
+        }),
+        displayDate: pointTime.toLocaleDateString("en-US", {
+          month: "numeric",
+          day: "numeric",
         }),
       };
     });
@@ -77,7 +82,7 @@ const StakeChart = ({ data, subnetId }: StakeChartProps) => {
     <ResponsiveContainer width="100%" height="100%">
       <AreaChart
         data={priceData}
-        margin={{ top: 10, right: 10, left: -5, bottom: 0 }}
+        margin={{ top: 10, right: 0, left: -5, bottom: 0 }}
       >
         <defs>
           <linearGradient
@@ -92,20 +97,22 @@ const StakeChart = ({ data, subnetId }: StakeChartProps) => {
           </linearGradient>
         </defs>
         <XAxis
-          dataKey="timestamp"
-          axisLine={false}
-          tickLine={false}
+          dataKey="displayDate"
           tick={{ fill: "#9CA3AF", fontSize: 10 }}
           tickSize={2}
-          tickMargin={2}
-          interval="preserveStartEnd"
-          minTickGap={50}
+          tickMargin={5}
+          ticks={
+            priceData.length > 0
+              ? Array.from({ length: 8 }, (_, i) => {
+                  const index = Math.floor((priceData.length - 1) * (i / 7));
+                  return priceData[index].displayDate;
+                })
+              : []
+          }
           dy={5}
         />
         <YAxis
           domain={calculateYAxisDomain(priceData)}
-          axisLine={false}
-          tickLine={false}
           tick={{ fill: "#9CA3AF", fontSize: 10 }}
           tickFormatter={(value) => `${parseFloat(value).toFixed(4)}τ`}
           width={60}
@@ -126,6 +133,10 @@ const StakeChart = ({ data, subnetId }: StakeChartProps) => {
           labelStyle={{
             color: "#D8E5FF",
             marginBottom: "6px",
+          }}
+          labelFormatter={(_, payload) => {
+            if (!payload || payload.length === 0) return "";
+            return payload[0].payload.timestamp;
           }}
           formatter={(value: string) => [
             `${parseFloat(value).toFixed(4)}τ`,
