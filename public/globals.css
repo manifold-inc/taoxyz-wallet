@@ -1,4 +1,62 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+
+/* Poppins Font */
+@font-face {
+  font-family: 'Poppins';
+  src: url('/fonts/Poppins-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Poppins';
+  src: url('/fonts/Poppins-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Poppins';
+  src: url('/fonts/Poppins-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Poppins';
+  src: url('/fonts/Poppins-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Blinker Font */
+@font-face {
+  font-family: 'Blinker';
+  src: url('/fonts/Blinker-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Blinker';
+  src: url('/fonts/Blinker-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Blinker';
+  src: url('/fonts/Blinker-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 
 @theme {
   /* Safety Colors */
@@ -44,7 +102,7 @@ input {
   height: 100%;
   margin: 0;
   padding: 0;
-  font-family: "Inconsolata", monospace;
+  font-family: 'Poppins', sans-serif;
 }
 
 ::-webkit-scrollbar {
@@ -76,7 +134,7 @@ input {
 }
 
 /* Remove default styles */
-.custom-checkbox input[type="checkbox"] {
+.custom-checkbox input[type='checkbox'] {
   appearance: none;
   background-color: transparent;
   margin: 0;
@@ -90,8 +148,8 @@ input {
   place-content: center;
 }
 
-.custom-checkbox input[type="checkbox"]::before {
-  content: "";
+.custom-checkbox input[type='checkbox']::before {
+  content: '';
   width: 0.75em;
   height: 0.75em;
   transform: scale(0);
@@ -101,15 +159,15 @@ input {
   clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
 }
 
-.custom-checkbox input[type="checkbox"]:checked::before {
+.custom-checkbox input[type='checkbox']:checked::before {
   transform: scale(1);
 }
 
-.custom-checkbox input[type="checkbox"]:focus {
+.custom-checkbox input[type='checkbox']:focus {
   outline: none;
 }
 
-.custom-checkbox input[type="checkbox"]:hover {
+.custom-checkbox input[type='checkbox']:hover {
   cursor: pointer;
 }
 
