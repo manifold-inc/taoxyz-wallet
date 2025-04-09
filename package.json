@@ -9,18 +9,20 @@
     "@tailwindcss/postcss": "^4.0.12",
     "@types/bun": "latest",
     "@types/chrome": "^0.0.304",
+    "@types/firefox-webext-browser": "^120.0.4",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "bun-types": "^1.2.2",
     "eslint": "^9.22.0",
     "lucide-react": "^0.477.0",
     "postcss": "^8.5.3",
+    "prettier": "^3.5.3",
+    "prettier-plugin-tailwindcss": "^0.6.11",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwindcss": "^4.0.7",
     "typescript": "^5.0.0",
-    "typescript-eslint": "^8.26.1",
-    "@types/firefox-webext-browser": "^120.0.4"
+    "typescript-eslint": "^8.26.1"
   },
   "dependencies": {
     "@fontsource/inconsolata": "^5.1.1",
@@ -34,6 +36,7 @@
     "dev": "bun run scripts/build.ts --watch",
     "build": "bun run lint && bun run scripts/build.ts && bun run zip:firefox && bun run zip",
     "lint": "npx eslint . --format=stylish",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,css,md,json}\"",
     "zip:firefox": "web-ext build -s dists/firefox -a ./dists/firefox_zip",
     "zip": "zip -r -x './node_modules/*' -x './.git/*' -x './dists/*' -X './dists/taoxyz-wallet-source.zip' ."
   }
