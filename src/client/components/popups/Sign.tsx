@@ -1,40 +1,35 @@
-import { useState } from "react";
-import type {
-  SignerPayloadJSON,
-  SignerPayloadRaw,
-} from "@polkadot/types/types";
+import { useState } from 'react';
 
-import KeyringService from "../../services/KeyringService";
-import { useNotification } from "../../contexts/NotificationContext";
-import { useWallet } from "../../contexts/WalletContext";
-import MessageService from "../../services/MessageService";
-import ConfirmAction from "../common/ConfirmAction";
-import { NotificationType } from "../../../types/client";
-import { MESSAGE_TYPES } from "../../../types/messages";
-import type {
-  StoredSignRequest,
-  SignResponsePayload,
-} from "../../../types/messages";
-import taoxyz from "../../../../public/icons/taoxyz.svg";
+import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
+
+import taoxyz from '../../../../public/icons/taoxyz.svg';
+import { NotificationType } from '../../../types/client';
+import { MESSAGE_TYPES } from '../../../types/messages';
+import type { SignResponsePayload, StoredSignRequest } from '../../../types/messages';
+import { useNotification } from '../../contexts/NotificationContext';
+import { useWallet } from '../../contexts/WalletContext';
+import KeyringService from '../../services/KeyringService';
+import MessageService from '../../services/MessageService';
+import ConfirmAction from '../common/ConfirmAction';
 
 const Sign = () => {
   const { showNotification } = useNotification();
   const { setCurrentAddress } = useWallet();
   const [request, setRequest] = useState<StoredSignRequest | null>(null);
-  const [password, setPassword] = useState("");
+  const [password, setPassword] = useState('');
   const [showForgetPassword, setShowForgetPassword] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
   const getRequest = async () => {
     try {
-      const result = await chrome.storage.local.get("signRequest");
+      const result = await chrome.storage.local.get('signRequest');
       if (!result.signRequest) throw new Error();
       setRequest(result.signRequest);
       return result.signRequest;
     } catch {
       showNotification({
         type: NotificationType.Error,
-        message: "Failed to Get Request",
+        message: 'Failed to Get Request',
       });
       setTimeout(() => {
         window.close();
@@ -48,7 +43,7 @@ const Sign = () => {
       if (!request) {
         showNotification({
           type: NotificationType.Error,
-          message: "No Request Found",
+          message: 'No Request Found',
         });
         setTimeout(() => {
           window.close();
@@ -58,10 +53,10 @@ const Sign = () => {
 
       if (approved) {
         const type = checkPayloadType(request.data);
-        if (type === "INVALID") {
+        if (type === 'INVALID') {
           showNotification({
             type: NotificationType.Error,
-            message: "Invalid Payload Format",
+            message: 'Invalid Payload Format',
           });
           setTimeout(() => {
             window.close();
@@ -76,10 +71,10 @@ const Sign = () => {
         );
 
         if (signature instanceof Error) {
-          if (signature.message === "Wallet is Locked") {
+          if (signature.message === 'Wallet is Locked') {
             showNotification({
               type: NotificationType.Error,
-              message: "Invalid Password",
+              message: 'Invalid Password',
             });
             return;
           }
@@ -120,18 +115,18 @@ const Sign = () => {
     } catch {
       showNotification({
         type: NotificationType.Error,
-        message: approved ? "Failed to Sign" : "Failed to Reject",
+        message: approved ? 'Failed to Sign' : 'Failed to Reject',
       });
     }
   };
 
   const checkPayloadType = (data: SignerPayloadJSON | SignerPayloadRaw) => {
-    if ("method" in data) {
-      return "JSON";
-    } else if ("data" in data) {
-      return "RAW";
+    if ('method' in data) {
+      return 'JSON';
+    } else if ('data' in data) {
+      return 'RAW';
     } else {
-      return "INVALID";
+      return 'INVALID';
     }
   };
 
@@ -143,7 +138,7 @@ const Sign = () => {
     if (!request) return null;
     const type = checkPayloadType(request.data);
 
-    if (type === "JSON") {
+    if (type === 'JSON') {
       const payload = request.data as SignerPayloadJSON;
       return (
         <div className="flex">
@@ -165,7 +160,7 @@ const Sign = () => {
       );
     }
 
-    if (type === "RAW") {
+    if (type === 'RAW') {
       const payload = request.data as SignerPayloadRaw;
       return (
         <div className="flex space-x-2">
@@ -244,9 +239,9 @@ const Sign = () => {
           <input
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={e => setPassword(e.target.value)}
             placeholder="Enter Password to Sign"
-            className="p-2 text-sm bg-mf-ash-500 border-2 border-mf-ash-500 border-sm focus:outline-none focus:border-mf-sybil-500 text-mf-silver-500 placeholder-mf-silver-500"
+            className="p-2 text-sm bg-mf-ash-500 border-2 border-mf-ash-500 border-sm focus:outline-none focus:border-mf-sybil-500 text-mf-edge-500 placeholder-mf-edge-500"
           />
 
           <div className="flex space-x-2">
@@ -261,8 +256,8 @@ const Sign = () => {
               disabled={!password}
               className={`flex-1 text-sm border-2 border-sm border-mf-sybil-500 ${
                 !password
-                  ? "bg-mf-ash-500 text-mf-silver-500 cursor-not-allowed"
-                  : "bg-mf-sybil-500 hover:bg-mf-night-500 hover:text-mf-sybil-500 text-mf-night-500"
+                  ? 'bg-mf-ash-500 text-mf-edge-500 cursor-not-allowed'
+                  : 'bg-mf-sybil-500 hover:bg-mf-night-500 hover:text-mf-sybil-500 text-mf-night-500'
               } p-2 transition-colors`}
             >
               Sign

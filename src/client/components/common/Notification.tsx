@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
-import { CheckCircle, XCircle, Loader } from "lucide-react";
+import { CheckCircle, Loader, XCircle } from 'lucide-react';
 
-import { NotificationType } from "../../../types/client";
+import { useEffect, useState } from 'react';
+
+import { NotificationType } from '../../../types/client';
 
 interface NotificationProps {
   type: NotificationType;
@@ -56,18 +57,17 @@ const Notification = ({
           transform
           transition-all
           duration-500
-          ${isLeaving ? "animate-slideUp" : "animate-slideDown"}
+          ${isLeaving ? 'animate-slideUp' : 'animate-slideDown'}
         `}
       >
         <div className="flex items-center justify-between gap-4">
           <div className="flex flex-col items-start">
-            <h2 className="text-xl font-semibold text-mf-silver-500">
-              {type === NotificationType.Pending ||
-              type === NotificationType.InBlock
-                ? "Processing"
+            <h2 className="text-xl font-semibold text-mf-edge-500">
+              {type === NotificationType.Pending || type === NotificationType.InBlock
+                ? 'Processing'
                 : type === NotificationType.Success
-                ? "Success"
-                : "Error"}
+                  ? 'Success'
+                  : 'Error'}
             </h2>
             <p className="text-xs text-mf-milk-500">{message}</p>
             {hash && (
@@ -77,9 +77,8 @@ const Notification = ({
             )}
           </div>
           <div className="flex items-center">
-            {type === NotificationType.Pending ||
-            type === NotificationType.InBlock ? (
-              <Loader className="w-6 h-6 animate-spin text-mf-silver-500" />
+            {type === NotificationType.Pending || type === NotificationType.InBlock ? (
+              <Loader className="w-6 h-6 animate-spin text-mf-edge-500" />
             ) : type === NotificationType.Success ? (
               <CheckCircle className="w-6 h-6 text-mf-sybil-500" />
             ) : (

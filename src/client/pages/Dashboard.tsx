@@ -1,19 +1,19 @@
-import { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { Copy } from "lucide-react";
+import { Copy } from 'lucide-react';
 
-import { usePolkadotApi } from "../contexts/PolkadotApiContext";
-import { useNotification } from "../contexts/NotificationContext";
-import { useWallet } from "../contexts/WalletContext";
-import WalletSelection from "../components/common/WalletSelection";
-import Portfolio from "../components/dashboard/Portfolio";
-import { formatNumber, raoToTao } from "../../utils/utils";
-import type { StakeTransaction, Subnet } from "../../types/client";
-import { NotificationType } from "../../types/client";
+import { useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-import taoxyz from "../../../public/icons/taoxyz.png";
-import dollar from "../../../public/assets/dollar.svg";
-import clock from "../../../public/assets/clock.svg";
+import clock from '../../../public/assets/clock.svg';
+import dollar from '../../../public/assets/dollar.svg';
+import taoxyz from '../../../public/icons/taoxyz.png';
+import type { StakeTransaction, Subnet } from '../../types/client';
+import { NotificationType } from '../../types/client';
+import { formatNumber, raoToTao } from '../../utils/utils';
+import WalletSelection from '../components/common/WalletSelection';
+import Portfolio from '../components/dashboard/Portfolio';
+import { useNotification } from '../contexts/NotificationContext';
+import { usePolkadotApi } from '../contexts/PolkadotApiContext';
+import { useWallet } from '../contexts/WalletContext';
 
 interface StakeResponse {
   netuid: number;
@@ -35,12 +35,8 @@ export const Dashboard = () => {
   const [dayOldUsdToTao, setDayOldUsdToTao] = useState<number | null>(null);
   const prevFetchRef = useRef<string | null>(null);
 
-  const fetchData = async (
-    address: string,
-    forceRefresh = false
-  ): Promise<void> => {
-    if (!api || !address || (!forceRefresh && address === prevFetchRef.current))
-      return;
+  const fetchData = async (address: string, forceRefresh = false): Promise<void> => {
+    if (!api || !address || (!forceRefresh && address === prevFetchRef.current)) return;
     setIsLoading(true);
     prevFetchRef.current = address;
 
@@ -54,7 +50,7 @@ export const Dashboard = () => {
       if (!subnetsResult) {
         showNotification({
           type: NotificationType.Error,
-          message: "Failed to Fetch Subnets",
+          message: 'Failed to Fetch Subnets',
         });
         return;
       }
@@ -62,7 +58,7 @@ export const Dashboard = () => {
       if (balanceResult === null) {
         showNotification({
           type: NotificationType.Error,
-          message: "Failed to Fetch Balance",
+          message: 'Failed to Fetch Balance',
         });
         return;
       }
@@ -70,13 +66,13 @@ export const Dashboard = () => {
       if (!stakeResult) {
         showNotification({
           type: NotificationType.Error,
-          message: "Failed to Fetch Stakes",
+          message: 'Failed to Fetch Stakes',
         });
         return;
       }
 
       const formattedStakes = await Promise.all(
-        (stakeResult as unknown as StakeResponse[]).map(async (stake) => {
+        (stakeResult as unknown as StakeResponse[]).map(async stake => {
           const subnet = await api.getSubnet(stake.netuid);
           return {
             subnetId: stake.netuid,
@@ -90,9 +86,7 @@ export const Dashboard = () => {
       let totalBalance = balanceResult;
 
       for (const stake of formattedStakes) {
-        const subnet = subnetsResult.find(
-          (subnet) => subnet.id === stake.subnetId
-        ) as Subnet;
+        const subnet = subnetsResult.find(subnet => subnet.id === stake.subnetId) as Subnet;
 
         if (subnet) {
           totalBalance += raoToTao(BigInt(stake.tokens)) * subnet.price;
@@ -111,11 +105,11 @@ export const Dashboard = () => {
     setIsLoading(true);
     try {
       const response = await fetch(
-        "https://api.coingecko.com/api/v3/coins/bittensor/market_chart?vs_currency=usd&days=1",
+        'https://api.coingecko.com/api/v3/coins/bittensor/market_chart?vs_currency=usd&days=1',
         {
-          method: "GET",
+          method: 'GET',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
         }
       );
@@ -128,7 +122,7 @@ export const Dashboard = () => {
     } catch {
       showNotification({
         type: NotificationType.Error,
-        message: "Failed to Fetch USD to TAO Price",
+        message: 'Failed to Fetch USD to TAO Price',
       });
     } finally {
       setIsLoading(false);
@@ -142,7 +136,7 @@ export const Dashboard = () => {
     setTimeout(() => setCopied(false), 2000);
     showNotification({
       type: NotificationType.Success,
-      message: "Address Copied",
+      message: 'Address Copied',
     });
   };
 
@@ -160,27 +154,19 @@ export const Dashboard = () => {
           {/* Price of TAO */}
           <div className="flex items-center gap-1">
             <img src={dollar} alt="Dollar Logo" className="w-4 h-4" />
-            <span className="text-base font-semibold text-mf-silver-500">
-              {usdToTao ? `${formatNumber(usdToTao).toFixed(2)}` : "Loading..."}
+            <span className="text-base font-semibold text-mf-edge-500">
+              {usdToTao ? `${formatNumber(usdToTao).toFixed(2)}` : 'Loading...'}
             </span>
-            {usdToTao && (
-              <span className="text-[10px] ml-0.5 text-mf-silver-500">/τ</span>
-            )}
+            {usdToTao && <span className="text-[10px] ml-0.5 text-mf-edge-500">/τ</span>}
           </div>
 
           {/* Price of TAO 24hr ago */}
           <div className="flex items-center gap-1">
             <img src={clock} alt="Clock Logo" className="w-4 h-4" />
-            <span className="text-base font-semibold text-mf-silver-500">
-              {dayOldUsdToTao
-                ? `${formatNumber(dayOldUsdToTao).toFixed(2)}`
-                : "Loading..."}
+            <span className="text-base font-semibold text-mf-edge-500">
+              {dayOldUsdToTao ? `${formatNumber(dayOldUsdToTao).toFixed(2)}` : 'Loading...'}
             </span>
-            {dayOldUsdToTao && (
-              <span className="text-[10px] ml-0.5 text-mf-silver-500">
-                24hr
-              </span>
-            )}
+            {dayOldUsdToTao && <span className="text-[10px] ml-0.5 text-mf-edge-500">24hr</span>}
           </div>
         </div>
 
@@ -192,19 +178,14 @@ export const Dashboard = () => {
               <div className="flex items-center text-xs text-mf-milk-300 gap-1">
                 <p>
                   {!currentAddress
-                    ? "Loading..."
-                    : `${currentAddress.slice(0, 4)}...${currentAddress.slice(
-                        -4
-                      )}`}
+                    ? 'Loading...'
+                    : `${currentAddress.slice(0, 4)}...${currentAddress.slice(-4)}`}
                 </p>
-                <button
-                  onClick={() => void handleCopy()}
-                  className="transition-colors"
-                >
+                <button onClick={() => void handleCopy()} className="transition-colors">
                   {currentAddress && (
                     <Copy
                       className={`w-3 h-3 cursor-pointer ${
-                        copied ? "text-mf-sybil-500" : "text-mf-milk-300"
+                        copied ? 'text-mf-sybil-500' : 'text-mf-milk-300'
                       }`}
                     />
                   )}
@@ -215,10 +196,8 @@ export const Dashboard = () => {
               <div className="flex items-center text-xs font-semibold text-mf-sybil-500 space-x-1">
                 <p>
                   {usdToTao === null || totalBalance === null
-                    ? "Loading..."
-                    : `$${formatNumber(Number(usdToTao * totalBalance)).toFixed(
-                        2
-                      )}`}
+                    ? 'Loading...'
+                    : `$${formatNumber(Number(usdToTao * totalBalance)).toFixed(2)}`}
                 </p>
               </div>
             </div>
@@ -231,12 +210,12 @@ export const Dashboard = () => {
               <img src={taoxyz} alt="Taoxyz Logo" className="w-3 h-3" />
               <span className="text-xl text-mf-milk-300 font-semibold">
                 {totalBalance === null
-                  ? "Loading"
+                  ? 'Loading'
                   : Number(totalBalance) === 0
-                  ? "0"
-                  : formatNumber(Number(totalBalance))}
+                    ? '0'
+                    : formatNumber(Number(totalBalance))}
               </span>
-              <span className="text-xs text-mf-silver-300">Total</span>
+              <span className="text-xs text-mf-edge-300">Total</span>
             </div>
 
             {/* Free Balance */}
@@ -244,10 +223,10 @@ export const Dashboard = () => {
               <img src={taoxyz} alt="Taoxyz Logo" className="w-3 h-3" />
               <span className="text-sm text-mf-sybil-500 font-semibold">
                 {balance === null
-                  ? "Loading"
+                  ? 'Loading'
                   : Number(balance) === 0
-                  ? "0"
-                  : formatNumber(Number(balance))}
+                    ? '0'
+                    : formatNumber(Number(balance))}
               </span>
               <span className="text-xs text-mf-sybil-500">Free</span>
             </div>
@@ -257,19 +236,19 @@ export const Dashboard = () => {
         <div className="mt-3">
           <div className="flex justify-between rounded-sm text-sm text-mf-night-500 transition-colors space-x-2">
             <button
-              onClick={() => navigate("/add-stake")}
+              onClick={() => navigate('/add-stake')}
               className="w-1/3 p-1 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 hover:border-mf-safety-500 border-sm transition-colors cursor-pointer"
             >
               <span>Add</span>
             </button>
             <button
-              onClick={() => navigate("/move-stake")}
+              onClick={() => navigate('/move-stake')}
               className="w-1/3 p-1 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 hover:border-mf-safety-500 border-sm transition-colors cursor-pointer"
             >
               <span>Move</span>
             </button>
             <button
-              onClick={() => navigate("/transfer")}
+              onClick={() => navigate('/transfer')}
               className="w-1/3 p-1 bg-mf-sybil-500 hover:bg-mf-night-500 hover:text-mf-sybil-500 border-2 border-mf-sybil-500 hover:border-mf-sybil-500 border-sm transition-colors cursor-pointer"
             >
               <span>Transfer</span>
@@ -288,9 +267,7 @@ export const Dashboard = () => {
               stakes={stakes}
               address={currentAddress as string}
               onRefresh={() =>
-                currentAddress
-                  ? fetchData(currentAddress, true)
-                  : Promise.resolve()
+                currentAddress ? fetchData(currentAddress, true) : Promise.resolve()
               }
             />
           )}

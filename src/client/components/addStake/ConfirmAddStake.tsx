@@ -1,16 +1,16 @@
-import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-import { usePolkadotApi } from "../../contexts/PolkadotApiContext";
-import { useNotification } from "../../contexts/NotificationContext";
-import { useLock } from "../../contexts/LockContext";
-import KeyringService from "../../services/KeyringService";
-import MessageService from "../../services/MessageService";
-import SlippageDisplay from "../common/SlippageDisplay";
-import ConfirmAction from "../common/ConfirmAction";
-import { slippageStakeCalculation, taoToRao } from "../../../utils/utils";
-import { NotificationType } from "../../../types/client";
-import type { Slippage, Subnet, Validator } from "../../../types/client";
+import { NotificationType } from '../../../types/client';
+import type { Slippage, Subnet, Validator } from '../../../types/client';
+import { slippageStakeCalculation, taoToRao } from '../../../utils/utils';
+import { useLock } from '../../contexts/LockContext';
+import { useNotification } from '../../contexts/NotificationContext';
+import { usePolkadotApi } from '../../contexts/PolkadotApiContext';
+import KeyringService from '../../services/KeyringService';
+import MessageService from '../../services/MessageService';
+import ConfirmAction from '../common/ConfirmAction';
+import SlippageDisplay from '../common/SlippageDisplay';
 
 interface ConfirmAddStakeProps {
   subnet: Subnet;
@@ -19,17 +19,12 @@ interface ConfirmAddStakeProps {
   address: string;
 }
 
-const ConfirmAddStake = ({
-  subnet,
-  validator,
-  balance,
-  address,
-}: ConfirmAddStakeProps) => {
+const ConfirmAddStake = ({ subnet, validator, balance, address }: ConfirmAddStakeProps) => {
   const navigate = useNavigate();
   const { showNotification } = useNotification();
   const { setIsLocked } = useLock();
   const { api } = usePolkadotApi();
-  const [amount, setAmount] = useState<string>("");
+  const [amount, setAmount] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -48,19 +43,19 @@ const ConfirmAddStake = ({
   }, [subnet.alphaIn, subnet.taoIn, amountInRao, subnet.id]);
 
   const restoreTransaction = async () => {
-    const result = await chrome.storage.local.get("storeAddStakeTransaction");
+    const result = await chrome.storage.local.get('storeAddStakeTransaction');
     if (result.storeAddStakeTransaction) {
       const { amount } = result.storeAddStakeTransaction;
-      await chrome.storage.local.remove("storeAddStakeTransaction");
+      await chrome.storage.local.remove('storeAddStakeTransaction');
       setAmount(amount);
     }
   };
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    if (value === "" || /^\d*\.?\d*$/.test(value)) {
+    if (value === '' || /^\d*\.?\d*$/.test(value)) {
       const numValue = parseFloat(value);
-      if (value === "" || (!isNaN(numValue) && numValue >= 0)) {
+      if (value === '' || (!isNaN(numValue) && numValue >= 0)) {
         setAmount(value);
       }
     }
@@ -94,21 +89,14 @@ const ConfirmAddStake = ({
   };
 
   const confirmSubmit = async () => {
-    if (
-      !api ||
-      !amount ||
-      isSubmitting ||
-      amountInRao > balanceInRao ||
-      amountInRao === 0n
-    )
-      return;
+    if (!api || !amount || isSubmitting || amountInRao > balanceInRao || amountInRao === 0n) return;
     setIsSubmitting(true);
     const isAuthorized = await handleAuth();
     if (!isAuthorized) return;
 
     try {
       showNotification({
-        message: "Submitting Transaction...",
+        message: 'Submitting Transaction...',
         type: NotificationType.Pending,
       });
 
@@ -120,17 +108,17 @@ const ConfirmAddStake = ({
       });
 
       showNotification({
-        message: "Transaction Successful!",
+        message: 'Transaction Successful!',
         type: NotificationType.Success,
         hash: result,
       });
 
       setTimeout(() => {
-        navigate("/dashboard");
+        navigate('/dashboard');
       }, 2000);
     } catch {
       showNotification({
-        message: "Failed to Add Stake",
+        message: 'Failed to Add Stake',
         type: NotificationType.Error,
       });
     } finally {
@@ -150,19 +138,17 @@ const ConfirmAddStake = ({
       <div className="p-2 max-h-[calc(100vh-280px)] overflow-y-auto">
         <div className="border-2 border-mf-ash-500 border-sm bg-mf-ash-500 p-2 space-y-4 text-xs">
           <div>
-            <p className="font-semibold text-mf-silver-300">Selected Subnet</p>
+            <p className="font-semibold text-mf-edge-300">Selected Subnet</p>
             <p className="text-mf-sybil-500">{subnet.name}</p>
           </div>
 
           <div>
-            <p className="font-semibold text-mf-silver-300">Token Price</p>
+            <p className="font-semibold text-mf-edge-300">Token Price</p>
             <p className="text-mf-sybil-500">{subnet.price} τ</p>
           </div>
 
           <div>
-            <p className="font-semibold text-mf-silver-300">
-              Selected Validator
-            </p>
+            <p className="font-semibold text-mf-edge-300">Selected Validator</p>
             <p className="text-mf-sybil-500">
               {validator.hotkey.slice(0, 6)}...{validator.hotkey.slice(-6)}
             </p>
@@ -184,16 +170,12 @@ const ConfirmAddStake = ({
             <button
               onClick={handleSubmit}
               disabled={
-                !amount ||
-                isSubmitting ||
-                !api ||
-                amountInRao > balanceInRao ||
-                amountInRao === 0n
+                !amount || isSubmitting || !api || amountInRao > balanceInRao || amountInRao === 0n
               }
               className={`w-44 text-xs flex items-center justify-center border-sm transition-colors p-2 mt-4 text-semibold border-2 border-mf-sybil-500 ${
                 !amount || isSubmitting || !api || amountInRao > balanceInRao
-                  ? "bg-mf-night-500 text-mf-milk-300 cursor-not-allowed"
-                  : "bg-mf-sybil-500 text-mf-night-500"
+                  ? 'bg-mf-night-500 text-mf-milk-300 cursor-not-allowed'
+                  : 'bg-mf-sybil-500 text-mf-night-500'
               }`}
             >
               {isSubmitting ? (
@@ -201,7 +183,7 @@ const ConfirmAddStake = ({
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-mf-milk-300" />
                 </div>
               ) : (
-                "Confirm"
+                'Confirm'
               )}
             </button>
           </div>

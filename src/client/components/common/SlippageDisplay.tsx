@@ -1,5 +1,5 @@
-import { formatNumber } from "../../../utils/utils";
-import type { Slippage } from "../../../types/client";
+import type { Slippage } from '../../../types/client';
+import { formatNumber } from '../../../utils/utils';
 
 interface SlippageDisplayProps {
   amount: string;
@@ -28,26 +28,26 @@ const SlippageDisplay = ({
   let payToken: string;
   if (moveStake) {
     if (isRoot) {
-      payToken = "τ";
+      payToken = 'τ';
     } else {
-      payToken = "α";
+      payToken = 'α';
     }
   } else {
-    payToken = "τ";
+    payToken = 'τ';
   }
 
   let receiveToken: string;
   if (moveStake) {
     if (isRoot) {
-      receiveToken = "τ";
+      receiveToken = 'τ';
     } else {
-      receiveToken = "α";
+      receiveToken = 'α';
     }
   } else {
     if (isRoot) {
-      receiveToken = "τ";
+      receiveToken = 'τ';
     } else {
-      receiveToken = "α";
+      receiveToken = 'α';
     }
   }
 
@@ -62,44 +62,40 @@ const SlippageDisplay = ({
           placeholder={`Enter Amount (${payToken})`}
           className={`w-full px-3 py-2 border-sm bg-mf-ash-300 text-mf-milk-300 border-2 ${
             !amount
-              ? "border-transparent focus:border-mf-safety-500"
+              ? 'border-transparent focus:border-mf-safety-500'
               : amountInRao > balanceInRao
-              ? "border-mf-safety-500"
-              : "border-mf-sybil-500"
+                ? 'border-mf-safety-500'
+                : 'border-mf-sybil-500'
           }`}
         />
-        <p className="ml-2 mt-2 text-mf-sybil-500">
-          Balance: {`${balance} ${payToken}`}
-        </p>
+        <p className="ml-2 mt-2 text-mf-sybil-500">Balance: {`${balance} ${payToken}`}</p>
       </div>
       {amountInRao > 0 && slippage && (
         <div className="border-2 border-mf-ash-500 rounded-sm bg-mf-ash-500 p-2 space-y-2 text-xs mt-2">
           <div className="flex justify-between items-center">
-            <span className="text-mf-silver-300">Your Price:</span>
+            <span className="text-mf-edge-300">Your Price:</span>
             <span className="text-mf-sybil-500">
               {formatNumber(parseFloat(amount))} {payToken}
             </span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-mf-silver-300">You Receive:</span>
+            <span className="text-mf-edge-300">You Receive:</span>
             <span className="text-mf-sybil-500">
               {formatNumber(receiveAmount)} {receiveToken}
             </span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-mf-silver-300">Slippage:</span>
+            <span className="text-mf-edge-300">Slippage:</span>
             <span
               className={`${
-                slippage?.slippagePercentage > 5
-                  ? "text-mf-safety-500"
-                  : "text-mf-silver-300"
+                slippage?.slippagePercentage > 5 ? 'text-mf-safety-500' : 'text-mf-edge-300'
               }`}
             >
               {slippage.slippagePercentage.toFixed(2)}%
             </span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-mf-silver-300">Fee:</span>
+            <span className="text-mf-edge-300">Fee:</span>
             <span className="text-mf-safety-500">{fee} τ</span>
           </div>
         </div>

@@ -1,0 +1,59 @@
+/* Background Circle Animation */
+@-webkit-keyframes scale-down-center {
+  0% {
+    -webkit-clip-path: circle(100% at 50% 50%);
+    clip-path: circle(100% at 50% 50%);
+  }
+  100% {
+    -webkit-clip-path: circle(0% at 50% 50%);
+    clip-path: circle(0% at 50% 50%);
+  }
+}
+
+@keyframes scale-down-center {
+  0% {
+    -webkit-clip-path: circle(100% at 50% 50%);
+    clip-path: circle(100% at 50% 50%);
+  }
+  100% {
+    -webkit-clip-path: circle(0% at 50% 50%);
+    clip-path: circle(0% at 50% 50%);
+  }
+}
+
+.scale-down-center {
+  -webkit-animation: scale-down-center 2s ease-in-out forwards;
+  animation: scale-down-center 2s ease-in-out forwards;
+}
+
+/* Text Slide Out Animation */
+@-webkit-keyframes slide-out-right {
+  0% {
+    -webkit-transform: translateX(0);
+    transform: translateX(0);
+    opacity: 0;
+  }
+  100% {
+    -webkit-transform: translateX(100%);
+    transform: translateX(100%);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-out-right {
+  0% {
+    -webkit-transform: translateX(0);
+    transform: translateX(0);
+    opacity: 0;
+  }
+  100% {
+    -webkit-transform: translateX(100%);
+    transform: translateX(100%);
+    opacity: 1;
+  }
+}
+
+.slide-out-right {
+  -webkit-animation: slide-out-right 2s ease-in-out forwards;
+  animation: slide-out-right 2s ease-in-out forwards;
+}

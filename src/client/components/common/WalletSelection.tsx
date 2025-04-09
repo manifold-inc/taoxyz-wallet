@@ -1,12 +1,14 @@
-import { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { WalletCards, ChevronDown, ChevronUp, Plus, X } from "lucide-react";
-import type { KeyringPair } from "@polkadot/keyring/types";
+import { ChevronDown, ChevronUp, Plus, WalletCards, X } from 'lucide-react';
 
-import { useLock } from "../../contexts/LockContext";
-import { useWallet } from "../../contexts/WalletContext";
-import KeyringService from "../../services/KeyringService";
-import ConfirmAction from "./ConfirmAction";
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import type { KeyringPair } from '@polkadot/keyring/types';
+
+import { useLock } from '../../contexts/LockContext';
+import { useWallet } from '../../contexts/WalletContext';
+import KeyringService from '../../services/KeyringService';
+import ConfirmAction from './ConfirmAction';
 
 const WalletSelection = () => {
   const navigate = useNavigate();
@@ -15,9 +17,7 @@ const WalletSelection = () => {
   const [wallet, setWallet] = useState<KeyringPair | null>(null);
   const [wallets, setWallets] = useState<KeyringPair[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [walletToDelete, setWalletToDelete] = useState<KeyringPair | null>(
-    null
-  );
+  const [walletToDelete, setWalletToDelete] = useState<KeyringPair | null>(null);
   const listenerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -31,24 +31,21 @@ const WalletSelection = () => {
         return;
       }
 
-      if (
-        listenerRef.current &&
-        !listenerRef.current.contains(event.target as Node)
-      ) {
+      if (listenerRef.current && !listenerRef.current.contains(event.target as Node)) {
         setIsExpanded(false);
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
   const clearSavedTransactions = async (): Promise<void> => {
-    await chrome.storage.local.remove("storeMoveStakeTransaction");
-    await chrome.storage.local.remove("storeAddStakeTransaction");
-    await chrome.storage.local.remove("storeTransferTransaction");
+    await chrome.storage.local.remove('storeMoveStakeTransaction');
+    await chrome.storage.local.remove('storeAddStakeTransaction');
+    await chrome.storage.local.remove('storeTransferTransaction');
   };
 
   const getWallet = async (): Promise<void> => {
@@ -104,7 +101,7 @@ const WalletSelection = () => {
                   <WalletCards className="w-5 h-5 text-mf-night-500" />
                 </div>
                 <div className="text-left text-mf-milk-300 text-xs flex flex-col">
-                  <span>{wallet.meta.name || "Unknown"}</span>
+                  <span>{wallet.meta.name || 'Unknown'}</span>
                   <span className="text-mf-sybil-500">
                     {wallet.address.slice(0, 6)}...{wallet.address.slice(-6)}
                   </span>
@@ -112,9 +109,9 @@ const WalletSelection = () => {
               </div>
               <div className="p-1">
                 {isExpanded ? (
-                  <ChevronUp className="w-6 h-6 text-mf-silver-300 p-1" />
+                  <ChevronUp className="w-6 h-6 text-mf-edge-300 p-1" />
                 ) : (
-                  <ChevronDown className="w-6 h-6 text-mf-silver-300 p-1" />
+                  <ChevronDown className="w-6 h-6 text-mf-edge-300 p-1" />
                 )}
               </div>
             </>
@@ -124,8 +121,8 @@ const WalletSelection = () => {
         {isExpanded && (
           <div className="absolute top-full left-0 right-0 z-50 bg-mf-ash-500">
             {wallets
-              .filter((w) => w.address !== wallet?.address)
-              .map((w) => (
+              .filter(w => w.address !== wallet?.address)
+              .map(w => (
                 <div
                   key={w.address}
                   className="flex items-center justify-between p-2 hover:bg-mf-night-500 transition-colors"
@@ -138,7 +135,7 @@ const WalletSelection = () => {
                       <WalletCards className="w-5 h-5 text-mf-sybil-500" />
                     </div>
                     <div className="text-left text-mf-milk-300 text-xs">
-                      <span>{w.meta.name || "Unknown"}</span>
+                      <span>{w.meta.name || 'Unknown'}</span>
                       <div className="text-mf-sybil-500">
                         {w.address.slice(0, 6)}...{w.address.slice(-6)}
                       </div>
@@ -146,7 +143,7 @@ const WalletSelection = () => {
                   </button>
                   {!isLocked && (
                     <button
-                      onClick={(event) => handleDeleteWallet(w, event)}
+                      onClick={event => handleDeleteWallet(w, event)}
                       className="text-mf-night-500 bg-mf-safety-500 rounded-sm hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 transition-colors mr-1 cursor-pointer"
                     >
                       <X className="w-5 h-5" />
@@ -156,7 +153,7 @@ const WalletSelection = () => {
               ))}
 
             <button
-              onClick={() => navigate("/welcome")}
+              onClick={() => navigate('/welcome')}
               className="w-full flex items-center gap-3 p-2 hover:bg-mf-night-500 transition-colors cursor-pointer"
             >
               <div className="flex items-center justify-center bg-mf-safety-500 border border-mf-safety-500 rounded-sm p-1">
@@ -173,7 +170,7 @@ const WalletSelection = () => {
         isOpen={!!walletToDelete}
         title="Delete Wallet"
         message={`Are you sure you want to delete the wallet "${
-          walletToDelete?.meta.name || "Unknown"
+          walletToDelete?.meta.name || 'Unknown'
         }"? This wallet cannot be recovered without its recovery phrase.`}
         onConfirm={confirmDelete}
         onCancel={() => setWalletToDelete(null)}

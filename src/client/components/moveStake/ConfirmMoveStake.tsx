@@ -1,21 +1,16 @@
-import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-import { usePolkadotApi } from "../../contexts/PolkadotApiContext";
-import { useNotification } from "../../contexts/NotificationContext";
-import { useLock } from "../../contexts/LockContext";
-import KeyringService from "../../services/KeyringService";
-import MessageService from "../../services/MessageService";
-import SlippageDisplay from "../common/SlippageDisplay";
-import ConfirmAction from "../common/ConfirmAction";
-import { taoToRao, slippageMoveStakeCalculation } from "../../../utils/utils";
-import { NotificationType } from "../../../types/client";
-import type {
-  Subnet,
-  Validator,
-  StakeTransaction,
-  Slippage,
-} from "../../../types/client";
+import { NotificationType } from '../../../types/client';
+import type { Slippage, StakeTransaction, Subnet, Validator } from '../../../types/client';
+import { slippageMoveStakeCalculation, taoToRao } from '../../../utils/utils';
+import { useLock } from '../../contexts/LockContext';
+import { useNotification } from '../../contexts/NotificationContext';
+import { usePolkadotApi } from '../../contexts/PolkadotApiContext';
+import KeyringService from '../../services/KeyringService';
+import MessageService from '../../services/MessageService';
+import ConfirmAction from '../common/ConfirmAction';
+import SlippageDisplay from '../common/SlippageDisplay';
 
 interface ConfirmMoveStakeProps {
   stake: StakeTransaction;
@@ -36,7 +31,7 @@ const ConfirmMoveStake = ({
   const { showNotification } = useNotification();
   const { setIsLocked } = useLock();
   const { api } = usePolkadotApi();
-  const [amount, setAmount] = useState<string>("");
+  const [amount, setAmount] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -53,19 +48,19 @@ const ConfirmMoveStake = ({
   }, [alphaAmountInRao, subnet.taoIn, subnet.alphaIn]);
 
   const restoreTransaction = async () => {
-    const result = await chrome.storage.local.get("storeMoveStakeTransaction");
+    const result = await chrome.storage.local.get('storeMoveStakeTransaction');
     if (result.storeMoveStakeTransaction) {
       const { amount } = result.storeMoveStakeTransaction;
-      await chrome.storage.local.remove("storeMoveStakeTransaction");
+      await chrome.storage.local.remove('storeMoveStakeTransaction');
       setAmount(amount);
     }
   };
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    if (value === "" || /^\d*\.?\d*$/.test(value)) {
+    if (value === '' || /^\d*\.?\d*$/.test(value)) {
       const numValue = parseFloat(value);
-      if (value === "" || (!isNaN(numValue) && numValue >= 0)) {
+      if (value === '' || (!isNaN(numValue) && numValue >= 0)) {
         setAmount(value);
       }
     }
@@ -113,7 +108,7 @@ const ConfirmMoveStake = ({
 
     try {
       showNotification({
-        message: "Submitting Transaction...",
+        message: 'Submitting Transaction...',
         type: NotificationType.Pending,
       });
 
@@ -127,19 +122,19 @@ const ConfirmMoveStake = ({
       });
 
       showNotification({
-        message: "Transaction Successful!",
+        message: 'Transaction Successful!',
         type: NotificationType.Success,
         hash: result,
       });
 
       setTimeout(() => {
-        navigate("/dashboard");
+        navigate('/dashboard');
       }, 2000);
 
       setIsSubmitting(false);
     } catch {
       showNotification({
-        message: "Failed to Stake",
+        message: 'Failed to Stake',
         type: NotificationType.Error,
       });
       setIsSubmitting(false);
@@ -158,19 +153,17 @@ const ConfirmMoveStake = ({
       <div className="p-2 max-h-[calc(100vh-280px)] overflow-y-auto">
         <div className="border-2 border-mf-ash-500 border-sm bg-mf-ash-500 p-2 space-y-4 text-xs">
           <div>
-            <p className="font-semibold text-mf-silver-300">Selected Subnet</p>
+            <p className="font-semibold text-mf-edge-300">Selected Subnet</p>
             <p className="text-mf-sybil-500">{subnet.name}</p>
           </div>
 
           <div>
-            <p className="font-semibold text-mf-silver-300">Token Price</p>
+            <p className="font-semibold text-mf-edge-300">Token Price</p>
             <p className="text-mf-sybil-500">{subnet.price} τ</p>
           </div>
 
           <div>
-            <p className="font-semibold text-mf-silver-300">
-              Selected Validator
-            </p>
+            <p className="font-semibold text-mf-edge-300">Selected Validator</p>
             <p className="text-mf-sybil-500">
               {validator.hotkey.slice(0, 6)}...{validator.hotkey.slice(-6)}
             </p>
@@ -200,12 +193,9 @@ const ConfirmMoveStake = ({
                 alphaAmountInRao === 0n
               }
               className={`w-44 text-xs flex items-center justify-center border-sm transition-colors p-2 mt-4 text-semibold border-2 border-mf-sybil-500 ${
-                !amount ||
-                isSubmitting ||
-                !api ||
-                alphaAmountInRao > balanceInRao
-                  ? "bg-mf-night-500 text-mf-milk-300 cursor-not-allowed"
-                  : "bg-mf-sybil-500 text-mf-night-500"
+                !amount || isSubmitting || !api || alphaAmountInRao > balanceInRao
+                  ? 'bg-mf-night-500 text-mf-milk-300 cursor-not-allowed'
+                  : 'bg-mf-sybil-500 text-mf-night-500'
               }`}
             >
               {isSubmitting ? (
@@ -213,7 +203,7 @@ const ConfirmMoveStake = ({
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-mf-milk-300" />
                 </div>
               ) : (
-                "Confirm"
+                'Confirm'
               )}
             </button>
           </div>

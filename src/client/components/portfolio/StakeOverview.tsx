@@ -1,4 +1,4 @@
-import type { StakeTransaction } from "../../../types/client";
+import type { StakeTransaction } from '../../../types/client';
 
 interface StakeOverviewProps {
   stake: StakeTransaction;
@@ -12,12 +12,8 @@ const StakeOverview = ({ stake, onClick }: StakeOverviewProps) => {
       className="w-full text-left border-sm border-2 border-mf-ash-500 cursor-pointer p-2 bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors space-y-1"
     >
       <div className="flex items-center justify-between text-sm">
-        <h3 className="font-semibold text-mf-silver-300">
-          Subnet {stake.subnetId}
-        </h3>
-        <span className="text-mf-safety-300">
-          {stake.subnetId === 0 ? "τ" : "α"}
-        </span>
+        <h3 className="font-semibold text-mf-edge-300">Subnet {stake.subnetId}</h3>
+        <span className="text-mf-safety-300">{stake.subnetId === 0 ? 'τ' : 'α'}</span>
       </div>
       <div className="flex items-center justify-between text-sm text-mf-milk-300">
         <p>
