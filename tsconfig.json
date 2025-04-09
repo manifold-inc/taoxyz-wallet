@@ -24,6 +24,13 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false,
 
+    // Path aliases
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@public/*": ["public/*"]
+    },
+
     "types": ["@types/chrome", "bun-types", "@types/firefox-webext-browser"]
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.css"]

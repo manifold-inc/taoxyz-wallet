@@ -1,0 +1,13 @@
+[install]
+# Configure path aliases
+alias = {
+  "@": "./src",
+  "@public": "./public"
+}
+
+[module]
+# Enable path aliases in imports
+alias = {
+  "@": "./src",
+  "@public": "./public"
+} 
