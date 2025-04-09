@@ -5,12 +5,11 @@ export default {
     './public/**/*.{html,js,jsx,ts,tsx}',
   ],
   theme: {
-    extend: {
-      fontFamily: {
-        poppins: ['Poppins', 'sans-serif'],
-        blinker: ['Blinker', 'sans-serif'],
-      },
+    fontFamily: {
+      poppins: ['Poppins', 'sans-serif'],
+      blinker: ['Blinker', 'sans-serif'],
     },
+    extend: {},
   },
   plugins: [],
 };
