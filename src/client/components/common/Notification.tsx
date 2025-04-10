@@ -57,7 +57,7 @@ const Notification = ({
           transform
           transition-all
           duration-500
-          ${isLeaving ? 'animate-slideUp' : 'animate-slideDown'}
+          ${isLeaving ? 'notification-slide-up' : 'notification-slide-down'}
         `}
       >
         <div className="flex items-center justify-between gap-4">

@@ -11,17 +11,17 @@ const Initial = ({ onGetStarted }: InitialProps) => {
       <div className="absolute inset-0 bg-mf-safety-500 scale-down-center z-10" />
 
       {/* Logo Animation */}
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 slide-left">
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 initial-slide-left">
         <img src={taoxyz} alt="Taoxyz Logo" className="h-8 w-8" />
       </div>
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 slide-right">
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 initial-slide-right">
         <p className="text-mf-edge-500 text-4xl font-bold blinker-font">TAO.XYZ</p>
       </div>
 
       {/* Button Animation */}
-      <div className="absolute z-0 slide-up">
+      <div className="absolute bottom-16 z-0 initial-slide-up">
         <button
-          className="rounded-full px-8 py-1.5 bg-mf-sybil-opacity slide-up text-base text-mf-sybil-500 cursor-pointer border border-mf-sybil-opacity hover:border-mf-sybil-500 transition-colors hover:text-mf-edge-500"
+          className="rounded-full px-8 py-1.5 bg-mf-sybil-opacity initial-slide-up text-base text-mf-sybil-500 cursor-pointer border border-mf-sybil-opacity hover:border-mf-sybil-500 transition-colors hover:text-mf-edge-500"
           onClick={onGetStarted}
         >
           <span>Get Started</span>

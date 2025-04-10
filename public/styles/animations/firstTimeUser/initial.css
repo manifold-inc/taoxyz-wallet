@@ -13,7 +13,7 @@
 }
 
 /* Logo Animation - Slide Left */
-@keyframes slide-left {
+@keyframes initial-slide-left {
   0% {
     transform: translateX(0);
   }
@@ -22,13 +22,13 @@
   }
 }
 
-.slide-left {
-  animation: slide-left 1s ease-in-out forwards;
+.initial-slide-left {
+  animation: initial-slide-left 1s ease-in-out forwards;
   animation-delay: 2s;
 }
 
 /* Text Animation - Slide Right */
-@keyframes slide-right {
+@keyframes initial-slide-right {
   0% {
     transform: translateX(0);
   }
@@ -38,14 +38,14 @@
   }
 }
 
-.slide-right {
-  animation: slide-right 1s ease-in-out forwards;
+.initial-slide-right {
+  animation: initial-slide-right 1s ease-in-out forwards;
   animation-delay: 3.25s;
   opacity: 0;
 }
 
 /* Button Animation */
-@keyframes slide-up {
+@keyframes initial-slide-up {
   0% {
     transform: translateY(0);
   }
@@ -55,8 +55,8 @@
   }
 }
 
-.slide-up {
-  animation: slide-up 1s ease-in-out forwards;
+.initial-slide-up {
+  animation: initial-slide-up 1s ease-in-out forwards;
   animation-delay: 4.5s;
   opacity: 0;
 }
