@@ -19,9 +19,9 @@ const Initial = ({ onGetStarted }: InitialProps) => {
       </div>
 
       {/* Button Animation */}
-      <div className="absolute bottom-16 px-8 py-1.5 bg-mf-sybil-opacity rounded-full z-0 slide-up cursor-pointer">
+      <div className="absolute bottom-16 px-8 py-1.5 bg-mf-sybil-opacity rounded-full z-0 slide-up text-base text-mf-sybil-500 cursor-pointer border border-mf-sybil-opacity hover:border-mf-sybil-500 transition-colors hover:text-mf-edge-500">
         <button className="rounded-full cursor-pointer" onClick={onGetStarted}>
-          <span className="text-mf-sybil-500 text-base">Get Started</span>
+          <span>Get Started</span>
         </button>
       </div>
     </div>
