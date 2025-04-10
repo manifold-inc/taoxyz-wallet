@@ -65,6 +65,7 @@
   --color-mf-safety-300: #ff9b7a; /* #FF9B7A */
   --color-mf-safety-500: #ff8159; /* #FF8159 */
   --color-mf-safety-700: #d96547; /* #D96547 */
+  --color-mf-safety-opacity: #4f3736; /* #4F3736 */
 
   /* Ash Colors */
   --color-mf-ash-300: #3a3c46; /* #3A3C46 */
@@ -88,6 +89,7 @@
 
   /* Sybil Colors */
   --color-mf-sybil-500: #57e8b4; /* #56E8B4 */
+  --color-mf-sybil-opacity: #2d4b49; /* #56E8B4 */
 }
 
 body {
