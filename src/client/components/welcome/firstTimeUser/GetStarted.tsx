@@ -1,7 +1,17 @@
 import taoxyz from '@public/icons/taoxyz.svg';
 import { Info, Plus, WalletCards } from 'lucide-react';
 
+import { useState } from 'react';
+
+import Disclaimer from '@/client/components/common/Disclaimer';
+
 const GetStarted = () => {
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
+
+  if (showDisclaimer) {
+    return <Disclaimer onClose={() => setShowDisclaimer(false)} />;
+  }
+
   return (
     <div className="flex h-full w-full bg-mf-night-500 justify-center items-center relative overflow-hidden">
       {/* Logo and Text */}
@@ -27,7 +37,10 @@ const GetStarted = () => {
           </button>
         </div>
         <div className="px-2 py-1.5 rounded-full cursor-pointer">
-          <button className="rounded-full cursor-pointer flex items-center gap-1.5">
+          <button
+            className="rounded-full cursor-pointer flex items-center gap-1.5"
+            onClick={() => setShowDisclaimer(true)}
+          >
             <Info className="w-4 h-4 text-mf-ash-300" />
             <span className="text-mf-ash-300 text-sm">Disclaimer</span>
           </button>
