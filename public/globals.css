@@ -1,5 +1,5 @@
 @import 'tailwindcss';
-@import './styles/animations/transitions.css';
+@import './styles/animations/notification.css';
 @import './styles/animations/first-time-user.css';
 
 /* Poppins Font */

@@ -12,17 +12,51 @@
   animation: scale-down-center 1.75s ease-in-out forwards;
 }
 
-/* Logo Animation */
+/* Logo Animation - Slide Left */
 @keyframes slide-left {
   0% {
     transform: translateX(0);
   }
   100% {
-    transform: translateX(-100%);
+    transform: translateX(-5rem);
   }
 }
 
 .slide-left {
   animation: slide-left 1s ease-in-out forwards;
   animation-delay: 2s;
+}
+
+/* Text Animation - Slide Right */
+@keyframes slide-right {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(1.5rem);
+    opacity: 1;
+  }
+}
+
+.slide-right {
+  animation: slide-right 1s ease-in-out forwards;
+  animation-delay: 3.25s;
+  opacity: 0;
+}
+
+/* Button Animation */
+@keyframes slide-up {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-1.5rem);
+    opacity: 1;
+  }
+}
+
+.slide-up {
+  animation: slide-up 1s ease-in-out forwards;
+  animation-delay: 4.5s;
+  opacity: 0;
 }
