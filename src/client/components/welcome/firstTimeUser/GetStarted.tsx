@@ -18,8 +18,8 @@ const GetStarted = () => {
       <div className="absolute left-[calc(50%-5rem)] top-1/2 -translate-x-1/2 -translate-y-1/2">
         <img src={taoxyz} alt="Taoxyz Logo" className="h-8 w-8" />
       </div>
-      <div className="absolute left-[calc(50%+1.5rem)] top-1/2 -translate-x-1/2 -translate-y-1/2">
-        <p className="text-mf-edge-500 text-4xl font-bold font-blinker">TAO.XYZ</p>
+      <div className="absolute left-[calc(50%+0.5rem)] top-1/2 -translate-x-1/2 -translate-y-1/2">
+        <p className="text-mf-edge-500 text-4xl font-bold blinker-font">TAO.XYZ</p>
       </div>
 
       {/* Buttons */}

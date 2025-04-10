@@ -174,3 +174,8 @@ input {
 .custom-checkbox input[type='checkbox']:hover {
   cursor: pointer;
 }
+
+/* Custom Blinker Font Class */
+.blinker-font {
+  font-family: 'Blinker', sans-serif;
+}

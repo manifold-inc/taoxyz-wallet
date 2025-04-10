@@ -15,7 +15,7 @@ const Initial = ({ onGetStarted }: InitialProps) => {
         <img src={taoxyz} alt="Taoxyz Logo" className="h-8 w-8" />
       </div>
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 slide-right">
-        <p className="text-mf-edge-500 text-4xl font-bold font-blinker">TAO.XYZ</p>
+        <p className="text-mf-edge-500 text-4xl font-bold blinker-font">TAO.XYZ</p>
       </div>
 
       {/* Button Animation */}
