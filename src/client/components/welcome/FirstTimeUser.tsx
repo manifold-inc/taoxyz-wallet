@@ -9,7 +9,7 @@ enum Step {
 }
 
 const FirstTimeUser = () => {
-  const [step, setStep] = useState<Step>(Step.INITIAL);
+  const [step, setStep] = useState<Step>(Step.GET_STARTED);
 
   const handleGetStarted = () => {
     setStep(Step.GET_STARTED);

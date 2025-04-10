@@ -24,27 +24,21 @@ const GetStarted = () => {
 
       {/* Buttons */}
       <div className="absolute bottom-16 flex flex-col items-center gap-4">
-        <div className="px-6 py-1.5 bg-mf-sybil-opacity rounded-full cursor-pointer text-base text-mf-sybil-500 border border-mf-sybil-opacity hover:border-mf-sybil-500 transition-colors hover:text-mf-edge-500">
-          <button className="rounded-full cursor-pointer flex items-center gap-1.5">
-            <WalletCards className="w-4 h-4" />
-            <span>Create Wallet</span>
-          </button>
-        </div>
-        <div className="px-6 py-1.5 bg-mf-safety-opacity rounded-full cursor-pointer text-base text-mf-safety-500 border border-mf-safety-opacity hover:border-mf-safety-500 transition-colors hover:text-mf-edge-500">
-          <button className="rounded-full cursor-pointer flex items-center gap-1.5">
-            <Plus className="w-4 h-4" />
-            <span>Existing Wallet</span>
-          </button>
-        </div>
-        <div className="px-2 py-1.5 rounded-full cursor-pointer">
-          <button
-            className="rounded-full cursor-pointer flex items-center gap-1.5 text-mf-ash-300 text-sm hover:text-mf-edge-500 transition-colors"
-            onClick={() => setShowDisclaimer(true)}
-          >
-            <Info className="w-4 h-4" />
-            <span>Disclaimer</span>
-          </button>
-        </div>
+        <button className="rounded-full cursor-pointer flex items-center gap-1.5 px-8 py-1.5 bg-mf-sybil-opacity rounded-full text-base text-mf-sybil-500 cursor-pointer border border-mf-sybil-opacity hover:border-mf-sybil-500 transition-colors hover:text-mf-edge-500">
+          <WalletCards className="w-4 h-4" />
+          <span>Create Wallet</span>
+        </button>
+        <button className="rounded-full cursor-pointer flex items-center gap-1.5 px-8 py-1.5 bg-mf-safety-opacity rounded-full text-base text-mf-safety-500 cursor-pointer border border-mf-safety-opacity hover:border-mf-safety-500 transition-colors hover:text-mf-edge-500">
+          <Plus className="w-4 h-4" />
+          <span>Existing Wallet</span>
+        </button>
+        <button
+          className="rounded-full cursor-pointer flex items-center gap-1.5 text-mf-ash-300 text-sm hover:text-mf-edge-500 transition-colors"
+          onClick={() => setShowDisclaimer(true)}
+        >
+          <Info className="w-4 h-4" />
+          <span>Disclaimer</span>
+        </button>
       </div>
     </div>
   );
