@@ -29,6 +29,7 @@
     "@polkadot/extension-dapp": "^0.58.4",
     "@polkadot/types": "^15.7.1",
     "@polkadot/ui-keyring": "^3.12.2",
+    "framer-motion": "^12.6.3",
     "react-router-dom": "^7.2.0",
     "recharts": "^2.15.1"
   },
