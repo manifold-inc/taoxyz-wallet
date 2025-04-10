@@ -1,5 +1,5 @@
 import taoxyz from '@public/icons/taoxyz.svg';
-import { Info, Send, X } from 'lucide-react';
+import { X } from 'lucide-react';
 
 interface DisclaimerProps {
   onClose: () => void;
@@ -43,18 +43,6 @@ const Disclaimer = ({ onClose }: DisclaimerProps) => {
             <span className="underline">devs@manifoldlabs.inc</span>
           </li>
         </ul>
-      </div>
-
-      {/* Contact Us Buttons */}
-      <div className="flex flex-col gap-4 flex flex-col items-center px-10">
-        <button className="rounded-full px-8 py-1.5 bg-mf-sybil-opacity text-base text-mf-sybil-500 cursor-pointer border border-mf-sybil-opacity hover:border-mf-sybil-500 transition-colors hover:text-mf-edge-500">
-          <Send className="w-4 h-4" />
-          <span>Email Us</span>
-        </button>
-        <button className="rounded-full px-8 py-1.5 bg-mf-safety-opacity text-base text-mf-safety-500 cursor-pointer border border-mf-safety-opacity hover:border-mf-safety-500 transition-colors hover:text-mf-edge-500">
-          <Info className="w-4 h-4" />
-          <span>Report Issue</span>
-        </button>
       </div>
     </div>
   );
