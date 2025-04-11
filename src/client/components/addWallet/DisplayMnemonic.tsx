@@ -42,7 +42,7 @@ const DisplayMnemonic = ({ mnemonic, wallet, onContinue }: DisplayMnemonicProps)
 
   const handleBack = (): void => {
     KeyringService.deleteWallet(wallet.address);
-    navigate('/welcome');
+    navigate('/welcome', { state: { step: 'GET_STARTED' } });
   };
 
   return (

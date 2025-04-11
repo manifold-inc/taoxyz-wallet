@@ -153,7 +153,7 @@ const WalletSelection = () => {
               ))}
 
             <button
-              onClick={() => navigate('/welcome')}
+              onClick={() => navigate('/welcome', { state: { step: 'GET_STARTED' } })}
               className="w-full flex items-center gap-3 p-2 hover:bg-mf-night-500 transition-colors cursor-pointer"
             >
               <div className="flex items-center justify-center bg-mf-safety-500 border border-mf-safety-500 rounded-sm p-1">

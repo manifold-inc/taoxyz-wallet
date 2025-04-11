@@ -110,7 +110,7 @@ const CreateWallet = ({ onSuccess }: CreateWalletProps) => {
   };
 
   const handleBack = (): void => {
-    navigate('/welcome');
+    navigate('/welcome', { state: { step: 'GET_STARTED' } });
   };
 
   return (

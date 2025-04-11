@@ -70,7 +70,7 @@ const MnemonicVerify = ({ mnemonic, wallet, onContinue }: MnemonicVerifyProps) =
 
   const handleBack = (): void => {
     KeyringService.deleteWallet(wallet.address);
-    navigate('/welcome');
+    navigate('/welcome', { state: { step: 'GET_STARTED' } });
   };
 
   return (

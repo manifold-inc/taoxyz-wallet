@@ -87,7 +87,7 @@ const ImportMnemonic = ({ onContinue }: ImportMnemonicProps) => {
   };
 
   const handleBack = (): void => {
-    navigate('/welcome');
+    navigate('/welcome', { state: { step: 'GET_STARTED' } });
   };
 
   return (
