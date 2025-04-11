@@ -19,6 +19,8 @@ const MnemonicVerify = ({ mnemonic, wallet, onContinue }: MnemonicVerifyProps) =
   const navigate = useNavigate();
   const { showNotification } = useNotification();
   const [inputMnemonic, setInputMnemonic] = useState('');
+  const [inputMnemonicSelected, setInputMnemonicSelected] = useState(false);
+  const [inputMnemonicStatus, setInputMnemonicStatus] = useState<string | null>(null);
 
   useEffect(() => {
     showNotification({
@@ -43,9 +45,22 @@ const MnemonicVerify = ({ mnemonic, wallet, onContinue }: MnemonicVerifyProps) =
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleMnemonicChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     setInputMnemonic(value);
+
+    if (!value.trim()) {
+      setInputMnemonicStatus('Recovery Phrase is Required');
+      return;
+    }
+
+    const wordCount = value.trim().split(/\s+/).length;
+    if (wordCount !== 12) {
+      setInputMnemonicStatus('Recovery Phrase Must Be 12 Words');
+      return;
+    }
+
+    setInputMnemonicStatus(null);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -66,13 +81,20 @@ const MnemonicVerify = ({ mnemonic, wallet, onContinue }: MnemonicVerifyProps) =
       <div className="relative">
         <textarea
           value={inputMnemonic}
-          onChange={handleInputChange}
+          onChange={handleMnemonicChange}
+          onFocus={() => setInputMnemonicSelected(true)}
+          onBlur={() => setInputMnemonicSelected(false)}
           className={`p-3 h-36 text-base rounded-sm bg-mf-night-300 border-mf-night-300 text-mf-edge-700 border-2 focus:outline-none w-full resize-none focus:border-mf-safety-500`}
           placeholder="Enter Your Recovery Phrase"
         />
+        <div className="h-8">
+          <p hidden={!inputMnemonicSelected} className={'pt-1.5 text-xs text-mf-safety-500'}>
+            {inputMnemonicStatus}
+          </p>
+        </div>
       </div>
 
-      <div className="flex flex-col items-center pt-4">
+      <div className="flex flex-col items-center gap-3 pt-4">
         <motion.button
           onClick={handleBack}
           className="cursor-pointer flex items-center gap-1.5 px-6 py-1 bg-mf-safety-opacity rounded-full text-sm text-mf-safety-500 border border-mf-safety-opacity hover:border-mf-safety-500 transition-colors hover:text-mf-edge-500"

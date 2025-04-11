@@ -65,7 +65,7 @@ const DisplayMnemonic = ({ mnemonic, wallet, onContinue }: DisplayMnemonicProps)
         </button>
       </div>
       <div className="h-8">
-        <p className={`pt-1 text-xs ${copied ? 'text-mf-sybil-500' : 'text-mf-safety-500'}`}>
+        <p className={`pt-1.5 text-xs ${copied ? 'text-mf-sybil-500' : 'text-mf-safety-500'}`}>
           Save and Store in a Secure Location
         </p>
       </div>
