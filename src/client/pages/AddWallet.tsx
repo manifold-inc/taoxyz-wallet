@@ -29,32 +29,15 @@ interface AddWalletState {
 const getStepTitle = (mode: Mode) => {
   switch (mode) {
     case Mode.SELECT:
-      return 'Add Wallet';
+      return 'ADD WALLET';
     case Mode.CREATE_WALLET:
-      return 'Create New Wallet';
+      return 'CREATE WALLET';
     case Mode.IMPORT_WALLET:
-      return 'Import Wallet';
+      return 'IMPORT WALLET';
     case Mode.DISPLAY_MNEMONIC:
-      return 'Backup Phrase';
+      return 'BACKUP PHRASE';
     case Mode.IMPORT_MNEMONIC:
-      return 'Import Mnemonic';
-    default:
-      return '';
-  }
-};
-
-const getStepSubtext = (mode: Mode) => {
-  switch (mode) {
-    case Mode.SELECT:
-      return 'Choose how to add a wallet';
-    case Mode.CREATE_WALLET:
-      return 'Set up your new wallet';
-    case Mode.IMPORT_WALLET:
-      return 'Import your existing wallet';
-    case Mode.DISPLAY_MNEMONIC:
-      return 'Save your backup phrase';
-    case Mode.IMPORT_MNEMONIC:
-      return 'Enter your backup phrase';
+      return 'IMPORT MNEMONIC';
     default:
       return '';
   }
@@ -136,7 +119,6 @@ const AddWallet = () => {
       <div className="flex flex-col items-center justify-center">
         <img src={taoxyz} alt="Taoxyz Logo" className="w-8 h-8" />
         <p className="text-mf-edge-500 text-2xl font-bold blinker-font">{getStepTitle(mode)}</p>
-        <p className="text-mf-edge-500 text-base">{getStepSubtext(mode)}</p>
       </div>
 
       {/* Content */}
