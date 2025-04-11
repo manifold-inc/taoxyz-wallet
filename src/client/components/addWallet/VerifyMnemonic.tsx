@@ -45,7 +45,7 @@ const MnemonicVerify = ({ mnemonic, wallet, onContinue }: MnemonicVerifyProps) =
     showNotification({
       type: NotificationType.Info,
       title: 'Verify Recovery Phrase',
-      message: 'Enter your recovery phrase for verification',
+      message: 'Enter your recovery phrase',
       duration: 5000,
     });
   }, []);
@@ -59,7 +59,7 @@ const MnemonicVerify = ({ mnemonic, wallet, onContinue }: MnemonicVerifyProps) =
         <textarea
           value={inputMnemonic}
           onChange={handleInputChange}
-          className={`p-3 h-36 text-base rounded-sm bg-mf-night-300 border-mf-night-300 text-mf-edge-700 border-2 focus:outline-none w-full resize-none`}
+          className={`p-3 h-36 text-base rounded-sm bg-mf-night-300 border-mf-night-300 text-mf-edge-700 border-2 focus:outline-none w-full resize-none focus:border-mf-safety-500`}
           placeholder="Enter Your Recovery Phrase"
         />
       </div>

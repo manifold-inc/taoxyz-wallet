@@ -65,9 +65,6 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
     };
 
     setNotifications(prev => [...prev, notification]);
-    setTimeout(() => {
-      dismissNotification(notification);
-    }, notification.duration + 500);
   }, []);
 
   const dismissNotification = useCallback((notification: Notification) => {

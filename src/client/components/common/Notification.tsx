@@ -27,7 +27,9 @@ const Notification = ({
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsVisible(false);
-      setTimeout(() => onDismiss(), 500);
+      setTimeout(() => {
+        onDismiss();
+      }, 500);
     }, duration);
     return () => clearTimeout(timer);
   }, [duration, onDismiss]);
