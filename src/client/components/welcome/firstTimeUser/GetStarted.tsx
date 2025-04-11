@@ -8,6 +8,7 @@ import Disclaimer from '@/client/components/common/Disclaimer';
 
 const GetStarted = () => {
   const [showDisclaimer, setShowDisclaimer] = useState(false);
+  const [showWalletText, setShowWalletText] = useState(false);
 
   return (
     <div className="flex h-full w-full bg-mf-night-500 justify-center items-center relative overflow-hidden">
@@ -17,13 +18,47 @@ const GetStarted = () => {
         animate={{ opacity: showDisclaimer ? 0.5 : 1 }}
         transition={{ duration: 0.3 }}
       >
-        {/* Logo and Text */}
-        <div className="absolute left-[calc(50%-5rem)] top-1/2 -translate-x-1/2 -translate-y-1/2">
+        {/* Logo */}
+        <motion.div
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
+          initial={{ y: 0, x: -80, scale: 1 }}
+          animate={{ y: -50, x: -120, scale: 0.9 }}
+          transition={{ duration: 1, ease: 'easeInOut' }}
+        >
           <img src={taoxyz} alt="Taoxyz Logo" className="h-8 w-8" />
-        </div>
-        <div className="absolute left-[calc(50%+0.5rem)] top-1/2 -translate-x-1/2 -translate-y-1/2">
-          <p className="text-mf-edge-500 text-4xl font-bold blinker-font">TAO.XYZ</p>
-        </div>
+        </motion.div>
+
+        {/* Text */}
+        <motion.div
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
+          initial={{ y: -2, x: 8, scale: 1 }}
+          animate={{ y: -52, x: -40, scale: 0.9 }}
+          transition={{ duration: 1, ease: 'easeInOut', onComplete: () => setShowWalletText(true) }}
+        >
+          <div className="relative">
+            <span className="text-mf-edge-500 text-4xl font-bold blinker-font">TAO.XYZ</span>
+            <motion.span
+              className="absolute left-full ml-2 text-mf-edge-500 text-4xl font-bold blinker-font"
+              initial={{ opacity: 0 }}
+              animate={{
+                opacity: showWalletText ? 1 : 0,
+              }}
+              transition={{ duration: 1 }}
+            >
+              WALLET
+            </motion.span>
+          </div>
+        </motion.div>
+
+        {/* Subtitle */}
+        <motion.p
+          className="text-mf-sybil-500 text-base font-light text-center px-12"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 5 }}
+          transition={{ delay: 0.5, duration: 1 }}
+        >
+          To get started, create a new wallet or import an existing one.
+        </motion.p>
 
         {/* Buttons */}
         <motion.div

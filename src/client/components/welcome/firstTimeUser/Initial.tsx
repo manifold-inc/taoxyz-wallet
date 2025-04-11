@@ -28,7 +28,7 @@ const Initial = ({ onGetStarted }: InitialProps) => {
 
       <motion.div
         className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
-        initial={{ x: 0, opacity: 0 }}
+        initial={{ x: 0, y: -2, opacity: 0 }}
         animate={{ x: 8, opacity: 1 }}
         transition={{ duration: 1, ease: 'easeInOut', delay: 3.25 }}
       >
@@ -42,12 +42,14 @@ const Initial = ({ onGetStarted }: InitialProps) => {
         animate={{ y: -24, opacity: 1 }}
         transition={{ duration: 1, ease: 'easeInOut', delay: 4.5 }}
       >
-        <button
-          className="rounded-full px-8 py-1.5 bg-mf-sybil-opacity text-base text-mf-sybil-500 cursor-pointer border border-mf-sybil-opacity hover:border-mf-sybil-500 transition-colors hover:text-mf-edge-500"
+        <motion.button
+          className="rounded-full px-6 py-1 bg-mf-sybil-opacity text-sm text-mf-sybil-500 cursor-pointer border border-mf-sybil-opacity hover:border-mf-sybil-500 transition-colors hover:text-mf-edge-500"
           onClick={onGetStarted}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
           <span>Get Started</span>
-        </button>
+        </motion.button>
       </motion.div>
     </div>
   );
