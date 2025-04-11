@@ -1,18 +1,31 @@
-import { useState } from "react";
-import { Copy } from "lucide-react";
-import type { KeyringPair } from "@polkadot/keyring/types";
+import { motion } from 'framer-motion';
+import { Copy } from 'lucide-react';
+
+import { useEffect, useState } from 'react';
+
+import type { KeyringPair } from '@polkadot/keyring/types';
+
+import { useNotification } from '@/client/contexts/NotificationContext';
+import { NotificationType } from '@/types/client';
+
 interface MnemonicDisplayProps {
   mnemonic: string;
   wallet: KeyringPair;
   onContinue: (wallet: KeyringPair) => void;
 }
 
-const MnemonicDisplay = ({
-  mnemonic,
-  wallet,
-  onContinue,
-}: MnemonicDisplayProps) => {
+const MnemonicDisplay = ({ mnemonic, wallet, onContinue }: MnemonicDisplayProps) => {
+  const { showNotification } = useNotification();
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    showNotification({
+      type: NotificationType.Warning,
+      title: 'Safely Secure Passphrase',
+      message: 'Cannot recover wallet without it',
+      autoHide: false,
+    });
+  }, []);
 
   const handleCopyMnemonic = async (): Promise<void> => {
     await navigator.clipboard.writeText(mnemonic);
@@ -21,43 +34,39 @@ const MnemonicDisplay = ({
   };
 
   return (
-    <div className="flex flex-col items-center justify-center mt-8 w-64 [&>*]:w-full">
+    <div className="flex flex-col items-center justify-center w-full px-12 [&>*]:w-full">
       <div className="relative">
         <textarea
           value={mnemonic}
           readOnly
-          className={`p-3 h-36 text-base rounded-sm bg-mf-ash-300 text-mf-milk-300 border-2 border-mf-ash-300 focus:outline-none w-full resize-none ${
-            copied ? "border-mf-sybil-500" : "border-mf-safety-500"
+          className={`cursor-not-allowed p-3 h-36 text-base rounded-sm bg-mf-night-300 text-mf-edge-700 border-2 border-mf-night-300 focus:outline-none w-full resize-none ${
+            copied ? 'border-mf-sybil-500' : 'border-mf-safety-500'
           }`}
         />
         <button
           onClick={handleCopyMnemonic}
-          className={`absolute right-2 bottom-3 transition-colors cursor-pointer bg-mf-ash-300 ${
-            copied ? "text-mf-sybil-500" : "text-mf-safety-500"
+          className={`absolute right-2 bottom-3 transition-colors cursor-pointer bg-mf-night-300 ${
+            copied ? 'text-mf-sybil-500' : 'text-mf-safety-500'
           }`}
         >
           <Copy className="w-4 h-4" />
         </button>
       </div>
       <div>
-        <p
-          className={`mt-2 text-xs ${
-            copied ? "text-mf-sybil-500" : "text-mf-safety-500"
-          }`}
-        >
-          {copied
-            ? "Copied Recovery Phrase"
-            : "Save and Store in a Secure Location"}
+        <p className={`pt-1 text-xs ${copied ? 'text-mf-sybil-500' : 'text-mf-safety-500'}`}>
+          {copied ? 'Copied Recovery Phrase' : 'Save and Store in a Secure Location'}
         </p>
       </div>
 
-      <div className="flex flex-col items-center mt-8">
-        <button
+      <div className="flex flex-col items-center pt-4">
+        <motion.button
           onClick={() => onContinue(wallet)}
-          className="w-44 border-sm text-sm text-mf-night-500 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 transition-colors p-1.5 cursor-pointer"
+          className="cursor-pointer flex items-center gap-1.5 px-6 py-1 bg-mf-sybil-opacity rounded-full text-sm text-mf-sybil-500 border border-mf-sybil-opacity hover:border-mf-sybil-500 transition-colors hover:text-mf-edge-500"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
           <span>Continue</span>
-        </button>
+        </motion.button>
       </div>
     </div>
   );

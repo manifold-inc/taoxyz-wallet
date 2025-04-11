@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { CheckCircle, Info, Loader, XCircle } from 'lucide-react';
+import { CheckCircle, Info, Loader, TriangleAlert, XCircle } from 'lucide-react';
 
 import { useEffect } from 'react';
 
@@ -33,6 +33,24 @@ const Notification = ({
     }
   }, [show, autoHide, onDismiss]);
 
+  const getIcon = (type: NotificationType) => {
+    switch (type) {
+      case NotificationType.Pending:
+      case NotificationType.InBlock:
+        return <Loader className="w-6 h-6 animate-spin text-mf-edge-500" />;
+      case NotificationType.Success:
+        return <CheckCircle className="w-6 h-6 text-mf-sybil-500" />;
+      case NotificationType.Info:
+        return <Info className="w-6 h-6 text-mf-safety-500" />;
+      case NotificationType.Error:
+        return <XCircle className="w-6 h-6 text-mf-safety-500" />;
+      case NotificationType.Warning:
+        return <TriangleAlert className="w-6 h-6 text-mf-safety-500" />;
+      default:
+        return <Info className="w-6 h-6 text-mf-edge-500" />;
+    }
+  };
+
   const getMessageColor = (type: NotificationType) => {
     switch (type) {
       case NotificationType.Pending:
@@ -42,6 +60,7 @@ const Notification = ({
         return 'text-mf-sybil-500';
       case NotificationType.Info:
       case NotificationType.Error:
+      case NotificationType.Warning:
         return 'text-mf-safety-500';
       default:
         return 'text-mf-edge-500';
@@ -79,17 +98,7 @@ const Notification = ({
               </div>
 
               {/* Icon */}
-              <div className="flex items-center">
-                {type === NotificationType.Pending || type === NotificationType.InBlock ? (
-                  <Loader className="w-6 h-6 animate-spin text-mf-edge-500" />
-                ) : type === NotificationType.Success ? (
-                  <CheckCircle className="w-6 h-6 text-mf-sybil-500" />
-                ) : type === NotificationType.Info ? (
-                  <Info className="w-6 h-6 text-mf-safety-500" />
-                ) : (
-                  <XCircle className="w-6 h-6 text-mf-safety-500" />
-                )}
-              </div>
+              <div className="flex items-center">{getIcon(type)}</div>
             </div>
           </motion.div>
         </motion.div>

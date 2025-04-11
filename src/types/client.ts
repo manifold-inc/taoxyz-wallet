@@ -72,6 +72,7 @@ export type PermissionsPerWebsite = Record<
 
 export enum NotificationType {
   Info = 'info',
+  Warning = 'warning',
   Error = 'error',
   Pending = 'pending',
   InBlock = 'inBlock',
