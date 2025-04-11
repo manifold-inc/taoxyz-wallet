@@ -6,9 +6,9 @@ import type { KeyringPair } from '@polkadot/keyring/types';
 import taoxyz from '../../../public/icons/taoxyz.svg';
 import { NotificationType } from '../../types/client';
 import CreateWallet from '../components/addWallet/CreateWallet';
+import DisplayMnemonic from '../components/addWallet/DisplayMnemonic';
+import ImportMnemonic from '../components/addWallet/ImportMnemonic';
 import ImportWallet from '../components/addWallet/ImportWallet';
-import MnemonicDisplay from '../components/addWallet/MnemonicDisplay';
-import MnemonicImport from '../components/addWallet/MnemonicImport';
 import MnemonicVerify from '../components/addWallet/VerifyMnemonic';
 import { useLock } from '../contexts/LockContext';
 import { useNotification } from '../contexts/NotificationContext';
@@ -105,7 +105,7 @@ const AddWallet = () => {
           return null;
         }
         return (
-          <MnemonicDisplay mnemonic={mnemonic} onContinue={handleDisplayMnemonic} wallet={wallet} />
+          <DisplayMnemonic mnemonic={mnemonic} onContinue={handleDisplayMnemonic} wallet={wallet} />
         );
 
       case Mode.VERIFY_MNEMONIC:
@@ -119,7 +119,7 @@ const AddWallet = () => {
         return <MnemonicVerify mnemonic={mnemonic} onContinue={handleContinue} wallet={wallet} />;
 
       case Mode.IMPORT_MNEMONIC:
-        return <MnemonicImport onContinue={handleImportMnemonic} />;
+        return <ImportMnemonic onContinue={handleImportMnemonic} />;
 
       default:
         return null;

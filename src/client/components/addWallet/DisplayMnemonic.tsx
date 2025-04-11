@@ -10,13 +10,13 @@ import { useNotification } from '@/client/contexts/NotificationContext';
 import KeyringService from '@/client/services/KeyringService';
 import { NotificationType } from '@/types/client';
 
-interface MnemonicDisplayProps {
+interface DisplayMnemonicProps {
   mnemonic: string;
   wallet: KeyringPair;
   onContinue: (wallet: KeyringPair) => void;
 }
 
-const MnemonicDisplay = ({ mnemonic, wallet, onContinue }: MnemonicDisplayProps) => {
+const DisplayMnemonic = ({ mnemonic, wallet, onContinue }: DisplayMnemonicProps) => {
   const navigate = useNavigate();
   const { showNotification } = useNotification();
   const [copied, setCopied] = useState(false);
@@ -92,4 +92,4 @@ const MnemonicDisplay = ({ mnemonic, wallet, onContinue }: MnemonicDisplayProps)
   );
 };
 
-export default MnemonicDisplay;
+export default DisplayMnemonic;

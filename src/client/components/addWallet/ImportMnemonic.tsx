@@ -7,11 +7,11 @@ import { NotificationType } from '../../../types/client';
 import { useNotification } from '../../contexts/NotificationContext';
 import KeyringService from '../../services/KeyringService';
 
-interface MnemonicImportProps {
+interface ImportMnemonicProps {
   onContinue: (mnemonic: string) => void;
 }
 
-const MnemonicImport = ({ onContinue }: MnemonicImportProps) => {
+const ImportMnemonic = ({ onContinue }: ImportMnemonicProps) => {
   const navigate = useNavigate();
   const { showNotification } = useNotification();
   const [mnemonic, setMnemonic] = useState('');
@@ -134,4 +134,4 @@ const MnemonicImport = ({ onContinue }: MnemonicImportProps) => {
   );
 };
 
-export default MnemonicImport;
+export default ImportMnemonic;
