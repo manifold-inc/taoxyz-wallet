@@ -1,33 +1,28 @@
-import { useEffect } from "react";
-import {
-  HashRouter,
-  Routes,
-  Route,
-  Navigate,
-  useLocation,
-} from "react-router-dom";
+import { useEffect } from 'react';
+import { HashRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 
-import { PolkadotApiProvider } from "./contexts/PolkadotApiContext";
-import { LockProvider, useLock } from "./contexts/LockContext";
-import { WalletProvider } from "./contexts/WalletContext";
-import { NotificationProvider } from "./contexts/NotificationContext";
-import MessageService from "./services/MessageService";
-import Dashboard from "./pages/Dashboard";
-import AddStake from "./pages/AddStake";
-import MoveStake from "./pages/MoveStake";
-import Transfer from "./pages/Transfer";
-import Settings from "./pages/Settings";
-import Welcome from "./pages/Welcome";
-import AddWallet from "./pages/AddWallet";
-import ProtectedRoute from "./components/ProtectedRoute";
-import Connect from "./components/popups/Connect";
-import Sign from "./components/popups/Sign";
-import Navigation from "./components/Navigation";
+import Navigation from './components/Navigation';
+import ProtectedRoute from './components/ProtectedRoute';
+import Connect from './components/popups/Connect';
+import Sign from './components/popups/Sign';
+import { LockProvider, useLock } from './contexts/LockContext';
+import { NotificationProvider } from './contexts/NotificationContext';
+import { PolkadotApiProvider } from './contexts/PolkadotApiContext';
+import { WalletProvider } from './contexts/WalletContext';
+import { WalletCreationProvider } from './contexts/WalletCreationContext';
+import AddStake from './pages/AddStake';
+import AddWallet from './pages/AddWallet';
+import Dashboard from './pages/Dashboard';
+import MoveStake from './pages/MoveStake';
+import Settings from './pages/Settings';
+import Transfer from './pages/Transfer';
+import Welcome from './pages/Welcome';
+import MessageService from './services/MessageService';
 
 const Content = () => {
   const { isLocked } = useLock();
   const location = useLocation();
-  const publicRoutes = ["/connect", "/sign", "/add-wallet", "/welcome"];
+  const publicRoutes = ['/connect', '/sign', '/add-wallet', '/welcome'];
 
   return (
     <div className="flex flex-col items-center min-h-screen">
@@ -107,7 +102,9 @@ const App = () => {
         <LockProvider>
           <WalletProvider>
             <NotificationProvider>
-              <Content />
+              <WalletCreationProvider>
+                <Content />
+              </WalletCreationProvider>
             </NotificationProvider>
           </WalletProvider>
         </LockProvider>

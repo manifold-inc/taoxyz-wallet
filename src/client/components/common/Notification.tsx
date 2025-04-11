@@ -78,7 +78,7 @@ const Notification = ({
           exit={{ y: -100, opacity: 0 }}
           transition={{
             duration: 0.5,
-            ease: 'easeOut',
+            ease: 'easeInOut',
           }}
         >
           <motion.div className="w-full mx-10 bg-mf-ash-500 px-4 py-3 rounded-sm shadow-lg">

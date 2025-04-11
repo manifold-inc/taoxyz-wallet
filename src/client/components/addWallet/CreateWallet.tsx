@@ -7,6 +7,7 @@ import type { KeyringPair } from '@polkadot/keyring/types';
 
 import { NotificationType } from '../../../types/client';
 import { useNotification } from '../../contexts/NotificationContext';
+import { useWalletCreation } from '../../contexts/WalletCreationContext';
 import KeyringService from '../../services/KeyringService';
 
 interface CreateWalletProps {
@@ -16,6 +17,7 @@ interface CreateWalletProps {
 const CreateWallet = ({ onSuccess }: CreateWalletProps) => {
   const navigate = useNavigate();
   const { showNotification } = useNotification();
+  const { actions } = useWalletCreation();
   const [password, setPassword] = useState('');
   const [nameSelected, setNameSelected] = useState(false);
   const [passwordSelected, setPasswordSelected] = useState(false);
@@ -32,11 +34,15 @@ const CreateWallet = ({ onSuccess }: CreateWalletProps) => {
   });
 
   useEffect(() => {
-    showNotification({
-      type: NotificationType.Info,
-      title: `Named ${getWalletName()} by Default`,
-      message: 'Edit to Rename Wallet',
-    });
+    const timer = setTimeout(() => {
+      showNotification({
+        type: NotificationType.Info,
+        title: `Named ${getWalletName()} by Default`,
+        message: 'Edit to Rename Wallet',
+      });
+    }, 1250);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const getWalletNameColor = (): string => {
@@ -106,6 +112,8 @@ const CreateWallet = ({ onSuccess }: CreateWalletProps) => {
       });
       return;
     }
+    actions.setMnemonic(mnemonic);
+    actions.setWallet(wallet);
     await onSuccess(wallet, mnemonic);
   };
 

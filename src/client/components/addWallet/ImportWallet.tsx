@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 
 import type { KeyringPair } from '@polkadot/keyring/types';
@@ -10,13 +11,14 @@ import { useNotification } from '../../contexts/NotificationContext';
 import KeyringService from '../../services/KeyringService';
 
 interface ImportWalletProps {
-  mnemonic: string;
   onSuccess: (wallet: KeyringPair) => Promise<void>;
 }
 
-const ImportWallet = ({ mnemonic, onSuccess }: ImportWalletProps) => {
-  const navigate = useNavigate();
+const ImportWallet = ({ onSuccess }: ImportWalletProps) => {
+  const location = useLocation();
   const { showNotification } = useNotification();
+  const mnemonic = location.state?.mnemonic;
+  const navigate = useNavigate();
   const [password, setPassword] = useState('');
   const [nameSelected, setNameSelected] = useState(false);
   const [passwordSelected, setPasswordSelected] = useState(false);
@@ -94,11 +96,15 @@ const ImportWallet = ({ mnemonic, onSuccess }: ImportWalletProps) => {
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
-    if (!validateName(name) || !validatePassword(password)) {
+    if (!mnemonic) {
+      showNotification({
+        type: NotificationType.Error,
+        message: 'No mnemonic provided',
+      });
       return;
     }
 
-    const wallet = await KeyringService.addWallet(mnemonic, name, password);
+    const wallet = await KeyringService.addWallet(mnemonic, 'Imported Wallet', '');
     if (wallet instanceof Error) {
       showNotification({
         type: NotificationType.Error,

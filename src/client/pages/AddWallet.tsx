@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import type { KeyringPair } from '@polkadot/keyring/types';
@@ -13,15 +14,8 @@ import MnemonicVerify from '../components/addWallet/VerifyMnemonic';
 import { useLock } from '../contexts/LockContext';
 import { useNotification } from '../contexts/NotificationContext';
 import { useWallet } from '../contexts/WalletContext';
+import { Mode, WalletCreationProvider, useWalletCreation } from '../contexts/WalletCreationContext';
 import MessageService from '../services/MessageService';
-
-enum Mode {
-  CREATE_WALLET = 'CREATE_WALLET',
-  IMPORT_WALLET = 'IMPORT_WALLET',
-  DISPLAY_MNEMONIC = 'DISPLAY_MNEMONIC',
-  IMPORT_MNEMONIC = 'IMPORT_MNEMONIC',
-  VERIFY_MNEMONIC = 'VERIFY_MNEMONIC',
-}
 
 const getStepTitle = (mode: Mode) => {
   switch (mode) {
@@ -40,30 +34,27 @@ const getStepTitle = (mode: Mode) => {
   }
 };
 
-const AddWallet = () => {
+const AddWalletContent = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { showNotification } = useNotification();
   const { setIsLocked } = useLock();
   const { setCurrentAddress } = useWallet();
-  const [mnemonic, setMnemonic] = useState<string>('');
-  const [mode, setMode] = useState<Mode>(location.state.mode);
-  const [wallet, setWallet] = useState<KeyringPair | null>(null);
+  const { state, actions } = useWalletCreation();
 
   const handleImportMnemonic = (mnemonic: string) => {
-    setMnemonic(mnemonic);
-    setMode(Mode.IMPORT_WALLET);
+    actions.setMnemonic(mnemonic);
+    actions.setMode(Mode.IMPORT_WALLET);
   };
 
   const handleCreateWallet = async (wallet: KeyringPair, mnemonic: string): Promise<void> => {
-    setMnemonic(mnemonic);
-    setWallet(wallet);
-    setMode(Mode.DISPLAY_MNEMONIC);
+    actions.setMnemonic(mnemonic);
+    actions.setWallet(wallet);
+    actions.setMode(Mode.DISPLAY_MNEMONIC);
   };
 
   const handleDisplayMnemonic = async (wallet: KeyringPair): Promise<void> => {
-    setWallet(wallet);
-    setMode(Mode.VERIFY_MNEMONIC);
+    actions.setWallet(wallet);
+    actions.setMode(Mode.VERIFY_MNEMONIC);
   };
 
   const handleContinue = async (wallet: KeyringPair): Promise<void> => {
@@ -82,15 +73,25 @@ const AddWallet = () => {
   };
 
   const renderContent = () => {
-    switch (mode) {
+    switch (state.mode) {
       case Mode.CREATE_WALLET:
         return <CreateWallet onSuccess={handleCreateWallet} />;
 
       case Mode.IMPORT_WALLET:
-        return <ImportWallet onSuccess={handleContinue} mnemonic={mnemonic} />;
+        return <ImportWallet onSuccess={handleContinue} />;
 
       case Mode.DISPLAY_MNEMONIC:
-        if (!wallet) {
+        if (!state.wallet) {
+          showNotification({
+            type: NotificationType.Error,
+            message: 'Could Not Find Wallet',
+          });
+          return null;
+        }
+        return <DisplayMnemonic onContinue={handleDisplayMnemonic} wallet={state.wallet} />;
+
+      case Mode.VERIFY_MNEMONIC:
+        if (!state.wallet) {
           showNotification({
             type: NotificationType.Error,
             message: 'Could Not Find Wallet',
@@ -98,18 +99,12 @@ const AddWallet = () => {
           return null;
         }
         return (
-          <DisplayMnemonic mnemonic={mnemonic} onContinue={handleDisplayMnemonic} wallet={wallet} />
+          <MnemonicVerify
+            onContinue={handleContinue}
+            wallet={state.wallet}
+            mnemonic={state.mnemonic}
+          />
         );
-
-      case Mode.VERIFY_MNEMONIC:
-        if (!wallet) {
-          showNotification({
-            type: NotificationType.Error,
-            message: 'Could Not Find Wallet',
-          });
-          return null;
-        }
-        return <MnemonicVerify mnemonic={mnemonic} onContinue={handleContinue} wallet={wallet} />;
 
       case Mode.IMPORT_MNEMONIC:
         return <ImportMnemonic onContinue={handleImportMnemonic} />;
@@ -120,16 +115,40 @@ const AddWallet = () => {
   };
 
   return (
-    <div className="w-full h-full bg-mf-night-500 flex flex-col justify-center items-center pt-32 gap-10">
-      {/* Header */}
-      <div className="flex flex-col items-center justify-center gap-3">
-        <img src={taoxyz} alt="Taoxyz Logo" className="w-8 h-8" />
-        <p className="text-mf-edge-500 text-2xl font-bold blinker-font">{getStepTitle(mode)}</p>
-      </div>
+    <div className="w-full h-full bg-mf-night-500 flex flex-col justify-end items-center overflow-hidden">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={state.mode}
+          className="flex flex-col items-center justify-center w-full gap-10 absolute top-32"
+          initial={{ y: '100vh', opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: '-100vh', opacity: 0 }}
+          transition={{ duration: 1, ease: 'easeInOut' }}
+        >
+          {/* Header */}
+          <div className="flex flex-col items-center justify-center gap-3">
+            <img src={taoxyz} alt="Taoxyz Logo" className="w-8 h-8" />
+            <p className="text-mf-edge-500 text-2xl font-bold blinker-font">
+              {getStepTitle(state.mode)}
+            </p>
+          </div>
 
-      {/* Content */}
-      <div className="flex flex-col flex-1 w-full">{renderContent()}</div>
+          {/* Content */}
+          <div className="flex flex-col flex-1 w-full">{renderContent()}</div>
+        </motion.div>
+      </AnimatePresence>
     </div>
+  );
+};
+
+const AddWallet = () => {
+  const location = useLocation();
+  const initialMode = location.state?.mode || Mode.CREATE_WALLET;
+
+  return (
+    <WalletCreationProvider initialMode={initialMode}>
+      <AddWalletContent />
+    </WalletCreationProvider>
   );
 };
 
