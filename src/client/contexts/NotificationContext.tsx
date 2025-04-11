@@ -39,21 +39,36 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
       case NotificationType.Info:
         defaultTitle = 'Info';
         break;
+      case NotificationType.Warning:
+        defaultTitle = 'Warning';
+        break;
+      default:
+        defaultTitle = 'Unknown';
+        break;
     }
 
     let defaultMessage = '';
     switch (params.type) {
       case NotificationType.Pending:
-        defaultMessage = 'Transaction submitted to network';
+        defaultMessage = 'Pending';
         break;
       case NotificationType.InBlock:
-        defaultMessage = 'Transaction included in block';
+        defaultMessage = 'In Block';
         break;
       case NotificationType.Success:
-        defaultMessage = 'Transaction finalized';
+        defaultMessage = 'Success';
         break;
       case NotificationType.Error:
-        defaultMessage = 'Transaction failed';
+        defaultMessage = 'Error';
+        break;
+      case NotificationType.Info:
+        defaultMessage = 'Info';
+        break;
+      case NotificationType.Warning:
+        defaultMessage = 'Warning';
+        break;
+      default:
+        defaultMessage = 'Unknown';
         break;
     }
 

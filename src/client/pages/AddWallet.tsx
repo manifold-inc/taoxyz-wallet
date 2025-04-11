@@ -91,7 +91,7 @@ const AddWallet = () => {
   const renderContent = () => {
     switch (mode) {
       case Mode.CREATE_WALLET:
-        return <CreateWallet onSuccess={handleCreateWallet} onBack={() => navigate('/welcome')} />;
+        return <CreateWallet onSuccess={handleCreateWallet} />;
 
       case Mode.IMPORT_WALLET:
         return <ImportWallet onSuccess={handleContinue} mnemonic={mnemonic} />;
@@ -119,9 +119,7 @@ const AddWallet = () => {
         return <MnemonicVerify mnemonic={mnemonic} onContinue={handleContinue} wallet={wallet} />;
 
       case Mode.IMPORT_MNEMONIC:
-        return (
-          <MnemonicImport onContinue={handleImportMnemonic} onBack={() => navigate('/welcome')} />
-        );
+        return <MnemonicImport onContinue={handleImportMnemonic} />;
 
       default:
         return null;

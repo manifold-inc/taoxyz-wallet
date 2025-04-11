@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import type { KeyringPair } from '@polkadot/keyring/types';
 
@@ -10,10 +11,10 @@ import KeyringService from '../../services/KeyringService';
 
 interface CreateWalletProps {
   onSuccess: (wallet: KeyringPair, mnemonic: string) => Promise<void>;
-  onBack: () => void;
 }
 
-const CreateWallet = ({ onSuccess, onBack }: CreateWalletProps) => {
+const CreateWallet = ({ onSuccess }: CreateWalletProps) => {
+  const navigate = useNavigate();
   const { showNotification } = useNotification();
   const [password, setPassword] = useState('');
   const [nameSelected, setNameSelected] = useState(false);
@@ -108,6 +109,10 @@ const CreateWallet = ({ onSuccess, onBack }: CreateWalletProps) => {
     await onSuccess(wallet, mnemonic);
   };
 
+  const handleBack = (): void => {
+    navigate('/welcome');
+  };
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -134,19 +139,14 @@ const CreateWallet = ({ onSuccess, onBack }: CreateWalletProps) => {
         required
       />
       <div className="h-8">
-        {nameStatus && (
-          <p
-            className={`pt-2 text-xs text-left ${
-              nameStatus === 'Valid Wallet Name' && !nameSelected
-                ? 'hidden'
-                : nameStatus === 'Valid Wallet Name'
-                  ? 'text-mf-sybil-500'
-                  : 'text-mf-safety-500'
-            }`}
-          >
-            {nameStatus}
-          </p>
-        )}
+        <p
+          hidden={!nameSelected && nameStatus === 'Valid Wallet Name'}
+          className={`pt-2 text-xs text-left ${
+            nameStatus === 'Valid Wallet Name' ? 'text-mf-sybil-500' : 'text-mf-safety-500'
+          }`}
+        >
+          {nameStatus}
+        </p>
       </div>
 
       <input
@@ -170,26 +170,21 @@ const CreateWallet = ({ onSuccess, onBack }: CreateWalletProps) => {
         required
       />
       <div className="h-8">
-        {passwordStatus && (
-          <p
-            className={`pt-2 text-xs text-left ${
-              passwordStatus === 'Valid Password' && !passwordSelected
-                ? 'hidden'
-                : passwordStatus === 'Valid Password'
-                  ? 'text-mf-sybil-500'
-                  : 'text-mf-safety-500'
-            }`}
-          >
-            {passwordStatus}
-          </p>
-        )}
+        <p
+          hidden={!passwordSelected && passwordStatus === 'Valid Password'}
+          className={`pt-2 text-xs text-left ${
+            passwordStatus === 'Valid Password' ? 'text-mf-sybil-500' : 'text-mf-safety-500'
+          }`}
+        >
+          {passwordStatus}
+        </p>
       </div>
 
       {/* Buttons */}
       <div className="flex flex-col items-center gap-3 pt-4">
         <motion.button
           type="button"
-          onClick={onBack}
+          onClick={handleBack}
           className="cursor-pointer flex items-center gap-1.5 px-6 py-1 bg-mf-safety-opacity rounded-full text-sm text-mf-safety-500 border border-mf-safety-opacity hover:border-mf-safety-500 transition-colors hover:text-mf-edge-500"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}

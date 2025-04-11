@@ -1,39 +1,57 @@
-import { useState } from "react";
+import { motion } from 'framer-motion';
 
-import { useNotification } from "../../contexts/NotificationContext";
-import KeyringService from "../../services/KeyringService";
-import { NotificationType } from "../../../types/client";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import { NotificationType } from '../../../types/client';
+import { useNotification } from '../../contexts/NotificationContext';
+import KeyringService from '../../services/KeyringService';
 
 interface MnemonicImportProps {
   onContinue: (mnemonic: string) => void;
-  onBack: () => void;
 }
 
-const MnemonicImport = ({ onContinue, onBack }: MnemonicImportProps) => {
+const MnemonicImport = ({ onContinue }: MnemonicImportProps) => {
+  const navigate = useNavigate();
   const { showNotification } = useNotification();
-  const [mnemonic, setMnemonic] = useState("");
+  const [mnemonic, setMnemonic] = useState('');
   const [mnemonicSelected, setMnemonicSelected] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isValid, setIsValid] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [mnemonicStatus, setMnemonicStatus] = useState<string | null>(null);
+
+  const handleMnemonicChange = (e: React.ChangeEvent<HTMLTextAreaElement>): void => {
+    setMnemonic(e.target.value);
+    const wordCount = e.target.value.trim().split(/\s+/).length;
+    if (wordCount !== 12) {
+      setMnemonicStatus('Recovery Phrase Must Be 12 Words');
+    }
+  };
 
   const validateMnemonic = async (): Promise<boolean> => {
     if (!mnemonic.trim()) {
-      setError("Recovery Phrase is Required");
-      setIsValid(false);
+      showNotification({
+        type: NotificationType.Error,
+        message: 'Recovery Phrase is Required',
+      });
+      setMnemonicStatus(null);
       return false;
     }
 
     const wordCount = mnemonic.trim().split(/\s+/).length;
     if (wordCount !== 12) {
-      setError("Recovery Phrase Must Be 12 Words");
-      setIsValid(false);
+      showNotification({
+        type: NotificationType.Error,
+        message: 'Recovery Phrase Must Be 12 Words',
+      });
+      setMnemonicStatus(null);
       return false;
     }
 
     if (!KeyringService.validateMnemonic(mnemonic.trim())) {
-      setError("Recovery Phrase is Invalid");
-      setIsValid(false);
+      showNotification({
+        type: NotificationType.Error,
+        message: 'Recovery Phrase is Invalid',
+      });
+      setMnemonicStatus(null);
       return false;
     }
 
@@ -41,69 +59,76 @@ const MnemonicImport = ({ onContinue, onBack }: MnemonicImportProps) => {
     if (isDuplicate) {
       showNotification({
         type: NotificationType.Error,
-        message: "Wallet Already Exists",
+        message: 'Wallet Already Exists',
       });
-      setIsValid(false);
+      setMnemonicStatus(null);
       return false;
     }
 
-    setIsValid(true);
     return true;
   };
 
   const handleSubmit = async (event: React.FormEvent): Promise<void> => {
     event.preventDefault();
-    setError(null);
-    setSubmitted(true);
     const isValid = await validateMnemonic();
     if (isValid) {
       onContinue(mnemonic.trim());
     }
   };
 
+  const handleBack = (): void => {
+    navigate('/welcome');
+  };
+
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col items-center justify-center mt-8 w-64 [&>*]:w-full"
+      className="flex flex-col items-center justify-center w-full px-12 [&>*]:w-full"
     >
+      {/* Mnemonic Input */}
       <textarea
         name="mnemonic"
         value={mnemonic}
-        required
-        onChange={(e) => {
-          setMnemonic(e.target.value);
-          setError(null);
-          setSubmitted(false);
-        }}
         onFocus={() => setMnemonicSelected(true)}
         onBlur={() => setMnemonicSelected(false)}
-        className={`p-3 h-36 text-base rounded-sm bg-mf-ash-300 text-mf-milk-300 placeholder:text-mf-milk-300 border-2 border-mf-ash-300 focus:outline-none resize-none ${
-          mnemonicSelected || submitted
-            ? `${isValid ? "border-mf-sybil-500" : "border-mf-safety-500"}`
-            : "border-mf-ash-300"
+        required
+        onChange={handleMnemonicChange}
+        className={`p-2 h-36 text-base rounded-sm border-mf-night-300 focus:border-mf-safety-500 bg-mf-night-300 text-mf-edge-700 placeholder:text-mf-edge-700 border-1 border-mf-night-300 focus:outline-none resize-none ${
+          mnemonicStatus === 'Valid Mnemonic' ? 'border-mf-safety-500' : 'border-mf-sybil-500'
         }`}
         placeholder="Enter 12 Word Recovery Phrase"
       />
       <div className="h-8">
-        {error && (mnemonicSelected || submitted) && (
-          <p className="mt-2 text-xs text-left text-mf-safety-500">{error}</p>
-        )}
+        <p
+          hidden={!mnemonicSelected}
+          className={`pt-1 text-xs text-mf-safety-500 ${
+            mnemonicStatus === 'Valid Mnemonic' ? 'text-mf-safety-500' : 'text-mf-sybil-500'
+          }`}
+        >
+          {mnemonicStatus}
+        </p>
       </div>
 
-      <div className="flex flex-col items-center space-y-3 mt-1">
-        <button
+      {/* Buttons */}
+      <div className="flex flex-col items-center gap-3 pt-4">
+        <motion.button
           type="button"
-          onClick={onBack}
-          className="w-44 border-sm text-sm text-mf-safety-500 bg-mf-night-500 border-mf-night-500 hover:border-mf-safety-500 border-2 transition-colors p-1.5 cursor-pointer"
+          onClick={handleBack}
+          className="cursor-pointer flex items-center gap-1.5 px-6 py-1 bg-mf-safety-opacity rounded-full text-sm text-mf-safety-500 border border-mf-safety-opacity hover:border-mf-safety-500 transition-colors hover:text-mf-edge-500"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
           <span>Back</span>
-        </button>
-        <button
+        </motion.button>
+        <motion.button
           type="submit"
-          className="w-44 border-sm text-sm text-mf-night-500 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 transition-colors p-1.5 cursor-pointer"
+          disabled={mnemonic.trim().length !== 12}
+          className="cursor-pointer flex items-center gap-1.5 px-6 py-1 bg-mf-sybil-opacity rounded-full text-sm text-mf-sybil-500 border border-mf-sybil-opacity hover:border-mf-sybil-500 transition-colors hover:text-mf-edge-500 disabled:bg-mf-ash-500 disabled:border-mf-ash-500 disabled:text-mf-edge-700 disabled:cursor-not-allowed"
+          whileHover={mnemonic.trim().length === 12 ? { scale: 1.05 } : undefined}
+          whileTap={mnemonic.trim().length === 12 ? { scale: 0.95 } : undefined}
         >
           <span>Continue</span>
-        </button>
+        </motion.button>
       </div>
     </form>
   );

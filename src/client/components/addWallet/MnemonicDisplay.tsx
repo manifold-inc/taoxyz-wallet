@@ -33,7 +33,11 @@ const MnemonicDisplay = ({ mnemonic, wallet, onContinue }: MnemonicDisplayProps)
   const handleCopyMnemonic = async (): Promise<void> => {
     await navigator.clipboard.writeText(mnemonic);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    showNotification({
+      type: NotificationType.Success,
+      title: 'Recovery Phrase Copied',
+    });
+    setTimeout(() => setCopied(false), 2500);
   };
 
   const handleBack = (): void => {
@@ -60,13 +64,13 @@ const MnemonicDisplay = ({ mnemonic, wallet, onContinue }: MnemonicDisplayProps)
           <Copy className="w-4 h-4" />
         </button>
       </div>
-      <div>
+      <div className="h-8">
         <p className={`pt-1 text-xs ${copied ? 'text-mf-sybil-500' : 'text-mf-safety-500'}`}>
-          {copied ? 'Copied Recovery Phrase' : 'Save and Store in a Secure Location'}
+          Save and Store in a Secure Location
         </p>
       </div>
 
-      <div className="flex flex-col items-center pt-4">
+      <div className="flex flex-col items-center gap-3 pt-4">
         <motion.button
           onClick={handleBack}
           className="cursor-pointer flex items-center gap-1.5 px-6 py-1 bg-mf-safety-opacity rounded-full text-sm text-mf-safety-500 border border-mf-safety-opacity hover:border-mf-safety-500 transition-colors hover:text-mf-edge-500"
