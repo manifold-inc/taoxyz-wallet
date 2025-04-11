@@ -136,7 +136,7 @@ const CreateWallet = ({ onSuccess, onBack }: CreateWalletProps) => {
       <div className="h-8">
         {nameStatus && (
           <p
-            className={`mt-2 text-xs text-left ${
+            className={`pt-2 text-xs text-left ${
               nameStatus === 'Valid Wallet Name' && !nameSelected
                 ? 'hidden'
                 : nameStatus === 'Valid Wallet Name'
@@ -172,7 +172,7 @@ const CreateWallet = ({ onSuccess, onBack }: CreateWalletProps) => {
       <div className="h-8">
         {passwordStatus && (
           <p
-            className={`mt-2 text-xs text-left ${
+            className={`pt-2 text-xs text-left ${
               passwordStatus === 'Valid Password' && !passwordSelected
                 ? 'hidden'
                 : passwordStatus === 'Valid Password'

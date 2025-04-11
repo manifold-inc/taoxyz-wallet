@@ -2,10 +2,12 @@ import { motion } from 'framer-motion';
 import { Copy } from 'lucide-react';
 
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import type { KeyringPair } from '@polkadot/keyring/types';
 
 import { useNotification } from '@/client/contexts/NotificationContext';
+import KeyringService from '@/client/services/KeyringService';
 import { NotificationType } from '@/types/client';
 
 interface MnemonicDisplayProps {
@@ -15,6 +17,7 @@ interface MnemonicDisplayProps {
 }
 
 const MnemonicDisplay = ({ mnemonic, wallet, onContinue }: MnemonicDisplayProps) => {
+  const navigate = useNavigate();
   const { showNotification } = useNotification();
   const [copied, setCopied] = useState(false);
 
@@ -31,6 +34,11 @@ const MnemonicDisplay = ({ mnemonic, wallet, onContinue }: MnemonicDisplayProps)
     await navigator.clipboard.writeText(mnemonic);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleBack = (): void => {
+    KeyringService.deleteWallet(wallet.address);
+    navigate('/welcome');
   };
 
   return (
@@ -59,6 +67,14 @@ const MnemonicDisplay = ({ mnemonic, wallet, onContinue }: MnemonicDisplayProps)
       </div>
 
       <div className="flex flex-col items-center pt-4">
+        <motion.button
+          onClick={handleBack}
+          className="cursor-pointer flex items-center gap-1.5 px-6 py-1 bg-mf-safety-opacity rounded-full text-sm text-mf-safety-500 border border-mf-safety-opacity hover:border-mf-safety-500 transition-colors hover:text-mf-edge-500"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <span>Back</span>
+        </motion.button>
         <motion.button
           onClick={() => onContinue(wallet)}
           className="cursor-pointer flex items-center gap-1.5 px-6 py-1 bg-mf-sybil-opacity rounded-full text-sm text-mf-sybil-500 border border-mf-sybil-opacity hover:border-mf-sybil-500 transition-colors hover:text-mf-edge-500"

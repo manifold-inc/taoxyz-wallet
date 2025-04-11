@@ -1,10 +1,12 @@
 import { motion } from 'framer-motion';
 
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import type { KeyringPair } from '@polkadot/keyring/types';
 
 import { useNotification } from '@/client/contexts/NotificationContext';
+import KeyringService from '@/client/services/KeyringService';
 import { NotificationType } from '@/types/client';
 
 interface MnemonicVerifyProps {
@@ -14,8 +16,18 @@ interface MnemonicVerifyProps {
 }
 
 const MnemonicVerify = ({ mnemonic, wallet, onContinue }: MnemonicVerifyProps) => {
+  const navigate = useNavigate();
   const { showNotification } = useNotification();
   const [inputMnemonic, setInputMnemonic] = useState('');
+
+  useEffect(() => {
+    showNotification({
+      type: NotificationType.Info,
+      title: 'Verify Recovery Phrase',
+      message: 'Enter your recovery phrase',
+      duration: 5000,
+    });
+  }, []);
 
   const verifyMnemonic = (input: string) => {
     const normalizedInput = input.trim().toLowerCase();
@@ -41,14 +53,10 @@ const MnemonicVerify = ({ mnemonic, wallet, onContinue }: MnemonicVerifyProps) =
     verifyMnemonic(inputMnemonic);
   };
 
-  useEffect(() => {
-    showNotification({
-      type: NotificationType.Info,
-      title: 'Verify Recovery Phrase',
-      message: 'Enter your recovery phrase',
-      duration: 5000,
-    });
-  }, []);
+  const handleBack = (): void => {
+    KeyringService.deleteWallet(wallet.address);
+    navigate('/welcome');
+  };
 
   return (
     <form
@@ -65,6 +73,14 @@ const MnemonicVerify = ({ mnemonic, wallet, onContinue }: MnemonicVerifyProps) =
       </div>
 
       <div className="flex flex-col items-center pt-4">
+        <motion.button
+          onClick={handleBack}
+          className="cursor-pointer flex items-center gap-1.5 px-6 py-1 bg-mf-safety-opacity rounded-full text-sm text-mf-safety-500 border border-mf-safety-opacity hover:border-mf-safety-500 transition-colors hover:text-mf-edge-500"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <span>Back</span>
+        </motion.button>
         <motion.button
           type="submit"
           className="cursor-pointer flex items-center gap-1.5 px-6 py-1 bg-mf-sybil-opacity rounded-full text-sm text-mf-sybil-500 border border-mf-sybil-opacity hover:border-mf-sybil-500 transition-colors hover:text-mf-edge-500"
