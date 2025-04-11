@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import type { KeyringPair } from '@polkadot/keyring/types';
 
@@ -14,7 +14,7 @@ import MnemonicVerify from '../components/addWallet/VerifyMnemonic';
 import { useLock } from '../contexts/LockContext';
 import { useNotification } from '../contexts/NotificationContext';
 import { useWallet } from '../contexts/WalletContext';
-import { Mode, WalletCreationProvider, useWalletCreation } from '../contexts/WalletCreationContext';
+import { Mode, useWalletCreation } from '../contexts/WalletCreationContext';
 import MessageService from '../services/MessageService';
 
 const getStepTitle = (mode: Mode) => {
@@ -34,7 +34,7 @@ const getStepTitle = (mode: Mode) => {
   }
 };
 
-const AddWalletContent = () => {
+const AddWallet = () => {
   const navigate = useNavigate();
   const { showNotification } = useNotification();
   const { setIsLocked } = useLock();
@@ -138,17 +138,6 @@ const AddWalletContent = () => {
         </motion.div>
       </AnimatePresence>
     </div>
-  );
-};
-
-const AddWallet = () => {
-  const location = useLocation();
-  const initialMode = location.state?.mode || Mode.CREATE_WALLET;
-
-  return (
-    <WalletCreationProvider initialMode={initialMode}>
-      <AddWalletContent />
-    </WalletCreationProvider>
   );
 };
 
