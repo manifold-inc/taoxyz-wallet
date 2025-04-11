@@ -114,15 +114,15 @@ const AddWallet = () => {
   };
 
   return (
-    <div className="w-full h-full bg-mf-night-500 flex flex-col justify-center items-center">
+    <div className="w-full h-full bg-mf-night-500 flex flex-col justify-center items-center py-30 gap-10">
       {/* Header */}
-      <div className="flex flex-col items-center justify-center">
+      <div className="flex flex-col items-center justify-center gap-3">
         <img src={taoxyz} alt="Taoxyz Logo" className="w-8 h-8" />
         <p className="text-mf-edge-500 text-2xl font-bold blinker-font">{getStepTitle(mode)}</p>
       </div>
 
       {/* Content */}
-      <div className="flex flex-col flex-1">{renderContent()}</div>
+      <div className="flex flex-col flex-1 w-full">{renderContent()}</div>
     </div>
   );
 };

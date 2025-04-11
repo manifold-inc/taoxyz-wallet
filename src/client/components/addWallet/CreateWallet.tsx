@@ -18,7 +18,7 @@ const CreateWallet = ({ onSuccess, onBack }: CreateWalletProps) => {
   const [password, setPassword] = useState('');
   const [nameSelected, setNameSelected] = useState(false);
   const [passwordSelected, setPasswordSelected] = useState(false);
-  const [nameStatus, setNameStatus] = useState<string | null>(null);
+  const [nameStatus, setNameStatus] = useState<string | null>('Valid Wallet Name');
   const [passwordStatus, setPasswordStatus] = useState<string | null>(null);
 
   const getWalletName = (): string => {
@@ -112,7 +112,7 @@ const CreateWallet = ({ onSuccess, onBack }: CreateWalletProps) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col items-center justify-center mt-8 w-64 [&>*]:w-full"
+      className="flex flex-col items-center justify-center w-full px-16 [&>*]:w-full"
     >
       <input
         type="text"
@@ -187,11 +187,11 @@ const CreateWallet = ({ onSuccess, onBack }: CreateWalletProps) => {
       </div>
 
       {/* Buttons */}
-      <div className="flex flex-col items-center gap-3">
+      <div className="flex flex-col items-center gap-3 pt-4">
         <motion.button
           type="button"
           onClick={onBack}
-          className="rounded-full cursor-pointer flex items-center gap-1.5 px-6 py-1 bg-mf-safety-opacity rounded-full text-sm text-mf-safety-500 cursor-pointer border border-mf-safety-opacity hover:border-mf-safety-500 transition-colors hover:text-mf-edge-500"
+          className="cursor-pointer flex items-center gap-1.5 px-6 py-1 bg-mf-safety-opacity rounded-full text-sm text-mf-safety-500 border border-mf-safety-opacity hover:border-mf-safety-500 transition-colors hover:text-mf-edge-500"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -205,7 +205,7 @@ const CreateWallet = ({ onSuccess, onBack }: CreateWalletProps) => {
             nameStatus !== 'Valid Wallet Name' ||
             passwordStatus !== 'Valid Password'
           }
-          className="rounded-full cursor-pointer flex items-center gap-1.5 px-6 py-1 bg-mf-sybil-opacity rounded-full text-sm text-mf-sybil-500 cursor-pointer border border-mf-sybil-opacity hover:border-mf-sybil-500 transition-colors hover:text-mf-edge-500"
+          className="cursor-pointer flex items-center gap-1.5 px-6 py-1 bg-mf-sybil-opacity rounded-full text-sm text-mf-sybil-500 border border-mf-sybil-opacity hover:border-mf-sybil-500 transition-colors hover:text-mf-edge-500 disabled:opacity-50 disabled:cursor-not-allowed"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >

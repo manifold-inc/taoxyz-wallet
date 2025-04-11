@@ -54,14 +54,14 @@ const Notification = ({
         <motion.div
           className="fixed top-4 left-0 right-0 flex justify-center z-50"
           initial={{ y: -100, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
+          animate={{ y: 25, opacity: 1 }}
           exit={{ y: -100, opacity: 0 }}
           transition={{
             duration: 0.5,
             ease: 'easeOut',
           }}
         >
-          <motion.div className="w-72 bg-mf-ash-500 py-2 px-4 rounded-sm shadow-lg">
+          <motion.div className="w-full mx-10 bg-mf-ash-500 px-4 py-3 rounded-sm shadow-lg">
             <div className="flex items-center justify-between gap-4">
               <div className="flex flex-col items-start">
                 {/* Message Title */}
