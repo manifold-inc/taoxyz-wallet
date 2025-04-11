@@ -1,11 +1,13 @@
+import { AnimatePresence, motion } from 'framer-motion';
 import { CheckCircle, Info, Loader, XCircle } from 'lucide-react';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 import { NotificationType } from '../../../types/client';
 
 interface NotificationProps {
   type: NotificationType;
+  title?: string;
   message: string;
   hash?: string;
   show?: boolean;
@@ -15,83 +17,84 @@ interface NotificationProps {
 
 const Notification = ({
   type = NotificationType.Error,
+  title = type.charAt(0) + type.slice(1).toLowerCase(),
   message,
   hash,
   show = true,
   autoHide = true,
   onDismiss,
 }: NotificationProps) => {
-  const [isLeaving, setIsLeaving] = useState(false);
-
   useEffect(() => {
-    if (show) setIsLeaving(false);
-
     if (show && autoHide) {
-      const startLeaveTimer = setTimeout(() => {
-        setIsLeaving(true);
-      }, 1700);
-
-      const hideTimer = setTimeout(() => {
+      const timer = setTimeout(() => {
         onDismiss?.();
-      }, 2100);
-
-      return () => {
-        clearTimeout(startLeaveTimer);
-        clearTimeout(hideTimer);
-      };
+      }, 2500);
+      return () => clearTimeout(timer);
     }
   }, [show, autoHide, onDismiss]);
 
-  if (!show) return null;
+  const getMessageColor = (type: NotificationType) => {
+    switch (type) {
+      case NotificationType.Pending:
+      case NotificationType.InBlock:
+        return 'text-mf-edge-500';
+      case NotificationType.Success:
+        return 'text-mf-sybil-500';
+      case NotificationType.Info:
+      case NotificationType.Error:
+        return 'text-mf-safety-500';
+      default:
+        return 'text-mf-edge-500';
+    }
+  };
 
   return (
-    <div className="fixed top-4 left-0 right-0 flex justify-center z-50">
-      <div
-        className={`
-          w-72
-          bg-mf-ash-500 
-          py-2
-          px-4
-          rounded-sm 
-          shadow-lg
-          transform
-          transition-all
-          duration-500
-          ${isLeaving ? 'notification-slide-up' : 'notification-slide-down'}
-        `}
-      >
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex flex-col items-start">
-            <h2 className="text-xl font-semibold text-mf-edge-500">
-              {type === NotificationType.Pending || type === NotificationType.InBlock
-                ? 'Processing'
-                : type === NotificationType.Success
-                  ? 'Success'
-                  : type === NotificationType.Info
-                    ? 'Info'
-                    : 'Error'}
-            </h2>
-            <p className="text-xs text-mf-milk-500">{message}</p>
-            {hash && (
-              <p className="text-xs text-mf-milk-500 mt-1 font-mono">
-                {hash.slice(0, 10)}...{hash.slice(-8)}
-              </p>
-            )}
-          </div>
-          <div className="flex items-center">
-            {type === NotificationType.Pending || type === NotificationType.InBlock ? (
-              <Loader className="w-6 h-6 animate-spin text-mf-edge-500" />
-            ) : type === NotificationType.Success ? (
-              <CheckCircle className="w-6 h-6 text-mf-sybil-500" />
-            ) : type === NotificationType.Info ? (
-              <Info className="w-6 h-6 text-mf-safety-500" />
-            ) : (
-              <XCircle className="w-6 h-6 text-mf-safety-500" />
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
+    <AnimatePresence>
+      {show && (
+        <motion.div
+          className="fixed top-4 left-0 right-0 flex justify-center z-50"
+          initial={{ y: -100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: -100, opacity: 0 }}
+          transition={{
+            duration: 0.5,
+            ease: 'easeOut',
+          }}
+        >
+          <motion.div className="w-72 bg-mf-ash-500 py-2 px-4 rounded-sm shadow-lg">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex flex-col items-start">
+                {/* Message Title */}
+                <p className="text-xs text-mf-edge-500">{title}</p>
+
+                {/* Message */}
+                <p className={`text-xs ${getMessageColor(type)}`}>{message}</p>
+
+                {/* Hash */}
+                {hash && (
+                  <p className="text-xs text-mf-milk-500 mt-1 font-mono">
+                    {hash.slice(0, 10)}...{hash.slice(-8)}
+                  </p>
+                )}
+              </div>
+
+              {/* Icon */}
+              <div className="flex items-center">
+                {type === NotificationType.Pending || type === NotificationType.InBlock ? (
+                  <Loader className="w-6 h-6 animate-spin text-mf-edge-500" />
+                ) : type === NotificationType.Success ? (
+                  <CheckCircle className="w-6 h-6 text-mf-sybil-500" />
+                ) : type === NotificationType.Info ? (
+                  <Info className="w-6 h-6 text-mf-safety-500" />
+                ) : (
+                  <XCircle className="w-6 h-6 text-mf-safety-500" />
+                )}
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 

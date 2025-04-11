@@ -25,6 +25,7 @@ const CreateWallet = ({ onSuccess, onBack }: CreateWalletProps) => {
   const init = (): void => {
     showNotification({
       type: NotificationType.Info,
+      title: `Named ${getPlaceholderWalletName()} by Default`,
       message: 'Edit to Rename Wallet',
       autoHide: true,
     });
