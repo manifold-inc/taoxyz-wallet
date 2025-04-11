@@ -9,6 +9,7 @@ import CreateWallet from '../components/addWallet/CreateWallet';
 import ImportWallet from '../components/addWallet/ImportWallet';
 import MnemonicDisplay from '../components/addWallet/MnemonicDisplay';
 import MnemonicImport from '../components/addWallet/MnemonicImport';
+import MnemonicVerify from '../components/addWallet/VerifyMnemonic';
 import { useLock } from '../contexts/LockContext';
 import { useNotification } from '../contexts/NotificationContext';
 import { useWallet } from '../contexts/WalletContext';
@@ -20,6 +21,7 @@ enum Mode {
   IMPORT_WALLET = 'import-wallet',
   DISPLAY_MNEMONIC = 'display-mnemonic',
   IMPORT_MNEMONIC = 'import-mnemonic',
+  VERIFY_MNEMONIC = 'verify-mnemonic',
 }
 
 interface AddWalletState {
@@ -38,6 +40,8 @@ const getStepTitle = (mode: Mode) => {
       return 'BACKUP PHRASE';
     case Mode.IMPORT_MNEMONIC:
       return 'IMPORT MNEMONIC';
+    case Mode.VERIFY_MNEMONIC:
+      return 'VERIFY PHRASE';
     default:
       return '';
   }
@@ -58,13 +62,15 @@ const AddWallet = () => {
     setMode(Mode.IMPORT_WALLET);
   };
 
-  const handleCreateWalletSuccess = async (
-    wallet: KeyringPair,
-    mnemonic: string
-  ): Promise<void> => {
+  const handleCreateWallet = async (wallet: KeyringPair, mnemonic: string): Promise<void> => {
     setMnemonic(mnemonic);
     setWallet(wallet);
     setMode(Mode.DISPLAY_MNEMONIC);
+  };
+
+  const handleDisplayMnemonic = async (wallet: KeyringPair): Promise<void> => {
+    setWallet(wallet);
+    setMode(Mode.VERIFY_MNEMONIC);
   };
 
   const handleContinue = async (wallet: KeyringPair): Promise<void> => {
@@ -77,7 +83,6 @@ const AddWallet = () => {
     }
 
     await setCurrentAddress(wallet.address);
-
     await setIsLocked(false);
     await MessageService.sendClearLockTimer();
     navigate('/dashboard');
@@ -86,9 +91,7 @@ const AddWallet = () => {
   const renderContent = () => {
     switch (mode) {
       case Mode.CREATE_WALLET:
-        return (
-          <CreateWallet onSuccess={handleCreateWalletSuccess} onBack={() => navigate('/welcome')} />
-        );
+        return <CreateWallet onSuccess={handleCreateWallet} onBack={() => navigate('/welcome')} />;
 
       case Mode.IMPORT_WALLET:
         return <ImportWallet onSuccess={handleContinue} mnemonic={mnemonic} />;
@@ -97,11 +100,23 @@ const AddWallet = () => {
         if (!wallet) {
           showNotification({
             type: NotificationType.Error,
-            message: 'Wallet not found',
+            message: 'Could Not Find Wallet',
           });
           return null;
         }
-        return <MnemonicDisplay mnemonic={mnemonic} onContinue={handleContinue} wallet={wallet} />;
+        return (
+          <MnemonicDisplay mnemonic={mnemonic} onContinue={handleDisplayMnemonic} wallet={wallet} />
+        );
+
+      case Mode.VERIFY_MNEMONIC:
+        if (!wallet) {
+          showNotification({
+            type: NotificationType.Error,
+            message: 'Could Not Find Wallet',
+          });
+          return null;
+        }
+        return <MnemonicVerify mnemonic={mnemonic} onContinue={handleContinue} wallet={wallet} />;
 
       case Mode.IMPORT_MNEMONIC:
         return (
