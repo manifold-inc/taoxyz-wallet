@@ -15,30 +15,38 @@ interface CreateWalletProps {
 
 const CreateWallet = ({ onSuccess, onBack }: CreateWalletProps) => {
   const { showNotification } = useNotification();
-  const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [nameSelected, setNameSelected] = useState(false);
   const [passwordSelected, setPasswordSelected] = useState(false);
   const [nameStatus, setNameStatus] = useState<string | null>(null);
   const [passwordStatus, setPasswordStatus] = useState<string | null>(null);
 
-  const init = (): void => {
+  const getWalletName = (): string => {
+    const wallets = KeyringService.getWallets();
+    return `Wallet ${wallets.length + 1}`;
+  };
+
+  const [name, setName] = useState(() => {
+    return getWalletName();
+  });
+
+  useEffect(() => {
     showNotification({
       type: NotificationType.Info,
-      title: `Named ${getPlaceholderWalletName()} by Default`,
+      title: `Named ${getWalletName()} by Default`,
       message: 'Edit to Rename Wallet',
       autoHide: true,
     });
-  };
-
-  useEffect(() => {
-    init();
   }, []);
 
-  const getPlaceholderWalletName = (): string => {
-    const wallets = KeyringService.getWallets();
-    const placeholderWalletName = `Wallet ${wallets.length + 1}`;
-    return placeholderWalletName;
+  const getWalletNameColor = (): string => {
+    let color;
+    if (name === getWalletName()) {
+      color = 'text-mf-safety-500';
+    } else {
+      color = 'text-mf-edge-500';
+    }
+    return color;
   };
 
   const validateName = (value: string): boolean => {
@@ -112,7 +120,7 @@ const CreateWallet = ({ onSuccess, onBack }: CreateWalletProps) => {
         onChange={handleNameChange}
         onFocus={() => setNameSelected(true)}
         onBlur={() => setNameSelected(false)}
-        className={`p-2 rounded-sm text-sm text-mf-edge-300 bg-mf-night-300 placeholder:text-mf-safety-500 border-1 focus:outline-none ${
+        className={`p-2 rounded-sm text-sm ${getWalletNameColor()} bg-mf-night-300 placeholder:text-mf-edge-700 border-1 focus:outline-none ${
           nameStatus === 'Valid Wallet Name' && !nameSelected
             ? 'border-transparent'
             : nameStatus === 'Valid Wallet Name'
@@ -123,7 +131,7 @@ const CreateWallet = ({ onSuccess, onBack }: CreateWalletProps) => {
                   ? 'border-mf-safety-500'
                   : 'border-transparent focus:border-mf-safety-500'
         }`}
-        placeholder={getPlaceholderWalletName()}
+        placeholder="Wallet Name"
         required
       />
       <div className="h-8">
