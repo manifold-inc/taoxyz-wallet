@@ -4,30 +4,24 @@ import { NotificationType } from '../../types/client';
 import Notification from '../components/common/Notification';
 
 interface NotificationContextType {
-  showNotification: (params: ShowNotificationParams) => void;
-  clearNotification: () => void;
+  showNotification: (params: Notification) => void;
+  dismissNotification: (notification: Notification) => void;
 }
 
-interface ShowNotificationParams {
+interface Notification {
   type: NotificationType;
   title?: string;
   message?: string;
   hash?: string;
-  autoHide?: boolean;
+  duration?: number;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
 export const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
-  const [notification, setNotification] = useState<
-    ShowNotificationParams & { show: boolean; message: string }
-  >({
-    show: false,
-    message: '',
-    type: NotificationType.Error,
-  });
+  const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  const showNotification = useCallback((params: ShowNotificationParams) => {
+  const showNotification = useCallback((params: Notification) => {
     let defaultTitle = '';
     switch (params.type) {
       case NotificationType.Pending:
@@ -63,27 +57,37 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
         break;
     }
 
-    const shouldAutoHide =
-      params.autoHide ??
-      (params.type === NotificationType.Success || params.type === NotificationType.Error);
-
-    setNotification({
+    const notification = {
       ...params,
-      show: true,
-      message: params.message || defaultMessage,
       title: params.title || defaultTitle,
-      autoHide: shouldAutoHide,
-    });
+      message: params.message || defaultMessage,
+      duration: params.duration || 2500,
+    };
+
+    setNotifications(prev => [...prev, notification]);
+    setTimeout(() => {
+      dismissNotification(notification);
+    }, notification.duration + 500);
   }, []);
 
-  const clearNotification = useCallback(() => {
-    setNotification(prev => ({ ...prev, show: false }));
+  const dismissNotification = useCallback((notification: Notification) => {
+    setNotifications(prev => prev.filter(n => n !== notification));
   }, []);
 
   return (
-    <NotificationContext.Provider value={{ showNotification, clearNotification }}>
+    <NotificationContext.Provider value={{ showNotification, dismissNotification }}>
       {children}
-      <Notification {...notification} onDismiss={clearNotification} />
+      {notifications.map((notification, index) => (
+        <Notification
+          key={index}
+          type={notification.type}
+          title={notification.title}
+          message={notification.message}
+          hash={notification.hash}
+          duration={notification.duration}
+          onDismiss={() => dismissNotification(notification)}
+        />
+      ))}
     </NotificationContext.Provider>
   );
 };

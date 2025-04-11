@@ -23,7 +23,7 @@ const MnemonicDisplay = ({ mnemonic, wallet, onContinue }: MnemonicDisplayProps)
       type: NotificationType.Warning,
       title: 'Safely Secure Passphrase',
       message: 'Cannot recover wallet without it',
-      autoHide: false,
+      duration: 5000,
     });
   }, []);
 

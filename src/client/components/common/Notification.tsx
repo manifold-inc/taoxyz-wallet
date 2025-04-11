@@ -1,18 +1,17 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { CheckCircle, Info, Loader, TriangleAlert, XCircle } from 'lucide-react';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { NotificationType } from '../../../types/client';
 
 interface NotificationProps {
   type: NotificationType;
   title?: string;
-  message: string;
+  message?: string;
   hash?: string;
-  show?: boolean;
-  autoHide?: boolean;
-  onDismiss?: () => void;
+  duration?: number;
+  onDismiss: () => void;
 }
 
 const Notification = ({
@@ -20,18 +19,18 @@ const Notification = ({
   title = type.charAt(0) + type.slice(1).toLowerCase(),
   message,
   hash,
-  show = true,
-  autoHide = true,
+  duration = 2500,
   onDismiss,
 }: NotificationProps) => {
+  const [isVisible, setIsVisible] = useState(true);
+
   useEffect(() => {
-    if (show && autoHide) {
-      const timer = setTimeout(() => {
-        onDismiss?.();
-      }, 2500);
-      return () => clearTimeout(timer);
-    }
-  }, [show, autoHide, onDismiss]);
+    const timer = setTimeout(() => {
+      setIsVisible(false);
+      setTimeout(() => onDismiss(), 500);
+    }, duration);
+    return () => clearTimeout(timer);
+  }, [duration, onDismiss]);
 
   const getIcon = (type: NotificationType) => {
     switch (type) {
@@ -69,7 +68,7 @@ const Notification = ({
 
   return (
     <AnimatePresence>
-      {show && (
+      {isVisible && (
         <motion.div
           className="fixed top-4 left-0 right-0 flex justify-center z-50"
           initial={{ y: -100, opacity: 0 }}
