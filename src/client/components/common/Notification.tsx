@@ -1,4 +1,4 @@
-import { CheckCircle, Loader, XCircle } from 'lucide-react';
+import { CheckCircle, Info, Loader, XCircle } from 'lucide-react';
 
 import { useEffect, useState } from 'react';
 
@@ -67,7 +67,9 @@ const Notification = ({
                 ? 'Processing'
                 : type === NotificationType.Success
                   ? 'Success'
-                  : 'Error'}
+                  : type === NotificationType.Info
+                    ? 'Info'
+                    : 'Error'}
             </h2>
             <p className="text-xs text-mf-milk-500">{message}</p>
             {hash && (
@@ -81,6 +83,8 @@ const Notification = ({
               <Loader className="w-6 h-6 animate-spin text-mf-edge-500" />
             ) : type === NotificationType.Success ? (
               <CheckCircle className="w-6 h-6 text-mf-sybil-500" />
+            ) : type === NotificationType.Info ? (
+              <Info className="w-6 h-6 text-mf-safety-500" />
             ) : (
               <XCircle className="w-6 h-6 text-mf-safety-500" />
             )}

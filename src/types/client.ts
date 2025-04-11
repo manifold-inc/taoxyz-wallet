@@ -71,10 +71,11 @@ export type PermissionsPerWebsite = Record<
 >;
 
 export enum NotificationType {
-  Error = "error",
-  Pending = "pending",
-  InBlock = "inBlock",
-  Success = "success",
+  Info = 'info',
+  Error = 'error',
+  Pending = 'pending',
+  InBlock = 'inBlock',
+  Success = 'success',
 }
 
 // BLOCKCHAIN TYPES

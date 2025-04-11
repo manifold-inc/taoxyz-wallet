@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { motion } from 'framer-motion';
+
+import { useEffect, useState } from 'react';
 
 import type { KeyringPair } from '@polkadot/keyring/types';
 
@@ -19,6 +21,24 @@ const CreateWallet = ({ onSuccess, onBack }: CreateWalletProps) => {
   const [passwordSelected, setPasswordSelected] = useState(false);
   const [nameStatus, setNameStatus] = useState<string | null>(null);
   const [passwordStatus, setPasswordStatus] = useState<string | null>(null);
+
+  const init = (): void => {
+    showNotification({
+      type: NotificationType.Info,
+      message: 'Edit to Rename Wallet',
+      autoHide: true,
+    });
+  };
+
+  useEffect(() => {
+    init();
+  }, []);
+
+  const getPlaceholderWalletName = (): string => {
+    const wallets = KeyringService.getWallets();
+    const placeholderWalletName = `Wallet ${wallets.length + 1}`;
+    return placeholderWalletName;
+  };
 
   const validateName = (value: string): boolean => {
     if (value.trim().length < 3) {
@@ -91,7 +111,7 @@ const CreateWallet = ({ onSuccess, onBack }: CreateWalletProps) => {
         onChange={handleNameChange}
         onFocus={() => setNameSelected(true)}
         onBlur={() => setNameSelected(false)}
-        className={`p-3 rounded-sm text-base text-mf-milk-300 bg-mf-ash-300 placeholder:text-mf-milk-300 border-2 focus:outline-none ${
+        className={`p-2 rounded-sm text-sm text-mf-edge-300 bg-mf-night-300 placeholder:text-mf-safety-500 border-1 focus:outline-none ${
           nameStatus === 'Valid Wallet Name' && !nameSelected
             ? 'border-transparent'
             : nameStatus === 'Valid Wallet Name'
@@ -102,7 +122,7 @@ const CreateWallet = ({ onSuccess, onBack }: CreateWalletProps) => {
                   ? 'border-mf-safety-500'
                   : 'border-transparent focus:border-mf-safety-500'
         }`}
-        placeholder="Wallet Name"
+        placeholder={getPlaceholderWalletName()}
         required
       />
       <div className="h-8">
@@ -127,7 +147,7 @@ const CreateWallet = ({ onSuccess, onBack }: CreateWalletProps) => {
         onChange={handlePasswordChange}
         onFocus={() => setPasswordSelected(true)}
         onBlur={() => setPasswordSelected(false)}
-        className={`p-3 rounded-sm text-base text-mf-milk-300 bg-mf-ash-300 placeholder:text-mf-milk-300 border-2 focus:outline-none ${
+        className={`p-2 rounded-sm text-sm text-mf-edge-300 bg-mf-night-300 placeholder:text-mf-edge-700 border-1 focus:outline-none ${
           passwordStatus === 'Valid Password' && !passwordSelected
             ? 'border-transparent'
             : passwordStatus === 'Valid Password'
@@ -157,15 +177,18 @@ const CreateWallet = ({ onSuccess, onBack }: CreateWalletProps) => {
         )}
       </div>
 
-      <div className="flex flex-col items-center space-y-3 mt-1">
-        <button
+      {/* Buttons */}
+      <div className="flex flex-col items-center gap-3">
+        <motion.button
           type="button"
           onClick={onBack}
-          className="w-44 border-sm text-sm text-mf-safety-500 bg-mf-night-500 hover:bg-mf-safety-500 hover:text-mf-night-500 border-2 border-mf-safety-500 transition-colors p-1.5 cursor-pointer"
+          className="rounded-full cursor-pointer flex items-center gap-1.5 px-6 py-1 bg-mf-safety-opacity rounded-full text-sm text-mf-safety-500 cursor-pointer border border-mf-safety-opacity hover:border-mf-safety-500 transition-colors hover:text-mf-edge-500"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
           <span>Back</span>
-        </button>
-        <button
+        </motion.button>
+        <motion.button
           type="submit"
           disabled={
             !name ||
@@ -173,10 +196,12 @@ const CreateWallet = ({ onSuccess, onBack }: CreateWalletProps) => {
             nameStatus !== 'Valid Wallet Name' ||
             passwordStatus !== 'Valid Password'
           }
-          className="w-44 border-sm text-sm text-mf-night-500 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 transition-colors p-1.5 cursor-pointer"
+          className="rounded-full cursor-pointer flex items-center gap-1.5 px-6 py-1 bg-mf-sybil-opacity rounded-full text-sm text-mf-sybil-500 cursor-pointer border border-mf-sybil-opacity hover:border-mf-sybil-500 transition-colors hover:text-mf-edge-500"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
           <span>Create</span>
-        </button>
+        </motion.button>
       </div>
     </form>
   );
