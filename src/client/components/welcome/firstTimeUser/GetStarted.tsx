@@ -3,12 +3,14 @@ import { motion } from 'framer-motion';
 import { Info, Plus, WalletCards } from 'lucide-react';
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import Disclaimer from '@/client/components/common/Disclaimer';
 
 const GetStarted = () => {
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [showWalletText, setShowWalletText] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <div className="flex h-full w-full bg-mf-night-500 justify-center items-center relative overflow-hidden">
@@ -71,6 +73,7 @@ const GetStarted = () => {
             className="rounded-full cursor-pointer flex items-center gap-1.5 px-6 py-1 bg-mf-sybil-opacity rounded-full text-sm text-mf-sybil-500 cursor-pointer border border-mf-sybil-opacity hover:border-mf-sybil-500 transition-colors hover:text-mf-edge-500"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            onClick={() => navigate('/add-wallet', { state: { mode: 'create-wallet' } })}
           >
             <WalletCards className="w-4 h-4" />
             <span>Create Wallet</span>
@@ -79,6 +82,7 @@ const GetStarted = () => {
             className="rounded-full cursor-pointer flex items-center gap-1.5 px-6 py-1 bg-mf-safety-opacity rounded-full text-sm text-mf-safety-500 cursor-pointer border border-mf-safety-opacity hover:border-mf-safety-500 transition-colors hover:text-mf-edge-500"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            onClick={() => navigate('/add-wallet', { state: { mode: 'import-mnemonic' } })}
           >
             <Plus className="w-4 h-4" />
             <span>Existing Wallet</span>
