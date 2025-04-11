@@ -127,7 +127,7 @@ const AddWallet = () => {
   };
 
   return (
-    <div className="w-full h-full bg-mf-night-500 flex flex-col justify-center items-center py-30 gap-10">
+    <div className="w-full h-full bg-mf-night-500 flex flex-col justify-center items-center pt-32 gap-10">
       {/* Header */}
       <div className="flex flex-col items-center justify-center gap-3">
         <img src={taoxyz} alt="Taoxyz Logo" className="w-8 h-8" />

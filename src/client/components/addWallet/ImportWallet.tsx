@@ -20,7 +20,7 @@ const ImportWallet = ({ mnemonic, onSuccess }: ImportWalletProps) => {
   const [password, setPassword] = useState('');
   const [nameSelected, setNameSelected] = useState(false);
   const [passwordSelected, setPasswordSelected] = useState(false);
-  const [nameStatus, setNameStatus] = useState<string | null>(null);
+  const [nameStatus, setNameStatus] = useState<string | null>('Valid Wallet Name');
   const [passwordStatus, setPasswordStatus] = useState<string | null>(null);
 
   const getWalletName = (): string => {
