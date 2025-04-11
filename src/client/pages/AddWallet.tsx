@@ -16,22 +16,15 @@ import { useWallet } from '../contexts/WalletContext';
 import MessageService from '../services/MessageService';
 
 enum Mode {
-  SELECT = 'select',
-  CREATE_WALLET = 'create-wallet',
-  IMPORT_WALLET = 'import-wallet',
-  DISPLAY_MNEMONIC = 'display-mnemonic',
-  IMPORT_MNEMONIC = 'import-mnemonic',
-  VERIFY_MNEMONIC = 'verify-mnemonic',
-}
-
-interface AddWalletState {
-  mode: Mode;
+  CREATE_WALLET = 'CREATE_WALLET',
+  IMPORT_WALLET = 'IMPORT_WALLET',
+  DISPLAY_MNEMONIC = 'DISPLAY_MNEMONIC',
+  IMPORT_MNEMONIC = 'IMPORT_MNEMONIC',
+  VERIFY_MNEMONIC = 'VERIFY_MNEMONIC',
 }
 
 const getStepTitle = (mode: Mode) => {
   switch (mode) {
-    case Mode.SELECT:
-      return 'ADD WALLET';
     case Mode.CREATE_WALLET:
       return 'CREATE WALLET';
     case Mode.IMPORT_WALLET:
@@ -53,8 +46,8 @@ const AddWallet = () => {
   const { showNotification } = useNotification();
   const { setIsLocked } = useLock();
   const { setCurrentAddress } = useWallet();
-  const [mode, setMode] = useState<Mode>((location.state as AddWalletState)?.mode || Mode.SELECT);
   const [mnemonic, setMnemonic] = useState<string>('');
+  const [mode, setMode] = useState<Mode>(location.state.mode);
   const [wallet, setWallet] = useState<KeyringPair | null>(null);
 
   const handleImportMnemonic = (mnemonic: string) => {
