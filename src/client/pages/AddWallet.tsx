@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 import type { KeyringPair } from '@polkadot/keyring/types';
 
-import taoxyz from '../../../public/icons/taoxyz.svg';
+import taoxyz from '../../../public/assets/taoxyz.svg';
 import { NotificationType } from '../../types/client';
 import CreateWallet from '../components/addWallet/CreateWallet';
 import DisplayMnemonic from '../components/addWallet/DisplayMnemonic';

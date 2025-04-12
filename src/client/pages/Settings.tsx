@@ -1,12 +1,12 @@
-import { useState } from "react";
+import { useState } from 'react';
 
-import { useLock } from "../contexts/LockContext";
-import KeyringService from "../services/KeyringService";
-import MessageService from "../services/MessageService";
-import Disclaimer from "../components/common/Disclaimer";
-import WalletSelection from "../components/common/WalletSelection";
-import ConnectedSites from "../components/settings/ConnectedSites";
-import taoxyzLogo from "../../../public/icons/taoxyz.svg";
+import taoxyzLogo from '../../../public/assets/taoxyz.svg';
+import Disclaimer from '../components/common/Disclaimer';
+import WalletSelection from '../components/common/WalletSelection';
+import ConnectedSites from '../components/settings/ConnectedSites';
+import { useLock } from '../contexts/LockContext';
+import KeyringService from '../services/KeyringService';
+import MessageService from '../services/MessageService';
 
 const Settings = () => {
   const { setIsLocked } = useLock();
@@ -30,11 +30,7 @@ const Settings = () => {
           ) : (
             <div className="flex flex-col items-center w-76 [&>*]:w-full">
               <div className="flex items-center justify-center">
-                <img
-                  src={taoxyzLogo}
-                  alt="Taoxyz Logo"
-                  className="w-16 h-16 mt-12"
-                />
+                <img src={taoxyzLogo} alt="Taoxyz Logo" className="w-16 h-16 mt-12" />
               </div>
 
               <div className="flex flex-col mt-4">
@@ -49,16 +45,12 @@ const Settings = () => {
               </div>
 
               <div className="mt-6">
-                <p className="flex justify-center text-sm text-mf-milk-300">
-                  Change Wallets
-                </p>
+                <p className="flex justify-center text-sm text-mf-milk-300">Change Wallets</p>
                 <WalletSelection />
               </div>
 
               <div className="mt-4">
-                <p className="flex justify-center text-sm text-mf-milk-300">
-                  Connected Sites
-                </p>
+                <p className="flex justify-center text-sm text-mf-milk-300">Connected Sites</p>
                 <div className="flex justify-center space-x-4 mt-4">
                   <button
                     onClick={handleLock}

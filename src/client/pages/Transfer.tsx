@@ -1,15 +1,15 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-import { usePolkadotApi } from "../contexts/PolkadotApiContext";
-import { useNotification } from "../contexts/NotificationContext";
-import { useLock } from "../contexts/LockContext";
-import { useWallet } from "../contexts/WalletContext";
-import KeyringService from "../services/KeyringService";
-import MessageService from "../services/MessageService";
-import { formatNumber, taoToRao } from "../../utils/utils";
-import { NotificationType } from "../../types/client";
-import taoxyzLogo from "../../../public/icons/taoxyz.svg";
+import taoxyzLogo from '../../../public/assets/taoxyz.svg';
+import { NotificationType } from '../../types/client';
+import { formatNumber, taoToRao } from '../../utils/utils';
+import { useLock } from '../contexts/LockContext';
+import { useNotification } from '../contexts/NotificationContext';
+import { usePolkadotApi } from '../contexts/PolkadotApiContext';
+import { useWallet } from '../contexts/WalletContext';
+import KeyringService from '../services/KeyringService';
+import MessageService from '../services/MessageService';
 
 const Transfer = () => {
   const navigate = useNavigate();
@@ -17,10 +17,10 @@ const Transfer = () => {
   const { showNotification } = useNotification();
   const { api } = usePolkadotApi();
   const { currentAddress } = useWallet();
-  const [fromAddress, setFromAddress] = useState("");
-  const [toAddress, setToAddress] = useState("");
-  const [balance, setBalance] = useState<string>("0");
-  const [amount, setAmount] = useState("");
+  const [fromAddress, setFromAddress] = useState('');
+  const [toAddress, setToAddress] = useState('');
+  const [balance, setBalance] = useState<string>('0');
+  const [amount, setAmount] = useState('');
   const [amountError, setAmountError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -35,10 +35,10 @@ const Transfer = () => {
   };
 
   const restoreTransaction = async (): Promise<void> => {
-    const result = await chrome.storage.local.get("storeTransferTransaction");
+    const result = await chrome.storage.local.get('storeTransferTransaction');
     if (result.storeTransferTransaction) {
       const { toAddress, amount } = result.storeTransferTransaction;
-      await chrome.storage.local.remove("storeTransferTransaction");
+      await chrome.storage.local.remove('storeTransferTransaction');
       setToAddress(toAddress);
       setAmount(amount);
     }
@@ -48,12 +48,12 @@ const Transfer = () => {
     const value = e.target.value;
     setAmountError(null);
 
-    if (value === "" || /^\d*\.?\d*$/.test(value)) {
+    if (value === '' || /^\d*\.?\d*$/.test(value)) {
       const numValue = parseFloat(value);
-      if (value === "" || (!isNaN(numValue) && numValue >= 0)) {
+      if (value === '' || (!isNaN(numValue) && numValue >= 0)) {
         const amountInRao = value ? taoToRao(numValue) : 0n;
         if (amountInRao > balanceInRao) {
-          setAmountError("Insufficient Balance");
+          setAmountError('Insufficient Balance');
         }
         setAmount(value);
       }
@@ -84,7 +84,7 @@ const Transfer = () => {
 
     try {
       showNotification({
-        message: "Submitting Transaction...",
+        message: 'Submitting Transaction...',
         type: NotificationType.Pending,
       });
 
@@ -95,18 +95,18 @@ const Transfer = () => {
       });
 
       showNotification({
-        message: "Transaction Submitted!",
+        message: 'Transaction Submitted!',
         type: NotificationType.Success,
         hash: result,
       });
 
       setTimeout(() => {
-        navigate("/dashboard");
+        navigate('/dashboard');
       }, 2000);
     } catch {
       showNotification({
         type: NotificationType.Error,
-        message: "Failed to Transfer",
+        message: 'Failed to Transfer',
       });
     } finally {
       setIsSubmitting(false);
@@ -143,30 +143,24 @@ const Transfer = () => {
             <div className="flex items-center space-x-3">
               <img src={taoxyzLogo} alt="Taoxyz Logo" className="w-4 h-4" />
               <span className="text-xl text-mf-milk-300 font-semibold">
-                {!api ? "Loading" : formatNumber(parseFloat(balance))}
+                {!api ? 'Loading' : formatNumber(parseFloat(balance))}
               </span>
             </div>
             <p className="text-sm text-mf-milk-300">
-              {!currentAddress
-                ? ""
-                : `${currentAddress.slice(0, 6)}...${currentAddress.slice(-6)}`}
+              {!currentAddress ? '' : `${currentAddress.slice(0, 6)}...${currentAddress.slice(-6)}`}
             </p>
           </div>
-          <p className="text-xs font-semibold text-mf-sybil-500">
-            Available Balance
-          </p>
+          <p className="text-xs font-semibold text-mf-sybil-500">Available Balance</p>
         </div>
 
         <div className="space-y-4 mt-4">
           <input
             type="text"
             value={toAddress}
-            onChange={(e) => setToAddress(e.target.value)}
+            onChange={e => setToAddress(e.target.value)}
             placeholder="Enter Recipient Address"
             className={`w-full px-3 py-2 text-xs border-sm bg-mf-ash-300 text-mf-milk-300 border-2 border-mf-ash-500 ${
-              !toAddress
-                ? "border-transparent focus:border-mf-safety-500"
-                : "border-mf-sybil-500"
+              !toAddress ? 'border-transparent focus:border-mf-safety-500' : 'border-mf-sybil-500'
             }`}
           />
 
@@ -179,18 +173,14 @@ const Transfer = () => {
               placeholder="Enter Amount (τ)"
               className={`w-full px-3 py-2 border-sm bg-mf-ash-300 text-mf-milk-300 border-2 border-mf-ash-500 text-xs ${
                 !amount
-                  ? "border-transparent focus:border-mf-safety-500"
+                  ? 'border-transparent focus:border-mf-safety-500'
                   : amountInRao > balanceInRao
-                  ? "border-mf-safety-500"
-                  : "border-mf-sybil-500"
+                    ? 'border-mf-safety-500'
+                    : 'border-mf-sybil-500'
               }`}
             />
             <div className="h-4">
-              {amountError && (
-                <p className="ml-2 mt-2 text-xs text-mf-safety-500">
-                  {amountError}
-                </p>
-              )}
+              {amountError && <p className="ml-2 mt-2 text-xs text-mf-safety-500">{amountError}</p>}
             </div>
           </div>
 
@@ -198,20 +188,12 @@ const Transfer = () => {
             <button
               onClick={handleSubmit}
               disabled={
-                !toAddress ||
-                !amount ||
-                isSubmitting ||
-                !!amountError ||
-                amountInRao > balanceInRao
+                !toAddress || !amount || isSubmitting || !!amountError || amountInRao > balanceInRao
               }
               className={`w-44 text-xs flex items-center justify-center border-sm transition-colors p-2 text-semibold border-2 border-mf-sybil-500 ${
-                !toAddress ||
-                !amount ||
-                isSubmitting ||
-                !!amountError ||
-                amountInRao > balanceInRao
-                  ? "bg-mf-night-500 text-mf-milk-300 cursor-not-allowed"
-                  : "bg-mf-sybil-500 text-mf-night-500"
+                !toAddress || !amount || isSubmitting || !!amountError || amountInRao > balanceInRao
+                  ? 'bg-mf-night-500 text-mf-milk-300 cursor-not-allowed'
+                  : 'bg-mf-sybil-500 text-mf-night-500'
               }`}
             >
               {isSubmitting ? (
@@ -219,7 +201,7 @@ const Transfer = () => {
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-mf-milk-300" />
                 </div>
               ) : (
-                "Confirm"
+                'Confirm'
               )}
             </button>
           </div>

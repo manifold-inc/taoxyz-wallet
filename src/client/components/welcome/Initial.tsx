@@ -1,4 +1,4 @@
-import taoxyz from '@public/icons/taoxyz.svg';
+import taoxyz from '@public/assets/taoxyz.svg';
 import { motion } from 'framer-motion';
 
 interface InitialProps {

@@ -1,5 +1,5 @@
-import GreenDollar from '@public/assets/green-dollar.svg';
-import SilverDollar from '@public/assets/silver-dollar.svg';
+import GreenTao from '@public/assets/green-tao.svg';
+import SilverTao from '@public/assets/silver-tao.svg';
 import { Copy } from 'lucide-react';
 
 import { useEffect, useState } from 'react';
@@ -66,26 +66,26 @@ const DashboardOverview = ({
   return (
     <div className="w-full h-full rounded-sm bg-mf-sybil-opacity p-2 flex justify-between">
       {/* Total and Free TAO */}
-      <div className="flex flex-col items-center justify-center gap-2">
-        <div className="flex flex-col items-center justify-center">
-          <div className="flex items-center justify-center gap-0.5">
-            <img src={SilverDollar} alt="Silver Dollar" className="w-4 h-4" />
-            <p className="text-mf-edge-500 font-semibold text-xl">{formatNumber(totalTao ?? 0)}</p>
+      <div className="flex flex-col items-start justify-center gap-2 w-2/3 border border-white">
+        <div className="flex flex-col items-start justify-center">
+          <div className="flex justify-center items-center gap-0.5">
+            <img src={SilverTao} alt="Silver Tao" className="w-5 h-5" />
+            <p className="text-mf-edge-500 font-semibold text-4xl">{formatNumber(totalTao ?? 0)}</p>
           </div>
-          <p className="text-mf-edge-500 text-xs">Total Tao</p>
+          <p className="text-mf-edge-500 font-medium text-xs pl-6 -mt-1">Total Tao</p>
         </div>
 
-        <div className="flex flex-col items-center justify-center">
-          <div className="flex items-center justify-center gap-0.5">
-            <img src={GreenDollar} alt="Green Dollar" className="w-4 h-4" />
-            <p className="text-mf-sybil-500 font-semibold text-xl">{formatNumber(freeTao ?? 0)}</p>
+        <div className="flex flex-col items-start justify-center">
+          <div className="flex justify-center items-center gap-0.5">
+            <img src={GreenTao} alt="Green Tao" className="w-5 h-5" />
+            <p className="text-mf-sybil-500 font-semibold text-3xl">{formatNumber(freeTao ?? 0)}</p>
           </div>
-          <p className="text-mf-sybil-500 text-xs">Free Tao</p>
+          <p className="text-mf-sybil-500 font-medium text-xs pl-6 -mt-1">Free Tao</p>
         </div>
       </div>
 
       {/* Address, TAO Price, TAO Percentage Change */}
-      <div className="flex flex-col items-center justify-center gap-2">
+      <div className="flex flex-col items-center justify-center gap-2 w-1/3 border border-white">
         <div className="flex items-center justify-center gap-1">
           <p className="text-mf-sybil-500 text-xs">
             {currentAddress?.slice(0, 4)}...{currentAddress?.slice(-4)}

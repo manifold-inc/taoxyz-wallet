@@ -1,11 +1,12 @@
-import { useState } from "react";
-import type { InjectedAccount } from "@polkadot/extension-inject/types";
+import { useState } from 'react';
 
-import { useNotification } from "../../contexts/NotificationContext";
-import KeyringService from "../../services/KeyringService";
-import { NotificationType } from "../../../types/client";
-import { MESSAGE_TYPES } from "../../../types/messages";
-import taoxyzLogo from "../../../../public/icons/taoxyz.svg";
+import type { InjectedAccount } from '@polkadot/extension-inject/types';
+
+import taoxyzLogo from '../../../../public/assets/taoxyz.svg';
+import { NotificationType } from '../../../types/client';
+import { MESSAGE_TYPES } from '../../../types/messages';
+import { useNotification } from '../../contexts/NotificationContext';
+import KeyringService from '../../services/KeyringService';
 
 interface AuthRequest {
   origin: string;
@@ -24,14 +25,14 @@ const Connect = () => {
 
   const getRequest = async (): Promise<AuthRequest | null> => {
     try {
-      const result = await chrome.storage.local.get(["connectRequest"]);
+      const result = await chrome.storage.local.get(['connectRequest']);
       if (!result.connectRequest) throw new Error();
       setRequest(result.connectRequest);
       return result.connectRequest;
     } catch {
       showNotification({
         type: NotificationType.Error,
-        message: "Failed to Get Request",
+        message: 'Failed to Get Request',
       });
       setTimeout(() => {
         window.close();
@@ -45,10 +46,8 @@ const Connect = () => {
       const keyringWallets = await KeyringService.getWallets();
       const walletsWithPermissions = (
         await Promise.all(
-          keyringWallets.map(async (wallet) => {
-            const permissions = await KeyringService.getPermissions(
-              wallet.address
-            );
+          keyringWallets.map(async wallet => {
+            const permissions = await KeyringService.getPermissions(wallet.address);
             if (permissions instanceof Error) return null;
             if (request.origin && permissions[request.origin] === false) {
               return null;
@@ -56,23 +55,23 @@ const Connect = () => {
             const selectableWallet = {
               address: wallet.address,
               genesisHash: null,
-              name: (wallet.meta?.name as string) || "Unnamed Wallet",
-              type: "sr25519" as const,
+              name: (wallet.meta?.name as string) || 'Unnamed Wallet',
+              type: 'sr25519' as const,
               meta: {
-                source: "taoxyz-wallet",
+                source: 'taoxyz-wallet',
               },
               selected: false,
             };
             return selectableWallet;
           })
         )
-      ).filter((wallet) => wallet !== null);
+      ).filter(wallet => wallet !== null);
 
       setWallets(walletsWithPermissions);
     } catch {
       showNotification({
         type: NotificationType.Error,
-        message: "Failed to Load Wallets",
+        message: 'Failed to Load Wallets',
       });
       setTimeout(() => {
         window.close();
@@ -82,8 +81,8 @@ const Connect = () => {
   };
 
   const toggleWallet = (address: string) => {
-    setWallets((wallets) =>
-      wallets.map((wallet) => ({
+    setWallets(wallets =>
+      wallets.map(wallet => ({
         ...wallet,
         selected:
           wallets.length === 1
@@ -100,7 +99,7 @@ const Connect = () => {
       if (!request) {
         showNotification({
           type: NotificationType.Error,
-          message: "Request Not Found",
+          message: 'Request Not Found',
         });
         setTimeout(() => {
           window.close();
@@ -108,22 +107,16 @@ const Connect = () => {
         return;
       }
 
-      const selectedWallet = wallets.find((wallet) => wallet.selected);
-      const selectedWallets = selectedWallet
-        ? [{ ...selectedWallet, selected: undefined }]
-        : [];
+      const selectedWallet = wallets.find(wallet => wallet.selected);
+      const selectedWallets = selectedWallet ? [{ ...selectedWallet, selected: undefined }] : [];
 
       if (approved && selectedWallet) {
         try {
-          await KeyringService.updatePermissions(
-            request.origin,
-            selectedWallet.address,
-            approved
-          );
+          await KeyringService.updatePermissions(request.origin, selectedWallet.address, approved);
         } catch {
           showNotification({
             type: NotificationType.Error,
-            message: "Failed to Update Permissions",
+            message: 'Failed to Update Permissions',
           });
           setTimeout(() => {
             window.close();
@@ -145,7 +138,7 @@ const Connect = () => {
       if (!response.success) {
         showNotification({
           type: NotificationType.Error,
-          message: "Failed to Send Response",
+          message: 'Failed to Send Response',
         });
       }
 
@@ -153,7 +146,7 @@ const Connect = () => {
     } catch {
       showNotification({
         type: NotificationType.Error,
-        message: "Failed to Send Response",
+        message: 'Failed to Send Response',
       });
       setTimeout(() => {
         window.close();
@@ -187,7 +180,7 @@ const Connect = () => {
 
       <div className="mt-4 w-80 [&>*]:w-full">
         <div className="h-60 space-y-3 rounded-sm overflow-y-scroll">
-          {wallets.map((wallet) => (
+          {wallets.map(wallet => (
             <button
               key={wallet.address}
               onClick={() => toggleWallet(wallet.address)}
@@ -222,7 +215,7 @@ const Connect = () => {
           </button>
           <button
             onClick={() => handleResponse(true)}
-            disabled={!wallets.some((wallet) => wallet.selected)}
+            disabled={!wallets.some(wallet => wallet.selected)}
             className="flex-1 cursor-pointer text-sm border-2 border-sm border-mf-sybil-500 bg-mf-sybil-500 hover:bg-mf-night-500 hover:text-mf-sybil-500 p-2 text-mf-night-500 transition-colors"
           >
             Approve

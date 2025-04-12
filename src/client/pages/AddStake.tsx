@@ -1,16 +1,17 @@
-import { useState, useCallback } from "react";
-import { ArrowLeftToLine, ArrowRightToLine } from "lucide-react";
-import taoxyzLogo from "../../../public/icons/taoxyz.svg";
+import { ArrowLeftToLine, ArrowRightToLine } from 'lucide-react';
 
-import { usePolkadotApi } from "../contexts/PolkadotApiContext";
-import { useNotification } from "../contexts/NotificationContext";
-import { useWallet } from "../contexts/WalletContext";
-import SubnetSelection from "../components/addStake/SubnetSelection";
-import ValidatorSelection from "../components/common/ValidatorSelection";
-import ConfirmAddStake from "../components/addStake/ConfirmAddStake";
-import { NotificationType } from "../../types/client";
-import type { Subnet, Validator } from "../../types/client";
-import { formatNumber } from "../../utils/utils";
+import { useCallback, useState } from 'react';
+
+import taoxyzLogo from '../../../public/assets/taoxyz.svg';
+import { NotificationType } from '../../types/client';
+import type { Subnet, Validator } from '../../types/client';
+import { formatNumber } from '../../utils/utils';
+import ConfirmAddStake from '../components/addStake/ConfirmAddStake';
+import SubnetSelection from '../components/addStake/SubnetSelection';
+import ValidatorSelection from '../components/common/ValidatorSelection';
+import { useNotification } from '../contexts/NotificationContext';
+import { usePolkadotApi } from '../contexts/PolkadotApiContext';
+import { useWallet } from '../contexts/WalletContext';
 
 enum Step {
   SELECT_SUBNET,
@@ -21,26 +22,26 @@ enum Step {
 const getStepSubtext = (step: Step) => {
   switch (step) {
     case Step.SELECT_SUBNET:
-      return "Select Subnet";
+      return 'Select Subnet';
     case Step.SELECT_VALIDATOR:
-      return "Select Validator";
+      return 'Select Validator';
     case Step.SELECT_CONFIRM_ADD_STAKE:
-      return "Review Add Stake";
+      return 'Review Add Stake';
     default:
-      return "";
+      return '';
   }
 };
 
 const getStepTitle = (step: Step) => {
   switch (step) {
     case Step.SELECT_SUBNET:
-      return "Add Stake";
+      return 'Add Stake';
     case Step.SELECT_VALIDATOR:
-      return "Add Stake";
+      return 'Add Stake';
     case Step.SELECT_CONFIRM_ADD_STAKE:
-      return "Confirm Stake";
+      return 'Confirm Stake';
     default:
-      return "";
+      return '';
   }
 };
 
@@ -53,15 +54,13 @@ export const AddStake = () => {
   const [selectedSubnet, setSelectedSubnet] = useState<Subnet | null>(null);
   const [validators, setValidators] = useState<Validator[]>([]);
   const [balance, setBalance] = useState<string | null>(null);
-  const [selectedValidator, setSelectedValidator] = useState<Validator | null>(
-    null
-  );
+  const [selectedValidator, setSelectedValidator] = useState<Validator | null>(null);
   const [isLoadingSubnets, setIsLoadingSubnets] = useState(true);
   const [isLoadingValidators, setIsLoadingValidators] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
 
   const restoreAddStake = async () => {
-    const result = await chrome.storage.local.get("storeAddStakeTransaction");
+    const result = await chrome.storage.local.get('storeAddStakeTransaction');
     if (result.storeAddStakeTransaction) {
       const { subnet, validator } = result.storeAddStakeTransaction;
       setSelectedSubnet(subnet);
@@ -79,7 +78,7 @@ export const AddStake = () => {
     } catch {
       showNotification({
         type: NotificationType.Error,
-        message: "Failed to Load Subnets",
+        message: 'Failed to Load Subnets',
       });
     } finally {
       setIsLoadingSubnets(false);
@@ -94,7 +93,7 @@ export const AddStake = () => {
     } catch {
       showNotification({
         type: NotificationType.Error,
-        message: "Failed to Load Validators",
+        message: 'Failed to Load Validators',
       });
     } finally {
       setIsLoadingValidators(false);
@@ -110,7 +109,7 @@ export const AddStake = () => {
     } catch {
       showNotification({
         type: NotificationType.Error,
-        message: "Failed to Fetch Balance",
+        message: 'Failed to Fetch Balance',
       });
     }
   };
@@ -144,11 +143,7 @@ export const AddStake = () => {
   };
 
   const handleNext = () => {
-    if (
-      step === Step.SELECT_SUBNET &&
-      selectedSubnet &&
-      validators.length > 0
-    ) {
+    if (step === Step.SELECT_SUBNET && selectedSubnet && validators.length > 0) {
       setStep(Step.SELECT_VALIDATOR);
       setValidators(validators);
     } else if (step === Step.SELECT_VALIDATOR && selectedValidator) {
@@ -216,8 +211,8 @@ export const AddStake = () => {
             disabled={step === Step.SELECT_SUBNET}
             className={`transition-colors cursor-pointer ${
               step === Step.SELECT_SUBNET
-                ? "text-mf-ash-300 cursor-not-allowed"
-                : "text-mf-milk-300"
+                ? 'text-mf-ash-300 cursor-not-allowed'
+                : 'text-mf-milk-300'
             }`}
           >
             <ArrowLeftToLine className="w-6 h-6" />
@@ -230,18 +225,16 @@ export const AddStake = () => {
           <button
             onClick={handleNext}
             disabled={
-              (step === Step.SELECT_SUBNET &&
-                (!selectedSubnet || validators.length === 0)) ||
+              (step === Step.SELECT_SUBNET && (!selectedSubnet || validators.length === 0)) ||
               (step === Step.SELECT_VALIDATOR && !selectedValidator) ||
               step === Step.SELECT_CONFIRM_ADD_STAKE
             }
             className={`transition-colors cursor-pointer ${
-              (step === Step.SELECT_SUBNET &&
-                (!selectedSubnet || validators.length === 0)) ||
+              (step === Step.SELECT_SUBNET && (!selectedSubnet || validators.length === 0)) ||
               (step === Step.SELECT_VALIDATOR && !selectedValidator) ||
               step === Step.SELECT_CONFIRM_ADD_STAKE
-                ? "text-mf-ash-300 cursor-not-allowed"
-                : "text-mf-milk-300"
+                ? 'text-mf-ash-300 cursor-not-allowed'
+                : 'text-mf-milk-300'
             }`}
           >
             <ArrowRightToLine className="w-6 h-6" />
@@ -252,9 +245,7 @@ export const AddStake = () => {
       <div className="mt-8">
         <div className="text-center">
           <h1 className="text-lg text-mf-milk-300">{getStepTitle(step)}</h1>
-          <p className="text-xs text-mf-sybil-500 mt-1">
-            {getStepSubtext(step)}
-          </p>
+          <p className="text-xs text-mf-sybil-500 mt-1">{getStepSubtext(step)}</p>
         </div>
 
         <div className="mt-2">{renderStep()}</div>

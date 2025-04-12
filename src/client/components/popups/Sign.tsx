@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 
-import taoxyz from '../../../../public/icons/taoxyz.svg';
+import taoxyz from '../../../../public/assets/taoxyz.svg';
 import { NotificationType } from '../../../types/client';
 import { MESSAGE_TYPES } from '../../../types/messages';
 import type { SignResponsePayload, StoredSignRequest } from '../../../types/messages';
