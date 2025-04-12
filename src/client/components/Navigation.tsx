@@ -1,18 +1,15 @@
-import { Link, useLocation } from "react-router-dom";
-import { Plus } from "lucide-react";
+import { Plus } from 'lucide-react';
+
+import { Link, useLocation } from 'react-router-dom';
 
 const Navigation = () => {
   const location = useLocation();
 
   const links = [
     {
-      path: "/dashboard",
+      path: '/dashboard',
       icon: (
-        <svg
-          className="w-6 h-6"
-          viewBox="0 0 16 16"
-          xmlns="http://www.w3.org/2000/svg"
-        >
+        <svg className="w-6 h-6" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
           <path
             d="M1 6V15H6V11C6 9.89543 6.89543 9 8 9C9.10457 9 10 9.89543 10 11V15H15V6L8 0L1 6Z"
             fill="currentColor"
@@ -21,11 +18,11 @@ const Navigation = () => {
       ),
     },
     {
-      path: "/add-stake",
+      path: '/add-stake',
       icon: <Plus strokeWidth={4} className="w-6 h-6" />,
     },
     {
-      path: "/move-stake",
+      path: '/move-stake',
       icon: (
         <svg
           className="w-6 h-6"
@@ -38,7 +35,7 @@ const Navigation = () => {
       ),
     },
     {
-      path: "/transfer",
+      path: '/transfer',
       icon: (
         <svg
           className="w-6 h-6"
@@ -60,7 +57,7 @@ const Navigation = () => {
       ),
     },
     {
-      path: "/settings",
+      path: '/settings',
       icon: (
         <svg
           fill="currentColor"
@@ -78,17 +75,17 @@ const Navigation = () => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 flex bg-mf-night-500 justify-center">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 flex bg-mf-night-500 justify-center">
       <div className="w-74 h-14">
         <div className="flex items-center justify-evenly h-full">
-          {links.map((link) => (
+          {links.map(link => (
             <Link
               key={link.path}
               to={link.path}
               className={`flex items-center p-4 ${
                 location.pathname === link.path
-                  ? "text-mf-safety-500 bg-mf-ash-500"
-                  : "text-mf-milk-300 hover:bg-mf-ash-500"
+                  ? 'text-mf-safety-500 bg-mf-ash-500'
+                  : 'text-mf-milk-300 hover:bg-mf-ash-500'
               }`}
             >
               {link.icon}

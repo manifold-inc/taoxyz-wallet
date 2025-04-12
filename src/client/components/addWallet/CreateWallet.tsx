@@ -5,10 +5,10 @@ import { useNavigate } from 'react-router-dom';
 
 import type { KeyringPair } from '@polkadot/keyring/types';
 
-import { NotificationType } from '../../../types/client';
-import { useNotification } from '../../contexts/NotificationContext';
-import { useWalletCreation } from '../../contexts/WalletCreationContext';
-import KeyringService from '../../services/KeyringService';
+import { useNotification } from '@/client/contexts/NotificationContext';
+import { useWalletCreation } from '@/client/contexts/WalletCreationContext';
+import KeyringService from '@/client/services/KeyringService';
+import { NotificationType } from '@/types/client';
 
 interface CreateWalletProps {
   onSuccess: (wallet: KeyringPair, mnemonic: string) => Promise<void>;

@@ -89,7 +89,7 @@ const WalletSelection = () => {
 
   return (
     <>
-      <div className="bg-mf-ash-500 mt-4 relative" ref={listenerRef}>
+      <div className="w-72 bg-mf-ash-500 relative" ref={listenerRef}>
         <div
           className="flex items-center justify-between p-2 hover:bg-mf-night-500 transition-colors cursor-pointer"
           onClick={() => setIsExpanded(!isExpanded)}
