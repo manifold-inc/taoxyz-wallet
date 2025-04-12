@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 
+import Navigation from '@/client/components/Navigation';
 import LockScreen from '@/client/components/common/LockScreen';
 import { ProtectedRoutes } from '@/client/components/routes/AppRoutes';
 import { useLock } from '@/client/contexts/LockContext';
@@ -18,13 +19,18 @@ const AppLayout = ({ children }: AppLayoutProps) => {
     location.pathname === '/';
 
   return (
-    <div className="w-full h-full">
-      {/* Main Content */}
+    <main className="min-w-screen min-h-screen">
+      {/* Routes */}
       {children}
 
-      {/* Lock Screen Overlay */}
-      {isProtectedRoute && <LockScreen isLocked={isLocked} />}
-    </div>
+      {/* Lock Screen for Protected Routes */}
+      {isProtectedRoute && (
+        <>
+          <LockScreen isLocked={isLocked} />
+          <Navigation />
+        </>
+      )}
+    </main>
   );
 };
 
