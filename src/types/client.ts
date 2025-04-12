@@ -44,6 +44,18 @@ export interface ValidatorIdentity {
   url: string;
 }
 
+export interface Stake {
+  netuid: number;
+  hotkey: string;
+  coldkey: string;
+  stake: number;
+  emission: number;
+  taoEmission: number;
+  drain: number;
+  isRegistered: boolean;
+  locked: number;
+}
+
 export interface StakeTransaction {
   subnetId: number;
   subnetName: string;

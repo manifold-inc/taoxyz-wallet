@@ -83,6 +83,7 @@ export const Dashboard = () => {
         })
       );
 
+      console.log('stakes: ', stakes);
       let totalBalance = balanceResult;
 
       for (const stake of formattedStakes) {
@@ -92,6 +93,8 @@ export const Dashboard = () => {
           totalBalance += raoToTao(BigInt(stake.tokens)) * subnet.price;
         }
       }
+
+      console.log('formatted stakes: ', formattedStakes);
 
       setTotalBalance(totalBalance);
       setBalance(balanceResult);
@@ -146,132 +149,131 @@ export const Dashboard = () => {
   }
 
   return (
-    <div className="flex flex-col items-center min-h-screen">
-      <div className="w-74 [&>*]:w-full">
-        <WalletSelection />
+    <div className="flex flex-col items-center w-full h-full pt-16">
+      {/* Wallet Selection */}
+      <WalletSelection />
 
-        <div className="mt-2 border-sm border-2 border-mf-ash-500 bg-mf-ash-500 flex p-1 justify-center items-center gap-4">
-          {/* Price of TAO */}
-          <div className="flex items-center gap-1">
-            <img src={dollar} alt="Dollar Logo" className="w-4 h-4" />
-            <span className="text-base font-semibold text-mf-edge-500">
-              {usdToTao ? `${formatNumber(usdToTao).toFixed(2)}` : 'Loading...'}
+      <div className="mt-2 border-sm border-2 border-mf-ash-500 bg-mf-ash-500 flex p-1 justify-center items-center gap-4">
+        {/* Price of TAO */}
+        <div className="flex items-center gap-1">
+          <img src={dollar} alt="Dollar Logo" className="w-4 h-4" />
+          <span className="text-base font-semibold text-mf-edge-500">
+            {usdToTao ? `${formatNumber(usdToTao).toFixed(2)}` : 'Loading...'}
+          </span>
+          {usdToTao && <span className="text-[10px] ml-0.5 text-mf-edge-500">/τ</span>}
+        </div>
+
+        {/* Price of TAO 24hr ago */}
+        <div className="flex items-center gap-1">
+          <img src={clock} alt="Clock Logo" className="w-4 h-4" />
+          <span className="text-base font-semibold text-mf-edge-500">
+            {dayOldUsdToTao ? `${formatNumber(dayOldUsdToTao).toFixed(2)}` : 'Loading...'}
+          </span>
+          {dayOldUsdToTao && <span className="text-[10px] ml-0.5 text-mf-edge-500">24hr</span>}
+        </div>
+      </div>
+
+      <div className="mt-2 border-sm border-2 border-mf-ash-500 bg-mf-ash-500 gap-2">
+        {/* Address & Account Value */}
+        <div className="border-b border-mf-ash-300">
+          <div className="flex items-center justify-between py-1 px-2">
+            {/* Address */}
+            <div className="flex items-center text-xs text-mf-milk-300 gap-1">
+              <p>
+                {!currentAddress
+                  ? 'Loading...'
+                  : `${currentAddress.slice(0, 4)}...${currentAddress.slice(-4)}`}
+              </p>
+              <button onClick={() => void handleCopy()} className="transition-colors">
+                {currentAddress && (
+                  <Copy
+                    className={`w-3 h-3 cursor-pointer ${
+                      copied ? 'text-mf-sybil-500' : 'text-mf-milk-300'
+                    }`}
+                  />
+                )}
+              </button>
+            </div>
+
+            {/* Account Value */}
+            <div className="flex items-center text-xs font-semibold text-mf-sybil-500 space-x-1">
+              <p>
+                {usdToTao === null || totalBalance === null
+                  ? 'Loading...'
+                  : `$${formatNumber(Number(usdToTao * totalBalance)).toFixed(2)}`}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Balance */}
+        <div className="px-2 py-1">
+          {/* Total Balance */}
+          <div className="flex items-center gap-2">
+            <img src={taoxyz} alt="Taoxyz Logo" className="w-3 h-3" />
+            <span className="text-xl text-mf-milk-300 font-semibold">
+              {totalBalance === null
+                ? 'Loading'
+                : Number(totalBalance) === 0
+                  ? '0'
+                  : formatNumber(Number(totalBalance))}
             </span>
-            {usdToTao && <span className="text-[10px] ml-0.5 text-mf-edge-500">/τ</span>}
+            <span className="text-xs text-mf-edge-300">Total</span>
           </div>
 
-          {/* Price of TAO 24hr ago */}
-          <div className="flex items-center gap-1">
-            <img src={clock} alt="Clock Logo" className="w-4 h-4" />
-            <span className="text-base font-semibold text-mf-edge-500">
-              {dayOldUsdToTao ? `${formatNumber(dayOldUsdToTao).toFixed(2)}` : 'Loading...'}
+          {/* Free Balance */}
+          <div className="flex items-center gap-2">
+            <img src={taoxyz} alt="Taoxyz Logo" className="w-3 h-3" />
+            <span className="text-sm text-mf-sybil-500 font-semibold">
+              {balance === null
+                ? 'Loading'
+                : Number(balance) === 0
+                  ? '0'
+                  : formatNumber(Number(balance))}
             </span>
-            {dayOldUsdToTao && <span className="text-[10px] ml-0.5 text-mf-edge-500">24hr</span>}
+            <span className="text-xs text-mf-sybil-500">Free</span>
           </div>
         </div>
+      </div>
 
-        <div className="mt-2 border-sm border-2 border-mf-ash-500 bg-mf-ash-500 gap-2">
-          {/* Address & Account Value */}
-          <div className="border-b border-mf-ash-300">
-            <div className="flex items-center justify-between py-1 px-2">
-              {/* Address */}
-              <div className="flex items-center text-xs text-mf-milk-300 gap-1">
-                <p>
-                  {!currentAddress
-                    ? 'Loading...'
-                    : `${currentAddress.slice(0, 4)}...${currentAddress.slice(-4)}`}
-                </p>
-                <button onClick={() => void handleCopy()} className="transition-colors">
-                  {currentAddress && (
-                    <Copy
-                      className={`w-3 h-3 cursor-pointer ${
-                        copied ? 'text-mf-sybil-500' : 'text-mf-milk-300'
-                      }`}
-                    />
-                  )}
-                </button>
-              </div>
-
-              {/* Account Value */}
-              <div className="flex items-center text-xs font-semibold text-mf-sybil-500 space-x-1">
-                <p>
-                  {usdToTao === null || totalBalance === null
-                    ? 'Loading...'
-                    : `$${formatNumber(Number(usdToTao * totalBalance)).toFixed(2)}`}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Balance */}
-          <div className="px-2 py-1">
-            {/* Total Balance */}
-            <div className="flex items-center gap-2">
-              <img src={taoxyz} alt="Taoxyz Logo" className="w-3 h-3" />
-              <span className="text-xl text-mf-milk-300 font-semibold">
-                {totalBalance === null
-                  ? 'Loading'
-                  : Number(totalBalance) === 0
-                    ? '0'
-                    : formatNumber(Number(totalBalance))}
-              </span>
-              <span className="text-xs text-mf-edge-300">Total</span>
-            </div>
-
-            {/* Free Balance */}
-            <div className="flex items-center gap-2">
-              <img src={taoxyz} alt="Taoxyz Logo" className="w-3 h-3" />
-              <span className="text-sm text-mf-sybil-500 font-semibold">
-                {balance === null
-                  ? 'Loading'
-                  : Number(balance) === 0
-                    ? '0'
-                    : formatNumber(Number(balance))}
-              </span>
-              <span className="text-xs text-mf-sybil-500">Free</span>
-            </div>
-          </div>
+      {/* Actions */}
+      <div className="mt-3">
+        <div className="flex justify-between rounded-sm text-sm text-mf-night-500 transition-colors space-x-2">
+          <button
+            onClick={() => navigate('/add-stake')}
+            className="w-1/3 p-1 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 hover:border-mf-safety-500 border-sm transition-colors cursor-pointer"
+          >
+            <span>Add</span>
+          </button>
+          <button
+            onClick={() => navigate('/move-stake')}
+            className="w-1/3 p-1 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 hover:border-mf-safety-500 border-sm transition-colors cursor-pointer"
+          >
+            <span>Move</span>
+          </button>
+          <button
+            onClick={() => navigate('/transfer')}
+            className="w-1/3 p-1 bg-mf-sybil-500 hover:bg-mf-night-500 hover:text-mf-sybil-500 border-2 border-mf-sybil-500 hover:border-mf-sybil-500 border-sm transition-colors cursor-pointer"
+          >
+            <span>Transfer</span>
+          </button>
         </div>
+      </div>
 
-        <div className="mt-3">
-          <div className="flex justify-between rounded-sm text-sm text-mf-night-500 transition-colors space-x-2">
-            <button
-              onClick={() => navigate('/add-stake')}
-              className="w-1/3 p-1 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 hover:border-mf-safety-500 border-sm transition-colors cursor-pointer"
-            >
-              <span>Add</span>
-            </button>
-            <button
-              onClick={() => navigate('/move-stake')}
-              className="w-1/3 p-1 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 hover:border-mf-safety-500 border-sm transition-colors cursor-pointer"
-            >
-              <span>Move</span>
-            </button>
-            <button
-              onClick={() => navigate('/transfer')}
-              className="w-1/3 p-1 bg-mf-sybil-500 hover:bg-mf-night-500 hover:text-mf-sybil-500 border-2 border-mf-sybil-500 hover:border-mf-sybil-500 border-sm transition-colors cursor-pointer"
-            >
-              <span>Transfer</span>
-            </button>
+      {/* Portfolio Overview */}
+      <div className="mt-3">
+        <h2 className="text-xs text-mf-sybil-500 font-semibold">Portfolio</h2>
+        {isLoading ? (
+          <div className="border-sm border-2 border-mf-ash-500 p-2 bg-mf-ash-500 text-sm text-mf-milk-300">
+            <p>Loading...</p>
           </div>
-        </div>
-
-        <div className="mt-3">
-          <h2 className="text-xs text-mf-sybil-500 font-semibold">Portfolio</h2>
-          {isLoading ? (
-            <div className="border-sm border-2 border-mf-ash-500 p-2 bg-mf-ash-500 text-sm text-mf-milk-300">
-              <p>Loading...</p>
-            </div>
-          ) : (
-            <Portfolio
-              stakes={stakes}
-              address={currentAddress as string}
-              onRefresh={() =>
-                currentAddress ? fetchData(currentAddress, true) : Promise.resolve()
-              }
-            />
-          )}
-        </div>
+        ) : (
+          <Portfolio
+            stakes={stakes}
+            address={currentAddress as string}
+            onRefresh={() => (currentAddress ? fetchData(currentAddress, true) : Promise.resolve())}
+          />
+        )}
       </div>
     </div>
   );

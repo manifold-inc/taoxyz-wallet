@@ -1,18 +1,18 @@
-import { ApiPromise, WsProvider } from "@polkadot/api";
-import type { EventRecord, ExtrinsicStatus } from "@polkadot/types/interfaces";
-import type { ISubmittableResult } from "@polkadot/types/types";
-
-import KeyringService from "../services/KeyringService";
+import { ApiPromise, WsProvider } from '@polkadot/api';
+import type { EventRecord, ExtrinsicStatus } from '@polkadot/types/interfaces';
+import type { ISubmittableResult } from '@polkadot/types/types';
 
 import type {
-  BittensorSubnet,
   BittensorMetagraph,
+  BittensorSubnet,
+  Stake,
   Subnet,
-  Validator,
   SubstrateAccount,
+  Validator,
   ValidatorIdentity,
-} from "../../types/client";
-import { raoToTao } from "../../utils/utils";
+} from '../../types/client';
+import { raoToTao } from '../../utils/utils';
+import KeyringService from '../services/KeyringService';
 
 class PolkadotApi {
   private api!: ApiPromise;
@@ -20,8 +20,8 @@ class PolkadotApi {
   private static instance: PolkadotApi;
 
   private readonly endpoints = {
-    test: "wss://test.finney.opentensor.ai:443",
-    main: "wss://entrypoint-finney.opentensor.ai:443",
+    test: 'wss://test.finney.opentensor.ai:443',
+    main: 'wss://entrypoint-finney.opentensor.ai:443',
   };
 
   private constructor() {
@@ -29,7 +29,7 @@ class PolkadotApi {
   }
 
   private async initialize(): Promise<void> {
-    console.log("[Client] Initializing API");
+    console.log('[Client] Initializing API');
     const provider = new WsProvider(this.endpoints.main);
     try {
       if (this.api?.isConnected) {
@@ -39,7 +39,7 @@ class PolkadotApi {
       this.api = await ApiPromise.create({ provider });
       console.log(`[Client] Connected to Endpoint: ${this.endpoints.main}`);
     } catch (error) {
-      console.error("Error in initialize:", error);
+      console.error('Error in initialize:', error);
       throw error;
     }
   }
@@ -54,7 +54,7 @@ class PolkadotApi {
   public async getApi(): Promise<ApiPromise> {
     await this.initPromise;
     if (!this.api) {
-      throw new Error("API Not Initialized");
+      throw new Error('API Not Initialized');
     }
     return this.api;
   }
@@ -75,8 +75,8 @@ class PolkadotApi {
       )) as unknown as SubstrateAccount;
 
       if (wallet instanceof Error) throw new Error(wallet.message);
-      if (wallet.isLocked) throw new Error("Wallet is Locked");
-      if (!toWallet.data.free) throw new Error("Invalid Recipient Address");
+      if (wallet.isLocked) throw new Error('Wallet is Locked');
+      if (!toWallet.data.free) throw new Error('Invalid Recipient Address');
 
       return new Promise((resolve, reject) => {
         let unsubscribe: (() => void) | undefined;
@@ -93,37 +93,30 @@ class PolkadotApi {
             }
 
             if (unsubscribe) {
-              this.handleTransactionStatus(
-                status,
-                events,
-                unsubscribe,
-                resolve,
-                reject
-              );
+              this.handleTransactionStatus(status, events, unsubscribe, resolve, reject);
             }
           })
-          .then((unsub) => {
+          .then(unsub => {
             unsubscribe = unsub;
           })
-          .catch((error) => {
+          .catch(error => {
             if (unsubscribe) unsubscribe();
             reject(error);
           });
       });
     } catch (error) {
-      console.error("Error in Transfer:", error);
+      console.error('Error in Transfer:', error);
       throw error;
     }
   }
 
-  public async getStake(address: string) {
+  public async getStake(address: string): Promise<Stake[] | null> {
     try {
-      const stake =
-        await this.api.call.stakeInfoRuntimeApi.getStakeInfoForColdkey(address);
-      return stake.toJSON();
+      const stake = await this.api.call.stakeInfoRuntimeApi.getStakeInfoForColdkey(address);
+      return stake.toJSON() as unknown as Stake[];
     } catch (error) {
-      console.error("Error in Get Stake:", error);
-      throw error;
+      console.error('Error in Get Stake:', error);
+      return null;
     }
   }
 
@@ -157,25 +150,19 @@ class PolkadotApi {
             }
 
             if (unsubscribe) {
-              this.handleTransactionStatus(
-                status,
-                events,
-                unsubscribe,
-                resolve,
-                reject
-              );
+              this.handleTransactionStatus(status, events, unsubscribe, resolve, reject);
             }
           })
-          .then((unsub) => {
+          .then(unsub => {
             unsubscribe = unsub;
           })
-          .catch((error) => {
+          .catch(error => {
             if (unsubscribe) unsubscribe();
             reject(error);
           });
       });
     } catch (error) {
-      console.error("Error in Create Stake:", error);
+      console.error('Error in Create Stake:', error);
       throw error;
     }
   }
@@ -191,7 +178,7 @@ class PolkadotApi {
     subnetId: number;
     amountInRao: bigint;
   }): Promise<string> {
-    if (!this.api) throw new Error("API Not Initialized");
+    if (!this.api) throw new Error('API Not Initialized');
 
     try {
       const wallet = await KeyringService.getWallet(address);
@@ -212,25 +199,19 @@ class PolkadotApi {
             }
 
             if (unsubscribe) {
-              this.handleTransactionStatus(
-                status,
-                events,
-                unsubscribe,
-                resolve,
-                reject
-              );
+              this.handleTransactionStatus(status, events, unsubscribe, resolve, reject);
             }
           })
-          .then((unsub) => {
+          .then(unsub => {
             unsubscribe = unsub;
           })
-          .catch((error) => {
+          .catch(error => {
             if (unsubscribe) unsubscribe();
             reject(error);
           });
       });
     } catch (error) {
-      console.error("Error in Remove Stake:", error);
+      console.error('Error in Remove Stake:', error);
       throw error;
     }
   }
@@ -258,13 +239,7 @@ class PolkadotApi {
         let unsubscribe: (() => void) | undefined;
 
         this.api.tx.subtensorModule
-          .moveStake(
-            fromHotkey,
-            toHotkey,
-            fromSubnetId,
-            toSubnetId,
-            amountInRao
-          )
+          .moveStake(fromHotkey, toHotkey, fromSubnetId, toSubnetId, amountInRao)
           .signAndSend(wallet, {}, (result: ISubmittableResult) => {
             const { status, dispatchError, events = [] } = result;
 
@@ -275,25 +250,19 @@ class PolkadotApi {
             }
 
             if (unsubscribe) {
-              this.handleTransactionStatus(
-                status,
-                events,
-                unsubscribe,
-                resolve,
-                reject
-              );
+              this.handleTransactionStatus(status, events, unsubscribe, resolve, reject);
             }
           })
-          .then((unsub) => {
+          .then(unsub => {
             unsubscribe = unsub;
           })
-          .catch((error) => {
+          .catch(error => {
             if (unsubscribe) unsubscribe();
             reject(error);
           });
       });
     } catch (error) {
-      console.error("Error in Move Stake:", error);
+      console.error('Error in Move Stake:', error);
       throw error;
     }
   }
@@ -305,18 +274,17 @@ class PolkadotApi {
       const balance = raoToTao(BigInt(account.data.free));
       return balance;
     } catch (error) {
-      console.error("Error in Get Balance:", error);
+      console.error('Error in Get Balance:', error);
       return null;
     }
   }
 
-  public async getSubnets(): Promise<Subnet[]> {
+  public async getSubnets(): Promise<Subnet[] | null> {
     try {
-      const result =
-        await this.api.call.subnetInfoRuntimeApi.getAllDynamicInfo();
+      const result = await this.api.call.subnetInfoRuntimeApi.getAllDynamicInfo();
 
       const btSubnets = (result.toJSON() as unknown as BittensorSubnet[])
-        .map((btSubnet) => {
+        .map(btSubnet => {
           if (!btSubnet) return null;
           const subnetName = btSubnet.subnetName
             ? String.fromCharCode(...btSubnet.subnetName)
@@ -326,12 +294,12 @@ class PolkadotApi {
             btSubnet.netuid === 0
               ? 1
               : btSubnet.taoIn && btSubnet.alphaIn && btSubnet.alphaIn > 0
-              ? Number((btSubnet.taoIn / btSubnet.alphaIn).toFixed(4))
-              : 0;
+                ? Number((btSubnet.taoIn / btSubnet.alphaIn).toFixed(4))
+                : 0;
 
           const tokenSymbol = btSubnet.tokenSymbol
             ? String.fromCharCode(...btSubnet.tokenSymbol)
-            : "TAO";
+            : 'TAO';
 
           const subnet: Subnet = {
             ...btSubnet,
@@ -346,18 +314,16 @@ class PolkadotApi {
 
       return btSubnets;
     } catch (error) {
-      console.error("Error in Get Subnets:", error);
-      throw error;
+      console.error('Error in Get Subnets:', error);
+      return null;
     }
   }
 
   public async getSubnet(subnetId: number): Promise<Subnet> {
     try {
-      const result = await this.api.call.subnetInfoRuntimeApi.getDynamicInfo(
-        subnetId
-      );
+      const result = await this.api.call.subnetInfoRuntimeApi.getDynamicInfo(subnetId);
       const btSubnet = result.toJSON() as unknown as BittensorSubnet;
-      if (!btSubnet) throw new Error("Could not find subnet");
+      if (!btSubnet) throw new Error('Could not find subnet');
 
       const subnetName = btSubnet.subnetName
         ? String.fromCharCode(...btSubnet.subnetName)
@@ -367,12 +333,12 @@ class PolkadotApi {
         btSubnet.netuid === 0
           ? 1
           : btSubnet.taoIn && btSubnet.alphaIn && btSubnet.alphaIn > 0
-          ? Number((btSubnet.taoIn / btSubnet.alphaIn).toFixed(4))
-          : 0;
+            ? Number((btSubnet.taoIn / btSubnet.alphaIn).toFixed(4))
+            : 0;
 
       const tokenSymbol = btSubnet.tokenSymbol
         ? String.fromCharCode(...btSubnet.tokenSymbol)
-        : "TAO";
+        : 'TAO';
 
       const subnet: Subnet = {
         ...btSubnet,
@@ -383,16 +349,14 @@ class PolkadotApi {
       };
       return subnet;
     } catch (error) {
-      console.error("Error in Get Subnet:", error);
+      console.error('Error in Get Subnet:', error);
       throw error;
     }
   }
 
   public async getValidators(subnetId: number): Promise<Validator[]> {
     try {
-      const result = await this.api.call.subnetInfoRuntimeApi.getMetagraph(
-        subnetId
-      );
+      const result = await this.api.call.subnetInfoRuntimeApi.getMetagraph(subnetId);
       const btMetagraph = result.toJSON() as unknown as BittensorMetagraph;
       if (
         !btMetagraph ||
@@ -400,32 +364,26 @@ class PolkadotApi {
         !btMetagraph.active ||
         !btMetagraph.validatorPermit
       ) {
-        throw new Error("Invalid Metagraph");
+        throw new Error('Invalid Metagraph');
       }
 
       const validators: Validator[] = [];
       for (let i = 0; i < btMetagraph.coldkeys.length; i++) {
-        if (
-          btMetagraph.active[i] === true &&
-          btMetagraph.validatorPermit[i] === true
-        ) {
+        if (btMetagraph.active[i] === true && btMetagraph.validatorPermit[i] === true) {
           let name = null;
-          const identity = btMetagraph.identities[
-            i
-          ] as unknown as ValidatorIdentity;
+          const identity = btMetagraph.identities[i] as unknown as ValidatorIdentity;
           if (identity) {
-            const hexString = identity.name.replace("0x", "");
+            const hexString = identity.name.replace('0x', '');
             const bytes = new Uint8Array(
-              hexString.match(/.{1,2}/g)?.map((byte) => parseInt(byte, 16)) ||
-                []
+              hexString.match(/.{1,2}/g)?.map(byte => parseInt(byte, 16)) || []
             );
             name = new TextDecoder().decode(bytes);
           }
 
           validators.push({
             index: i,
-            hotkey: btMetagraph.hotkeys[i] || "unknown",
-            coldkey: btMetagraph.coldkeys[i] || "unknown",
+            hotkey: btMetagraph.hotkeys[i] || 'unknown',
+            coldkey: btMetagraph.coldkeys[i] || 'unknown',
             name: name,
           });
         }
@@ -433,7 +391,7 @@ class PolkadotApi {
 
       return validators;
     } catch (error) {
-      console.error("Error in Get Validators:", error);
+      console.error('Error in Get Validators:', error);
       throw error;
     }
   }
@@ -451,18 +409,14 @@ class PolkadotApi {
       case status.isBroadcast:
         break;
       case status.isInBlock: {
-        const extrinsicFailed = events.find(
-          ({ event }) => event.method === "ExtrinsicFailed"
-        );
+        const extrinsicFailed = events.find(({ event }) => event.method === 'ExtrinsicFailed');
         if (extrinsicFailed) {
           unsubscribe();
-          reject(new Error("Transaction failed"));
+          reject(new Error('Transaction failed'));
           return;
         }
 
-        const extrinsicSuccess = events.find(
-          ({ event }) => event.method === "ExtrinsicSuccess"
-        );
+        const extrinsicSuccess = events.find(({ event }) => event.method === 'ExtrinsicSuccess');
         if (extrinsicSuccess) {
           unsubscribe();
           resolve(status.asInBlock.toHex());
