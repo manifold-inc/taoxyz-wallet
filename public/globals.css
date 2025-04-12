@@ -88,6 +88,10 @@
   /* Sybil Colors */
   --color-mf-sybil-500: #57e8b4; /* #56E8B4 */
   --color-mf-sybil-opacity: #2d4b49; /* #56E8B4 */
+
+  /* Red Colors */
+  --color-mf-red-500: #ff5a5a; /* #FF5A5A */
+  --color-mf-red-opacity: #3a2a33; /* #3A2A33 */
 }
 
 body {

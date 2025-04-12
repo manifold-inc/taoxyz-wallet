@@ -1,3 +1,5 @@
+import { motion } from 'framer-motion';
+
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -117,39 +119,49 @@ export const Dashboard = () => {
   }
 
   return (
-    <div className="flex flex-col items-center w-full h-full pt-16 bg-mf-night-500 px-5">
+    <div className="flex flex-col items-center w-full h-full pt-16 bg-mf-night-500">
       {/* Wallet Selection */}
       <WalletSelection />
 
-      <DashboardOverview
-        stakes={stakes}
-        subnets={subnets}
-        freeTao={freeTao ?? 0}
-        taoPrice={taoPrice}
-        priceChangePercentage={priceChangePercentage}
-        isLoading={isLoading}
-      />
-
-      {/* Actions */}
-      <div className="flex justify-between rounded-sm text-sm text-mf-night-500 transition-colors gap-2 pt-3">
-        <button
-          onClick={() => navigate('/add-stake')}
-          className="w-1/3 p-1 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 hover:border-mf-safety-500 border-sm transition-colors cursor-pointer"
-        >
-          <span>Add</span>
-        </button>
-        <button
-          onClick={() => navigate('/move-stake')}
-          className="w-1/3 p-1 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 hover:border-mf-safety-500 border-sm transition-colors cursor-pointer"
-        >
-          <span>Move</span>
-        </button>
-        <button
-          onClick={() => navigate('/transfer')}
-          className="w-1/3 p-1 bg-mf-sybil-500 hover:bg-mf-night-500 hover:text-mf-sybil-500 border-2 border-mf-sybil-500 hover:border-mf-sybil-500 border-sm transition-colors cursor-pointer"
-        >
-          <span>Transfer</span>
-        </button>
+      <div className="border-b border-mf-ash-300 w-full">
+        <div className="flex flex-col w-full gap-3 px-5 py-3">
+          {/* Overview */}
+          <DashboardOverview
+            stakes={stakes}
+            subnets={subnets}
+            freeTao={freeTao ?? 0}
+            taoPrice={taoPrice}
+            priceChangePercentage={priceChangePercentage}
+            isLoading={isLoading}
+          />
+          {/* Action Buttons */}
+          <div className="flex justify-between gap-3 w-full">
+            <motion.button
+              onClick={() => navigate('/add-stake')}
+              className="w-1/3 py-1.5 bg-mf-sybil-opacity rounded-sm cursor-pointer"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <span className="text-sm text-mf-sybil-500">Stake</span>
+            </motion.button>
+            <motion.button
+              onClick={() => navigate('/move-stake')}
+              className="w-1/3 py-1.5 bg-mf-red-opacity rounded-sm cursor-pointer"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <span className="text-sm text-mf-red-500">Unstake</span>
+            </motion.button>
+            <motion.button
+              onClick={() => navigate('/transfer')}
+              className="w-1/3 py-1.5 bg-mf-safety-opacity rounded-sm cursor-pointer"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <span className="text-sm text-mf-safety-500">Transfer</span>
+            </motion.button>
+          </div>
+        </div>
       </div>
 
       {/* Portfolio Overview */}
