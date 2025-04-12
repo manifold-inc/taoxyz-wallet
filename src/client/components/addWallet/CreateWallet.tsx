@@ -40,7 +40,7 @@ const CreateWallet = ({ onSuccess }: CreateWalletProps) => {
         title: `Named ${getWalletName()} by Default`,
         message: 'Edit to Rename Wallet',
       });
-    }, 1250);
+    }, 1000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -118,6 +118,7 @@ const CreateWallet = ({ onSuccess }: CreateWalletProps) => {
   };
 
   const handleBack = (): void => {
+    actions.reset();
     navigate('/welcome', { state: { step: 'GET_STARTED' } });
   };
 
@@ -126,6 +127,7 @@ const CreateWallet = ({ onSuccess }: CreateWalletProps) => {
       onSubmit={handleSubmit}
       className="flex flex-col items-center justify-center w-full px-16 [&>*]:w-full"
     >
+      {/* Name Input */}
       <input
         type="text"
         value={name}
@@ -157,6 +159,7 @@ const CreateWallet = ({ onSuccess }: CreateWalletProps) => {
         </p>
       </div>
 
+      {/* Password Input */}
       <input
         type="password"
         value={password}

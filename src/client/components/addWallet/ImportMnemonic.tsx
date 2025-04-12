@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { useWalletCreation } from '@/client/contexts/WalletCreationContext';
+
 import { NotificationType } from '../../../types/client';
 import { useNotification } from '../../contexts/NotificationContext';
 import KeyringService from '../../services/KeyringService';
@@ -17,6 +19,7 @@ const ImportMnemonic = ({ onContinue }: ImportMnemonicProps) => {
   const [mnemonic, setMnemonic] = useState('');
   const [mnemonicSelected, setMnemonicSelected] = useState(false);
   const [mnemonicStatus, setMnemonicStatus] = useState<string | null>(null);
+  const { actions } = useWalletCreation();
 
   const handleMnemonicChange = (e: React.ChangeEvent<HTMLTextAreaElement>): void => {
     const value = e.target.value;
@@ -87,6 +90,7 @@ const ImportMnemonic = ({ onContinue }: ImportMnemonicProps) => {
   };
 
   const handleBack = (): void => {
+    actions.reset();
     navigate('/welcome', { state: { step: 'GET_STARTED' } });
   };
 
@@ -112,6 +116,7 @@ const ImportMnemonic = ({ onContinue }: ImportMnemonicProps) => {
         }`}
         placeholder="Enter 12 Word Recovery Phrase"
       />
+      {/* Mnemonic Status */}
       <div className="h-8">
         <p hidden={!mnemonicSelected} className={'pt-1.5 text-xs text-mf-safety-500'}>
           {mnemonicStatus}

@@ -8,11 +8,12 @@ export enum Mode {
   DISPLAY_MNEMONIC = 'DISPLAY_MNEMONIC',
   IMPORT_MNEMONIC = 'IMPORT_MNEMONIC',
   VERIFY_MNEMONIC = 'VERIFY_MNEMONIC',
+  NULL = 'NULL_MODE',
 }
 
 interface WalletCreationState {
   mode: Mode;
-  mnemonic: string;
+  mnemonic: string | null;
   wallet: KeyringPair | null;
 }
 
@@ -40,29 +41,26 @@ export const useWalletCreation = () => {
 
 interface WalletCreationProviderProps {
   children: React.ReactNode;
-  initialMode?: Mode;
+  mode?: Mode;
 }
 
-const initialState: WalletCreationState = {
-  mode: Mode.CREATE_WALLET,
-  mnemonic: '',
+const resetState: WalletCreationState = {
+  mode: Mode.NULL,
+  mnemonic: null,
   wallet: null,
 };
 
-export const WalletCreationProvider = ({
-  children,
-  initialMode = Mode.CREATE_WALLET,
-}: WalletCreationProviderProps) => {
+export const WalletCreationProvider = ({ children, mode }: WalletCreationProviderProps) => {
   const [state, setState] = useState<WalletCreationState>({
-    ...initialState,
-    mode: initialMode,
+    ...resetState,
+    mode: mode || Mode.NULL,
   });
 
   const actions: WalletCreationActions = {
     setMode: mode => setState(prev => ({ ...prev, mode })),
     setMnemonic: mnemonic => setState(prev => ({ ...prev, mnemonic })),
     setWallet: wallet => setState(prev => ({ ...prev, wallet })),
-    reset: () => setState(initialState),
+    reset: () => setState(resetState),
   };
 
   return (

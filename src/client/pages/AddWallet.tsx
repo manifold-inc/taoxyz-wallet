@@ -81,37 +81,23 @@ const AddWallet = () => {
         return <ImportWallet onSuccess={handleContinue} />;
 
       case Mode.DISPLAY_MNEMONIC:
-        if (!state.wallet) {
-          showNotification({
-            type: NotificationType.Error,
-            message: 'Could Not Find Wallet',
-          });
-          return null;
-        }
-        return <DisplayMnemonic onContinue={handleDisplayMnemonic} wallet={state.wallet} />;
+        return <DisplayMnemonic onContinue={handleDisplayMnemonic} />;
 
       case Mode.VERIFY_MNEMONIC:
-        if (!state.wallet) {
-          showNotification({
-            type: NotificationType.Error,
-            message: 'Could Not Find Wallet',
-          });
-          return null;
-        }
-        return (
-          <MnemonicVerify
-            onContinue={handleContinue}
-            wallet={state.wallet}
-            mnemonic={state.mnemonic}
-          />
-        );
+        return <MnemonicVerify onContinue={handleContinue} />;
 
       case Mode.IMPORT_MNEMONIC:
         return <ImportMnemonic onContinue={handleImportMnemonic} />;
 
       default:
+        handleBack();
         return null;
     }
+  };
+
+  const handleBack = () => {
+    actions.reset();
+    navigate('/welcome', { state: { step: 'GET_STARTED' } });
   };
 
   return (
@@ -123,7 +109,7 @@ const AddWallet = () => {
           initial={{ y: '100vh', opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: '-100vh', opacity: 0 }}
-          transition={{ duration: 1, ease: 'easeInOut' }}
+          transition={{ duration: 0.4, ease: 'easeOut' }}
         >
           {/* Header */}
           <div className="flex flex-col items-center justify-center gap-3">

@@ -1,10 +1,11 @@
 import { motion } from 'framer-motion';
 
 import { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 
 import type { KeyringPair } from '@polkadot/keyring/types';
+
+import { useWalletCreation } from '@/client/contexts/WalletCreationContext';
 
 import { NotificationType } from '../../../types/client';
 import { useNotification } from '../../contexts/NotificationContext';
@@ -15,10 +16,9 @@ interface ImportWalletProps {
 }
 
 const ImportWallet = ({ onSuccess }: ImportWalletProps) => {
-  const location = useLocation();
-  const { showNotification } = useNotification();
-  const mnemonic = location.state?.mnemonic;
   const navigate = useNavigate();
+  const { showNotification } = useNotification();
+  const { state, actions } = useWalletCreation();
   const [password, setPassword] = useState('');
   const [nameSelected, setNameSelected] = useState(false);
   const [passwordSelected, setPasswordSelected] = useState(false);
@@ -35,11 +35,15 @@ const ImportWallet = ({ onSuccess }: ImportWalletProps) => {
   });
 
   useEffect(() => {
-    showNotification({
-      type: NotificationType.Info,
-      title: `Named ${getWalletName()} by Default`,
-      message: 'Edit to Rename Wallet',
-    });
+    const timer = setTimeout(() => {
+      showNotification({
+        type: NotificationType.Info,
+        title: `Named ${getWalletName()} by Default`,
+        message: 'Edit to Rename Wallet',
+      });
+    }, 1000);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const getWalletNameColor = (): string => {
@@ -96,15 +100,15 @@ const ImportWallet = ({ onSuccess }: ImportWalletProps) => {
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
-    if (!mnemonic) {
+    if (!state.mnemonic) {
       showNotification({
         type: NotificationType.Error,
-        message: 'No mnemonic provided',
+        message: 'Mnemonic Not Found',
       });
       return;
     }
 
-    const wallet = await KeyringService.addWallet(mnemonic, 'Imported Wallet', '');
+    const wallet = await KeyringService.addWallet(state.mnemonic, name, password);
     if (wallet instanceof Error) {
       showNotification({
         type: NotificationType.Error,
@@ -116,6 +120,10 @@ const ImportWallet = ({ onSuccess }: ImportWalletProps) => {
   };
 
   const handleBack = (): void => {
+    if (state.wallet) {
+      KeyringService.deleteWallet(state.wallet.address);
+    }
+    actions.reset();
     navigate('/welcome', { state: { step: 'GET_STARTED' } });
   };
 
@@ -124,6 +132,7 @@ const ImportWallet = ({ onSuccess }: ImportWalletProps) => {
       onSubmit={handleSubmit}
       className="flex flex-col items-center justify-center w-full px-16 [&>*]:w-full"
     >
+      {/* Name Input */}
       <input
         type="text"
         value={name}
@@ -144,6 +153,7 @@ const ImportWallet = ({ onSuccess }: ImportWalletProps) => {
         placeholder="Wallet Name"
         required
       />
+      {/* Name Status */}
       <div className="h-8">
         <p
           hidden={!nameSelected && nameStatus === 'Valid Wallet Name'}
@@ -155,6 +165,7 @@ const ImportWallet = ({ onSuccess }: ImportWalletProps) => {
         </p>
       </div>
 
+      {/* Password Input */}
       <input
         type="password"
         value={password}
@@ -175,6 +186,7 @@ const ImportWallet = ({ onSuccess }: ImportWalletProps) => {
         placeholder="Password"
         required
       />
+      {/* Password Status */}
       <div className="h-8">
         <p
           hidden={!passwordSelected && passwordStatus === 'Valid Password'}
@@ -186,6 +198,7 @@ const ImportWallet = ({ onSuccess }: ImportWalletProps) => {
         </p>
       </div>
 
+      {/* Buttons */}
       <div className="flex flex-col items-center gap-3 pt-4">
         <motion.button
           type="button"

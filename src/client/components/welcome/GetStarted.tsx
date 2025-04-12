@@ -6,14 +6,11 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import Disclaimer from '@/client/components/common/Disclaimer';
-
-enum Mode {
-  CREATE_WALLET = 'CREATE_WALLET',
-  IMPORT_MNEMONIC = 'IMPORT_MNEMONIC',
-}
+import { Mode, useWalletCreation } from '@/client/contexts/WalletCreationContext';
 
 const GetStarted = () => {
   const navigate = useNavigate();
+  const { actions } = useWalletCreation();
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [showWalletText, setShowWalletText] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
@@ -21,7 +18,8 @@ const GetStarted = () => {
   const handleNavigation = (path: string, mode: Mode) => {
     setIsExiting(true);
     setTimeout(() => {
-      navigate(path, { state: { mode } });
+      actions.setMode(mode);
+      navigate(path);
     }, 1000);
   };
 
