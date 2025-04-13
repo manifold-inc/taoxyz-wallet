@@ -7,6 +7,7 @@ import { ChevronDown, ChevronUp, Copy } from 'lucide-react';
 
 import { useEffect, useMemo, useState } from 'react';
 
+import Skeleton from '@/client/components/common/Skeleton';
 import { useNotification } from '@/client/contexts/NotificationContext';
 import { useWallet } from '@/client/contexts/WalletContext';
 import { NotificationType, type Stake, type Subnet } from '@/types/client';
@@ -26,22 +27,6 @@ interface DashboardOverviewProps {
   priceChangePercentage: number | null;
   isLoading: boolean;
 }
-
-const Skeleton = ({ className }: { className: string }) => {
-  return (
-    <motion.div
-      className={`bg-mf-ash-500 rounded-md ${className}`}
-      animate={{
-        opacity: [0.5, 0.8, 0.5],
-      }}
-      transition={{
-        duration: 1.5,
-        repeat: Infinity,
-        ease: 'easeInOut',
-      }}
-    />
-  );
-};
 
 const DashboardOverview = ({
   stakes,
@@ -125,7 +110,7 @@ const DashboardOverview = ({
                 <img src={SilverTao} alt="Silver Tao" className="w-4 h-4 -mt-1" />
               ))}
             {isLoading ? (
-              <Skeleton className="w-32 h-10" />
+              <Skeleton className="w-32 h-8" />
             ) : (
               <p className="text-mf-edge-500 font-semibold text-4xl group-hover:opacity-80">
                 {showUSD
@@ -134,7 +119,9 @@ const DashboardOverview = ({
               </p>
             )}
           </div>
-          <p className="text-mf-edge-500 font-medium text-xs pl-5 -mt-1">Total Balance</p>
+          <p className="text-mf-edge-500 font-medium text-xs pl-5 -mt-1">
+            {isLoading ? <Skeleton className="w-24 h-4 mt-2" /> : 'Total Balance'}
+          </p>
         </div>
 
         <div className="flex flex-col items-start justify-center">
@@ -146,7 +133,7 @@ const DashboardOverview = ({
                 <img src={GreenTao} alt="Green Tao" className="w-4 h-4 -mt-1" />
               ))}
             {isLoading ? (
-              <Skeleton className="w-28 h-8" />
+              <Skeleton className="w-28 h-7" />
             ) : (
               <p className="text-mf-sybil-500 font-semibold text-3xl">
                 {showUSD
@@ -155,7 +142,9 @@ const DashboardOverview = ({
               </p>
             )}
           </div>
-          <p className="text-mf-sybil-500 font-medium text-xs pl-5 -mt-1">Free Balance</p>
+          <p className="text-mf-sybil-500 font-medium text-xs pl-5 -mt-1">
+            {isLoading ? <Skeleton className="w-24 h-4 mt-2" /> : 'Free Balance'}
+          </p>
         </div>
       </motion.div>
 
