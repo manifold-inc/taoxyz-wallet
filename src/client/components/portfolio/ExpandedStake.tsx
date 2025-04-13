@@ -1,4 +1,4 @@
-import taoxyz from '@public/icons/taoxyz.png';
+import { motion } from 'framer-motion';
 import { ChevronUp, Copy } from 'lucide-react';
 
 import { useState } from 'react';
@@ -12,7 +12,7 @@ import StakeChart from './StakeChart';
 
 interface ExpandedStakeProps {
   stake: Stake;
-  subnet: Subnet | null;
+  subnet: Subnet;
   onClose: () => void;
   onRemoveStake: () => void;
   onMoveStake: () => void;
@@ -79,7 +79,7 @@ const ExpandedStake = ({
   const handleCopy = () => {
     navigator.clipboard.writeText(stake.hotkey);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setTimeout(() => setCopied(false), 2500);
     showNotification({
       type: NotificationType.Success,
       message: 'Validator Hotkey Copied',
@@ -97,67 +97,106 @@ const ExpandedStake = ({
   }
 
   return (
-    <div className="mt-2">
-      <div className="border-sm px-3 py-2 border border-mf-safety-500 bg-mf-ash-500">
-        <div className="flex justify-between">
-          <div>
-            <h3 className="text-sm font-semibold text-mf-milk-300">Subnet {stake.netuid}</h3>
+    <div className="w-full">
+      <div className="rounded-md px-3 py-2 bg-mf-ash-500 flex flex-col gap-2">
+        {/* Subnet Name, Price, Stake */}
+        <div className="flex items-center justify-between">
+          {/* Subnet Name, ID */}
+          <div className="flex gap-1">
+            <p className="text-sm font-semibold text-mf-edge-500 truncate max-w-[10ch]">
+              {subnet.name}
+            </p>
+            <span className="text-mf-edge-700 font-semibold text-sm">SN{subnet.id}</span>
           </div>
-          <div className="flex flex-col text-mf-sybil-500 text-xs">
+
+          <div className="flex gap-2">
+            {/* Stake */}
             <div className="flex items-center gap-1">
-              <span className="text-mf-milk-300">Stake</span>
-              <span>{(stake.stake / 1e9).toFixed(4)}</span>
-              <span className="text-mf-safety-500">α</span>
+              <div className="rounded-full flex items-center bg-mf-sybil-opacity px-2 py-0.5">
+                <span className="text-mf-sybil-500 text-xs">Stake</span>
+              </div>
+              <span className="text-mf-edge-500 text-xs">{(stake.stake / 1e9).toFixed(4)}α</span>
             </div>
+
+            {/* Price */}
             <div className="flex items-center gap-1">
-              <span className="text-mf-milk-300">Price</span>
-              <span className="flex items-center gap-1">
-                {subnet?.price ? subnet.price.toFixed(4) : '-'}
-                <img src={taoxyz} alt="taoxyz" className="w-3 h-3" />
+              <div className="rounded-full flex items-center bg-mf-sybil-opacity px-2 py-0.5">
+                <span className="text-mf-sybil-500 text-xs">Price</span>
+              </div>
+              <span className="text-mf-edge-500 text-xs">
+                {subnet.price ? subnet.price.toFixed(4) : '-'}τ
               </span>
             </div>
           </div>
         </div>
 
+        {/* Chart */}
         {isLoading ? (
           <div className="h-28 flex items-center justify-center">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-mf-milk-300" />
           </div>
         ) : priceData.length > 0 ? (
-          <div className="h-28">
+          <div className="h-32">
             <StakeChart data={priceData} subnetId={stake.netuid} />
           </div>
         ) : null}
 
-        <div className="text-mf-milk-300 flex items-center justify-between">
+        {/* Validator */}
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-mf-milk-300">Validator</span>
-            <p>
-              {stake.hotkey.slice(0, 6)}...{stake.hotkey.slice(-6)}
-            </p>
-            <button onClick={handleCopy} className="transition-colors cursor-pointer">
-              <Copy className={`w-3 h-3 ${copied ? 'text-mf-sybil-500' : 'text-mf-milk-300'}`} />
-            </button>
+            <div className="rounded-full flex items-center bg-mf-sybil-opacity px-2 py-0.5">
+              <p className="text-mf-sybil-500 text-xs">Validator</p>
+            </div>
+            <div className="flex items-center gap-0.5">
+              <span className="text-mf-edge-500 text-xs">
+                {stake.hotkey.slice(0, 6)}...{stake.hotkey.slice(-6)}
+              </span>
+              <motion.button
+                onClick={handleCopy}
+                className="transition-colors cursor-pointer"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Copy className={`w-3 h-3 ${copied ? 'text-mf-sybil-500' : 'text-mf-edge-500'}`} />
+              </motion.button>
+            </div>
           </div>
-          <button onClick={onClose} className="p-1 cursor-pointer">
-            <ChevronUp className="w-5 h-5 text-mf-milk-300" />
-          </button>
+          <motion.button
+            onClick={onClose}
+            className="p-1 cursor-pointer"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <ChevronUp className="w-4 h-4 text-mf-edge-500" />
+          </motion.button>
         </div>
       </div>
 
-      <div className="flex mt-4 space-x-4">
-        <button
-          onClick={onRemoveStake}
-          className="flex-1 p-2 border-sm bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 hover:border-mf-safety-500 transition-colors cursor-pointer"
+      {/* Action Buttons */}
+      <div className="flex gap-2 pt-2">
+        <motion.button
+          className="cursor-pointer w-1/3 py-1.5 bg-mf-sybil-opacity rounded-sm text-mf-sybil-500 border border-mf-sybil-opacity hover:border-mf-sybil-500 transition-colors hover:text-mf-edge-500"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
-          Remove
-        </button>
-        <button
+          Stake
+        </motion.button>
+        <motion.button
+          onClick={onRemoveStake}
+          className="cursor-pointer w-1/3 py-1.5 bg-mf-red-opacity rounded-sm text-mf-red-500 border border-mf-red-opacity hover:border-mf-red-500 transition-colors hover:text-mf-edge-500"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          Unstake
+        </motion.button>
+        <motion.button
           onClick={onMoveStake}
-          className="flex-1 p-2 border-sm bg-mf-sybil-500 hover:bg-mf-night-500 hover:text-mf-sybil-500 border-2 border-mf-sybil-500 hover:border-mf-sybil-500 transition-colors cursor-pointer"
+          className="cursor-pointer w-1/3 py-1.5 bg-mf-safety-opacity rounded-sm text-mf-safety-500 border border-mf-safety-opacity hover:border-mf-safety-500 transition-colors hover:text-mf-edge-500"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
           Move
-        </button>
+        </motion.button>
       </div>
     </div>
   );

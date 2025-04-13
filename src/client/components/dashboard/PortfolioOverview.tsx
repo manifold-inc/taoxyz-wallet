@@ -137,7 +137,7 @@ const PortfolioOverview = ({ stakes, subnets, address, isLoading, onRefresh }: P
       {selectedStake ? (
         <ExpandedStake
           stake={selectedStake}
-          subnet={selectedSubnet}
+          subnet={selectedSubnet as Subnet}
           onClose={() => {
             setSelectedStake(null);
             setSelectedSubnet(null);

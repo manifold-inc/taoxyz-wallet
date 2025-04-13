@@ -75,7 +75,7 @@ const DashboardOverview = ({
     if (!currentAddress) return;
     await navigator.clipboard.writeText(currentAddress);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setTimeout(() => setCopied(false), 2500);
     showNotification({
       type: NotificationType.Success,
       message: 'Address Copied',
