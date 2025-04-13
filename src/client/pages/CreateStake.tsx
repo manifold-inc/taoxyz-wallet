@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import SubnetSelection from '@/client/components/addStake/SubnetSelection';
+import SubnetSelection from '@/client/components/common/SubnetSelection';
 import { useNotification } from '@/client/contexts/NotificationContext';
 import { usePolkadotApi } from '@/client/contexts/PolkadotApiContext';
 import type { Subnet } from '@/types/client';

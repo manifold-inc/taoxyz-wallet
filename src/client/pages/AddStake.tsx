@@ -7,7 +7,7 @@ import { NotificationType } from '../../types/client';
 import type { Subnet, Validator } from '../../types/client';
 import { formatNumber } from '../../utils/utils';
 import ConfirmAddStake from '../components/addStake/ConfirmAddStake';
-import SubnetSelection from '../components/addStake/SubnetSelection';
+import SubnetSelection from '../components/common/SubnetSelection';
 import ValidatorSelection from '../components/common/ValidatorSelection';
 import { useNotification } from '../contexts/NotificationContext';
 import { usePolkadotApi } from '../contexts/PolkadotApiContext';
