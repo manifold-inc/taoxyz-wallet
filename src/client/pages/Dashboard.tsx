@@ -45,7 +45,7 @@ export const Dashboard = () => {
   const [taoPrice, setTaoPrice] = useState<number | null>(null);
   const [priceChangePercentage, setPriceChangePercentage] = useState<number | null>(null);
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const prevAddressRef = useRef<string | null>(null);
 
   const fetchData = async (address: string, forceRefresh = false): Promise<void> => {
@@ -87,7 +87,6 @@ export const Dashboard = () => {
       setSubnets(subnets);
       setFreeTao(freeTao);
       setStakes(stakes);
-      console.log('Dashboard Data', { subnets, freeTao, stakes });
     } finally {
       setIsLoading(false);
     }
@@ -129,7 +128,7 @@ export const Dashboard = () => {
           <DashboardOverview
             stakes={stakes}
             subnets={subnets}
-            freeTao={freeTao ?? 0}
+            freeTao={freeTao}
             taoPrice={taoPrice}
             priceChangePercentage={priceChangePercentage}
             isLoading={isLoading}

@@ -5,37 +5,65 @@ import SilverTao from '@public/assets/silver-tao.svg';
 import { motion } from 'framer-motion';
 import { ChevronDown, ChevronUp, Copy } from 'lucide-react';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { useNotification } from '@/client/contexts/NotificationContext';
 import { useWallet } from '@/client/contexts/WalletContext';
 import { NotificationType, type Stake, type Subnet } from '@/types/client';
 import { formatNumber, raoToTao } from '@/utils/utils';
 
+interface Balances {
+  totalTao: number | null;
+  totalInUSD: number | null;
+  freeInUSD: number | null;
+}
+
 interface DashboardOverviewProps {
   stakes: Stake[];
   subnets: Subnet[];
-  freeTao: number;
+  freeTao: number | null;
   taoPrice: number | null;
   priceChangePercentage: number | null;
   isLoading: boolean;
 }
 
+const Skeleton = ({ className }: { className: string }) => {
+  return (
+    <motion.div
+      className={`bg-mf-ash-500 rounded-md ${className}`}
+      animate={{
+        opacity: [0.5, 0.8, 0.5],
+      }}
+      transition={{
+        duration: 1.5,
+        repeat: Infinity,
+        ease: 'easeInOut',
+      }}
+    />
+  );
+};
+
 const DashboardOverview = ({
   stakes,
   subnets,
-  freeTao = 0,
+  freeTao,
   taoPrice,
   priceChangePercentage,
   isLoading = true,
 }: DashboardOverviewProps) => {
   const { currentAddress } = useWallet();
   const { showNotification } = useNotification();
-  const [totalTao, setTotalTao] = useState<number | null>(null);
+  const [balances, setBalances] = useState<Balances>({
+    totalTao: null,
+    totalInUSD: null,
+    freeInUSD: null,
+  });
   const [copied, setCopied] = useState(false);
   const [showUSD, setShowUSD] = useState(false);
 
-  const calculateTotalTao = (): void => {
+  const calculatedTotalTao = useMemo((): number | null => {
+    if (isLoading || freeTao === null) return null;
+
     let total = freeTao;
     for (const stake of stakes) {
       const subnet = subnets.find(subnet => subnet.id === stake.netuid) as Subnet;
@@ -44,9 +72,19 @@ const DashboardOverview = ({
       }
     }
 
-    console.log('Overview Data', { total, freeTao, stakes, subnets });
-    setTotalTao(total);
-  };
+    return total;
+  }, [stakes, subnets, freeTao, isLoading]);
+
+  const updatedBalances = useMemo(() => {
+    if (isLoading || calculatedTotalTao === null || taoPrice === null || freeTao === null)
+      return null;
+
+    return {
+      totalTao: calculatedTotalTao,
+      totalInUSD: calculatedTotalTao * taoPrice,
+      freeInUSD: freeTao * taoPrice,
+    };
+  }, [isLoading, calculatedTotalTao, taoPrice, freeTao]);
 
   const handleCopy = async (): Promise<void> => {
     if (!currentAddress) return;
@@ -63,16 +101,11 @@ const DashboardOverview = ({
     setShowUSD(prev => !prev);
   };
 
-  const totalInUSD = (totalTao ?? 0) * (taoPrice ?? 0);
-  const freeInUSD = freeTao * (taoPrice ?? 0);
-
   useEffect(() => {
-    void calculateTotalTao();
-  }, [currentAddress, stakes, subnets, freeTao]);
-
-  if (isLoading) {
-    console.log('isLoading');
-  }
+    if (updatedBalances) {
+      setBalances(updatedBalances);
+    }
+  }, [updatedBalances]);
 
   return (
     <div className="w-full h-full rounded-md bg-mf-sybil-opacity p-3 flex justify-between">
@@ -85,28 +118,42 @@ const DashboardOverview = ({
       >
         <div className="flex flex-col items-start justify-center">
           <div className="flex justify-center items-center gap-0.5">
-            {showUSD ? (
-              <img src={SilverDollar} alt="Silver Dollar" className="w-4 h-4 -mt-1" />
+            {!isLoading &&
+              (showUSD ? (
+                <img src={SilverDollar} alt="Silver Dollar" className="w-4 h-4 -mt-1" />
+              ) : (
+                <img src={SilverTao} alt="Silver Tao" className="w-4 h-4 -mt-1" />
+              ))}
+            {isLoading ? (
+              <Skeleton className="w-32 h-10" />
             ) : (
-              <img src={SilverTao} alt="Silver Tao" className="w-4 h-4 -mt-1" />
+              <p className="text-mf-edge-500 font-semibold text-4xl group-hover:opacity-80">
+                {showUSD
+                  ? `${formatNumber(balances.totalInUSD ?? 0).toFixed(2)}`
+                  : formatNumber(balances.totalTao ?? 0)}
+              </p>
             )}
-            <p className="text-mf-edge-500 font-semibold text-4xl group-hover:opacity-80">
-              {showUSD ? `${formatNumber(totalInUSD).toFixed(2)}` : formatNumber(totalTao ?? 0)}
-            </p>
           </div>
           <p className="text-mf-edge-500 font-medium text-xs pl-5 -mt-1">Total Balance</p>
         </div>
 
         <div className="flex flex-col items-start justify-center">
           <div className="flex justify-center items-center gap-0.5">
-            {showUSD ? (
-              <img src={GreenDollar} alt="Green Dollar" className="w-4 h-4 -mt-1" />
+            {!isLoading &&
+              (showUSD ? (
+                <img src={GreenDollar} alt="Green Dollar" className="w-4 h-4 -mt-1" />
+              ) : (
+                <img src={GreenTao} alt="Green Tao" className="w-4 h-4 -mt-1" />
+              ))}
+            {isLoading ? (
+              <Skeleton className="w-28 h-8" />
             ) : (
-              <img src={GreenTao} alt="Green Tao" className="w-4 h-4 -mt-1" />
+              <p className="text-mf-sybil-500 font-semibold text-3xl">
+                {showUSD
+                  ? `${formatNumber(balances.freeInUSD ?? 0).toFixed(2)}`
+                  : formatNumber(freeTao ?? 0)}
+              </p>
             )}
-            <p className="text-mf-sybil-500 font-semibold text-3xl">
-              {showUSD ? `${formatNumber(freeInUSD).toFixed(2)}` : formatNumber(freeTao)}
-            </p>
           </div>
           <p className="text-mf-sybil-500 font-medium text-xs pl-5 -mt-1">Free Balance</p>
         </div>
@@ -115,34 +162,49 @@ const DashboardOverview = ({
       {/* Address, TAO Price, TAO Percentage Change */}
       <div className="flex flex-col items-end justify-between w-1/3">
         <div className="flex items-center justify-end gap-1">
-          <p className="text-mf-sybil-500 text-sm font-light">
-            {currentAddress?.slice(0, 4)}...{currentAddress?.slice(-4)}
-          </p>
-          <motion.button
-            onClick={handleCopy}
-            className="cursor-pointer bg-mf-ash-500 rounded-full p-1.5"
-            whileHover={{ scale: 1.05 }}
-          >
-            <Copy
-              className={`w-3 h-3 cursor-pointer ${
-                copied ? 'text-mf-edge-500' : 'text-mf-sybil-500'
-              }`}
-            />
-          </motion.button>
+          {isLoading ? (
+            <Skeleton className="w-24 h-4" />
+          ) : (
+            <>
+              <p className="text-mf-sybil-500 text-sm font-light">
+                {currentAddress?.slice(0, 4)}...{currentAddress?.slice(-4)}
+              </p>
+              <motion.button
+                onClick={handleCopy}
+                className="cursor-pointer bg-mf-ash-500 rounded-full p-1.5"
+                whileHover={{ scale: 1.05 }}
+              >
+                <Copy
+                  className={`w-3 h-3 cursor-pointer ${
+                    copied ? 'text-mf-edge-500' : 'text-mf-sybil-500'
+                  }`}
+                />
+              </motion.button>
+            </>
+          )}
         </div>
 
         <div className="flex flex-col items-end">
-          <p
-            className={`text-sm font-light flex items-center ${priceChangePercentage && priceChangePercentage >= 0 ? 'text-mf-sybil-500' : 'text-mf-safety-500'}`}
-          >
-            {priceChangePercentage && priceChangePercentage >= 0 ? (
-              <ChevronUp className="w-4 h-4" />
-            ) : (
-              <ChevronDown className="w-4 h-4" />
-            )}
-            {Math.abs(priceChangePercentage ?? 0).toFixed(2)}
-          </p>
-          <p className="text-mf-edge-500 text-sm font-light">${taoPrice?.toFixed(2)}</p>
+          {isLoading ? (
+            <>
+              <Skeleton className="w-16 h-4 mb-1" />
+              <Skeleton className="w-20 h-4" />
+            </>
+          ) : (
+            <>
+              <p
+                className={`text-sm font-light flex items-center ${priceChangePercentage && priceChangePercentage >= 0 ? 'text-mf-sybil-500' : 'text-mf-safety-500'}`}
+              >
+                {priceChangePercentage && priceChangePercentage >= 0 ? (
+                  <ChevronUp className="w-4 h-4" />
+                ) : (
+                  <ChevronDown className="w-4 h-4" />
+                )}
+                {Math.abs(priceChangePercentage ?? 0).toFixed(2)}
+              </p>
+              <p className="text-mf-edge-500 text-sm font-light">${taoPrice?.toFixed(2)}</p>
+            </>
+          )}
         </div>
       </div>
     </div>
