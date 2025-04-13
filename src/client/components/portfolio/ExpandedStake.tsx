@@ -98,9 +98,9 @@ const ExpandedStake = ({
 
   return (
     <div className="w-full">
-      <div className="rounded-md px-3 py-2 bg-mf-ash-500 flex flex-col gap-2">
+      <div className="w-full rounded-md py-2 bg-mf-ash-500 flex flex-col gap-2">
         {/* Subnet Name, Price, Stake */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between px-3">
           {/* Subnet Name, ID */}
           <div className="flex gap-1">
             <p className="text-sm font-semibold text-mf-edge-500 truncate max-w-[10ch]">
@@ -136,13 +136,15 @@ const ExpandedStake = ({
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-mf-milk-300" />
           </div>
         ) : priceData.length > 0 ? (
-          <div className="h-32">
-            <StakeChart data={priceData} />
+          <div className="h-32 border-b border-mf-ash-300">
+            <div className="px-3 h-full">
+              <StakeChart data={priceData} />
+            </div>
           </div>
         ) : null}
 
         {/* Validator */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between px-3">
           <div className="flex items-center gap-2">
             <div className="rounded-full flex items-center bg-mf-sybil-opacity px-2 py-0.5">
               <p className="text-mf-sybil-500 text-xs">Validator</p>
