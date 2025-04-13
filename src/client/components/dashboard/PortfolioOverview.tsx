@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import ConfirmAction from '@/client/components/common/ConfirmAction';
+import Skeleton from '@/client/components/common/Skeleton';
 import ExpandedStake from '@/client/components/portfolio/ExpandedStake';
 import StakeOverview from '@/client/components/portfolio/StakeOverview';
 import { useLock } from '@/client/contexts/LockContext';
@@ -146,16 +147,36 @@ const PortfolioOverview = ({ stakes, subnets, address, isLoading, onRefresh }: P
         />
       ) : (
         <div className="w-full">
-          <div className="gap-3">
-            {stakes.map((stake, index) => (
-              <StakeOverview
-                key={index}
-                stake={stake}
-                subnet={subnets.find(subnet => subnet.id === stake.netuid) as Subnet}
-                onClick={() => handleStakeSelect(stake)}
-              />
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="flex flex-col gap-3">
+              {[1, 2, 3].map(index => (
+                <div key={index} className="w-full rounded-md p-3 bg-mf-ash-500">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-1">
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-4 w-12" />
+                    </div>
+                    <Skeleton className="h-4 w-4" />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-4 w-16" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {stakes.map((stake, index) => (
+                <StakeOverview
+                  key={index}
+                  stake={stake}
+                  subnet={subnets.find(subnet => subnet.id === stake.netuid) as Subnet}
+                  onClick={() => handleStakeSelect(stake)}
+                />
+              ))}
+            </div>
+          )}
         </div>
       )}
     </>

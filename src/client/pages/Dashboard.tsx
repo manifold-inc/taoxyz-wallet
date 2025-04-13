@@ -164,7 +164,7 @@ export const Dashboard = () => {
       </div>
 
       {/* Portfolio Overview */}
-      <div className="w-full px-5">
+      <div className="w-full px-5 py-3">
         {currentAddress && (
           <PortfolioOverview
             stakes={stakes}

@@ -110,7 +110,7 @@ const DashboardOverview = ({
                 <img src={SilverTao} alt="Silver Tao" className="w-4 h-4 -mt-1" />
               ))}
             {isLoading ? (
-              <Skeleton className="w-32 h-8" />
+              <Skeleton className="w-32 h-8 bg-mf-ash-500" />
             ) : (
               <p className="text-mf-edge-500 font-semibold text-4xl group-hover:opacity-80">
                 {showUSD
@@ -120,7 +120,7 @@ const DashboardOverview = ({
             )}
           </div>
           <div className="text-mf-edge-500 font-medium text-xs pl-5 -mt-1">
-            {isLoading ? <Skeleton className="w-24 h-4 mt-2" /> : 'Total Balance'}
+            {isLoading ? <Skeleton className="w-24 h-4 mt-2 bg-mf-ash-500" /> : 'Total Balance'}
           </div>
         </div>
 
@@ -133,7 +133,7 @@ const DashboardOverview = ({
                 <img src={GreenTao} alt="Green Tao" className="w-4 h-4 -mt-1" />
               ))}
             {isLoading ? (
-              <Skeleton className="w-28 h-7" />
+              <Skeleton className="w-28 h-7 bg-mf-ash-500" />
             ) : (
               <p className="text-mf-sybil-500 font-semibold text-3xl">
                 {showUSD
@@ -143,7 +143,7 @@ const DashboardOverview = ({
             )}
           </div>
           <div className="text-mf-sybil-500 font-medium text-xs pl-5 -mt-1">
-            {isLoading ? <Skeleton className="w-24 h-4 mt-2" /> : 'Free Balance'}
+            {isLoading ? <Skeleton className="w-24 h-4 mt-2 bg-mf-ash-500" /> : 'Free Balance'}
           </div>
         </div>
       </motion.div>
@@ -152,7 +152,7 @@ const DashboardOverview = ({
       <div className="flex flex-col items-end justify-between w-1/3">
         <div className="flex items-center justify-end gap-1">
           {isLoading ? (
-            <Skeleton className="w-24 h-4" />
+            <Skeleton className="w-24 h-4 bg-mf-ash-500" />
           ) : (
             <>
               <p className="text-mf-sybil-500 text-sm font-light">
@@ -176,8 +176,8 @@ const DashboardOverview = ({
         <div className="flex flex-col items-end">
           {isLoading ? (
             <>
-              <Skeleton className="w-16 h-4 mb-1" />
-              <Skeleton className="w-20 h-4" />
+              <Skeleton className="w-16 h-4 mb-1 bg-mf-ash-500" />
+              <Skeleton className="w-20 h-4 bg-mf-ash-500" />
             </>
           ) : (
             <>
