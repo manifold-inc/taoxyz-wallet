@@ -119,9 +119,9 @@ const DashboardOverview = ({
               </p>
             )}
           </div>
-          <p className="text-mf-edge-500 font-medium text-xs pl-5 -mt-1">
+          <div className="text-mf-edge-500 font-medium text-xs pl-5 -mt-1">
             {isLoading ? <Skeleton className="w-24 h-4 mt-2" /> : 'Total Balance'}
-          </p>
+          </div>
         </div>
 
         <div className="flex flex-col items-start justify-center">
@@ -142,9 +142,9 @@ const DashboardOverview = ({
               </p>
             )}
           </div>
-          <p className="text-mf-sybil-500 font-medium text-xs pl-5 -mt-1">
+          <div className="text-mf-sybil-500 font-medium text-xs pl-5 -mt-1">
             {isLoading ? <Skeleton className="w-24 h-4 mt-2" /> : 'Free Balance'}
-          </p>
+          </div>
         </div>
       </motion.div>
 

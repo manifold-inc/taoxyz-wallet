@@ -80,12 +80,12 @@ const LockScreen = ({ isLocked }: LockScreenProps) => {
           animate={{ y: isExiting ? '-100%' : 0 }}
           transition={{ duration: 0.5, ease: 'easeInOut' }}
         >
-          <div className="flex flex-col items-center justify-start w-full h-full pt-16 gap-10">
+          <div className="flex flex-col items-center justify-start w-full h-full pt-12 gap-10">
             {/* Wallet Selection */}
             <WalletSelection />
 
             {/* Header */}
-            <div className="flex flex-col items-center justify-center gap-3">
+            <div className="flex flex-col items-center justify-center gap-3 pt-4">
               <img src={taoxyz} alt="Taoxyz Logo" className="w-8 h-8" />
               <p className="text-mf-edge-500 text-2xl font-bold blinker-font">UNLOCK WALLET</p>
             </div>
@@ -117,7 +117,7 @@ const LockScreen = ({ isLocked }: LockScreenProps) => {
                 <motion.button
                   type="submit"
                   disabled={password.length < 8}
-                  className="rounded-full border-sm text-sm text-mf-sybil-500 bg-mf-sybil-opacity border border-mf-sybil-opacity hover:border-mf-sybil-500 transition-colors px-6 py-1 disabled:text-mf-edge-700 disabled:bg-mf-night-300 disabled:border-mf-night-300 disabled:cursor-not-allowed"
+                  className="rounded-full cursor-pointer border-sm text-sm text-mf-sybil-500 bg-mf-sybil-opacity border border-mf-sybil-opacity hover:border-mf-sybil-500 transition-colors px-6 py-1 disabled:text-mf-edge-700 disabled:bg-mf-night-300 disabled:border-mf-night-300 disabled:cursor-not-allowed"
                   whileHover={{ scale: password.length >= 8 ? 1.05 : undefined }}
                   whileTap={{ scale: password.length >= 8 ? 0.95 : undefined }}
                 >
