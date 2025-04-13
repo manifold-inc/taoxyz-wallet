@@ -131,17 +131,11 @@ const ExpandedStake = ({
         </div>
 
         {/* Chart */}
-        {isLoading ? (
-          <div className="h-32 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-mf-milk-300" />
+        <div className="h-32 border-b border-mf-ash-300">
+          <div className="px-3 h-full">
+            <StakeChart data={priceData} isLoading={isLoading} />
           </div>
-        ) : priceData.length > 0 ? (
-          <div className="h-32 border-b border-mf-ash-300">
-            <div className="px-3 h-full">
-              <StakeChart data={priceData} />
-            </div>
-          </div>
-        ) : null}
+        </div>
 
         {/* Validator */}
         <div className="flex items-center justify-between px-3">

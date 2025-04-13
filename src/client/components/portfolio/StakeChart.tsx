@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 interface StakeChartProps {
   data: PriceResponse[];
+  isLoading: boolean;
 }
 
 interface PriceResponse {
@@ -18,7 +19,52 @@ interface ChartDataPoint {
   displayDate: string;
 }
 
-const StakeChart = ({ data }: StakeChartProps) => {
+const SkeletonChart = () => {
+  const skeletonData = Array.from({ length: 10 }, (_, i) => ({
+    // Create a wave pattern
+    price: Math.sin(i * 0.6) * 0.3 + 0.5,
+    displayDate: `${i + 1}`,
+  }));
+
+  return (
+    <ResponsiveContainer width="100%" height="100%">
+      <AreaChart data={skeletonData} margin={{ top: 10, right: 0, left: -17, bottom: 0 }}>
+        <XAxis
+          dataKey="displayDate"
+          tick={{ fill: '#374151', fontSize: 10 }}
+          axisLine={{ stroke: '#374151' }}
+          tickLine={{ stroke: '#374151' }}
+          tickSize={2}
+          tickMargin={5}
+          dy={5}
+        />
+        <YAxis
+          domain={[0, 1]}
+          tick={{ fill: '#374151', fontSize: 10 }}
+          axisLine={{ stroke: '#374151' }}
+          tickLine={{ stroke: '#374151' }}
+          width={60}
+          tickSize={2}
+          tickMargin={2}
+          tickCount={5}
+          dx={-5}
+        />
+        <Area
+          type="monotoneX"
+          dataKey="price"
+          stroke="#4B5563"
+          strokeWidth={2}
+          fillOpacity={0.2}
+          fill="#4B5563"
+          animationDuration={0}
+          className="animate-pulse"
+        />
+      </AreaChart>
+    </ResponsiveContainer>
+  );
+};
+
+const StakeChart = ({ data, isLoading = true }: StakeChartProps) => {
   const [priceData, setPriceData] = useState<ChartDataPoint[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -70,9 +116,16 @@ const StakeChart = ({ data }: StakeChartProps) => {
     setIsInitialized(true);
   };
 
-  if (!isInitialized) {
+  if (!isInitialized && data.length > 0) {
     void init();
-    setIsInitialized(true);
+  }
+
+  if (isLoading) {
+    return <SkeletonChart />;
+  }
+
+  if (!priceData.length) {
+    return null;
   }
 
   return (
