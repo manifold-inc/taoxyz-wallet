@@ -132,12 +132,12 @@ const ExpandedStake = ({
 
         {/* Chart */}
         {isLoading ? (
-          <div className="h-28 flex items-center justify-center">
+          <div className="h-32 flex items-center justify-center">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-mf-milk-300" />
           </div>
         ) : priceData.length > 0 ? (
           <div className="h-32">
-            <StakeChart data={priceData} subnetId={stake.netuid} />
+            <StakeChart data={priceData} />
           </div>
         ) : null}
 
