@@ -1,15 +1,17 @@
-import { useState } from "react";
-import { ChevronUp, Copy } from "lucide-react";
+import taoxyz from '@public/icons/taoxyz.png';
+import { ChevronUp, Copy } from 'lucide-react';
 
-import { useNotification } from "../../contexts/NotificationContext";
-import StakeChart from "./StakeChart";
-import { raoToTao } from "../../../utils/utils";
-import { NotificationType } from "../../../types/client";
-import type { StakeTransaction, Subnet } from "../../../types/client";
-import taoxyz from "../../../../public/icons/taoxyz.png";
+import { useState } from 'react';
+
+import { useNotification } from '@/client/contexts/NotificationContext';
+import { NotificationType } from '@/types/client';
+import type { Stake, Subnet } from '@/types/client';
+import { raoToTao } from '@/utils/utils';
+
+import StakeChart from './StakeChart';
 
 interface ExpandedStakeProps {
-  stake: StakeTransaction;
+  stake: Stake;
   subnet: Subnet | null;
   onClose: () => void;
   onRemoveStake: () => void;
@@ -41,19 +43,19 @@ const ExpandedStake = ({
   const fetchSubnetPrice = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("https://tao.xyz/api/subnets/price", {
-        method: "POST",
+      const response = await fetch('https://tao.xyz/api/subnets/price', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           allSubnets: false,
-          netuid: stake.subnetId,
+          netuid: stake.netuid,
         }),
       });
 
       const data: ApiResponse = await response.json();
-      const convertedData = data.data.map((price) => {
+      const convertedData = data.data.map(price => {
         const converted = {
           netuid: price.netuid,
           price:
@@ -67,7 +69,7 @@ const ExpandedStake = ({
     } catch {
       showNotification({
         type: NotificationType.Error,
-        message: "Failed to Fetch Subnet Price History",
+        message: 'Failed to Fetch Subnet Price History',
       });
     } finally {
       setIsLoading(false);
@@ -75,12 +77,12 @@ const ExpandedStake = ({
   };
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(stake.validatorHotkey);
+    navigator.clipboard.writeText(stake.hotkey);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
     showNotification({
       type: NotificationType.Success,
-      message: "Validator Hotkey Copied",
+      message: 'Validator Hotkey Copied',
     });
   };
 
@@ -99,20 +101,18 @@ const ExpandedStake = ({
       <div className="border-sm px-3 py-2 border border-mf-safety-500 bg-mf-ash-500">
         <div className="flex justify-between">
           <div>
-            <h3 className="text-sm font-semibold text-mf-milk-300">
-              Subnet {stake.subnetId}
-            </h3>
+            <h3 className="text-sm font-semibold text-mf-milk-300">Subnet {stake.netuid}</h3>
           </div>
           <div className="flex flex-col text-mf-sybil-500 text-xs">
             <div className="flex items-center gap-1">
               <span className="text-mf-milk-300">Stake</span>
-              <span>{(stake.tokens / 1e9).toFixed(4)}</span>
+              <span>{(stake.stake / 1e9).toFixed(4)}</span>
               <span className="text-mf-safety-500">α</span>
             </div>
             <div className="flex items-center gap-1">
               <span className="text-mf-milk-300">Price</span>
               <span className="flex items-center gap-1">
-                {subnet?.price ? subnet.price.toFixed(4) : "-"}
+                {subnet?.price ? subnet.price.toFixed(4) : '-'}
                 <img src={taoxyz} alt="taoxyz" className="w-3 h-3" />
               </span>
             </div>
@@ -125,7 +125,7 @@ const ExpandedStake = ({
           </div>
         ) : priceData.length > 0 ? (
           <div className="h-28">
-            <StakeChart data={priceData} subnetId={stake.subnetId} />
+            <StakeChart data={priceData} subnetId={stake.netuid} />
           </div>
         ) : null}
 
@@ -133,18 +133,10 @@ const ExpandedStake = ({
           <div className="flex items-center gap-2">
             <span className="text-mf-milk-300">Validator</span>
             <p>
-              {stake.validatorHotkey.slice(0, 6)}...
-              {stake.validatorHotkey.slice(-6)}
+              {stake.hotkey.slice(0, 6)}...{stake.hotkey.slice(-6)}
             </p>
-            <button
-              onClick={handleCopy}
-              className="transition-colors cursor-pointer"
-            >
-              <Copy
-                className={`w-3 h-3 ${
-                  copied ? "text-mf-sybil-500" : "text-mf-milk-300"
-                }`}
-              />
+            <button onClick={handleCopy} className="transition-colors cursor-pointer">
+              <Copy className={`w-3 h-3 ${copied ? 'text-mf-sybil-500' : 'text-mf-milk-300'}`} />
             </button>
           </div>
           <button onClick={onClose} className="p-1 cursor-pointer">

@@ -1,43 +1,43 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-import { usePolkadotApi } from "../../contexts/PolkadotApiContext";
-import { useNotification } from "../../contexts/NotificationContext";
-import { useLock } from "../../contexts/LockContext";
-import KeyringService from "../../services/KeyringService";
-import MessageService from "../../services/MessageService";
-import StakeOverview from "../portfolio/StakeOverview";
-import ExpandedStake from "../portfolio/ExpandedStake";
-import ConfirmAction from "../common/ConfirmAction";
-import { formatNumber } from "../../../utils/utils";
-import { NotificationType } from "../../../types/client";
-import type { StakeTransaction, Subnet } from "../../../types/client";
+import ConfirmAction from '@/client/components/common/ConfirmAction';
+import ExpandedStake from '@/client/components/portfolio/ExpandedStake';
+import StakeOverview from '@/client/components/portfolio/StakeOverview';
+import { useLock } from '@/client/contexts/LockContext';
+import { useNotification } from '@/client/contexts/NotificationContext';
+import { usePolkadotApi } from '@/client/contexts/PolkadotApiContext';
+import KeyringService from '@/client/services/KeyringService';
+import MessageService from '@/client/services/MessageService';
+import { NotificationType } from '@/types/client';
+import type { Stake, Subnet } from '@/types/client';
+import { formatNumber } from '@/utils/utils';
 
 interface PortfolioProps {
-  stakes: StakeTransaction[];
+  stakes: Stake[];
+  subnets: Subnet[];
   address: string;
+  isLoading: boolean;
   onRefresh: () => Promise<void>;
 }
 
-const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
+const PortfolioOverview = ({ stakes, subnets, address, isLoading, onRefresh }: PortfolioProps) => {
   const navigate = useNavigate();
   const { setIsLocked } = useLock();
   const { showNotification } = useNotification();
   const { api } = usePolkadotApi();
-  const [selectedStake, setSelectedStake] = useState<StakeTransaction | null>(
-    null
-  );
+  const [selectedStake, setSelectedStake] = useState<Stake | null>(null);
   const [selectedSubnet, setSelectedSubnet] = useState<Subnet | null>(null);
   const [showRemoveStakeConfirm, setShowRemoveStakeConfirm] = useState(false);
 
-  const handleStakeSelect = async (stake: StakeTransaction): Promise<void> => {
-    const subnet = await api?.getSubnet(stake.subnetId);
+  const handleStakeSelect = (stake: Stake): void => {
+    const subnet = subnets.find(subnet => subnet.id === stake.netuid);
     if (subnet) {
       setSelectedSubnet(subnet);
       setSelectedStake(stake);
     } else {
       showNotification({
-        message: "Failed to Fetch Subnet",
+        message: 'Failed to Fetch Subnet',
         type: NotificationType.Error,
       });
       setSelectedStake(null);
@@ -55,7 +55,7 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
   };
 
   const handleMoveStake = (): void => {
-    navigate("/move-stake", {
+    navigate('/move-stake', {
       state: {
         selectedStake,
         selectedSubnet,
@@ -76,28 +76,28 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
     setShowRemoveStakeConfirm(false);
 
     try {
-      if (!selectedStake.tokens || isNaN(selectedStake.tokens)) {
+      if (!selectedStake.stake || isNaN(selectedStake.stake)) {
         showNotification({
           type: NotificationType.Error,
-          message: "Invalid Stake Amount",
+          message: 'Invalid Stake Amount',
         });
         return;
       }
 
       showNotification({
         type: NotificationType.Pending,
-        message: "Submitting Transaction...",
+        message: 'Submitting Transaction...',
       });
 
       const result = await api.removeStake({
         address,
-        validatorHotkey: selectedStake.validatorHotkey,
-        subnetId: selectedStake.subnetId,
-        amountInRao: BigInt(selectedStake.tokens),
+        validatorHotkey: selectedStake.hotkey,
+        subnetId: selectedStake.netuid,
+        amountInRao: BigInt(selectedStake.stake),
       });
 
       showNotification({
-        message: "Transaction Successful!",
+        message: 'Transaction Successful!',
         type: NotificationType.Success,
         hash: result,
       });
@@ -108,18 +108,14 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
       onRefresh();
     } catch {
       showNotification({
-        message: "Failed to Remove Stake",
+        message: 'Failed to Remove Stake',
         type: NotificationType.Error,
       });
     }
   };
 
-  if (!api) {
-    return (
-      <div className="flex justify-center items-center h-16">
-        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-mf-milk-300" />
-      </div>
-    );
+  if (isLoading) {
+    console.log('isLoading', isLoading);
   }
 
   return (
@@ -130,11 +126,9 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
         message={
           selectedStake
             ? `Are you sure you want to remove your stake of ${formatNumber(
-                selectedStake.tokens / 1e9
-              )} ${selectedStake.subnetId === 0 ? "τ" : "α"} from Subnet ${
-                selectedStake.subnetId
-              }?`
-            : ""
+                selectedStake.stake / 1e9
+              )} ${selectedStake.netuid === 0 ? 'τ' : 'α'} from Subnet ${selectedStake.netuid}?`
+            : ''
         }
         onConfirm={handleConfirmRemoveStake}
         onCancel={() => setShowRemoveStakeConfirm(false)}
@@ -151,26 +145,21 @@ const Portfolio = ({ stakes, address, onRefresh }: PortfolioProps) => {
           onMoveStake={handleMoveStake}
         />
       ) : (
-        <div className="w-full max-h-74 overflow-y-auto portfolio-container mt-2">
-          {stakes.length > 0 ? (
-            <div className="space-y-3">
-              {stakes.map((stake, index) => (
-                <StakeOverview
-                  key={index}
-                  stake={stake}
-                  onClick={() => handleStakeSelect(stake)}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="border-sm border-2 border-mf-ash-500 p-2 bg-mf-ash-500 text-sm text-mf-milk-300">
-              <p>No Stakes</p>
-            </div>
-          )}
+        <div className="w-full">
+          <div className="gap-3">
+            {stakes.map((stake, index) => (
+              <StakeOverview
+                key={index}
+                stake={stake}
+                subnet={subnets.find(subnet => subnet.id === stake.netuid) as Subnet}
+                onClick={() => handleStakeSelect(stake)}
+              />
+            ))}
+          </div>
         </div>
       )}
     </>
   );
 };
 
-export default Portfolio;
+export default PortfolioOverview;

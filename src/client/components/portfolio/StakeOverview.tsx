@@ -1,26 +1,29 @@
-import type { StakeTransaction } from '../../../types/client';
+import type { Stake, Subnet } from '../../../types/client';
 
 interface StakeOverviewProps {
-  stake: StakeTransaction;
+  subnet: Subnet;
+  stake: Stake;
   onClick: () => void;
 }
 
-const StakeOverview = ({ stake, onClick }: StakeOverviewProps) => {
+const StakeOverview = ({ stake, subnet, onClick }: StakeOverviewProps) => {
   return (
     <button
       onClick={onClick}
-      className="w-full text-left border-sm border-2 border-mf-ash-500 cursor-pointer p-2 bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors space-y-1"
+      className="w-full text-left rounded-md cursor-pointer p-3 bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors gap-1"
     >
-      <div className="flex items-center justify-between text-sm">
-        <h3 className="font-semibold text-mf-edge-300">Subnet {stake.subnetId}</h3>
-        <span className="text-mf-safety-300">{stake.subnetId === 0 ? 'τ' : 'α'}</span>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1">
+          <p className="font-semibold text-mf-edge-500 text-sm">{subnet.name}</p>
+          <span className="font-semibold text-mf-edge-700 text-sm">{`SN${subnet.id}`}</span>
+        </div>
+        <span className="text-mf-edge-500 text-sm">{stake.netuid === 0 ? 'τ' : 'α'}</span>
       </div>
-      <div className="flex items-center justify-between text-sm text-mf-milk-300">
-        <p>
-          {stake.validatorHotkey.slice(0, 6)}...
-          {stake.validatorHotkey.slice(-6)}
+      <div className="flex items-center justify-between">
+        <p className="text-mf-sybil-500 text-sm">
+          {stake.hotkey.slice(0, 6)}...{stake.hotkey.slice(-6)}
         </p>
-        <p>{(stake.tokens / 1e9).toFixed(4)}</p>
+        <p className="text-mf-edge-500 text-sm">{(stake.stake / 1e9).toFixed(4)}</p>
       </div>
     </button>
   );

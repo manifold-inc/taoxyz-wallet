@@ -128,10 +128,6 @@ input {
   background: var(--color-mf-ash-400);
 }
 
-.portfolio-container::-webkit-scrollbar {
-  width: 4px;
-}
-
 .custom-checkbox {
   display: grid;
   grid-template-columns: 1.25em auto;

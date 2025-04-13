@@ -56,13 +56,6 @@ export interface Stake {
   locked: number;
 }
 
-export interface StakeTransaction {
-  subnetId: number;
-  subnetName: string;
-  validatorHotkey: string;
-  tokens: number;
-}
-
 export interface Slippage {
   tokens: number;
   slippagePercentage: number;

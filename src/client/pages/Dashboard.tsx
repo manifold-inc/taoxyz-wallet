@@ -7,7 +7,7 @@ import type { Stake, Subnet } from '../../types/client';
 import { NotificationType } from '../../types/client';
 import WalletSelection from '../components/common/WalletSelection';
 import DashboardOverview from '../components/dashboard/DashboardOverview';
-// import Portfolio from '../components/dashboard/Portfolio';
+import PortfolioOverview from '../components/dashboard/PortfolioOverview';
 import { useNotification } from '../contexts/NotificationContext';
 import { usePolkadotApi } from '../contexts/PolkadotApiContext';
 import { useWallet } from '../contexts/WalletContext';
@@ -164,20 +164,17 @@ export const Dashboard = () => {
       </div>
 
       {/* Portfolio Overview */}
-      {/* <div className="mt-3">
-        <h2 className="text-xs text-mf-sybil-500 font-semibold">Portfolio</h2>
-        {isLoading ? (
-          <div className="border-sm border-2 border-mf-ash-500 p-2 bg-mf-ash-500 text-sm text-mf-milk-300">
-            <p>Loading...</p>
-          </div>
-        ) : (
-          <Portfolio
+      <div className="w-full px-5">
+        {currentAddress && (
+          <PortfolioOverview
             stakes={stakes}
-            address={currentAddress as string}
+            subnets={subnets}
+            address={currentAddress}
+            isLoading={isLoading}
             onRefresh={() => (currentAddress ? fetchData(currentAddress, true) : Promise.resolve())}
           />
         )}
-      </div> */}
+      </div>
     </div>
   );
 };
