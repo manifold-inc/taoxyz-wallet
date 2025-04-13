@@ -22,6 +22,28 @@ interface PortfolioProps {
   onRefresh: () => Promise<void>;
 }
 
+const StakeOverviewSkeleton = () => {
+  return (
+    <div className="flex flex-col gap-3">
+      {[1, 2, 3].map(index => (
+        <div key={index} className="w-full rounded-md p-3 bg-mf-ash-500">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-1">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-4 w-12" />
+            </div>
+            <Skeleton className="h-4 w-4" />
+          </div>
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-4 w-16" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 const PortfolioOverview = ({ stakes, subnets, address, isLoading, onRefresh }: PortfolioProps) => {
   const navigate = useNavigate();
   const { setIsLocked } = useLock();
@@ -115,10 +137,6 @@ const PortfolioOverview = ({ stakes, subnets, address, isLoading, onRefresh }: P
     }
   };
 
-  if (isLoading) {
-    console.log('isLoading', isLoading);
-  }
-
   return (
     <>
       <ConfirmAction
@@ -148,23 +166,7 @@ const PortfolioOverview = ({ stakes, subnets, address, isLoading, onRefresh }: P
       ) : (
         <div className="w-full">
           {isLoading ? (
-            <div className="flex flex-col gap-3">
-              {[1, 2, 3].map(index => (
-                <div key={index} className="w-full rounded-md p-3 bg-mf-ash-500">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-1">
-                      <Skeleton className="h-4 w-24" />
-                      <Skeleton className="h-4 w-12" />
-                    </div>
-                    <Skeleton className="h-4 w-4" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <Skeleton className="h-4 w-32" />
-                    <Skeleton className="h-4 w-16" />
-                  </div>
-                </div>
-              ))}
-            </div>
+            <StakeOverviewSkeleton />
           ) : (
             <div className="flex flex-col gap-3">
               {stakes.map((stake, index) => (

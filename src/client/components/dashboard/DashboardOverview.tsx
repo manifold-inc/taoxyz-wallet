@@ -28,6 +28,7 @@ interface DashboardOverviewProps {
   isLoading: boolean;
 }
 
+// TODO: Abstract out skeleton
 const DashboardOverview = ({
   stakes,
   subnets,

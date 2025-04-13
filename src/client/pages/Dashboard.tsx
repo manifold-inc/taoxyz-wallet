@@ -136,24 +136,16 @@ export const Dashboard = () => {
           {/* Action Buttons */}
           <div className="flex justify-between gap-3 w-full">
             <motion.button
-              onClick={() => navigate('/add-stake')}
-              className="w-1/3 py-1.5 bg-mf-sybil-opacity rounded-sm cursor-pointer text-mf-sybil-500 border border-mf-sybil-opacity hover:border-mf-sybil-500 transition-colors hover:text-mf-edge-500"
+              onClick={() => navigate('/create-stake')}
+              className="w-1/2 py-1.5 bg-mf-sybil-opacity rounded-sm cursor-pointer text-mf-sybil-500 border border-mf-sybil-opacity hover:border-mf-sybil-500 transition-colors hover:text-mf-edge-500"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               <span className="text-sm">Stake</span>
             </motion.button>
             <motion.button
-              onClick={() => navigate('/move-stake')}
-              className="w-1/3 py-1.5 bg-mf-red-opacity rounded-sm cursor-pointer text-mf-red-500 border border-mf-red-opacity hover:border-mf-red-500 transition-colors hover:text-mf-edge-500"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <span className="text-sm">Unstake</span>
-            </motion.button>
-            <motion.button
               onClick={() => navigate('/transfer')}
-              className="w-1/3 py-1.5 bg-mf-safety-opacity rounded-sm cursor-pointer text-mf-safety-500 border border-mf-safety-opacity hover:border-mf-safety-500 transition-colors hover:text-mf-edge-500"
+              className="w-1/2 py-1.5 bg-mf-safety-opacity rounded-sm cursor-pointer text-mf-safety-500 border border-mf-safety-opacity hover:border-mf-safety-500 transition-colors hover:text-mf-edge-500"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >

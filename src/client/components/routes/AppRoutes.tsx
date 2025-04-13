@@ -3,8 +3,8 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import ProtectedRoute from '@/client/components/ProtectedRoute';
 import Connect from '@/client/components/popups/Connect';
 import Sign from '@/client/components/popups/Sign';
-import AddStake from '@/client/pages/AddStake';
 import AddWallet from '@/client/pages/AddWallet';
+import CreateStake from '@/client/pages/CreateStake';
 import Dashboard from '@/client/pages/Dashboard';
 import MoveStake from '@/client/pages/MoveStake';
 import Settings from '@/client/pages/Settings';
@@ -20,7 +20,7 @@ export enum PublicRoutes {
 
 export enum ProtectedRoutes {
   Dashboard = '/dashboard',
-  AddStake = '/add-stake',
+  CreateStake = '/create-stake',
   MoveStake = '/move-stake',
   Transfer = '/transfer',
   Settings = '/settings',
@@ -53,10 +53,10 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path={ProtectedRoutes.AddStake}
+        path={ProtectedRoutes.CreateStake}
         element={
           <ProtectedRoute>
-            <AddStake />
+            <CreateStake />
           </ProtectedRoute>
         }
       />

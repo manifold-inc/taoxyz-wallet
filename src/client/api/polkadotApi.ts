@@ -354,7 +354,7 @@ class PolkadotApi {
     }
   }
 
-  public async getValidators(subnetId: number): Promise<Validator[]> {
+  public async getValidators(subnetId: number): Promise<Validator[] | null> {
     try {
       const result = await this.api.call.subnetInfoRuntimeApi.getMetagraph(subnetId);
       const btMetagraph = result.toJSON() as unknown as BittensorMetagraph;
@@ -392,7 +392,7 @@ class PolkadotApi {
       return validators;
     } catch (error) {
       console.error('Error in Get Validators:', error);
-      throw error;
+      return null;
     }
   }
 

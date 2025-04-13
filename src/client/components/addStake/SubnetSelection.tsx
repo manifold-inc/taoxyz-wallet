@@ -1,94 +1,93 @@
+import { motion } from 'framer-motion';
+
 import { useState } from 'react';
 
-import type { Subnet, Validator } from '../../../types/client';
+import { useNotification } from '@/client/contexts/NotificationContext';
+import { usePolkadotApi } from '@/client/contexts/PolkadotApiContext';
+import type { Subnet, Validator } from '@/types/client';
+import { NotificationType } from '@/types/client';
 
 interface SubnetSelectionProps {
   subnets: Subnet[];
-  selectedSubnet: Subnet | null;
-  validators: Validator[];
   isLoadingSubnets: boolean;
-  isLoadingValidators: boolean;
   onSelect: (subnet: Subnet) => void;
 }
 
-const SubnetSelection = ({
-  subnets,
-  selectedSubnet,
-  isLoadingSubnets,
-  validators,
-  isLoadingValidators,
-  onSelect,
-}: SubnetSelectionProps) => {
+const SubnetSelection = ({ subnets, isLoadingSubnets = true, onSelect }: SubnetSelectionProps) => {
+  const { api } = usePolkadotApi();
+  const { showNotification } = useNotification();
   const [searchQuery, setSearchQuery] = useState('');
+  const [validators, setValidators] = useState<Validator[]>([]);
+  const [isLoadingValidators, setIsLoadingValidators] = useState(false);
+
+  const getValidators = async (subnetId: number) => {
+    if (!api) return;
+    try {
+      setIsLoadingValidators(true);
+      const validators = await api.getValidators(subnetId);
+      if (validators === null) {
+        showNotification({
+          type: NotificationType.Error,
+          message: 'Failed to Fetch Validators',
+        });
+        return;
+      }
+      setValidators(validators);
+    } finally {
+      setIsLoadingValidators(false);
+    }
+  };
 
   const filteredSubnets = subnets.filter(subnet => {
     const query = searchQuery.toLowerCase();
-    return (
-      subnet.id.toString().toLowerCase().includes(query) ||
-      subnet.name.toLowerCase().includes(query)
-    );
+    const subnetName = subnet.name.toLowerCase();
+    const subnetId = `SN${subnet.id}`.toLowerCase();
+    return subnetName.includes(query) || subnetId.includes(query);
   });
 
+  const handleSubnetSelect = (subnet: Subnet) => {
+    onSelect(subnet);
+    getValidators(subnet.id);
+  };
+
+  console.log(validators, isLoadingValidators, isLoadingSubnets);
+
   return (
-    <div>
-      <div className="p-2">
-        <input
-          type="text"
-          placeholder="Search ID or Name"
-          value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
-          className="w-full p-2 text-sm bg-mf-ash-500 border-2 border-mf-ash-300 border-sm text-mf-edge-300 placeholder-mf-milk-300 focus:outline-none focus:border-mf-safety-500"
-        />
-      </div>
-      <div className="p-2 max-h-[calc(100vh-320px)] overflow-y-auto">
-        {isLoadingSubnets ? (
-          <div className="flex justify-center items-center h-16">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-mf-milk-300" />
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {filteredSubnets.map(subnet => {
-              const isSelected = selectedSubnet?.id === subnet.id;
-              return (
-                <button
-                  key={subnet.id}
-                  onClick={() => onSelect(subnet)}
-                  className={`w-full text-left border-sm p-2 border-2 border-mf-ash-500 cursor-pointer ${
-                    isSelected
-                      ? 'bg-mf-ash-300 border-mf-safety-500'
-                      : 'bg-mf-ash-500 hover:bg-mf-ash-300'
-                  } transition-colors space-y-1`}
-                >
-                  <div className="flex items-center justify-between text-sm">
-                    <h3 className="font-semibold text-mf-edge-300 flex items-center">
-                      <span className="truncate w-16">{subnet.name}</span>
-                      {isSelected && (
-                        <span
-                          className={`ml-2 text-xs ${
-                            !isLoadingValidators && validators.length > 0
-                              ? 'text-mf-sybil-500'
-                              : 'text-mf-safety-500'
-                          }`}
-                        >
-                          {isLoadingValidators
-                            ? 'Loading...'
-                            : validators.length === 0
-                              ? '0 Validators'
-                              : `${validators.length} Validators`}
-                        </span>
-                      )}
-                    </h3>
-                    <span className="text-mf-safety-500">{subnet.id === 0 ? 'τ' : 'α'}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm text-mf-milk-300">
-                    <p>Subnet {subnet.id}</p>
-                    <p>{subnet.price?.toFixed(4) ?? '-'}</p>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        )}
+    <div className="w-full h-full flex flex-col gap-3 px-5 py-3">
+      {/* Search */}
+      <input
+        type="text"
+        placeholder="Search Subnets"
+        value={searchQuery}
+        onChange={e => setSearchQuery(e.target.value)}
+        className="w-full p-2 text-sm text-mf-edge-500 placeholder-mf-edge-500 bg-mf-night-300 rounded-md"
+      />
+
+      {/* Subnets */}
+      <div className="flex flex-col gap-3">
+        {filteredSubnets.map(subnet => (
+          <motion.button
+            key={subnet.id}
+            onClick={() => handleSubnetSelect(subnet)}
+            className="w-full text-left rounded-md cursor-pointer p-3 bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors gap-1"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1">
+                <p className="font-semibold text-mf-edge-500 text-sm truncate max-w-[10ch]">
+                  {subnet.name}
+                </p>
+                <span className="font-semibold text-mf-edge-700 text-sm">{`SN${subnet.id}`}</span>
+              </div>
+              <span className="text-mf-edge-500 text-sm">{subnet.id === 0 ? 'τ' : 'α'}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <p className="text-mf-sybil-500 text-sm">Price</p>
+              <p className="text-mf-edge-500 text-sm">{subnet.price}</p>
+            </div>
+          </motion.button>
+        ))}
       </div>
     </div>
   );

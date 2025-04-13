@@ -175,7 +175,7 @@ const ExpandedStake = ({
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          Stake
+          Add
         </motion.button>
         <motion.button
           onClick={onRemoveStake}
@@ -183,7 +183,7 @@ const ExpandedStake = ({
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          Unstake
+          Remove
         </motion.button>
         <motion.button
           onClick={onMoveStake}
