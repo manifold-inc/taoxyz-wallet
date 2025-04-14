@@ -12,36 +12,34 @@ import Skeleton from './Skeleton';
 interface SubnetSelectionProps {
   subnets: Subnet[];
   isLoadingSubnets: boolean;
-  onSelect: (subnet: Subnet) => void;
+  onSelect: (subnet: Subnet, validators: Validator[]) => void;
 }
 
 const SubnetSkeleton = () => {
   return (
-    <div className="w-full h-full flex flex-col gap-3 px-5 py-3">
+    <div className="flex flex-col gap-3">
       {/* Subnets Skeleton */}
-      <div className="flex flex-col gap-3">
-        {[1, 2, 3].map(index => (
-          <div key={index} className="flex flex-col gap-3">
-            <div className="w-full rounded-md p-3 bg-mf-ash-500">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-1">
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-4 w-12" />
-                </div>
-                <Skeleton className="h-4 w-4" />
+      {[1, 2, 3].map(index => (
+        <div key={index} className="flex flex-col gap-3">
+          <div className="w-full rounded-md p-3 bg-mf-ash-500">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-1">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-12" />
               </div>
-              <div className="flex items-center justify-between">
-                <Skeleton className="h-4 w-16" />
-                <Skeleton className="h-4 w-16" />
-              </div>
-              <div className="flex items-center justify-between mt-2">
-                <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-4 w-8" />
-              </div>
+              <Skeleton className="h-4 w-4" />
+            </div>
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-4 w-16" />
+            </div>
+            <div className="flex items-center justify-between mt-2">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-4 w-8" />
             </div>
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
 };
@@ -90,12 +88,13 @@ const SubnetSelection = ({ subnets, isLoadingSubnets = true, onSelect }: SubnetS
   });
 
   const handleSubnetSelect = (subnet: Subnet) => {
+    if (subnet.id === selectedSubnet?.id) return;
     setSelectedSubnet(subnet);
     getValidators(subnet.id);
   };
 
-  const handleSubnetConfirm = (subnet: Subnet) => {
-    onSelect(subnet);
+  const handleSubnetConfirm = (subnet: Subnet, validators: Validator[]) => {
+    onSelect(subnet, validators);
   };
 
   return (
@@ -111,7 +110,7 @@ const SubnetSelection = ({ subnets, isLoadingSubnets = true, onSelect }: SubnetS
         placeholder="Search Subnets"
         value={searchQuery}
         onChange={e => setSearchQuery(e.target.value)}
-        className="w-full p-2 text-sm text-mf-edge-500 placeholder-mf-edge-500 bg-mf-night-300 rounded-md"
+        className="w-full p-2 text-sm text-mf-edge-500 placeholder:text-mf-edge-700 bg-mf-night-300 rounded-md"
       />
 
       {/* Subnets */}
@@ -168,7 +167,7 @@ const SubnetSelection = ({ subnets, isLoadingSubnets = true, onSelect }: SubnetS
                   </motion.button>
 
                   <motion.button
-                    onClick={() => handleSubnetConfirm(subnet)}
+                    onClick={() => handleSubnetConfirm(subnet, validators)}
                     className="w-full rounded-md text-center cursor-pointer w-1/2 py-1.5 bg-mf-sybil-opacity border border-mf-sybil-opacity hover:border-mf-sybil-500 hover:text-mf-edge-500 transition-colors text-mf-sybil-500 gap-1"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}

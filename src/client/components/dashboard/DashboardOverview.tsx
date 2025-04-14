@@ -67,6 +67,7 @@ const DashboardOverviewSkeleton = () => {
   );
 };
 
+// TODO: Remove nullish coalescing checks
 const DashboardOverview = ({
   stakes,
   subnets,

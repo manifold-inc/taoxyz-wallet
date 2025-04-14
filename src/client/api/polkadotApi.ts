@@ -169,13 +169,13 @@ class PolkadotApi {
 
   public async removeStake({
     address,
-    validatorHotkey,
     subnetId,
+    validatorHotkey,
     amountInRao,
   }: {
     address: string;
-    validatorHotkey: string;
     subnetId: number;
+    validatorHotkey: string;
     amountInRao: bigint;
   }): Promise<string> {
     if (!this.api) throw new Error('API Not Initialized');

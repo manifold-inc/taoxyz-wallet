@@ -103,7 +103,7 @@ const ExpandedStake = ({
         <div className="flex items-center justify-between px-3">
           {/* Subnet Name, ID */}
           <div className="flex gap-1">
-            <p className="text-sm font-semibold text-mf-edge-500 truncate max-w-[10ch]">
+            <p className="text-sm font-semibold text-mf-edge-500 truncate max-w-[16ch]">
               {subnet.name}
             </p>
             <span className="text-mf-edge-700 font-semibold text-sm">SN{subnet.id}</span>
