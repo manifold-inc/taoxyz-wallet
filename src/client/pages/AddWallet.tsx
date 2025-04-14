@@ -4,18 +4,18 @@ import { useNavigate } from 'react-router-dom';
 
 import type { KeyringPair } from '@polkadot/keyring/types';
 
-import taoxyz from '../../../public/assets/taoxyz.svg';
-import { NotificationType } from '../../types/client';
-import CreateWallet from '../components/addWallet/CreateWallet';
-import DisplayMnemonic from '../components/addWallet/DisplayMnemonic';
-import ImportMnemonic from '../components/addWallet/ImportMnemonic';
-import ImportWallet from '../components/addWallet/ImportWallet';
-import MnemonicVerify from '../components/addWallet/VerifyMnemonic';
-import { useLock } from '../contexts/LockContext';
-import { useNotification } from '../contexts/NotificationContext';
-import { useWallet } from '../contexts/WalletContext';
-import { Mode, useWalletCreation } from '../contexts/WalletCreationContext';
-import MessageService from '../services/MessageService';
+import taoxyz from '@/assets/taoxyz.svg';
+import CreateWallet from '@/client/components/addWallet/CreateWallet';
+import DisplayMnemonic from '@/client/components/addWallet/DisplayMnemonic';
+import ImportMnemonic from '@/client/components/addWallet/ImportMnemonic';
+import ImportWallet from '@/client/components/addWallet/ImportWallet';
+import MnemonicVerify from '@/client/components/addWallet/VerifyMnemonic';
+import { useLock } from '@/client/contexts/LockContext';
+import { useNotification } from '@/client/contexts/NotificationContext';
+import { useWallet } from '@/client/contexts/WalletContext';
+import { Mode, useWalletCreation } from '@/client/contexts/WalletCreationContext';
+import MessageService from '@/client/services/MessageService';
+import { NotificationType } from '@/types/client';
 
 const getStepTitle = (mode: Mode) => {
   switch (mode) {

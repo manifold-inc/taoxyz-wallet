@@ -3,11 +3,10 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { useNotification } from '@/client/contexts/NotificationContext';
 import { useWalletCreation } from '@/client/contexts/WalletCreationContext';
-
-import { NotificationType } from '../../../types/client';
-import { useNotification } from '../../contexts/NotificationContext';
-import KeyringService from '../../services/KeyringService';
+import KeyringService from '@/client/services/KeyringService';
+import { NotificationType } from '@/types/client';
 
 interface ImportMnemonicProps {
   onContinue: (mnemonic: string) => void;
