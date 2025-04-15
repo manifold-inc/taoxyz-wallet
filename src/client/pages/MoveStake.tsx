@@ -6,7 +6,7 @@ import { useLocation } from 'react-router-dom';
 import type { StakeTransaction, Subnet, Validator } from '../../types/client';
 import { NotificationType } from '../../types/client';
 import { formatNumber, raoToTao } from '../../utils/utils';
-import ValidatorSelection from '../components/common/ValidatorSelection';
+import ValidatorSelection from '../components/dashboard/ValidatorSelection';
 import ConfirmMoveStake from '../components/moveStake/ConfirmMoveStake';
 import StakeSelection from '../components/moveStake/StakeSelection';
 import { useNotification } from '../contexts/NotificationContext';

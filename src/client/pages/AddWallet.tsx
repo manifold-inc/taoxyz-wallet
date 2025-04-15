@@ -1,10 +1,10 @@
+import taoxyz from '@public/assets/taoxyz.svg';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import { useNavigate } from 'react-router-dom';
 
 import type { KeyringPair } from '@polkadot/keyring/types';
 
-import taoxyz from '@/assets/taoxyz.svg';
 import CreateWallet from '@/client/components/addWallet/CreateWallet';
 import DisplayMnemonic from '@/client/components/addWallet/DisplayMnemonic';
 import ImportMnemonic from '@/client/components/addWallet/ImportMnemonic';

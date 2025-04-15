@@ -4,9 +4,7 @@ import ProtectedRoute from '@/client/components/ProtectedRoute';
 import Connect from '@/client/components/popups/Connect';
 import Sign from '@/client/components/popups/Sign';
 import AddWallet from '@/client/pages/AddWallet';
-import CreateStake from '@/client/pages/CreateStake';
 import Dashboard from '@/client/pages/Dashboard';
-import MoveStake from '@/client/pages/MoveStake';
 import Settings from '@/client/pages/Settings';
 import Transfer from '@/client/pages/Transfer';
 import Welcome from '@/client/pages/Welcome';
@@ -20,8 +18,6 @@ export enum PublicRoutes {
 
 export enum ProtectedRoutes {
   Dashboard = '/dashboard',
-  CreateStake = '/create-stake',
-  MoveStake = '/move-stake',
   Transfer = '/transfer',
   Settings = '/settings',
 }
@@ -49,22 +45,6 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <Dashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path={ProtectedRoutes.CreateStake}
-        element={
-          <ProtectedRoute>
-            <CreateStake />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path={ProtectedRoutes.MoveStake}
-        element={
-          <ProtectedRoute>
-            <MoveStake />
           </ProtectedRoute>
         }
       />

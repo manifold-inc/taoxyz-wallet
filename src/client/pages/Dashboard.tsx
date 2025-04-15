@@ -1,19 +1,54 @@
-import { motion } from 'framer-motion';
-
 import { useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
-import type { Stake, Subnet } from '../../types/client';
-import { NotificationType } from '../../types/client';
-import WalletSelection from '../components/common/WalletSelection';
-import DashboardOverview from '../components/dashboard/DashboardOverview';
-import PortfolioOverview from '../components/dashboard/PortfolioOverview';
-import { useNotification } from '../contexts/NotificationContext';
-import { usePolkadotApi } from '../contexts/PolkadotApiContext';
-import { useWallet } from '../contexts/WalletContext';
+import WalletSelection from '@/client/components/common/WalletSelection';
+import DashboardOverview from '@/client/components/dashboard/DashboardOverview';
+import PortfolioOverview from '@/client/components/dashboard/PortfolioOverview';
+import Transaction from '@/client/components/dashboard/Transaction';
+import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
+import { useNotification } from '@/client/contexts/NotificationContext';
+import { usePolkadotApi } from '@/client/contexts/PolkadotApiContext';
+import { useWallet } from '@/client/contexts/WalletContext';
+import type { Stake, Subnet } from '@/types/client';
+import { NotificationType } from '@/types/client';
 
 const API_URL = 'https://api.coingecko.com/api/v3';
 const NETWORK_ID = 'bittensor';
+
+/**
+ * Dashboard Overview
+ *  Overview Modal
+ *    Total Balance / Free Balance - OVERVIEW
+ *      - Fetch Free Balance
+ *      - Fetch Subnets
+ *      - Fetch Stakes
+ *      - Calculate Total Balance (Free + (Stakes * Subnet Price))
+ *    Free Balance / Subnet Price - CREATE STAKE
+ *      - Fetch Free Balance
+ *      - Fetch Subnet
+ *    Stake Balance(a) / Subnet Price - ADD STAKE
+ *      - Fetch Free Balance
+ *      - Fetch Stake
+ *      - Fetch Subnet
+ *    Stake Balance(a) / Subnet Price - REMOVE STAKE
+ *      - Fetch Stake
+ *      - Fetch Subnet
+ *    Stake Balance(a) / Subnet Price - MOVE STAKE
+ *      - Fetch Stake (What if they want to move to another existing stake?)
+ *      - Fetch Subnet
+ *    Free Balance / Total Balance - TRANSFER
+ *      - Fetch Free Balance
+ *      - Fetch Subnet
+ *      - Fetch Stake
+ *      - Calculate Total Balance (Free + (Stakes * Subnet Price))
+ *
+ *  Action Buttons
+ *    Stake (Selected) - CREATE STAKE
+ *    Transfer (Selected) - TRANSFER
+ *
+ * Modular Section
+ *  Portfolio Overview - OVERVIEW
+ *  Transaction - ADD STAKE / REMOVE STAKE / MOVE STAKE
+ */
 
 // [Timestamp, Price]
 interface PriceData {
@@ -33,9 +68,9 @@ const calculatePriceChange = (
 };
 
 export const Dashboard = () => {
-  const navigate = useNavigate();
   const { showNotification } = useNotification();
   const { api } = usePolkadotApi();
+  const { dashboardState, setDashboardSubnets } = useDashboard();
   const { currentAddress } = useWallet();
 
   const [stakes, setStakes] = useState<Stake[]>([]);
@@ -85,6 +120,7 @@ export const Dashboard = () => {
       }
 
       setSubnets(subnets);
+      setDashboardSubnets(subnets);
       setFreeTao(freeTao);
       setStakes(stakes);
     } finally {
@@ -122,48 +158,38 @@ export const Dashboard = () => {
       {/* Wallet Selection */}
       <WalletSelection />
 
+      {/* Modular Overview */}
       <div className="border-b border-mf-ash-300 w-full">
-        <div className="flex flex-col w-full gap-3 px-5 py-3">
-          {/* Overview */}
+        <div className="w-full px-5 py-3">
           <DashboardOverview
             stakes={stakes}
             subnets={subnets}
             freeTao={freeTao}
             taoPrice={taoPrice}
             priceChangePercentage={priceChangePercentage}
+            dashboardState={dashboardState}
             isLoading={isLoading}
           />
-          {/* Action Buttons */}
-          <div className="flex justify-between gap-3 w-full">
-            <motion.button
-              onClick={() => navigate('/create-stake')}
-              className="w-1/2 py-1.5 bg-mf-sybil-opacity rounded-sm cursor-pointer text-mf-sybil-500 border border-mf-sybil-opacity hover:border-mf-sybil-500 transition-colors hover:text-mf-edge-500"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <span className="text-sm">Stake</span>
-            </motion.button>
-            <motion.button
-              onClick={() => navigate('/transfer')}
-              className="w-1/2 py-1.5 bg-mf-safety-opacity rounded-sm cursor-pointer text-mf-safety-500 border border-mf-safety-opacity hover:border-mf-safety-500 transition-colors hover:text-mf-edge-500"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <span className="text-sm">Transfer</span>
-            </motion.button>
-          </div>
         </div>
       </div>
 
-      {/* Portfolio Overview */}
+      {/* Modular Section */}
       <div className="w-full px-5 py-3">
-        {currentAddress && (
+        {dashboardState === DashboardState.OVERVIEW && currentAddress && (
           <PortfolioOverview
             stakes={stakes}
             subnets={subnets}
             address={currentAddress}
             isLoading={isLoading}
-            onRefresh={() => (currentAddress ? fetchData(currentAddress, true) : Promise.resolve())}
+            onRefresh={() => fetchData(currentAddress, true)}
+          />
+        )}
+
+        {dashboardState !== DashboardState.OVERVIEW && currentAddress && (
+          <Transaction
+            address={currentAddress}
+            isLoading={isLoading}
+            dashboardState={dashboardState}
           />
         )}
       </div>
