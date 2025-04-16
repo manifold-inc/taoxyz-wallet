@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion';
 
+import { useEffect } from 'react';
+
 import SlippageDisplay from '@/client/components/common/SlippageDisplay';
 import type { AmountState } from '@/client/components/dashboard/Transaction';
 import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
@@ -11,8 +13,8 @@ interface TransactionFormProps {
   setAmountState: (amountState: AmountState) => void;
   setToAddress: (toAddress: string) => void;
   handleSetupTransaction: (e: React.FormEvent) => void;
-  handleRenderSubnetSelection: () => React.ReactNode;
-  handleRenderValidatorSelection: () => React.ReactNode;
+  renderSubnetSelection: () => React.ReactNode;
+  renderValidatorSelection: () => React.ReactNode;
 }
 
 const TransactionForm = ({
@@ -21,8 +23,8 @@ const TransactionForm = ({
   setAmountState,
   setToAddress,
   handleSetupTransaction,
-  handleRenderSubnetSelection,
-  handleRenderValidatorSelection,
+  renderSubnetSelection,
+  renderValidatorSelection,
 }: TransactionFormProps) => {
   const {
     resetDashboardState,
@@ -31,10 +33,29 @@ const TransactionForm = ({
     dashboardFreeBalance,
     dashboardState,
     dashboardValidator,
+    setDashboardFreeBalance,
   } = useDashboard();
 
+  const setBalance = () => {
+    switch (dashboardState) {
+      case DashboardState.CREATE_STAKE:
+      case DashboardState.ADD_STAKE:
+      case DashboardState.TRANSFER:
+        // Free balance for tao is set when dashboard does api call - only for explicitness
+        setDashboardFreeBalance(dashboardFreeBalance);
+        break;
+      case DashboardState.MOVE_STAKE:
+      case DashboardState.REMOVE_STAKE:
+        // Is needed when stake is selected
+        if (dashboardStake === null) return;
+        setDashboardFreeBalance(dashboardStake.stake);
+        break;
+      default:
+        break;
+    }
+  };
+
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('handleAmountChange called with value:', e.target.value);
     const value = e.target.value;
     if (/^\d*\.?\d*$/.test(value)) {
       const numValue = parseFloat(value);
@@ -46,27 +67,46 @@ const TransactionForm = ({
   };
 
   const handleMaxAmount = () => {
+    console.log('handleMaxAmount called', {
+      dashboardState,
+      dashboardFreeBalance,
+      dashboardStake,
+    });
+
+    let amount: string;
+    let amountInRao: bigint;
+
     switch (dashboardState) {
       case DashboardState.CREATE_STAKE:
       case DashboardState.TRANSFER:
-        if (dashboardFreeBalance === null) return;
-        setAmountState({
-          amount: dashboardFreeBalance.toString(),
-          amountInRao: taoToRao(dashboardFreeBalance),
-        });
+        if (dashboardFreeBalance === null) {
+          console.log('No free balance available');
+          return;
+        }
+        amount = dashboardFreeBalance.toString();
+        amountInRao = taoToRao(dashboardFreeBalance);
+        console.log('Setting amount to free balance:', amount);
         break;
       case DashboardState.ADD_STAKE:
       case DashboardState.REMOVE_STAKE:
       case DashboardState.MOVE_STAKE:
-        if (dashboardStake === null) return;
-        setAmountState({
-          amount: dashboardStake.stake.toString(),
-          amountInRao: taoToRao(dashboardStake.stake),
-        });
+        if (dashboardStake === null) {
+          console.log('No stake available');
+          return;
+        }
+        amount = dashboardStake.stake.toString();
+        amountInRao = taoToRao(dashboardStake.stake);
+        console.log('Setting amount to stake:', amount);
         break;
       default:
+        console.log('Unhandled dashboard state:', dashboardState);
         return;
     }
+
+    setAmountState({
+      amount,
+      amountInRao,
+    });
   };
 
   const amountValidation = (amount: number) => {
@@ -97,8 +137,8 @@ const TransactionForm = ({
       case DashboardState.CREATE_STAKE:
         return (
           <div className="w-full flex flex-col gap-4 items-center justify-center">
-            {handleRenderSubnetSelection()}
-            {handleRenderValidatorSelection()}
+            {renderSubnetSelection()}
+            {renderValidatorSelection()}
           </div>
         );
 
@@ -158,6 +198,10 @@ const TransactionForm = ({
         return null;
     }
   };
+
+  useEffect(() => {
+    void setBalance();
+  }, [dashboardState]);
 
   return (
     <div className="w-full h-full flex flex-col gap-3">

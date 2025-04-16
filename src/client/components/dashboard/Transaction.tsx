@@ -54,8 +54,8 @@ const Transaction = ({ address, isLoading = true, dashboardState }: TransactionP
     dashboardValidators,
     dashboardStake,
     setDashboardSubnet,
-    setDashboardValidators,
     setDashboardValidator,
+    setDashboardValidators,
   } = useDashboard();
 
   const [amountState, setAmountState] = useState<AmountState>({
@@ -274,12 +274,12 @@ const Transaction = ({ address, isLoading = true, dashboardState }: TransactionP
       ) : (
         <TransactionForm
           amountState={amountState}
-          setAmountState={setAmountState}
           toAddress={toAddress}
+          setAmountState={setAmountState}
           setToAddress={setToAddress}
           handleSetupTransaction={handleSetupTransaction}
-          handleRenderSubnetSelection={renderSubnetSelection}
-          handleRenderValidatorSelection={renderValidatorSelection}
+          renderSubnetSelection={renderSubnetSelection}
+          renderValidatorSelection={renderValidatorSelection}
         />
       )}
     </>

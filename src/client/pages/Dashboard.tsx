@@ -70,7 +70,7 @@ const calculatePriceChange = (
 export const Dashboard = () => {
   const { showNotification } = useNotification();
   const { api } = usePolkadotApi();
-  const { dashboardState, setDashboardSubnets } = useDashboard();
+  const { dashboardState, setDashboardFreeBalance, setDashboardSubnets } = useDashboard();
   const { currentAddress } = useWallet();
 
   const [stakes, setStakes] = useState<Stake[]>([]);
@@ -122,6 +122,7 @@ export const Dashboard = () => {
       setSubnets(subnets);
       setDashboardSubnets(subnets);
       setFreeTao(freeTao);
+      setDashboardFreeBalance(freeTao);
       setStakes(stakes);
     } finally {
       setIsLoading(false);
