@@ -81,7 +81,7 @@ const DashboardOverview = ({
 }: DashboardOverviewProps) => {
   const { currentAddress } = useWallet();
   const { showNotification } = useNotification();
-  const { setDashboardState } = useDashboard();
+  const { setDashboardState, setDashboardTotalBalance } = useDashboard();
   const [balances, setBalances] = useState<Balances>({
     totalTao: null,
     totalInUSD: null,
@@ -134,7 +134,11 @@ const DashboardOverview = ({
     if (updatedBalances) {
       setBalances(updatedBalances);
     }
-  }, [updatedBalances]);
+
+    if (calculatedTotalTao) {
+      setDashboardTotalBalance(calculatedTotalTao);
+    }
+  }, [updatedBalances, calculatedTotalTao]);
 
   console.log(dashboardState);
   // TODO: Render 3 different views based on dashboardState

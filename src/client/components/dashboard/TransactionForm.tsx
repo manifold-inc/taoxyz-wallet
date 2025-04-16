@@ -171,7 +171,6 @@ const TransactionForm = ({
             amount={amountState.amount}
             balance={dashboardFreeBalance.toString()}
             isRoot={isRoot}
-            handleAmountChange={handleAmountChange}
           />
         );
       case DashboardState.ADD_STAKE:
@@ -181,7 +180,6 @@ const TransactionForm = ({
             amount={amountState.amount}
             balance={dashboardStake.stake.toString()}
             isRoot={isRoot}
-            handleAmountChange={handleAmountChange}
           />
         );
       case DashboardState.MOVE_STAKE:
@@ -191,7 +189,6 @@ const TransactionForm = ({
             balance={dashboardStake.stake.toString()}
             moveStake={true}
             isRoot={isRoot}
-            handleAmountChange={handleAmountChange}
           />
         );
       default:

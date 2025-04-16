@@ -50,8 +50,6 @@ export const DashboardProvider = ({ children }: DashboardProviderProps) => {
   const resetDashboardState = () => {
     setDashboardState(DashboardState.OVERVIEW);
     setDashboardStake(null);
-    setDashboardFreeBalance(null);
-    setDashboardTotalBalance(null);
     setDashboardSubnet(null);
     setDashboardSubnets(null);
     setDashboardValidator(null);
