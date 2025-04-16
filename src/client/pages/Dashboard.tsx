@@ -188,8 +188,9 @@ export const Dashboard = () => {
         {dashboardState !== DashboardState.OVERVIEW && currentAddress && (
           <Transaction
             address={currentAddress}
-            isLoading={isLoading}
             dashboardState={dashboardState}
+            isLoading={isLoading}
+            onRefresh={() => fetchData(currentAddress, true)}
           />
         )}
       </div>

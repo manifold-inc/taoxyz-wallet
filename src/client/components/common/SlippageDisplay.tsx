@@ -50,7 +50,9 @@ const SlippageDisplay = ({
       {!isRoot && (
         <div className="flex items-center justify-between">
           <p className="text-mf-edge-700 text-sm">Slippage</p>
-          <p className="text-mf-sybil-500 text-sm">{formatNumber(slippage.slippagePercentage)}%</p>
+          <p className="text-mf-sybil-500 text-sm">
+            {formatNumber(slippage.slippagePercentage).toFixed(2)}%
+          </p>
         </div>
       )}
     </div>

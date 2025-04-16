@@ -51,7 +51,6 @@ export const DashboardProvider = ({ children }: DashboardProviderProps) => {
     setDashboardState(DashboardState.OVERVIEW);
     setDashboardStake(null);
     setDashboardSubnet(null);
-    setDashboardSubnets(null);
     setDashboardValidator(null);
     setDashboardValidators(null);
   };

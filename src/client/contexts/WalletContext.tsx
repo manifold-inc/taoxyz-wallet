@@ -21,9 +21,11 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
 
   const updateCurrentAddress = async (address: string | null): Promise<void> => {
     await chrome.storage.local.set({ currentAddress: address });
-    await chrome.storage.local.remove('storeTransferTransaction');
-    await chrome.storage.local.remove('storeMoveStakeTransaction');
+    await chrome.storage.local.remove('storeCreateStakeTransaction');
     await chrome.storage.local.remove('storeAddStakeTransaction');
+    await chrome.storage.local.remove('storeRemoveStakeTransaction');
+    await chrome.storage.local.remove('storeMoveStakeTransaction');
+    await chrome.storage.local.remove('storeTransferTransaction');
     setCurrentAddress(address);
   };
 

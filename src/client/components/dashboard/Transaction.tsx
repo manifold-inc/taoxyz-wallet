@@ -38,6 +38,7 @@ interface TransactionProps {
   address: string;
   dashboardState: DashboardState;
   isLoading: boolean;
+  onRefresh: () => void;
 }
 
 export interface AmountState {
@@ -45,7 +46,12 @@ export interface AmountState {
   amountInRao: bigint | null;
 }
 
-const Transaction = ({ address, isLoading = true, dashboardState }: TransactionProps) => {
+const Transaction = ({
+  address,
+  isLoading = true,
+  dashboardState,
+  onRefresh,
+}: TransactionProps) => {
   const { api } = usePolkadotApi();
   const {
     dashboardSubnet,
@@ -56,6 +62,7 @@ const Transaction = ({ address, isLoading = true, dashboardState }: TransactionP
     setDashboardSubnet,
     setDashboardValidator,
     setDashboardValidators,
+    resetDashboardState,
   } = useDashboard();
 
   const [amountState, setAmountState] = useState<AmountState>({
@@ -134,15 +141,23 @@ const Transaction = ({ address, isLoading = true, dashboardState }: TransactionP
       case DashboardState.CREATE_STAKE:
       case DashboardState.ADD_STAKE:
         api.createStake(params as StakeParams);
+        onRefresh();
+        resetDashboardState();
         break;
       case DashboardState.REMOVE_STAKE:
         api.removeStake(params as StakeParams);
+        onRefresh();
+        resetDashboardState();
         break;
       case DashboardState.MOVE_STAKE:
         api.moveStake(params as MoveStakeParams);
+        onRefresh();
+        resetDashboardState();
         break;
       case DashboardState.TRANSFER:
         api.transfer(params as TransferTaoParams);
+        onRefresh();
+        resetDashboardState();
         break;
     }
   };

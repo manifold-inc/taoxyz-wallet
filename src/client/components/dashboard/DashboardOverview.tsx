@@ -81,7 +81,7 @@ const DashboardOverview = ({
 }: DashboardOverviewProps) => {
   const { currentAddress } = useWallet();
   const { showNotification } = useNotification();
-  const { setDashboardState, setDashboardTotalBalance } = useDashboard();
+  const { setDashboardState, setDashboardTotalBalance, resetDashboardState } = useDashboard();
   const [balances, setBalances] = useState<Balances>({
     totalTao: null,
     totalInUSD: null,
@@ -228,6 +228,7 @@ const DashboardOverview = ({
           <div className="flex justify-between gap-3 w-full">
             <motion.button
               onClick={() => {
+                resetDashboardState();
                 setDashboardState(DashboardState.CREATE_STAKE);
               }}
               className="w-1/2 py-1.5 bg-mf-sybil-opacity rounded-sm cursor-pointer text-mf-sybil-500 border border-mf-sybil-opacity hover:border-mf-sybil-500 transition-colors hover:text-mf-edge-500"
@@ -238,6 +239,7 @@ const DashboardOverview = ({
             </motion.button>
             <motion.button
               onClick={() => {
+                resetDashboardState();
                 setDashboardState(DashboardState.TRANSFER);
               }}
               className="w-1/2 py-1.5 bg-mf-safety-opacity rounded-sm cursor-pointer text-mf-safety-500 border border-mf-safety-opacity hover:border-mf-safety-500 transition-colors hover:text-mf-edge-500"
