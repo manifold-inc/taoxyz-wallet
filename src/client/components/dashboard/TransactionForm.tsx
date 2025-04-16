@@ -78,6 +78,7 @@ const TransactionForm = ({
 
     switch (dashboardState) {
       case DashboardState.CREATE_STAKE:
+      case DashboardState.ADD_STAKE:
       case DashboardState.TRANSFER:
         if (dashboardFreeBalance === null) {
           console.log('No free balance available');
@@ -87,7 +88,6 @@ const TransactionForm = ({
         amountInRao = taoToRao(dashboardFreeBalance);
         console.log('Setting amount to free balance:', amount);
         break;
-      case DashboardState.ADD_STAKE:
       case DashboardState.REMOVE_STAKE:
       case DashboardState.MOVE_STAKE:
         if (dashboardStake === null) {

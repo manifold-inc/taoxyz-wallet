@@ -19,9 +19,11 @@ const AppLayout = ({ children }: AppLayoutProps) => {
     location.pathname === '/';
 
   return (
-    <main className="min-w-screen min-h-screen">
-      {/* Routes */}
-      {children}
+    <main className="min-h-screen min-w-screen">
+      <div className="pb-14">
+        {/* Routes */}
+        {children}
+      </div>
 
       {/* Lock Screen for Protected Routes */}
       {isProtectedRoute && (

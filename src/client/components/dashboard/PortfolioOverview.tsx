@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 import Skeleton from '@/client/components/common/Skeleton';
 import ExpandedStake from '@/client/components/portfolio/ExpandedStake';
 import StakeOverview from '@/client/components/portfolio/StakeOverview';
@@ -41,9 +39,14 @@ const StakeOverviewSkeleton = () => {
 const PortfolioOverview = ({ stakes, subnets, isLoading }: PortfolioProps) => {
   const { showNotification } = useNotification();
   const { api } = usePolkadotApi();
-  const { setDashboardState, setDashboardSubnet, setDashboardValidator } = useDashboard();
-  const [selectedStake, setSelectedStake] = useState<Stake | null>(null);
-  const [selectedSubnet, setSelectedSubnet] = useState<Subnet | null>(null);
+  const {
+    setDashboardState,
+    setDashboardSubnet,
+    setDashboardValidator,
+    setDashboardStake,
+    dashboardStake,
+    dashboardSubnet,
+  } = useDashboard();
 
   const getValidator = async (subnet: Subnet, hotkey: string) => {
     const result = await api?.getValidators(subnet.id);
@@ -60,51 +63,57 @@ const PortfolioOverview = ({ stakes, subnets, isLoading }: PortfolioProps) => {
   const handleStakeSelect = (stake: Stake): void => {
     const subnet = subnets.find(subnet => subnet.id === stake.netuid);
     if (subnet) {
-      setSelectedSubnet(subnet);
-      setSelectedStake(stake);
+      setDashboardSubnet(subnet);
+      setDashboardStake(stake);
     } else {
       showNotification({
         message: 'Failed to Fetch Subnet',
         type: NotificationType.Error,
       });
-      setSelectedStake(null);
-      setSelectedSubnet(null);
+      setDashboardSubnet(null);
+      setDashboardStake(null);
     }
   };
 
   const handleAddStake = async (): Promise<void> => {
     setDashboardState(DashboardState.ADD_STAKE);
-    setDashboardSubnet(selectedSubnet);
-    const validator = await getValidator(selectedSubnet as Subnet, selectedStake?.hotkey as string);
+    const validator = await getValidator(
+      dashboardSubnet as Subnet,
+      dashboardStake?.hotkey as string
+    );
     if (validator === null) return;
     setDashboardValidator(validator);
   };
 
   const handleMoveStake = async (): Promise<void> => {
     setDashboardState(DashboardState.MOVE_STAKE);
-    setDashboardSubnet(selectedSubnet);
-    const validator = await getValidator(selectedSubnet as Subnet, selectedStake?.hotkey as string);
+    const validator = await getValidator(
+      dashboardSubnet as Subnet,
+      dashboardStake?.hotkey as string
+    );
     if (validator === null) return;
     setDashboardValidator(validator);
   };
 
   const handleRemoveStake = async (): Promise<void> => {
     setDashboardState(DashboardState.REMOVE_STAKE);
-    setDashboardSubnet(selectedSubnet);
-    const validator = await getValidator(selectedSubnet as Subnet, selectedStake?.hotkey as string);
+    const validator = await getValidator(
+      dashboardSubnet as Subnet,
+      dashboardStake?.hotkey as string
+    );
     if (validator === null) return;
     setDashboardValidator(validator);
   };
 
   return (
     <>
-      {selectedStake ? (
+      {dashboardStake ? (
         <ExpandedStake
-          stake={selectedStake}
-          subnet={selectedSubnet as Subnet}
+          stake={dashboardStake}
+          subnet={dashboardSubnet as Subnet}
           onClose={() => {
-            setSelectedStake(null);
-            setSelectedSubnet(null);
+            setDashboardStake(null);
+            setDashboardSubnet(null);
           }}
           onAddStake={handleAddStake}
           onRemoveStake={handleRemoveStake}
