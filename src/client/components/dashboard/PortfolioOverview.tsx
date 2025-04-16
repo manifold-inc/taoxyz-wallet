@@ -1,23 +1,17 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
-import ConfirmAction from '@/client/components/common/ConfirmAction';
 import Skeleton from '@/client/components/common/Skeleton';
 import ExpandedStake from '@/client/components/portfolio/ExpandedStake';
 import StakeOverview from '@/client/components/portfolio/StakeOverview';
-import { useLock } from '@/client/contexts/LockContext';
+import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
 import { useNotification } from '@/client/contexts/NotificationContext';
 import { usePolkadotApi } from '@/client/contexts/PolkadotApiContext';
-import KeyringService from '@/client/services/KeyringService';
-import MessageService from '@/client/services/MessageService';
 import { NotificationType } from '@/types/client';
 import type { Stake, Subnet } from '@/types/client';
-import { formatNumber } from '@/utils/utils';
 
 interface PortfolioProps {
   stakes: Stake[];
   subnets: Subnet[];
-  address: string;
   isLoading: boolean;
   onRefresh: () => Promise<void>;
 }
@@ -44,14 +38,24 @@ const StakeOverviewSkeleton = () => {
   );
 };
 
-const PortfolioOverview = ({ stakes, subnets, address, isLoading, onRefresh }: PortfolioProps) => {
-  const navigate = useNavigate();
-  const { setIsLocked } = useLock();
+const PortfolioOverview = ({ stakes, subnets, isLoading }: PortfolioProps) => {
   const { showNotification } = useNotification();
   const { api } = usePolkadotApi();
+  const { setDashboardState, setDashboardSubnet, setDashboardValidator } = useDashboard();
   const [selectedStake, setSelectedStake] = useState<Stake | null>(null);
   const [selectedSubnet, setSelectedSubnet] = useState<Subnet | null>(null);
-  const [showRemoveStakeConfirm, setShowRemoveStakeConfirm] = useState(false);
+
+  const getValidator = async (subnet: Subnet, hotkey: string) => {
+    const result = await api?.getValidators(subnet.id);
+    if (!result) {
+      showNotification({
+        message: 'Failed to Fetch Validators',
+        type: NotificationType.Error,
+      });
+      return null;
+    }
+    return result.find(validator => validator.hotkey === hotkey) || null;
+  };
 
   const handleStakeSelect = (stake: Stake): void => {
     const subnet = subnets.find(subnet => subnet.id === stake.netuid);
@@ -68,90 +72,32 @@ const PortfolioOverview = ({ stakes, subnets, address, isLoading, onRefresh }: P
     }
   };
 
-  const handleAuth = async (): Promise<boolean> => {
-    if (await KeyringService.isLocked(address)) {
-      await setIsLocked(true);
-      await MessageService.sendWalletsLocked();
-      return false;
-    }
-    return true;
+  const handleAddStake = async (): Promise<void> => {
+    setDashboardState(DashboardState.ADD_STAKE);
+    setDashboardSubnet(selectedSubnet);
+    const validator = await getValidator(selectedSubnet as Subnet, selectedStake?.hotkey as string);
+    if (validator === null) return;
+    setDashboardValidator(validator);
   };
 
-  const handleMoveStake = (): void => {
-    navigate('/move-stake', {
-      state: {
-        selectedStake,
-        selectedSubnet,
-      },
-    });
+  const handleMoveStake = async (): Promise<void> => {
+    setDashboardState(DashboardState.MOVE_STAKE);
+    setDashboardSubnet(selectedSubnet);
+    const validator = await getValidator(selectedSubnet as Subnet, selectedStake?.hotkey as string);
+    if (validator === null) return;
+    setDashboardValidator(validator);
   };
 
   const handleRemoveStake = async (): Promise<void> => {
-    if (!api || !selectedStake) return;
-    const isAuthorized = await handleAuth();
-    if (!isAuthorized) return;
-
-    setShowRemoveStakeConfirm(true);
-  };
-
-  const handleConfirmRemoveStake = async (): Promise<void> => {
-    if (!api || !selectedStake) return;
-    setShowRemoveStakeConfirm(false);
-
-    try {
-      if (!selectedStake.stake || isNaN(selectedStake.stake)) {
-        showNotification({
-          type: NotificationType.Error,
-          message: 'Invalid Stake Amount',
-        });
-        return;
-      }
-
-      showNotification({
-        type: NotificationType.Pending,
-        message: 'Submitting Transaction...',
-      });
-
-      const result = await api.removeStake({
-        address,
-        validatorHotkey: selectedStake.hotkey,
-        subnetId: selectedStake.netuid,
-        amountInRao: BigInt(selectedStake.stake),
-      });
-
-      showNotification({
-        message: 'Transaction Successful!',
-        type: NotificationType.Success,
-        hash: result,
-      });
-
-      setSelectedStake(null);
-      setSelectedSubnet(null);
-
-      onRefresh();
-    } catch {
-      showNotification({
-        message: 'Failed to Remove Stake',
-        type: NotificationType.Error,
-      });
-    }
+    setDashboardState(DashboardState.REMOVE_STAKE);
+    setDashboardSubnet(selectedSubnet);
+    const validator = await getValidator(selectedSubnet as Subnet, selectedStake?.hotkey as string);
+    if (validator === null) return;
+    setDashboardValidator(validator);
   };
 
   return (
     <>
-      <ConfirmAction
-        isOpen={showRemoveStakeConfirm}
-        title="Confirm Remove Stake"
-        message={
-          selectedStake
-            ? `Are you sure you want to remove your stake of ${formatNumber(
-                selectedStake.stake / 1e9
-              )} ${selectedStake.netuid === 0 ? 'τ' : 'α'} from Subnet ${selectedStake.netuid}?`
-            : ''
-        }
-        onConfirm={handleConfirmRemoveStake}
-        onCancel={() => setShowRemoveStakeConfirm(false)}
-      />
       {selectedStake ? (
         <ExpandedStake
           stake={selectedStake}
@@ -160,6 +106,7 @@ const PortfolioOverview = ({ stakes, subnets, address, isLoading, onRefresh }: P
             setSelectedStake(null);
             setSelectedSubnet(null);
           }}
+          onAddStake={handleAddStake}
           onRemoveStake={handleRemoveStake}
           onMoveStake={handleMoveStake}
         />

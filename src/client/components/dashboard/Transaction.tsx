@@ -1,14 +1,13 @@
-import { motion } from 'framer-motion';
+import { ChevronRight, CircleCheckBig } from 'lucide-react';
 
 import { useState } from 'react';
 
+import SubnetSelection from '@/client/components/dashboard/SubnetSelection';
+import TransactionForm from '@/client/components/dashboard/TransactionForm';
 import ValidatorSelection from '@/client/components/dashboard/ValidatorSelection';
 import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
 import { usePolkadotApi } from '@/client/contexts/PolkadotApiContext';
-import type { Validator } from '@/types/client';
-import { taoToRao } from '@/utils/utils';
-
-import SubnetSelection from './SubnetSelection';
+import type { Subnet, Validator } from '@/types/client';
 
 interface TransactionParams {
   address?: string;
@@ -41,6 +40,11 @@ interface TransactionProps {
   isLoading: boolean;
 }
 
+export interface AmountState {
+  amount: string;
+  amountInRao: bigint | null;
+}
+
 const Transaction = ({ address, isLoading = true, dashboardState }: TransactionProps) => {
   const { api } = usePolkadotApi();
   const {
@@ -48,42 +52,19 @@ const Transaction = ({ address, isLoading = true, dashboardState }: TransactionP
     dashboardSubnets,
     dashboardValidator,
     dashboardValidators,
-    dashboardFreeBalance,
     dashboardStake,
+    setDashboardSubnet,
+    setDashboardValidators,
     setDashboardValidator,
-    resetDashboardState,
   } = useDashboard();
-  const [amount, setAmount] = useState<string>('');
-  const [amountInRao, setAmountInRao] = useState<bigint | null>(null);
+
+  const [amountState, setAmountState] = useState<AmountState>({
+    amount: '',
+    amountInRao: null,
+  });
   const [toAddress, setToAddress] = useState<string>('');
-
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    // Allow empty string or valid decimal numbers
-    if (value === '' || /^\d*\.?\d*$/.test(value)) {
-      setAmount(value);
-      // Only convert to RAO if we have a valid number
-      if (value !== '') {
-        const numValue = parseFloat(value);
-        if (!isNaN(numValue) && numValue >= 0) {
-          setAmountInRao(taoToRao(numValue));
-        }
-      } else {
-        setAmountInRao(null);
-      }
-    }
-  };
-
-  const amountValidation = (amountInRao: bigint) => {
-    if (dashboardFreeBalance === null) return false;
-    if (amountInRao <= 0) return false;
-    if (amountInRao > BigInt(dashboardFreeBalance)) return false;
-    return true;
-  };
-
-  const handleValidatorSelection = (validator: Validator) => {
-    setDashboardValidator(validator);
-  };
+  const [showSubnetSelection, setShowSubnetSelection] = useState(false);
+  const [showValidatorSelection, setShowValidatorSelection] = useState(false);
 
   /**
    * Create {address, subnetId, validatorHotkey, amountInRao}
@@ -95,10 +76,10 @@ const Transaction = ({ address, isLoading = true, dashboardState }: TransactionP
    *  Requires existing stake
    * Transfer {address, amountInRao}
    */
-  const handleSetupTransaction = () => {
+  const handleSetupTransaction = (e: React.FormEvent) => {
+    e.preventDefault();
     if (!api) return;
-    if (amountInRao === null) return;
-    if (!amountValidation(amountInRao)) return;
+    if (amountState.amountInRao === null) return;
 
     let params: TransactionParams;
     switch (dashboardState) {
@@ -108,7 +89,7 @@ const Transaction = ({ address, isLoading = true, dashboardState }: TransactionP
           address,
           subnetId: dashboardSubnet.id,
           validatorHotkey: dashboardValidator.hotkey,
-          amountInRao,
+          amountInRao: amountState.amountInRao,
         } as StakeParams;
         break;
       case DashboardState.ADD_STAKE:
@@ -118,7 +99,7 @@ const Transaction = ({ address, isLoading = true, dashboardState }: TransactionP
           address,
           subnetId: dashboardSubnet.id,
           validatorHotkey: dashboardStake.hotkey,
-          amountInRao,
+          amountInRao: amountState.amountInRao,
         } as StakeParams;
         break;
       case DashboardState.MOVE_STAKE:
@@ -129,7 +110,7 @@ const Transaction = ({ address, isLoading = true, dashboardState }: TransactionP
           fromHotkey: dashboardStake.hotkey,
           toSubnetId: dashboardSubnet.id,
           toHotkey: dashboardValidator.hotkey,
-          amountInRao,
+          amountInRao: amountState.amountInRao,
         } as MoveStakeParams;
         break;
       case DashboardState.TRANSFER:
@@ -137,12 +118,13 @@ const Transaction = ({ address, isLoading = true, dashboardState }: TransactionP
         params = {
           fromAddress: address,
           toAddress,
-          amountInRao,
+          amountInRao: amountState.amountInRao,
         } as TransferTaoParams;
         break;
       default:
         return;
     }
+    console.log('params', params);
     submitTransaction(params);
   };
 
@@ -166,108 +148,142 @@ const Transaction = ({ address, isLoading = true, dashboardState }: TransactionP
   };
 
   const renderSubnetSelection = () => {
-    if (dashboardSubnet === null) return null;
-    return (
-      <div className="w-full px-3 py-2 text-sm bg-mf-night-300 rounded-md">
-        <p className="text-mf-edge-500">{dashboardSubnet.name}</p>
-        <span className="text-mf-edge-700">SN{dashboardSubnet.id}</span>
-      </div>
-    );
-  };
-
-  const renderInputFields = () => {
-    switch (dashboardState) {
-      case DashboardState.CREATE_STAKE:
-      case DashboardState.ADD_STAKE:
-      case DashboardState.REMOVE_STAKE:
-      case DashboardState.MOVE_STAKE:
-        if (dashboardValidators === null) return null;
-        return (
-          <div className="flex flex-col gap-4 items-center justify-center w-full">
-            {renderSubnetSelection()}
-            <ValidatorSelection
-              validators={dashboardValidators}
-              onSelect={handleValidatorSelection}
-            />
-          </div>
-        );
-
-      case DashboardState.TRANSFER:
-        return (
-          <input
-            type="text"
-            value={toAddress}
-            placeholder="Enter Address"
-            onChange={e => setToAddress(e.target.value)}
-            className="w-full px-3 py-2 text-sm text-mf-edge-500 placeholder-mf-edge-700 bg-mf-night-300 rounded-md"
+    if (showSubnetSelection && dashboardSubnets) {
+      return (
+        <div className="w-full">
+          <SubnetSelection
+            subnets={dashboardSubnets}
+            isLoadingSubnets={isLoading}
+            onCancel={handleSubnetCancel}
+            onConfirm={handleSubnetConfirm}
           />
-        );
+        </div>
+      );
     }
-  };
 
-  const TransactionForm = () => {
-    return (
-      <div className="w-full h-full flex flex-col gap-3 px-5 py-3">
-        {/* Transaction Modal */}
-        <form
-          className="flex flex-col gap-4 items-center justify-center"
-          onSubmit={handleSetupTransaction}
+    if (dashboardSubnet === null) {
+      return (
+        <button
+          className="w-full p-2 bg-mf-night-400 rounded-md cursor-pointer flex items-center justify-between"
+          onClick={() => setShowSubnetSelection(true)}
         >
-          {/* Amount and Validator */}
-          <input
-            type="text"
-            value={amount}
-            placeholder="Enter Amount"
-            onChange={handleAmountChange}
-            className="w-full px-3 py-2 text-sm text-mf-edge-500 placeholder-mf-edge-700 bg-mf-night-300 rounded-md"
-          />
-          {renderInputFields()}
+          <p className="text-mf-edge-700 text-sm font-medium">Select Subnet</p>
+          <ChevronRight className="w-4 h-4 text-mf-edge-500" />
+        </button>
+      );
+    }
 
-          {/* Action Buttons */}
-          <div className="w-full flex gap-2 items-center justify-center">
-            <motion.button
-              type="button"
-              onClick={() => resetDashboardState()}
-              className="w-full rounded-md text-center cursor-pointer w-1/2 py-1.5 bg-mf-red-opacity border border-mf-red-opacity hover:border-mf-red-500 hover:text-mf-edge-500 transition-colors text-mf-red-500 gap-1"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              Cancel
-            </motion.button>
-            <motion.button
-              type="submit"
-              disabled={
-                !amountInRao ||
-                !dashboardSubnet ||
-                !dashboardValidator ||
-                !amountValidation(amountInRao)
-              }
-              className="w-full rounded-md text-center cursor-pointer w-1/2 py-1.5 bg-mf-sybil-opacity border border-mf-sybil-opacity hover:border-mf-sybil-500 hover:text-mf-edge-500 transition-colors text-mf-sybil-500 gap-1"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              Submit
-            </motion.button>
-          </div>
-        </form>
-      </div>
+    return (
+      <button
+        className="w-full p-2 text-sm bg-mf-night-400 rounded-md cursor-pointer flex items-center justify-between"
+        onClick={() => setShowSubnetSelection(true)}
+      >
+        <div className="flex gap-1">
+          <p className="text-mf-edge-500 font-medium">{dashboardSubnet.name}</p>
+          <span className="text-mf-edge-700 font-medium">SN{dashboardSubnet.id}</span>
+        </div>
+        <CircleCheckBig className="w-4 h-4 text-mf-sybil-500" />
+      </button>
     );
   };
 
-  const renderModal = () => {
-    switch (dashboardState) {
-      case DashboardState.ADD_STAKE:
-      case DashboardState.MOVE_STAKE:
-        // Skips render if subnet is selected
-        if (dashboardSubnet !== null) break;
-        if (dashboardSubnets === null) break;
-        return <SubnetSelection subnets={dashboardSubnets} isLoadingSubnets={isLoading} />;
-      default:
-        return <TransactionForm />;
+  const renderValidatorSelection = () => {
+    if (showValidatorSelection && dashboardValidators) {
+      return (
+        <div className="w-full">
+          <ValidatorSelection
+            validators={dashboardValidators}
+            onCancel={handleValidatorCancel}
+            onConfirm={handleValidatorConfirm}
+          />
+        </div>
+      );
     }
+
+    if (dashboardValidator === null) {
+      return (
+        <button
+          className="w-full p-2 text-sm bg-mf-night-400 rounded-md cursor-pointer flex items-center justify-between disabled:disabled-button disabled:cursor-not-allowed"
+          disabled={dashboardSubnet === null}
+          onClick={() => setShowValidatorSelection(true)}
+        >
+          <p className="text-mf-edge-700 font-medium">Select Validator</p>
+          <ChevronRight className="w-4 h-4 text-mf-edge-500" />
+        </button>
+      );
+    }
+
+    return (
+      <button
+        className="w-full p-2 text-sm bg-mf-night-400 rounded-md cursor-pointer flex items-center justify-between"
+        onClick={() => setShowValidatorSelection(true)}
+      >
+        <div className="flex gap-1">
+          <p className="text-mf-edge-500 font-medium truncate max-w-[16ch]">
+            {dashboardValidator.name || 'Validator'}
+          </p>
+          <span className="text-mf-edge-700 font-medium">
+            {dashboardValidator.hotkey.slice(0, 6)}...{dashboardValidator.hotkey.slice(-6)}
+          </span>
+        </div>
+        <CircleCheckBig className="w-4 h-4 text-mf-sybil-500" />
+      </button>
+    );
   };
 
-  return <>{renderModal()}</>;
+  const handleSubnetCancel = () => {
+    setDashboardSubnet(null);
+    setDashboardValidator(null);
+    setDashboardValidators(null);
+    setShowSubnetSelection(false);
+  };
+
+  const handleSubnetConfirm = (subnet: Subnet, validators: Validator[]) => {
+    setDashboardSubnet(subnet);
+    setDashboardValidator(null);
+    setDashboardValidators(validators);
+    setShowSubnetSelection(false);
+  };
+
+  const handleValidatorCancel = () => {
+    setDashboardValidator(null);
+    setDashboardValidators(null);
+    setShowValidatorSelection(false);
+  };
+
+  const handleValidatorConfirm = (validator: Validator) => {
+    setDashboardValidator(validator);
+    setShowValidatorSelection(false);
+  };
+
+  return (
+    <>
+      {showSubnetSelection && dashboardSubnets ? (
+        <SubnetSelection
+          subnets={dashboardSubnets}
+          isLoadingSubnets={isLoading}
+          onCancel={handleSubnetCancel}
+          onConfirm={handleSubnetConfirm}
+        />
+      ) : showValidatorSelection && dashboardValidators ? (
+        <ValidatorSelection
+          validators={dashboardValidators}
+          onCancel={handleValidatorCancel}
+          onConfirm={handleValidatorConfirm}
+        />
+      ) : (
+        <TransactionForm
+          amountState={amountState}
+          setAmountState={setAmountState}
+          toAddress={toAddress}
+          setToAddress={setToAddress}
+          handleSetupTransaction={handleSetupTransaction}
+          handleRenderSubnetSelection={renderSubnetSelection}
+          handleRenderValidatorSelection={renderValidatorSelection}
+        />
+      )}
+    </>
+  );
 };
 
 export default Transaction;

@@ -6,7 +6,6 @@ import Sign from '@/client/components/popups/Sign';
 import AddWallet from '@/client/pages/AddWallet';
 import Dashboard from '@/client/pages/Dashboard';
 import Settings from '@/client/pages/Settings';
-import Transfer from '@/client/pages/Transfer';
 import Welcome from '@/client/pages/Welcome';
 
 export enum PublicRoutes {
@@ -18,7 +17,6 @@ export enum PublicRoutes {
 
 export enum ProtectedRoutes {
   Dashboard = '/dashboard',
-  Transfer = '/transfer',
   Settings = '/settings',
 }
 
@@ -45,14 +43,6 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <Dashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path={ProtectedRoutes.Transfer}
-        element={
-          <ProtectedRoute>
-            <Transfer />
           </ProtectedRoute>
         }
       />

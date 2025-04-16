@@ -6,13 +6,7 @@ interface ConfirmActionProps {
   onCancel: () => void;
 }
 
-const ConfirmAction = ({
-  isOpen,
-  title,
-  message,
-  onConfirm,
-  onCancel,
-}: ConfirmActionProps) => {
+const ConfirmAction = ({ isOpen, title, message, onConfirm, onCancel }: ConfirmActionProps) => {
   if (!isOpen) return null;
 
   return (
@@ -20,7 +14,7 @@ const ConfirmAction = ({
       role="dialog"
       aria-modal="true"
       className="fixed inset-0 z-[100] flex items-center justify-center"
-      onClick={(event) => {
+      onClick={event => {
         event.stopPropagation();
       }}
     >

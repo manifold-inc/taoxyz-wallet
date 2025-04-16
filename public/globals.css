@@ -72,6 +72,7 @@
 
   /* Night Colors */
   --color-mf-night-300: #2a2c33; /* #2A2C33 */
+  --color-mf-night-400: #22242e; /* #22242E */
   --color-mf-night-500: #191b20; /* #191B20 */
   --color-mf-night-700: #101114; /* #101114 */
 
@@ -86,7 +87,7 @@
   --color-mf-milk-700: #aec0d6; /* #B9C4D6 */
 
   /* Sybil Colors */
-  --color-mf-sybil-500: #57e8b4; /* #56E8B4 */
+  --color-mf-sybil-500: #57e8b4; /* #57E8B4 */
   --color-mf-sybil-opacity: #2d4b49; /* #2D4B49 */
 
   /* Red Colors */
@@ -176,4 +177,10 @@ input {
 /* Custom Blinker Font Class */
 .blinker-font {
   font-family: 'Blinker', sans-serif;
+}
+
+.disabled-button {
+  background-color: var(--color-mf-ash-500);
+  color: var(--color-mf-edge-700);
+  border-color: var(--color-mf-ash-500);
 }

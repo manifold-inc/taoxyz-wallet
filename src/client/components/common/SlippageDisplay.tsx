@@ -1,11 +1,9 @@
 import type { Slippage } from '../../../types/client';
-import { formatNumber } from '../../../utils/utils';
+import { formatNumber, taoToRao } from '../../../utils/utils';
 
 interface SlippageDisplayProps {
   amount: string;
   balance: string;
-  balanceInRao: bigint;
-  amountInRao: bigint;
   slippage?: Slippage;
   isRoot?: boolean;
   moveStake?: boolean;
@@ -15,8 +13,6 @@ interface SlippageDisplayProps {
 const SlippageDisplay = ({
   amount,
   balance,
-  amountInRao,
-  balanceInRao,
   slippage,
   moveStake = false,
   isRoot = false,
@@ -24,6 +20,8 @@ const SlippageDisplay = ({
 }: SlippageDisplayProps) => {
   const fee = moveStake ? 0.0001 : 0.00005;
   const receiveAmount = isRoot ? parseFloat(amount) : slippage?.tokens || 0;
+  const balanceInRao = taoToRao(Number(balance));
+  const amountInRao = taoToRao(Number(amount));
 
   let payToken: string;
   if (moveStake) {

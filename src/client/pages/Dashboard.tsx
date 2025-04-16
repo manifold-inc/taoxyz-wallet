@@ -179,7 +179,6 @@ export const Dashboard = () => {
           <PortfolioOverview
             stakes={stakes}
             subnets={subnets}
-            address={currentAddress}
             isLoading={isLoading}
             onRefresh={() => fetchData(currentAddress, true)}
           />

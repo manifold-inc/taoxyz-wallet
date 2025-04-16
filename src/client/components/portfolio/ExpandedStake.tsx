@@ -3,17 +3,17 @@ import { ChevronUp, Copy } from 'lucide-react';
 
 import { useState } from 'react';
 
+import StakeChart from '@/client/components/portfolio/StakeChart';
 import { useNotification } from '@/client/contexts/NotificationContext';
 import { NotificationType } from '@/types/client';
 import type { Stake, Subnet } from '@/types/client';
 import { raoToTao } from '@/utils/utils';
 
-import StakeChart from './StakeChart';
-
 interface ExpandedStakeProps {
   stake: Stake;
   subnet: Subnet;
   onClose: () => void;
+  onAddStake: () => void;
   onRemoveStake: () => void;
   onMoveStake: () => void;
 }
@@ -31,6 +31,7 @@ const ExpandedStake = ({
   stake,
   subnet,
   onClose,
+  onAddStake,
   onRemoveStake,
   onMoveStake,
 }: ExpandedStakeProps) => {
@@ -172,6 +173,7 @@ const ExpandedStake = ({
       <div className="flex gap-2 pt-2">
         <motion.button
           className="cursor-pointer w-1/3 py-1.5 bg-mf-sybil-opacity rounded-sm text-mf-sybil-500 border border-mf-sybil-opacity hover:border-mf-sybil-500 transition-colors hover:text-mf-edge-500"
+          onClick={onAddStake}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >

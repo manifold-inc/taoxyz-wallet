@@ -47,6 +47,10 @@ export const DashboardProvider = ({ children }: DashboardProviderProps) => {
   const [dashboardValidator, setDashboardValidator] = useState<Validator | null>(null);
   const [dashboardValidators, setDashboardValidators] = useState<Validator[] | null>(null);
 
+  const handleSetDashboardState = (state: DashboardState) => {
+    setDashboardState(state);
+  };
+
   const resetDashboardState = () => {
     setDashboardState(DashboardState.OVERVIEW);
     setDashboardStake(null);
@@ -62,7 +66,7 @@ export const DashboardProvider = ({ children }: DashboardProviderProps) => {
     <DashboardContext.Provider
       value={{
         dashboardState,
-        setDashboardState,
+        setDashboardState: handleSetDashboardState,
         dashboardStake,
         setDashboardStake,
         dashboardFreeBalance,

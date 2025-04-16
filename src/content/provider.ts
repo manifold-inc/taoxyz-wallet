@@ -1,22 +1,19 @@
-import { MESSAGE_TYPES, ERROR_TYPES } from "../types/messages";
 import type {
-  InjectedWindowProvider,
-  InjectedAccount,
   Injected,
-} from "@polkadot/extension-inject/types";
+  InjectedAccount,
+  InjectedWindowProvider,
+} from '@polkadot/extension-inject/types';
+import type { SignerPayloadJSON, SignerPayloadRaw, SignerResult } from '@polkadot/types/types';
+
+import { ERROR_TYPES, MESSAGE_TYPES } from '../types/messages';
 import type {
-  SignerPayloadJSON,
-  SignerPayloadRaw,
-  SignerResult,
-} from "@polkadot/types/types";
-import type {
+  ConnectResponsePayload,
   DappMessage,
   ExtensionMessage,
-  ConnectResponsePayload,
-  SignResponsePayload,
   MessagePayloadMap,
-} from "../types/messages";
-import { generateId } from "../utils/utils";
+  SignResponsePayload,
+} from '../types/messages';
+import { generateId } from '../utils/utils';
 
 // Interface for the dApp, this holds the logic for the routing for content.ts.
 
@@ -26,7 +23,7 @@ const dappMessageHandler = <T extends keyof MessagePayloadMap>(
 ) => {
   const handler = (event: MessageEvent<ExtensionMessage>) => {
     if (event.data.type === messageType) {
-      window.removeEventListener("message", handler);
+      window.removeEventListener('message', handler);
       callback(event.data.payload as MessagePayloadMap[T]);
     }
   };
@@ -67,7 +64,7 @@ const signerHandler = () => ({
         }
       );
 
-      window.addEventListener("message", handleSignResponse);
+      window.addEventListener('message', handleSignResponse);
       sendMessage({
         type: MESSAGE_TYPES.SIGN_REQUEST,
         payload: {
@@ -95,7 +92,7 @@ const signerHandler = () => ({
         }
       );
 
-      window.addEventListener("message", handleSignResponse);
+      window.addEventListener('message', handleSignResponse);
       sendMessage({
         type: MESSAGE_TYPES.SIGN_REQUEST,
         payload: {
@@ -132,7 +129,7 @@ export const TaoxyzWalletProvider: InjectedWindowProvider = {
         }
       );
 
-      window.addEventListener("message", handleAuthResponse);
+      window.addEventListener('message', handleAuthResponse);
       sendMessage({
         type: MESSAGE_TYPES.CONNECT_REQUEST,
         payload: { origin },

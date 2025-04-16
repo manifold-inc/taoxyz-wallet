@@ -1,4 +1,4 @@
-import type { Slippage } from "../types/client";
+import type { Slippage } from '../types/client';
 
 export const generateId = (): number => {
   return Math.floor(Math.random() * 1000000);
@@ -42,8 +42,7 @@ export const slippageStakeCalculation = (
       }
 
       if (slippage + alphaReturned != 0n) {
-        slippagePercentage =
-          (100 * Number(slippage)) / Number(slippage + alphaReturned);
+        slippagePercentage = (100 * Number(slippage)) / Number(slippage + alphaReturned);
       } else {
         slippagePercentage = 0;
       }
@@ -65,8 +64,7 @@ export const slippageStakeCalculation = (
       }
 
       if (slippage + taoReturned != 0n) {
-        slippagePercentage =
-          (100 * Number(slippage)) / Number(slippage + taoReturned);
+        slippagePercentage = (100 * Number(slippage)) / Number(slippage + taoReturned);
       } else {
         slippagePercentage = 0;
       }
@@ -91,13 +89,7 @@ export const slippageMoveStakeCalculation = (
   taoIn: bigint,
   amountInRao: bigint
 ): Slippage => {
-  const unstakeResult = slippageStakeCalculation(
-    alphaIn,
-    taoIn,
-    amountInRao,
-    false,
-    true
-  );
+  const unstakeResult = slippageStakeCalculation(alphaIn, taoIn, amountInRao, false, true);
 
   const newAlphaIn = alphaIn - taoToRao(unstakeResult.tokens);
   const newTaoIn = taoIn + amountInRao;
