@@ -197,17 +197,20 @@ const TransactionForm = ({
       <form className="flex flex-col gap-4 items-center justify-center" onSubmit={handleFormSubmit}>
         <div className="w-full flex flex-col gap-4 items-center justify-center">
           <div className="w-full flex items-center gap-2">
-            <input
+            <motion.input
               type="text"
               value={amountState.amount}
               placeholder="Enter Amount"
               onChange={handleAmountChange}
-              className="w-4/5 p-2 text-sm text-mf-edge-500 placeholder-mf-edge-700 bg-mf-night-300 rounded-md"
+              className="w-4/5 p-2 text-sm text-mf-edge-500 border border-mf-ash-500 placeholder-mf-edge-700 bg-mf-night-300 rounded-md"
+              whileFocus={{
+                borderColor: '#57E8B4',
+              }}
             />
             <motion.button
               type="button"
               onClick={handleMaxAmount}
-              className="w-1/5 text-mf-sybil-500 text-sm p-2 rounded-md bg-mf-sybil-opacity cursor-pointer"
+              className="w-1/5 text-mf-sybil-500 text-sm p-2 rounded-md bg-mf-sybil-opacity cursor-pointer border border-mf-ash-500"
               whileHover={{ opacity: 0.5 }}
             >
               Max
@@ -235,7 +238,7 @@ const TransactionForm = ({
             className="w-full rounded-md text-center cursor-pointer w-1/2 py-1.5 bg-mf-sybil-opacity border border-mf-sybil-opacity transition-colors text-mf-sybil-500 gap-1 disabled:disabled-button disabled:cursor-not-allowed"
             whileHover={{ opacity: 0.5, color: '#c5dbff', borderColor: '#57e8b4' }}
           >
-            Submit
+            Continue
           </motion.button>
         </div>
       </form>

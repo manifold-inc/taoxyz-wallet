@@ -293,7 +293,6 @@ const Transaction = ({
 
   const handleValidatorCancel = () => {
     setDashboardValidator(null);
-    setDashboardValidators(null);
     setShowValidatorSelection(false);
   };
 

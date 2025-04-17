@@ -2,13 +2,12 @@ import { motion } from 'framer-motion';
 
 import { useState } from 'react';
 
+import Skeleton from '@/client/components/common/Skeleton';
 import { useDashboard } from '@/client/contexts/DashboardContext';
 import { useNotification } from '@/client/contexts/NotificationContext';
 import { usePolkadotApi } from '@/client/contexts/PolkadotApiContext';
 import type { Subnet, Validator } from '@/types/client';
 import { NotificationType } from '@/types/client';
-
-import Skeleton from '../../common/Skeleton';
 
 interface SubnetSelectionProps {
   subnets: Subnet[];
@@ -109,13 +108,23 @@ const SubnetSelection = ({
             borderColor: '#57E8B4',
           }}
         />
-        <motion.button
-          onClick={() => setSearchQuery('')}
-          className="text-mf-sybil-500 text-sm w-1/5 bg-mf-ash-500 rounded-md border border-mf-ash-500 p-2 cursor-pointer"
-          whileHover={{ opacity: 0.5 }}
-        >
-          Clear
-        </motion.button>
+        {searchQuery !== '' ? (
+          <motion.button
+            onClick={() => setSearchQuery('')}
+            className="text-mf-sybil-500 text-sm w-1/5 bg-mf-ash-500 rounded-md border border-mf-ash-500 p-2 cursor-pointer"
+            whileHover={{ opacity: 0.5 }}
+          >
+            Clear
+          </motion.button>
+        ) : (
+          <motion.button
+            onClick={onCancel}
+            className="text-mf-red-500 text-sm w-1/5 bg-mf-red-opacity rounded-md border border-mf-red-opacity p-2 cursor-pointer"
+            whileHover={{ opacity: 0.5 }}
+          >
+            Back
+          </motion.button>
+        )}
       </div>
 
       {/* Subnets */}
@@ -128,7 +137,7 @@ const SubnetSelection = ({
               {/* Subnet */}
               <motion.button
                 onClick={() => handleSubnetSelect(subnet)}
-                className={`w-full text-left rounded-md cursor-pointer p-3 transition-colors gap-1 ${
+                className={`w-full text-left rounded-md cursor-pointer p-2 transition-colors gap-1 ${
                   dashboardSubnet?.id === subnet.id ? 'bg-mf-ash-300' : 'bg-mf-ash-500'
                 }`}
                 whileHover={{ backgroundColor: '#3a3c46' }}
@@ -166,13 +175,18 @@ const SubnetSelection = ({
                     className="w-full rounded-md text-center cursor-pointer w-1/2 py-1.5 bg-mf-red-opacity border border-mf-red-opacity hover:border-mf-red-500 hover:text-mf-edge-500 transition-colors text-mf-red-500 gap-1"
                     whileHover={{ opacity: 0.5 }}
                   >
-                    Cancel
+                    Back
                   </motion.button>
 
                   <motion.button
                     onClick={() => onConfirm(subnet, dashboardValidators ?? [])}
-                    className="w-full rounded-md text-center cursor-pointer w-1/2 py-1.5 bg-mf-sybil-opacity border border-mf-sybil-opacity hover:border-mf-sybil-500 hover:text-mf-edge-500 transition-colors text-mf-sybil-500 gap-1"
+                    className="w-full rounded-md text-center cursor-pointer w-1/2 py-1.5 bg-mf-sybil-opacity border border-mf-sybil-opacity hover:border-mf-sybil-500 hover:text-mf-edge-500 transition-colors text-mf-sybil-500 gap-1 disabled:disabled-button disabled:cursor-not-allowed"
                     whileHover={{ opacity: 0.5 }}
+                    disabled={
+                      dashboardSubnet === null ||
+                      dashboardValidators === null ||
+                      dashboardValidators.length === 0
+                    }
                   >
                     Confirm
                   </motion.button>
