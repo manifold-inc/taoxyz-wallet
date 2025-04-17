@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion';
 
+import { formatNumber, raoToTao } from '@/utils/utils';
+
 import type { Stake, Subnet } from '../../../types/client';
 
 interface StakeOverviewProps {
@@ -29,7 +31,7 @@ const StakeOverview = ({ stake, subnet, onClick }: StakeOverviewProps) => {
         <p className="text-mf-sybil-500 text-sm">
           {stake.hotkey.slice(0, 6)}...{stake.hotkey.slice(-6)}
         </p>
-        <p className="text-mf-edge-500 text-sm">{(stake.stake / 1e9).toFixed(4)}</p>
+        <p className="text-mf-edge-500 text-sm">{formatNumber(raoToTao(stake.stake))}</p>
       </div>
     </motion.button>
   );

@@ -14,16 +14,16 @@ export enum DashboardState {
 interface DashboardContextType {
   dashboardState: DashboardState;
   dashboardStake: Stake | null;
-  dashboardFreeBalance: number | null;
-  dashboardTotalBalance: number | null;
+  dashboardFreeBalance: bigint | null;
+  dashboardTotalBalance: bigint | null;
   dashboardSubnet: Subnet | null;
   dashboardSubnets: Subnet[] | null;
   dashboardValidator: Validator | null;
   dashboardValidators: Validator[] | null;
   setDashboardState: (state: DashboardState) => void;
   setDashboardStake: (stake: Stake | null) => void;
-  setDashboardFreeBalance: (balance: number | null) => void;
-  setDashboardTotalBalance: (balance: number | null) => void;
+  setDashboardFreeBalance: (balance: bigint | null) => void;
+  setDashboardTotalBalance: (balance: bigint | null) => void;
   setDashboardSubnet: (subnet: Subnet | null) => void;
   setDashboardSubnets: (subnets: Subnet[] | null) => void;
   setDashboardValidator: (validator: Validator | null) => void;
@@ -40,8 +40,8 @@ interface DashboardProviderProps {
 export const DashboardProvider = ({ children }: DashboardProviderProps) => {
   const [dashboardState, setDashboardState] = useState<DashboardState>(DashboardState.OVERVIEW);
   const [dashboardStake, setDashboardStake] = useState<Stake | null>(null);
-  const [dashboardFreeBalance, setDashboardFreeBalance] = useState<number | null>(null);
-  const [dashboardTotalBalance, setDashboardTotalBalance] = useState<number | null>(null);
+  const [dashboardFreeBalance, setDashboardFreeBalance] = useState<bigint | null>(null);
+  const [dashboardTotalBalance, setDashboardTotalBalance] = useState<bigint | null>(null);
   const [dashboardSubnet, setDashboardSubnet] = useState<Subnet | null>(null);
   const [dashboardSubnets, setDashboardSubnets] = useState<Subnet[] | null>(null);
   const [dashboardValidator, setDashboardValidator] = useState<Validator | null>(null);

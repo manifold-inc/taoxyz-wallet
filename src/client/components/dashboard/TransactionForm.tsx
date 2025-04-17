@@ -7,12 +7,10 @@ import SlippageDisplay from '@/client/components/common/SlippageDisplay';
 import type { AmountState } from '@/client/components/dashboard/Transaction';
 import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
 import { useLock } from '@/client/contexts/LockContext';
-import { useNotification } from '@/client/contexts/NotificationContext';
 import { useWallet } from '@/client/contexts/WalletContext';
 import KeyringService from '@/client/services/KeyringService';
 import MessageService from '@/client/services/MessageService';
-import { NotificationType } from '@/types/client';
-import { taoToRao } from '@/utils/utils';
+import { raoToTao, taoToRao } from '@/utils/utils';
 
 interface TransactionFormProps {
   amountState: AmountState;
@@ -35,7 +33,6 @@ const TransactionForm = ({
 }: TransactionFormProps) => {
   const { currentAddress } = useWallet();
   const { setIsLocked } = useLock();
-  const { showNotification } = useNotification();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     resetDashboardState,
@@ -81,19 +78,20 @@ const TransactionForm = ({
     let amount: string;
     let amountInRao: bigint;
 
+    // If its a staked position, the stake/tokens is in rao already
     switch (dashboardState) {
       case DashboardState.CREATE_STAKE:
       case DashboardState.ADD_STAKE:
       case DashboardState.TRANSFER:
         if (dashboardFreeBalance === null) return;
-        amount = dashboardFreeBalance.toString();
-        amountInRao = taoToRao(dashboardFreeBalance);
+        amount = raoToTao(dashboardFreeBalance).toString();
+        amountInRao = dashboardFreeBalance;
         break;
       case DashboardState.REMOVE_STAKE:
       case DashboardState.MOVE_STAKE:
         if (dashboardStake === null) return;
-        amount = dashboardStake.stake.toString();
-        amountInRao = taoToRao(dashboardStake.stake);
+        amount = raoToTao(dashboardStake.stake).toString();
+        amountInRao = dashboardStake.stake;
         break;
       default:
         return;
@@ -283,71 +281,24 @@ const TransactionForm = ({
       }
     }
   };
-
-  const logFormState = () => {
-    console.log('Form State:', {
-      isSubmitting,
-      amount: amountState.amount,
-      toAddress,
-      dashboardSubnet: dashboardSubnet?.id,
-      dashboardValidator: dashboardValidator?.hotkey,
-      amountValidation: amountValidation(Number(amountState.amount)),
-      disabledConditions: {
-        submitButton:
-          !dashboardSubnet ||
-          !dashboardValidator ||
-          !amountValidation(Number(amountState.amount)) ||
-          isSubmitting,
-        maxButton: isSubmitting,
-        cancelButton: isSubmitting,
-        amountInput: isSubmitting,
-      },
-    });
-  };
-
+  // TODO: Add validators to restoreTransaction
   useEffect(() => {
     void setBalance();
     void restoreTransaction();
-    logFormState();
   }, [dashboardState]);
-
-  useEffect(() => {
-    logFormState();
-  }, [isSubmitting, amountState.amount, toAddress, dashboardSubnet, dashboardValidator]);
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    logFormState();
 
     const isAuthorized = await handleAuth();
     if (!isAuthorized) {
       setIsSubmitting(false);
-      logFormState();
       return;
     }
 
-    try {
-      showNotification({
-        message: 'Submitting Transaction...',
-        type: NotificationType.Pending,
-      });
-
-      await handleSetupTransaction(e);
-
-      showNotification({
-        message: 'Transaction Successful!',
-        type: NotificationType.Success,
-      });
-    } catch (error) {
-      showNotification({
-        message: error instanceof Error ? error.message : 'Transaction Failed',
-        type: NotificationType.Error,
-      });
-    } finally {
-      setIsSubmitting(false);
-      logFormState();
-    }
+    await handleSetupTransaction(e);
+    setIsSubmitting(false);
   };
 
   return (

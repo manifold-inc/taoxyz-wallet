@@ -10,6 +10,7 @@ import { usePolkadotApi } from '@/client/contexts/PolkadotApiContext';
 import { useWallet } from '@/client/contexts/WalletContext';
 import type { Stake, Subnet } from '@/types/client';
 import { NotificationType } from '@/types/client';
+import { raoToTao } from '@/utils/utils';
 
 const API_URL = 'https://api.coingecko.com/api/v3';
 const NETWORK_ID = 'bittensor';
@@ -121,7 +122,7 @@ export const Dashboard = () => {
 
       setSubnets(subnets);
       setDashboardSubnets(subnets);
-      setFreeTao(freeTao);
+      setFreeTao(raoToTao(freeTao));
       setDashboardFreeBalance(freeTao);
       setStakes(stakes);
     } finally {

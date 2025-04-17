@@ -12,7 +12,7 @@ import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext
 import { useNotification } from '@/client/contexts/NotificationContext';
 import { useWallet } from '@/client/contexts/WalletContext';
 import { NotificationType, type Stake, type Subnet } from '@/types/client';
-import { formatNumber, raoToTao } from '@/utils/utils';
+import { formatNumber, raoToTao, taoToRao } from '@/utils/utils';
 
 interface Balances {
   totalTao: number | null;
@@ -136,7 +136,7 @@ const DashboardOverview = ({
     }
 
     if (calculatedTotalTao) {
-      setDashboardTotalBalance(calculatedTotalTao);
+      setDashboardTotalBalance(taoToRao(calculatedTotalTao));
     }
   }, [updatedBalances, calculatedTotalTao]);
 

@@ -48,7 +48,7 @@ export interface Stake {
   netuid: number;
   hotkey: string;
   coldkey: string;
-  stake: number;
+  stake: bigint;
   emission: number;
   taoEmission: number;
   drain: number;

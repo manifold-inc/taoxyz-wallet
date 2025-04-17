@@ -11,7 +11,6 @@ import type {
   Validator,
   ValidatorIdentity,
 } from '../../types/client';
-import { raoToTao } from '../../utils/utils';
 import KeyringService from '../services/KeyringService';
 
 class PolkadotApi {
@@ -267,12 +266,12 @@ class PolkadotApi {
     }
   }
 
-  public async getBalance(address: string): Promise<number | null> {
+  public async getBalance(address: string): Promise<bigint | null> {
     try {
       const result = await this.api.query.system.account(address);
       const account = result.toJSON() as unknown as SubstrateAccount;
-      const balance = raoToTao(BigInt(account.data.free));
-      return balance;
+      const balance = account.data.free;
+      return BigInt(balance);
     } catch (error) {
       console.error('Error in Get Balance:', error);
       return null;

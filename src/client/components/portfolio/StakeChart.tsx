@@ -153,7 +153,9 @@ const StakeChart = ({ data, isLoading = true }: StakeChartProps) => {
           tick={{ fill: '#9CA3AF', fontSize: 10 }}
           axisLine={{ stroke: '#374151' }}
           tickLine={{ stroke: '#374151' }}
-          tickFormatter={value => `${parseFloat(value).toFixed(4)}τ`}
+          tickFormatter={value =>
+            `${parseFloat(value).toLocaleString('en-US', { maximumFractionDigits: 9 })}τ`
+          }
           width={60}
           tickSize={2}
           tickMargin={2}
@@ -177,7 +179,10 @@ const StakeChart = ({ data, isLoading = true }: StakeChartProps) => {
             if (!payload || payload.length === 0) return '';
             return payload[0].payload.timestamp;
           }}
-          formatter={(value: string) => [`${parseFloat(value).toFixed(4)}τ`, 'Price']}
+          formatter={(value: string) => [
+            `${parseFloat(value).toLocaleString('en-US', { maximumFractionDigits: 9 })}τ`,
+            'Price',
+          ]}
         />
         <Area
           type="monotoneX"

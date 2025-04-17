@@ -24,6 +24,7 @@ const ValidatorSelection = ({ validators, onCancel, onConfirm }: ValidatorSelect
   const handleValidatorSelect = (validator: Validator) => {
     if (validator.hotkey === selectedValidator?.hotkey) return;
     setSelectedValidator(validator);
+    console.log('Validator Selected', validator);
   };
 
   return (

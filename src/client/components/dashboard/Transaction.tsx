@@ -6,7 +6,9 @@ import SubnetSelection from '@/client/components/dashboard/SubnetSelection';
 import TransactionForm from '@/client/components/dashboard/TransactionForm';
 import ValidatorSelection from '@/client/components/dashboard/ValidatorSelection';
 import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
+import { useNotification } from '@/client/contexts/NotificationContext';
 import { usePolkadotApi } from '@/client/contexts/PolkadotApiContext';
+import { NotificationType } from '@/types/client';
 import type { Subnet, Validator } from '@/types/client';
 
 interface TransactionParams {
@@ -64,6 +66,7 @@ const Transaction = ({
     setDashboardValidators,
     resetDashboardState,
   } = useDashboard();
+  const { showNotification } = useNotification();
 
   const [amountState, setAmountState] = useState<AmountState>({
     amount: '',
@@ -137,28 +140,66 @@ const Transaction = ({
 
   const submitTransaction = async (params: TransactionParams) => {
     if (!api) return;
-    switch (dashboardState) {
-      case DashboardState.CREATE_STAKE:
-      case DashboardState.ADD_STAKE:
-        api.createStake(params as StakeParams);
-        onRefresh();
-        resetDashboardState();
-        break;
-      case DashboardState.REMOVE_STAKE:
-        api.removeStake(params as StakeParams);
-        onRefresh();
-        resetDashboardState();
-        break;
-      case DashboardState.MOVE_STAKE:
-        api.moveStake(params as MoveStakeParams);
-        onRefresh();
-        resetDashboardState();
-        break;
-      case DashboardState.TRANSFER:
-        api.transfer(params as TransferTaoParams);
-        onRefresh();
-        resetDashboardState();
-        break;
+    try {
+      switch (dashboardState) {
+        case DashboardState.CREATE_STAKE:
+        case DashboardState.ADD_STAKE:
+          showNotification({
+            message: 'Creating Stake...',
+            type: NotificationType.Info,
+          });
+          await api.createStake(params as StakeParams);
+          onRefresh();
+          resetDashboardState();
+          showNotification({
+            message: 'Transaction Successful',
+            type: NotificationType.Success,
+          });
+          break;
+        case DashboardState.REMOVE_STAKE:
+          showNotification({
+            message: 'Removing Stake...',
+            type: NotificationType.Info,
+          });
+          await api.removeStake(params as StakeParams);
+          onRefresh();
+          resetDashboardState();
+          showNotification({
+            message: 'Transaction Successful',
+            type: NotificationType.Success,
+          });
+          break;
+        case DashboardState.MOVE_STAKE:
+          showNotification({
+            message: 'Moving Stake...',
+            type: NotificationType.Info,
+          });
+          await api.moveStake(params as MoveStakeParams);
+          onRefresh();
+          resetDashboardState();
+          showNotification({
+            message: 'Transaction Successful',
+            type: NotificationType.Success,
+          });
+          break;
+        case DashboardState.TRANSFER:
+          showNotification({
+            message: 'Transferring TAO...',
+            type: NotificationType.Info,
+          });
+          await api.transfer(params as TransferTaoParams);
+          onRefresh();
+          resetDashboardState();
+          showNotification({
+            message: 'Transfer Successful',
+            type: NotificationType.Success,
+          });
+      }
+    } catch {
+      showNotification({
+        message: 'Transaction Failed',
+        type: NotificationType.Error,
+      });
     }
   };
 
@@ -179,8 +220,9 @@ const Transaction = ({
     if (dashboardSubnet === null) {
       return (
         <button
+          type="button"
           className="w-full p-2 bg-mf-night-400 rounded-md cursor-pointer flex items-center justify-between"
-          onClick={() => setShowSubnetSelection(true)}
+          onClick={handleSubnetSelection}
         >
           <p className="text-mf-edge-700 text-sm font-medium">Select Subnet</p>
           <ChevronRight className="w-4 h-4 text-mf-edge-500" />
@@ -188,10 +230,15 @@ const Transaction = ({
       );
     }
 
+    // Users should not be able to change subnet for adding to or removing from a stake
     return (
       <button
-        className="w-full p-2 text-sm bg-mf-night-400 rounded-md cursor-pointer flex items-center justify-between"
-        onClick={() => setShowSubnetSelection(true)}
+        className="w-full p-2 text-sm bg-mf-night-400 rounded-md cursor-pointer flex items-center justify-between disabled:disabled-button disabled:cursor-not-allowed"
+        onClick={handleSubnetSelection}
+        disabled={
+          dashboardState === DashboardState.ADD_STAKE ||
+          dashboardState === DashboardState.REMOVE_STAKE
+        }
       >
         <div className="flex gap-1">
           <p className="text-mf-edge-500 font-medium">{dashboardSubnet.name}</p>
@@ -218,9 +265,9 @@ const Transaction = ({
     if (dashboardValidator === null) {
       return (
         <button
-          className="w-full p-2 text-sm bg-mf-night-400 rounded-md cursor-pointer flex items-center justify-between disabled:disabled-button disabled:cursor-not-allowed"
-          disabled={dashboardSubnet === null}
-          onClick={() => setShowValidatorSelection(true)}
+          type="button"
+          className="w-full p-2 text-sm bg-mf-night-400 rounded-md cursor-pointer flex items-center justify-between"
+          onClick={handleValidatorSelection}
         >
           <p className="text-mf-edge-700 font-medium">Select Validator</p>
           <ChevronRight className="w-4 h-4 text-mf-edge-500" />
@@ -228,10 +275,15 @@ const Transaction = ({
       );
     }
 
+    // Users should not be able to change validator for adding to or removing from a stake
     return (
       <button
-        className="w-full p-2 text-sm bg-mf-night-400 rounded-md cursor-pointer flex items-center justify-between"
-        onClick={() => setShowValidatorSelection(true)}
+        className="w-full p-2 text-sm bg-mf-night-400 rounded-md cursor-pointer flex items-center justify-between disabled:disabled-button disabled:cursor-not-allowed"
+        onClick={handleValidatorSelection}
+        disabled={
+          dashboardState === DashboardState.ADD_STAKE ||
+          dashboardState === DashboardState.REMOVE_STAKE
+        }
       >
         <div className="flex gap-1">
           <p className="text-mf-edge-500 font-medium truncate max-w-[16ch]">
@@ -244,6 +296,16 @@ const Transaction = ({
         <CircleCheckBig className="w-4 h-4 text-mf-sybil-500" />
       </button>
     );
+  };
+
+  const handleSubnetSelection = (e: React.FormEvent) => {
+    e.preventDefault();
+    setShowSubnetSelection(true);
+  };
+
+  const handleValidatorSelection = (e: React.FormEvent) => {
+    e.preventDefault();
+    setShowValidatorSelection(true);
   };
 
   const handleSubnetCancel = () => {

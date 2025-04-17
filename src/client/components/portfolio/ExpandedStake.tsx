@@ -7,7 +7,7 @@ import StakeChart from '@/client/components/portfolio/StakeChart';
 import { useNotification } from '@/client/contexts/NotificationContext';
 import { NotificationType } from '@/types/client';
 import type { Stake, Subnet } from '@/types/client';
-import { raoToTao } from '@/utils/utils';
+import { formatNumber, raoToTao } from '@/utils/utils';
 
 interface ExpandedStakeProps {
   stake: Stake;
@@ -116,7 +116,9 @@ const ExpandedStake = ({
               <div className="rounded-full flex items-center bg-mf-sybil-opacity px-2 py-0.5">
                 <span className="text-mf-sybil-500 text-xs">Stake</span>
               </div>
-              <span className="text-mf-edge-500 text-xs">{(stake.stake / 1e9).toFixed(4)}α</span>
+              <span className="text-mf-edge-500 text-xs">
+                {formatNumber(raoToTao(stake.stake))}α
+              </span>
             </div>
 
             {/* Price */}
@@ -125,7 +127,7 @@ const ExpandedStake = ({
                 <span className="text-mf-sybil-500 text-xs">Price</span>
               </div>
               <span className="text-mf-edge-500 text-xs">
-                {subnet.price ? subnet.price.toFixed(4) : '-'}τ
+                {subnet.price ? formatNumber(subnet.price) : '-'}τ
               </span>
             </div>
           </div>
