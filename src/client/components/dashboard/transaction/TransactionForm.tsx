@@ -1,15 +1,10 @@
 import { motion } from 'framer-motion';
 
-import { useState } from 'react';
 import { useEffect } from 'react';
 
 import SlippageDisplay from '@/client/components/common/SlippageDisplay';
-import type { AmountState } from '@/client/components/dashboard/Transaction';
+import type { AmountState } from '@/client/components/dashboard/transaction/Transaction';
 import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
-import { useLock } from '@/client/contexts/LockContext';
-import { useWallet } from '@/client/contexts/WalletContext';
-import KeyringService from '@/client/services/KeyringService';
-import MessageService from '@/client/services/MessageService';
 import { raoToTao, taoToRao } from '@/utils/utils';
 
 interface TransactionFormProps {
@@ -31,9 +26,6 @@ const TransactionForm = ({
   renderSubnetSelection,
   renderValidatorSelection,
 }: TransactionFormProps) => {
-  const { currentAddress } = useWallet();
-  const { setIsLocked } = useLock();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     resetDashboardState,
     dashboardSubnet,
@@ -191,114 +183,13 @@ const TransactionForm = ({
     }
   };
 
-  const handleAuth = async () => {
-    // Address should never be null
-    if (currentAddress === null) return;
-
-    if (await KeyringService.isLocked(currentAddress)) {
-      setIsLocked(true);
-      await MessageService.sendWalletsLocked();
-
-      const storeTransaction = async (key: string, data: Record<string, unknown>) => {
-        await chrome.storage.local.set({ [key]: data });
-        return false;
-      };
-
-      switch (dashboardState) {
-        case DashboardState.CREATE_STAKE:
-        case DashboardState.ADD_STAKE:
-        case DashboardState.REMOVE_STAKE:
-          if (dashboardSubnet === null || dashboardValidator === null) return;
-          return await storeTransaction(`store${dashboardState}Transaction`, {
-            address: currentAddress,
-            subnet: dashboardSubnet,
-            validator: dashboardValidator,
-            amount: amountState.amount,
-          });
-
-        case DashboardState.MOVE_STAKE:
-          if (dashboardStake === null || dashboardSubnet === null || dashboardValidator === null)
-            return;
-          return await storeTransaction('storeMoveStakeTransaction', {
-            address: currentAddress,
-            fromSubnetId: dashboardStake.netuid,
-            fromHotkey: dashboardStake.hotkey,
-            toSubnetId: dashboardSubnet.id,
-            toHotkey: dashboardValidator.hotkey,
-            amount: amountState.amount,
-          });
-
-        case DashboardState.TRANSFER:
-          return await storeTransaction('storeTransferTransaction', {
-            fromAddress: currentAddress,
-            toAddress: toAddress,
-            amount: amountState.amount,
-          });
-
-        default:
-          return false;
-      }
-    }
-    return true;
-  };
-
-  const restoreTransaction = async () => {
-    const getStoredTransaction = async (key: string) => {
-      const result = await chrome.storage.local.get(key);
-      if (result[key]) {
-        await chrome.storage.local.remove(key);
-        return result[key];
-      }
-      return null;
-    };
-
-    let storedTransaction;
-    switch (dashboardState) {
-      case DashboardState.CREATE_STAKE:
-        storedTransaction = await getStoredTransaction('storeCreateStakeTransaction');
-        break;
-      case DashboardState.ADD_STAKE:
-        storedTransaction = await getStoredTransaction('storeAddStakeTransaction');
-        break;
-      case DashboardState.REMOVE_STAKE:
-        storedTransaction = await getStoredTransaction('storeRemoveStakeTransaction');
-        break;
-      case DashboardState.MOVE_STAKE:
-        storedTransaction = await getStoredTransaction('storeMoveStakeTransaction');
-        break;
-      case DashboardState.TRANSFER:
-        storedTransaction = await getStoredTransaction('storeTransferTransaction');
-        break;
-    }
-
-    if (storedTransaction) {
-      setAmountState({
-        amount: storedTransaction.amount,
-        amountInRao: taoToRao(parseFloat(storedTransaction.amount)),
-      });
-      if (storedTransaction.toAddress) {
-        setToAddress(storedTransaction.toAddress);
-      }
-    }
-  };
-  // TODO: Add validators to restoreTransaction
   useEffect(() => {
     void setBalance();
-    void restoreTransaction();
   }, [dashboardState]);
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-
-    const isAuthorized = await handleAuth();
-    if (!isAuthorized) {
-      setIsSubmitting(false);
-      return;
-    }
-
     await handleSetupTransaction(e);
-    setIsSubmitting(false);
   };
 
   return (
@@ -312,12 +203,11 @@ const TransactionForm = ({
               placeholder="Enter Amount"
               onChange={handleAmountChange}
               className="w-4/5 p-2 text-sm text-mf-edge-500 placeholder-mf-edge-700 bg-mf-night-300 rounded-md"
-              disabled={isSubmitting}
             />
             <motion.button
               type="button"
               onClick={handleMaxAmount}
-              className="w-1/5 text-mf-sybil-500 text-sm p-2 rounded-md bg-mf-sybil-opacity cursor-pointer disabled:cursor-not-allowed"
+              className="w-1/5 text-mf-sybil-500 text-sm p-2 rounded-md bg-mf-sybil-opacity cursor-pointer"
               whileHover={{ opacity: 0.5 }}
             >
               Max
@@ -340,8 +230,7 @@ const TransactionForm = ({
             disabled={
               !dashboardSubnet ||
               !dashboardValidator ||
-              !amountValidation(Number(amountState.amount)) ||
-              isSubmitting
+              !amountValidation(Number(amountState.amount))
             }
             className="w-full rounded-md text-center cursor-pointer w-1/2 py-1.5 bg-mf-sybil-opacity border border-mf-sybil-opacity transition-colors text-mf-sybil-500 gap-1 disabled:disabled-button disabled:cursor-not-allowed"
             whileHover={{ opacity: 0.5, color: '#c5dbff', borderColor: '#57e8b4' }}

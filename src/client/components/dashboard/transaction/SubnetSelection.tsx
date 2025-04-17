@@ -8,7 +8,7 @@ import { usePolkadotApi } from '@/client/contexts/PolkadotApiContext';
 import type { Subnet, Validator } from '@/types/client';
 import { NotificationType } from '@/types/client';
 
-import Skeleton from '../common/Skeleton';
+import Skeleton from '../../common/Skeleton';
 
 interface SubnetSelectionProps {
   subnets: Subnet[];

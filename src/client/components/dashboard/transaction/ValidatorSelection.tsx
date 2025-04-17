@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 
 import { useState } from 'react';
 
-import type { Validator } from '../../../types/client';
+import type { Validator } from '../../../../types/client';
 
 interface ValidatorSelectionProps {
   validators: Validator[];

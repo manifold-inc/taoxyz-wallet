@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 
 import { formatNumber, raoToTao } from '@/utils/utils';
 
-import type { Stake, Subnet } from '../../../types/client';
+import type { Stake, Subnet } from '../../../../types/client';
 
 interface StakeOverviewProps {
   subnet: Subnet;

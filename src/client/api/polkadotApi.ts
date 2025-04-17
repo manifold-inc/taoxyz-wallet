@@ -58,15 +58,18 @@ class PolkadotApi {
     return this.api;
   }
 
-  public async transfer({
-    fromAddress,
-    toAddress,
-    amountInRao,
-  }: {
-    fromAddress: string;
-    toAddress: string;
-    amountInRao: bigint;
-  }): Promise<string> {
+  public async transfer(
+    {
+      fromAddress,
+      toAddress,
+      amountInRao,
+    }: {
+      fromAddress: string;
+      toAddress: string;
+      amountInRao: bigint;
+    },
+    onStatusChange?: (status: string) => void
+  ): Promise<string> {
     try {
       const wallet = await KeyringService.getWallet(fromAddress);
       const toWallet = (await this.api.query.system.account(
@@ -89,6 +92,31 @@ class PolkadotApi {
               if (unsubscribe) unsubscribe();
               reject(new Error(dispatchError.toString()));
               return;
+            }
+
+            switch (true) {
+              case status.isReady:
+                onStatusChange?.('ready');
+                break;
+              case status.isBroadcast:
+                onStatusChange?.('broadcast');
+                break;
+              case status.isInBlock: {
+                const extrinsicFailed = events.find(
+                  ({ event }) => event.method === 'ExtrinsicFailed'
+                );
+                if (extrinsicFailed) {
+                  onStatusChange?.('failed');
+                } else {
+                  const extrinsicSuccess = events.find(
+                    ({ event }) => event.method === 'ExtrinsicSuccess'
+                  );
+                  if (extrinsicSuccess) {
+                    onStatusChange?.('success');
+                  }
+                }
+                break;
+              }
             }
 
             if (unsubscribe) {
@@ -119,17 +147,20 @@ class PolkadotApi {
     }
   }
 
-  public async createStake({
-    address,
-    subnetId,
-    validatorHotkey,
-    amountInRao,
-  }: {
-    address: string;
-    subnetId: number;
-    validatorHotkey: string;
-    amountInRao: bigint;
-  }): Promise<string> {
+  public async createStake(
+    {
+      address,
+      subnetId,
+      validatorHotkey,
+      amountInRao,
+    }: {
+      address: string;
+      subnetId: number;
+      validatorHotkey: string;
+      amountInRao: bigint;
+    },
+    onStatusChange?: (status: string) => void
+  ): Promise<string> {
     try {
       const wallet = await KeyringService.getWallet(address);
       if (wallet instanceof Error) throw new Error(wallet.message);
@@ -146,6 +177,31 @@ class PolkadotApi {
               if (unsubscribe) unsubscribe();
               reject(new Error(dispatchError.toString()));
               return;
+            }
+
+            switch (true) {
+              case status.isReady:
+                onStatusChange?.('ready');
+                break;
+              case status.isBroadcast:
+                onStatusChange?.('broadcast');
+                break;
+              case status.isInBlock: {
+                const extrinsicFailed = events.find(
+                  ({ event }) => event.method === 'ExtrinsicFailed'
+                );
+                if (extrinsicFailed) {
+                  onStatusChange?.('failed');
+                } else {
+                  const extrinsicSuccess = events.find(
+                    ({ event }) => event.method === 'ExtrinsicSuccess'
+                  );
+                  if (extrinsicSuccess) {
+                    onStatusChange?.('success');
+                  }
+                }
+                break;
+              }
             }
 
             if (unsubscribe) {
@@ -166,17 +222,20 @@ class PolkadotApi {
     }
   }
 
-  public async removeStake({
-    address,
-    subnetId,
-    validatorHotkey,
-    amountInRao,
-  }: {
-    address: string;
-    subnetId: number;
-    validatorHotkey: string;
-    amountInRao: bigint;
-  }): Promise<string> {
+  public async removeStake(
+    {
+      address,
+      subnetId,
+      validatorHotkey,
+      amountInRao,
+    }: {
+      address: string;
+      subnetId: number;
+      validatorHotkey: string;
+      amountInRao: bigint;
+    },
+    onStatusChange?: (status: string) => void
+  ): Promise<string> {
     if (!this.api) throw new Error('API Not Initialized');
 
     try {
@@ -197,6 +256,31 @@ class PolkadotApi {
               return;
             }
 
+            switch (true) {
+              case status.isReady:
+                onStatusChange?.('ready');
+                break;
+              case status.isBroadcast:
+                onStatusChange?.('broadcast');
+                break;
+              case status.isInBlock: {
+                const extrinsicFailed = events.find(
+                  ({ event }) => event.method === 'ExtrinsicFailed'
+                );
+                if (extrinsicFailed) {
+                  onStatusChange?.('failed');
+                } else {
+                  const extrinsicSuccess = events.find(
+                    ({ event }) => event.method === 'ExtrinsicSuccess'
+                  );
+                  if (extrinsicSuccess) {
+                    onStatusChange?.('success');
+                  }
+                }
+                break;
+              }
+            }
+
             if (unsubscribe) {
               this.handleTransactionStatus(status, events, unsubscribe, resolve, reject);
             }
@@ -215,21 +299,24 @@ class PolkadotApi {
     }
   }
 
-  public async moveStake({
-    address,
-    fromHotkey,
-    toHotkey,
-    fromSubnetId,
-    toSubnetId,
-    amountInRao,
-  }: {
-    address: string;
-    fromHotkey: string;
-    toHotkey: string;
-    fromSubnetId: number;
-    toSubnetId: number;
-    amountInRao: bigint;
-  }): Promise<string> {
+  public async moveStake(
+    {
+      address,
+      fromHotkey,
+      toHotkey,
+      fromSubnetId,
+      toSubnetId,
+      amountInRao,
+    }: {
+      address: string;
+      fromHotkey: string;
+      toHotkey: string;
+      fromSubnetId: number;
+      toSubnetId: number;
+      amountInRao: bigint;
+    },
+    onStatusChange?: (status: string) => void
+  ): Promise<string> {
     try {
       const wallet = await KeyringService.getWallet(address);
       if (wallet instanceof Error) throw new Error(wallet.message);
@@ -246,6 +333,31 @@ class PolkadotApi {
               if (unsubscribe) unsubscribe();
               reject(new Error(dispatchError.toString()));
               return;
+            }
+
+            switch (true) {
+              case status.isReady:
+                onStatusChange?.('ready');
+                break;
+              case status.isBroadcast:
+                onStatusChange?.('broadcast');
+                break;
+              case status.isInBlock: {
+                const extrinsicFailed = events.find(
+                  ({ event }) => event.method === 'ExtrinsicFailed'
+                );
+                if (extrinsicFailed) {
+                  onStatusChange?.('failed');
+                } else {
+                  const extrinsicSuccess = events.find(
+                    ({ event }) => event.method === 'ExtrinsicSuccess'
+                  );
+                  if (extrinsicSuccess) {
+                    onStatusChange?.('success');
+                  }
+                }
+                break;
+              }
             }
 
             if (unsubscribe) {
@@ -404,12 +516,16 @@ class PolkadotApi {
   ): void {
     switch (true) {
       case status.isReady:
+        console.log('Transaction Ready');
         break;
       case status.isBroadcast:
+        console.log('Transaction Broadcast');
         break;
       case status.isInBlock: {
+        console.log('Transaction In Block');
         const extrinsicFailed = events.find(({ event }) => event.method === 'ExtrinsicFailed');
         if (extrinsicFailed) {
+          console.log('Transaction Failed');
           unsubscribe();
           reject(new Error('Transaction failed'));
           return;
@@ -417,6 +533,7 @@ class PolkadotApi {
 
         const extrinsicSuccess = events.find(({ event }) => event.method === 'ExtrinsicSuccess');
         if (extrinsicSuccess) {
+          console.log('Transaction Success');
           unsubscribe();
           resolve(status.asInBlock.toHex());
         }

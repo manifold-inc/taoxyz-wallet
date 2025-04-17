@@ -2,16 +2,17 @@ import { ChevronRight, CircleCheckBig } from 'lucide-react';
 
 import { useState } from 'react';
 
-import SubnetSelection from '@/client/components/dashboard/SubnetSelection';
-import TransactionForm from '@/client/components/dashboard/TransactionForm';
-import ValidatorSelection from '@/client/components/dashboard/ValidatorSelection';
+import ConfirmTransaction from '@/client/components/dashboard/transaction/ConfirmTransaction';
+import SubnetSelection from '@/client/components/dashboard/transaction/SubnetSelection';
+import TransactionForm from '@/client/components/dashboard/transaction/TransactionForm';
+import ValidatorSelection from '@/client/components/dashboard/transaction/ValidatorSelection';
 import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
 import { useNotification } from '@/client/contexts/NotificationContext';
 import { usePolkadotApi } from '@/client/contexts/PolkadotApiContext';
 import { NotificationType } from '@/types/client';
 import type { Subnet, Validator } from '@/types/client';
 
-interface TransactionParams {
+export interface TransactionParams {
   address?: string;
   amountInRao: bigint;
 }
@@ -36,7 +37,7 @@ interface TransferTaoParams extends TransactionParams {
   amountInRao: bigint;
 }
 
-interface TransactionProps {
+export interface TransactionProps {
   address: string;
   dashboardState: DashboardState;
   isLoading: boolean;
@@ -47,6 +48,8 @@ export interface AmountState {
   amount: string;
   amountInRao: bigint | null;
 }
+
+export type TransactionStatus = 'ready' | 'broadcast' | 'inBlock' | 'success' | 'failed';
 
 const Transaction = ({
   address,
@@ -75,7 +78,8 @@ const Transaction = ({
   const [toAddress, setToAddress] = useState<string>('');
   const [showSubnetSelection, setShowSubnetSelection] = useState(false);
   const [showValidatorSelection, setShowValidatorSelection] = useState(false);
-
+  const [showTransactionConfirmation, setShowTransactionConfirmation] = useState(false);
+  const [transactionParams, setTransactionParams] = useState<TransactionParams | null>(null);
   /**
    * Create {address, subnetId, validatorHotkey, amountInRao}
    * Add {address, subnetId, validatorHotkey, amountInRao}
@@ -134,68 +138,33 @@ const Transaction = ({
       default:
         return;
     }
-    console.log('params', params);
-    submitTransaction(params);
+    setTransactionParams(params);
+    setShowTransactionConfirmation(true);
   };
 
-  const submitTransaction = async (params: TransactionParams) => {
+  const submitTransaction = async (
+    params: TransactionParams,
+    onStatusChange: (status: string) => void
+  ) => {
     if (!api) return;
     try {
       switch (dashboardState) {
         case DashboardState.CREATE_STAKE:
         case DashboardState.ADD_STAKE:
-          showNotification({
-            message: 'Creating Stake...',
-            type: NotificationType.Info,
-          });
-          await api.createStake(params as StakeParams);
-          onRefresh();
-          resetDashboardState();
-          showNotification({
-            message: 'Transaction Successful',
-            type: NotificationType.Success,
-          });
+          await api.createStake(params as StakeParams, onStatusChange);
           break;
         case DashboardState.REMOVE_STAKE:
-          showNotification({
-            message: 'Removing Stake...',
-            type: NotificationType.Info,
-          });
-          await api.removeStake(params as StakeParams);
-          onRefresh();
-          resetDashboardState();
-          showNotification({
-            message: 'Transaction Successful',
-            type: NotificationType.Success,
-          });
+          await api.removeStake(params as StakeParams, onStatusChange);
           break;
         case DashboardState.MOVE_STAKE:
-          showNotification({
-            message: 'Moving Stake...',
-            type: NotificationType.Info,
-          });
-          await api.moveStake(params as MoveStakeParams);
-          onRefresh();
-          resetDashboardState();
-          showNotification({
-            message: 'Transaction Successful',
-            type: NotificationType.Success,
-          });
+          await api.moveStake(params as MoveStakeParams, onStatusChange);
           break;
         case DashboardState.TRANSFER:
-          showNotification({
-            message: 'Transferring TAO...',
-            type: NotificationType.Info,
-          });
-          await api.transfer(params as TransferTaoParams);
-          onRefresh();
-          resetDashboardState();
-          showNotification({
-            message: 'Transfer Successful',
-            type: NotificationType.Success,
-          });
+          await api.transfer(params as TransferTaoParams, onStatusChange);
+          break;
       }
     } catch {
+      onStatusChange('failed');
       showNotification({
         message: 'Transaction Failed',
         type: NotificationType.Error,
@@ -333,6 +302,13 @@ const Transaction = ({
     setShowValidatorSelection(false);
   };
 
+  const handleTransactionConfirmationCancel = () => {
+    resetDashboardState();
+    onRefresh();
+    setTransactionParams(null);
+    setShowTransactionConfirmation(false);
+  };
+
   return (
     <>
       {showSubnetSelection && dashboardSubnets ? (
@@ -347,6 +323,12 @@ const Transaction = ({
           validators={dashboardValidators}
           onCancel={handleValidatorCancel}
           onConfirm={handleValidatorConfirm}
+        />
+      ) : showTransactionConfirmation && transactionParams ? (
+        <ConfirmTransaction
+          params={transactionParams}
+          submitTransaction={submitTransaction}
+          onCancel={handleTransactionConfirmationCancel}
         />
       ) : (
         <TransactionForm

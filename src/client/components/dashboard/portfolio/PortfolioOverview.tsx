@@ -1,6 +1,6 @@
 import Skeleton from '@/client/components/common/Skeleton';
-import ExpandedStake from '@/client/components/portfolio/ExpandedStake';
-import StakeOverview from '@/client/components/portfolio/StakeOverview';
+import ExpandedStake from '@/client/components/dashboard/portfolio/ExpandedStake';
+import StakeOverview from '@/client/components/dashboard/portfolio/StakeOverview';
 import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
 import { useNotification } from '@/client/contexts/NotificationContext';
 import { usePolkadotApi } from '@/client/contexts/PolkadotApiContext';

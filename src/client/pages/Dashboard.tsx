@@ -2,8 +2,8 @@ import { useRef, useState } from 'react';
 
 import WalletSelection from '@/client/components/common/WalletSelection';
 import DashboardOverview from '@/client/components/dashboard/DashboardOverview';
-import PortfolioOverview from '@/client/components/dashboard/PortfolioOverview';
-import Transaction from '@/client/components/dashboard/Transaction';
+import PortfolioOverview from '@/client/components/dashboard/portfolio/PortfolioOverview';
+import Transaction from '@/client/components/dashboard/transaction/Transaction';
 import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
 import { useNotification } from '@/client/contexts/NotificationContext';
 import { usePolkadotApi } from '@/client/contexts/PolkadotApiContext';
@@ -88,7 +88,6 @@ export const Dashboard = () => {
     if (!api || !address || (!forceRefresh && address === prevAddressRef.current)) return;
     setIsLoading(true);
     prevAddressRef.current = address;
-
     try {
       const [subnets, freeTao, stakes] = await Promise.all([
         api.getSubnets(),

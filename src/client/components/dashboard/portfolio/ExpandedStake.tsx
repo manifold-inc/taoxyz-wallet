@@ -3,7 +3,7 @@ import { ChevronUp, Copy } from 'lucide-react';
 
 import { useState } from 'react';
 
-import StakeChart from '@/client/components/portfolio/StakeChart';
+import StakeChart from '@/client/components/dashboard/portfolio/StakeChart';
 import { useNotification } from '@/client/contexts/NotificationContext';
 import { NotificationType } from '@/types/client';
 import type { Stake, Subnet } from '@/types/client';
