@@ -57,16 +57,21 @@ const TransactionForm = ({
   const renderSlippageInput = () => {
     return (
       <div className="w-full flex gap-2 items-center justify-center">
-        <input
-          type="text"
-          value={slippage}
-          onChange={handleSlippageChange}
-          onBlur={handleSlippageBlur}
-          placeholder="Enter Slippage"
-          className="w-full p-2 text-sm text-mf-edge-500 placeholder-mf-edge-700 bg-mf-night-300 rounded-md"
-        />
-        <div className="text-mf-safety-500 text-sm rounded-md bg-mf-safety-opacity p-2">
-          Slippage
+        <div className="w-3/5 relative">
+          <input
+            type="text"
+            value={slippage}
+            onChange={handleSlippageChange}
+            onBlur={handleSlippageBlur}
+            placeholder="Enter Slippage"
+            className="w-full p-2 pr-6 text-sm text-mf-edge-500 placeholder-mf-edge-700 bg-mf-night-300 rounded-md"
+          />
+          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-mf-edge-700 text-sm">
+            %
+          </span>
+        </div>
+        <div className="w-2/5 text-mf-safety-500 text-center text-sm rounded-md bg-mf-safety-opacity p-2">
+          Set Slippage
         </div>
       </div>
     );
@@ -132,19 +137,20 @@ const TransactionForm = ({
 
   const amountValidation = (amount: number) => {
     if (amount <= 0) return false;
+    const amountInRao = taoToRao(amount);
 
     switch (dashboardState) {
       case DashboardState.CREATE_STAKE:
       case DashboardState.TRANSFER:
         if (dashboardFreeBalance === null) return false;
-        if (amount > dashboardFreeBalance) return false;
+        if (amountInRao > dashboardFreeBalance) return false;
         return true;
 
       case DashboardState.ADD_STAKE:
       case DashboardState.REMOVE_STAKE:
       case DashboardState.MOVE_STAKE:
         if (dashboardStake === null) return false;
-        if (amount > dashboardStake.stake) return false;
+        if (amountInRao > dashboardStake.stake) return false;
         return true;
 
       default:
@@ -245,7 +251,7 @@ const TransactionForm = ({
               value={amountState.amount}
               placeholder="Enter Amount"
               onChange={handleAmountChange}
-              className="w-4/5 p-2 text-sm text-mf-edge-500 border border-mf-ash-500 placeholder-mf-edge-700 bg-mf-night-300 rounded-md"
+              className="w-3/5 p-2 text-sm text-mf-edge-500 border border-mf-ash-500 placeholder-mf-edge-700 bg-mf-night-300 rounded-md"
               whileFocus={{
                 borderColor: '#57E8B4',
               }}
@@ -253,36 +259,34 @@ const TransactionForm = ({
             <motion.button
               type="button"
               onClick={handleMaxAmount}
-              className="w-1/5 text-mf-sybil-500 text-sm p-2 rounded-md bg-mf-sybil-opacity cursor-pointer border border-mf-ash-500"
+              className="w-2/5 text-mf-sybil-500 text-sm p-2 items-center rounded-md bg-mf-sybil-opacity cursor-pointer border border-mf-ash-500"
               whileHover={{ opacity: 0.5 }}
             >
-              Max
+              Max Amount
             </motion.button>
           </div>
           {renderInputFields()}
         </div>
         {renderSlippageDisplay()}
         <div className="w-full flex gap-2 items-center justify-center">
-          <motion.button
+          <button
             type="button"
             onClick={() => resetDashboardState()}
-            className="w-full rounded-md text-center cursor-pointer w-1/2 py-1.5 bg-mf-red-opacity border border-mf-red-opacity transition-colors text-mf-red-500 gap-1 disabled:cursor-not-allowed"
-            whileHover={{ opacity: 0.5, color: '#c5dbff', borderColor: '#ff5a5a' }}
+            className="rounded-md text-center cursor-pointer w-1/2 py-1.5 bg-mf-red-opacity border border-mf-red-opacity transition-colors text-mf-red-500 gap-1 disabled:cursor-not-allowed hover:opacity-50"
           >
             Cancel
-          </motion.button>
-          <motion.button
+          </button>
+          <button
             type="submit"
             disabled={
               !dashboardSubnet ||
               !dashboardValidator ||
               !amountValidation(Number(amountState.amount))
             }
-            className="w-full rounded-md text-center cursor-pointer w-1/2 py-1.5 bg-mf-sybil-opacity border border-mf-sybil-opacity transition-colors text-mf-sybil-500 gap-1 disabled:disabled-button disabled:cursor-not-allowed"
-            whileHover={{ opacity: 0.5, color: '#c5dbff', borderColor: '#57e8b4' }}
+            className="w-1/2 rounded-md text-center cursor-pointer py-1.5 transition-colors gap-1 disabled:cursor-not-allowed hover:opacity-50 disabled:hover:opacity-100 disabled:bg-mf-ash-500 disabled:border-mf-ash-500 disabled:text-mf-edge-700 enabled:bg-mf-sybil-opacity enabled:border-mf-sybil-opacity enabled:text-mf-sybil-500"
           >
             Continue
-          </motion.button>
+          </button>
         </div>
       </form>
     </div>

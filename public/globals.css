@@ -178,9 +178,3 @@ input {
 .blinker-font {
   font-family: 'Blinker', sans-serif;
 }
-
-.disabled-button {
-  background-color: var(--color-mf-ash-500);
-  color: var(--color-mf-edge-700);
-  border-color: var(--color-mf-ash-500);
-}
