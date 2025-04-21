@@ -36,25 +36,31 @@ const SlippageDisplay = ({
   const payToken = moveStake ? (isRoot ? 'τ' : 'α') : 'τ';
 
   return (
-    <div className="w-full flex flex-col gap-2">
+    <div className="w-full flex flex-col gap-2 p-3">
       <div className="flex items-center justify-between">
-        <p className="text-mf-edge-700 text-sm">Pay</p>
-        <p className="text-mf-edge-500 text-sm">
+        <p className="text-mf-edge-700 text-sm font-medium">Pay</p>
+        <p className="text-mf-sybil-500 text-sm font-medium">
           {formatNumber(parseFloat(amount))} {payToken}
         </p>
       </div>
-      <div className="flex items-center justify-between">
-        <p className="text-mf-edge-700 text-sm">Chain Fee</p>
-        <p className="text-mf-edge-500 text-sm">{chainFee} τ</p>
-      </div>
       {!isRoot && (
         <div className="flex items-center justify-between">
-          <p className="text-mf-edge-700 text-sm">Slippage</p>
-          <p className="text-mf-sybil-500 text-sm">
+          <p className="text-mf-edge-700 text-sm font-medium">Slippage</p>
+          <p className="text-mf-safety-500 text-sm font-medium">
             {formatNumber(slippage.slippagePercentage).toFixed(2)}%
           </p>
         </div>
       )}
+      <div className="flex items-center justify-between">
+        <p className="text-mf-edge-700 text-sm font-medium">Chain Fee</p>
+        <p className="text-mf-sybil-500 text-sm font-medium">{chainFee} τ</p>
+      </div>
+      <div className="flex items-center justify-between">
+        <p className="text-mf-edge-500 text-sm font-medium">Estimated Total</p>
+        <p className="text-mf-sybil-500 text-sm font-medium">
+          {formatNumber(slippage.tokens - chainFee)} {payToken}
+        </p>
+      </div>
     </div>
   );
 };

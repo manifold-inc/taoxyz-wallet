@@ -2,14 +2,17 @@ import taoxyz from '@public/assets/taoxyz.svg';
 
 import { useState } from 'react';
 
+import SlippageDisplay from '@/client/components/common/SlippageDisplay';
 import type { TransactionParams } from '@/client/components/dashboard/transaction/Transaction';
 import type { TransactionStatus } from '@/client/components/dashboard/transaction/Transaction';
+import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
 import { useLock } from '@/client/contexts/LockContext';
 import { useNotification } from '@/client/contexts/NotificationContext';
 import { useWallet } from '@/client/contexts/WalletContext';
 import KeyringService from '@/client/services/KeyringService';
 import MessageService from '@/client/services/MessageService';
 import { NotificationType } from '@/types/client';
+import { raoToTao } from '@/utils/utils';
 
 interface ConfirmTransactionProps {
   params: TransactionParams;
@@ -27,6 +30,8 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
   const [password, setPassword] = useState('');
   const [passwordSelected, setPasswordSelected] = useState(false);
   const [status, setStatus] = useState<TransactionStatus>('ready');
+  const { dashboardSubnet, dashboardValidator, dashboardFreeBalance, dashboardState } =
+    useDashboard();
 
   const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     setPassword(event.target.value);
@@ -202,17 +207,51 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
         );
       default:
         return (
-          <>
-            <div className="flex flex-col items-center justify-center gap-3 pt-4">
+          <div className="w-full h-full flex flex-col items-center gap-3 px-5 pt-12">
+            {/* Header */}
+            <div className="w-full flex flex-col items-center justify-center gap-3">
               <img src={taoxyz} alt="Taoxyz Logo" className="w-8 h-8" />
               <p className="text-mf-edge-500 text-2xl font-bold blinker-font">
                 CONFIRM TRANSACTION
               </p>
             </div>
 
+            {/* Transaction Details */}
+            <div className="w-full flex flex-col bg-mf-ash-500 rounded-md divide-y divide-mf-ash-300">
+              {/* Subnet Details */}
+              <div className="flex flex-col gap-2 p-3">
+                <div className="flex justify-between">
+                  <p className="text-mf-edge-700 text-sm font-medium">Selected Subnet</p>
+                  <p className="text-mf-sybil-500 text-sm font-medium">{dashboardSubnet?.name}</p>
+                </div>
+                <div className="flex justify-between">
+                  <p className="text-mf-edge-700 text-sm font-medium">Subnet Price</p>
+                  <p className="text-mf-sybil-500 text-sm font-medium">
+                    {dashboardSubnet?.price} {dashboardSubnet?.id === 0 ? 'τ' : 'α'}
+                  </p>
+                </div>
+                <div className="flex justify-between">
+                  <p className="text-mf-edge-700 text-sm font-medium">Selected Validator</p>
+                  <p className="text-mf-sybil-500 text-sm font-medium">
+                    {dashboardValidator?.hotkey.slice(0, 6)}...
+                    {dashboardValidator?.hotkey.slice(-6)}
+                  </p>
+                </div>
+              </div>
+
+              {/* Amount Details */}
+              <SlippageDisplay
+                amount={raoToTao(params.amountInRao).toString()}
+                balance={raoToTao(dashboardFreeBalance ?? 0n).toString()}
+                moveStake={dashboardState === DashboardState.MOVE_STAKE}
+                isRoot={dashboardSubnet?.id === 0}
+              />
+            </div>
+
+            {/* Password Input */}
             <form
               onSubmit={handleSubmit}
-              className="flex flex-col items-center justify-center [&>*]:w-full gap-4"
+              className="flex flex-col items-center w-full [&>*]:w-full gap-3 px-10"
               autoComplete="off"
             >
               <input
@@ -232,7 +271,7 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
                 minLength={8}
               />
 
-              <div className="flex flex-col items-center pt-4 gap-4">
+              <div className="flex justify-center items-center gap-3 w-full">
                 <button
                   onClick={onCancel}
                   type="button"
@@ -249,18 +288,12 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
                 </button>
               </div>
             </form>
-          </>
+          </div>
         );
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 bg-mf-night-500">
-      <div className="flex flex-col items-center justify-start w-full h-full pt-12 gap-10">
-        {renderContent()}
-      </div>
-    </div>
-  );
+  return <div className="w-full h-full fixed inset-0 z-50 bg-mf-night-500">{renderContent()}</div>;
 };
 
 export default ConfirmTransaction;

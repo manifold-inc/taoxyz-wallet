@@ -29,14 +29,14 @@ class PolkadotApi {
 
   private async initialize(): Promise<void> {
     console.log('[Client] Initializing API');
-    const provider = new WsProvider(this.endpoints.test);
+    const provider = new WsProvider(this.endpoints.main);
     try {
       if (this.api?.isConnected) {
         await this.api.disconnect();
       }
 
       this.api = await ApiPromise.create({ provider });
-      console.log(`[Client] Connected to Endpoint: ${this.endpoints.test}`);
+      console.log(`[Client] Connected to Endpoint: ${this.endpoints.main}`);
     } catch (error) {
       console.error('Error in initialize:', error);
       throw error;
@@ -222,6 +222,83 @@ class PolkadotApi {
     }
   }
 
+  public async createStakeLimit(
+    {
+      validatorHotkey,
+      address,
+      amountInRao,
+      limitPrice,
+      allowPartial = false,
+    }: {
+      validatorHotkey: string;
+      address: string;
+      amountInRao: bigint;
+      limitPrice: bigint;
+      allowPartial?: boolean;
+    },
+    onStatusChange?: (status: string) => void
+  ): Promise<string> {
+    try {
+      const wallet = await KeyringService.getWallet(address);
+      if (wallet instanceof Error) throw new Error(wallet.message);
+
+      return new Promise((resolve, reject) => {
+        let unsubscribe: (() => void) | undefined;
+
+        this.api.tx.subtensorModule
+          .addStakeLimit(validatorHotkey, address, amountInRao, limitPrice, allowPartial)
+          .signAndSend(wallet, {}, (result: ISubmittableResult) => {
+            const { status, dispatchError, events = [] } = result;
+
+            if (dispatchError) {
+              if (unsubscribe) unsubscribe();
+              reject(new Error(dispatchError.toString()));
+              return;
+            }
+
+            switch (true) {
+              case status.isReady:
+                onStatusChange?.('ready');
+                break;
+              case status.isBroadcast:
+                onStatusChange?.('broadcast');
+                break;
+              case status.isInBlock: {
+                const extrinsicFailed = events.find(
+                  ({ event }) => event.method === 'ExtrinsicFailed'
+                );
+                if (extrinsicFailed) {
+                  onStatusChange?.('failed');
+                } else {
+                  const extrinsicSuccess = events.find(
+                    ({ event }) => event.method === 'ExtrinsicSuccess'
+                  );
+                  if (extrinsicSuccess) {
+                    onStatusChange?.('success');
+                  }
+                }
+                break;
+              }
+            }
+
+            if (unsubscribe) {
+              this.handleTransactionStatus(status, events, unsubscribe, resolve, reject);
+            }
+          })
+          .then(unsub => {
+            unsubscribe = unsub;
+          })
+          .catch(error => {
+            if (unsubscribe) unsubscribe();
+            reject(error);
+          });
+      });
+    } catch (error) {
+      console.error('Error in Create Stake Limit:', error);
+      throw error;
+    }
+  }
+
   public async removeStake(
     {
       address,
@@ -295,6 +372,83 @@ class PolkadotApi {
       });
     } catch (error) {
       console.error('Error in Remove Stake:', error);
+      throw error;
+    }
+  }
+
+  public async removeStakeLimit(
+    {
+      validatorHotkey,
+      address,
+      amountInRao,
+      limitPrice,
+      allowPartial = false,
+    }: {
+      validatorHotkey: string;
+      address: string;
+      amountInRao: bigint;
+      limitPrice: bigint;
+      allowPartial?: boolean;
+    },
+    onStatusChange?: (status: string) => void
+  ): Promise<string> {
+    try {
+      const wallet = await KeyringService.getWallet(address);
+      if (wallet instanceof Error) throw new Error(wallet.message);
+
+      return new Promise((resolve, reject) => {
+        let unsubscribe: (() => void) | undefined;
+
+        this.api.tx.subtensorModule
+          .removeStakeLimit(validatorHotkey, address, amountInRao, limitPrice, allowPartial)
+          .signAndSend(wallet, {}, (result: ISubmittableResult) => {
+            const { status, dispatchError, events = [] } = result;
+
+            if (dispatchError) {
+              if (unsubscribe) unsubscribe();
+              reject(new Error(dispatchError.toString()));
+              return;
+            }
+
+            switch (true) {
+              case status.isReady:
+                onStatusChange?.('ready');
+                break;
+              case status.isBroadcast:
+                onStatusChange?.('broadcast');
+                break;
+              case status.isInBlock: {
+                const extrinsicFailed = events.find(
+                  ({ event }) => event.method === 'ExtrinsicFailed'
+                );
+                if (extrinsicFailed) {
+                  onStatusChange?.('failed');
+                } else {
+                  const extrinsicSuccess = events.find(
+                    ({ event }) => event.method === 'ExtrinsicSuccess'
+                  );
+                  if (extrinsicSuccess) {
+                    onStatusChange?.('success');
+                  }
+                }
+                break;
+              }
+            }
+
+            if (unsubscribe) {
+              this.handleTransactionStatus(status, events, unsubscribe, resolve, reject);
+            }
+          })
+          .then(unsub => {
+            unsubscribe = unsub;
+          })
+          .catch(error => {
+            if (unsubscribe) unsubscribe();
+            reject(error);
+          });
+      });
+    } catch (error) {
+      console.error('Error in Remove Stake Limit:', error);
       throw error;
     }
   }

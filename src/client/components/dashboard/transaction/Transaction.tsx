@@ -21,6 +21,8 @@ interface StakeParams extends TransactionParams {
   address: string;
   subnetId: number;
   validatorHotkey: string;
+  limitPrice: bigint;
+  allowPartial?: boolean;
 }
 
 interface MoveStakeParams extends TransactionParams {
@@ -75,6 +77,8 @@ const Transaction = ({
     amount: '',
     amountInRao: null,
   });
+  // Slippage defaults to 0.5%
+  const [slippage, setSlippage] = useState<string>('0.5');
   const [toAddress, setToAddress] = useState<string>('');
   const [showSubnetSelection, setShowSubnetSelection] = useState(false);
   const [showValidatorSelection, setShowValidatorSelection] = useState(false);
@@ -104,6 +108,7 @@ const Transaction = ({
           subnetId: dashboardSubnet.id,
           validatorHotkey: dashboardValidator.hotkey,
           amountInRao: amountState.amountInRao,
+          limitPrice: (amountState.amountInRao * BigInt(100 + Number(slippage))) / 100n,
         } as StakeParams;
         break;
       case DashboardState.ADD_STAKE:
@@ -114,6 +119,7 @@ const Transaction = ({
           subnetId: dashboardSubnet.id,
           validatorHotkey: dashboardStake.hotkey,
           amountInRao: amountState.amountInRao,
+          limitPrice: (amountState.amountInRao * BigInt(100 - Number(slippage))) / 100n,
         } as StakeParams;
         break;
       case DashboardState.MOVE_STAKE:
@@ -151,10 +157,10 @@ const Transaction = ({
       switch (dashboardState) {
         case DashboardState.CREATE_STAKE:
         case DashboardState.ADD_STAKE:
-          await api.createStake(params as StakeParams, onStatusChange);
+          await api.createStakeLimit(params as StakeParams, onStatusChange);
           break;
         case DashboardState.REMOVE_STAKE:
-          await api.removeStake(params as StakeParams, onStatusChange);
+          await api.removeStakeLimit(params as StakeParams, onStatusChange);
           break;
         case DashboardState.MOVE_STAKE:
           await api.moveStake(params as MoveStakeParams, onStatusChange);
@@ -333,8 +339,10 @@ const Transaction = ({
         <TransactionForm
           amountState={amountState}
           toAddress={toAddress}
+          slippage={slippage}
           setAmountState={setAmountState}
           setToAddress={setToAddress}
+          setSlippage={setSlippage}
           handleSetupTransaction={handleSetupTransaction}
           renderSubnetSelection={renderSubnetSelection}
           renderValidatorSelection={renderValidatorSelection}

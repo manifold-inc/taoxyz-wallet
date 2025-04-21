@@ -10,8 +10,10 @@ import { raoToTao, taoToRao } from '@/utils/utils';
 interface TransactionFormProps {
   amountState: AmountState;
   toAddress: string;
+  slippage: string;
   setAmountState: (amountState: AmountState) => void;
   setToAddress: (toAddress: string) => void;
+  setSlippage: (slippage: string) => void;
   handleSetupTransaction: (e: React.FormEvent) => void;
   renderSubnetSelection: () => React.ReactNode;
   renderValidatorSelection: () => React.ReactNode;
@@ -20,8 +22,10 @@ interface TransactionFormProps {
 const TransactionForm = ({
   amountState,
   toAddress,
+  slippage,
   setAmountState,
   setToAddress,
+  setSlippage,
   handleSetupTransaction,
   renderSubnetSelection,
   renderValidatorSelection,
@@ -35,6 +39,38 @@ const TransactionForm = ({
     dashboardValidator,
     setDashboardFreeBalance,
   } = useDashboard();
+
+  const handleSlippageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Allow empty string or numbers with optional decimal
+    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+      setSlippage(value);
+    }
+  };
+
+  const handleSlippageBlur = () => {
+    if (slippage === '') {
+      setSlippage('0');
+    }
+  };
+
+  const renderSlippageInput = () => {
+    return (
+      <div className="w-full flex gap-2 items-center justify-center">
+        <input
+          type="text"
+          value={slippage}
+          onChange={handleSlippageChange}
+          onBlur={handleSlippageBlur}
+          placeholder="Enter Slippage"
+          className="w-full p-2 text-sm text-mf-edge-500 placeholder-mf-edge-700 bg-mf-night-300 rounded-md"
+        />
+        <div className="text-mf-safety-500 text-sm rounded-md bg-mf-safety-opacity p-2">
+          Slippage
+        </div>
+      </div>
+    );
+  };
 
   const setBalance = () => {
     switch (dashboardState) {
@@ -120,8 +156,15 @@ const TransactionForm = ({
     switch (dashboardState) {
       case DashboardState.ADD_STAKE:
       case DashboardState.REMOVE_STAKE:
-      case DashboardState.MOVE_STAKE:
       case DashboardState.CREATE_STAKE:
+        return (
+          <div className="w-full flex flex-col gap-4 items-center justify-center">
+            {renderSlippageInput()}
+            {renderSubnetSelection()}
+            {renderValidatorSelection()}
+          </div>
+        );
+      case DashboardState.MOVE_STAKE:
         return (
           <div className="w-full flex flex-col gap-4 items-center justify-center">
             {renderSubnetSelection()}
