@@ -2,6 +2,7 @@ import { ApiPromise, WsProvider } from '@polkadot/api';
 import type { EventRecord, ExtrinsicStatus } from '@polkadot/types/interfaces';
 import type { ISubmittableResult } from '@polkadot/types/types';
 
+import KeyringService from '@/client/services/KeyringService';
 import type {
   BittensorMetagraph,
   BittensorSubnet,
@@ -10,8 +11,7 @@ import type {
   SubstrateAccount,
   Validator,
   ValidatorIdentity,
-} from '../../types/client';
-import KeyringService from '../services/KeyringService';
+} from '@/types/client';
 
 class PolkadotApi {
   private api!: ApiPromise;
@@ -224,20 +224,31 @@ class PolkadotApi {
 
   public async createStakeLimit(
     {
-      validatorHotkey,
       address,
+      validatorHotkey,
+      subnetId,
       amountInRao,
       limitPrice,
       allowPartial = false,
     }: {
       validatorHotkey: string;
       address: string;
+      subnetId: number;
       amountInRao: bigint;
       limitPrice: bigint;
       allowPartial?: boolean;
     },
     onStatusChange?: (status: string) => void
   ): Promise<string> {
+    console.log(
+      'API CALL:',
+      address,
+      validatorHotkey,
+      subnetId,
+      amountInRao,
+      limitPrice,
+      allowPartial
+    );
     try {
       const wallet = await KeyringService.getWallet(address);
       if (wallet instanceof Error) throw new Error(wallet.message);
@@ -246,7 +257,7 @@ class PolkadotApi {
         let unsubscribe: (() => void) | undefined;
 
         this.api.tx.subtensorModule
-          .addStakeLimit(validatorHotkey, address, amountInRao, limitPrice, allowPartial)
+          .addStakeLimit(validatorHotkey, subnetId, amountInRao, limitPrice, allowPartial)
           .signAndSend(wallet, {}, (result: ISubmittableResult) => {
             const { status, dispatchError, events = [] } = result;
 
@@ -378,14 +389,16 @@ class PolkadotApi {
 
   public async removeStakeLimit(
     {
-      validatorHotkey,
       address,
+      validatorHotkey,
+      subnetId,
       amountInRao,
       limitPrice,
       allowPartial = false,
     }: {
       validatorHotkey: string;
       address: string;
+      subnetId: number;
       amountInRao: bigint;
       limitPrice: bigint;
       allowPartial?: boolean;
@@ -396,11 +409,20 @@ class PolkadotApi {
       const wallet = await KeyringService.getWallet(address);
       if (wallet instanceof Error) throw new Error(wallet.message);
 
+      console.log(
+        'API CALL:',
+        address,
+        validatorHotkey,
+        subnetId,
+        amountInRao,
+        limitPrice,
+        allowPartial
+      );
       return new Promise((resolve, reject) => {
         let unsubscribe: (() => void) | undefined;
 
         this.api.tx.subtensorModule
-          .removeStakeLimit(validatorHotkey, address, amountInRao, limitPrice, allowPartial)
+          .removeStakeLimit(validatorHotkey, subnetId, amountInRao, limitPrice, allowPartial)
           .signAndSend(wallet, {}, (result: ISubmittableResult) => {
             const { status, dispatchError, events = [] } = result;
 

@@ -26,7 +26,6 @@ interface DashboardOverviewProps {
   freeTao: number | null;
   taoPrice: number | null;
   priceChangePercentage: number | null;
-  dashboardState: DashboardState;
   isLoading: boolean;
 }
 
@@ -76,7 +75,6 @@ const DashboardOverview = ({
   freeTao,
   taoPrice,
   priceChangePercentage,
-  dashboardState,
   isLoading = true,
 }: DashboardOverviewProps) => {
   const { currentAddress } = useWallet();
@@ -140,7 +138,6 @@ const DashboardOverview = ({
     }
   }, [updatedBalances, calculatedTotalTao]);
 
-  console.log(dashboardState);
   // TODO: Render 3 different views based on dashboardState
   return (
     <>

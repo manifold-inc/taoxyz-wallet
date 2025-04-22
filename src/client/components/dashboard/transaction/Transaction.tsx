@@ -11,10 +11,12 @@ import { useNotification } from '@/client/contexts/NotificationContext';
 import { usePolkadotApi } from '@/client/contexts/PolkadotApiContext';
 import { NotificationType } from '@/types/client';
 import type { Subnet, Validator } from '@/types/client';
+import { taoToRao } from '@/utils/utils';
 
 export interface TransactionParams {
   address?: string;
   amountInRao: bigint;
+  amount: string;
 }
 
 interface StakeParams extends TransactionParams {
@@ -80,10 +82,36 @@ const Transaction = ({
   // Slippage defaults to 0.5%
   const [slippage, setSlippage] = useState<string>('0.5');
   const [toAddress, setToAddress] = useState<string>('');
+  const [toSubnet, setToSubnet] = useState<Subnet | null>(null);
+  const [toValidator, setToValidator] = useState<Validator | null>(null);
   const [showSubnetSelection, setShowSubnetSelection] = useState(false);
   const [showValidatorSelection, setShowValidatorSelection] = useState(false);
   const [showTransactionConfirmation, setShowTransactionConfirmation] = useState(false);
   const [transactionParams, setTransactionParams] = useState<TransactionParams | null>(null);
+
+  const calculateLimitPrice = (subnet: Subnet, slippage: string): bigint => {
+    const priceInRao = taoToRao(subnet.price);
+    const slippageValue = Number(slippage) / 100;
+
+    console.log('Base Price in TAO:', subnet.price);
+    console.log('Base Price in RAO:', priceInRao.toString());
+    console.log('Slippage Value:', slippageValue);
+
+    if (
+      dashboardState === DashboardState.CREATE_STAKE ||
+      dashboardState === DashboardState.ADD_STAKE
+    ) {
+      const priceLimit = taoToRao(subnet.price * (1 + slippageValue));
+      console.log('Slippage Limit in RAO:', priceLimit.toString());
+      return priceLimit;
+    } else if (dashboardState === DashboardState.REMOVE_STAKE) {
+      const priceLimit = taoToRao(subnet.price * (1 - slippageValue));
+      console.log('Slippage Limit in RAO:', priceLimit.toString());
+      return priceLimit;
+    }
+    return priceInRao;
+  };
+
   /**
    * Create {address, subnetId, validatorHotkey, amountInRao}
    * Add {address, subnetId, validatorHotkey, amountInRao}
@@ -100,37 +128,48 @@ const Transaction = ({
     if (amountState.amountInRao === null) return;
 
     let params: TransactionParams;
+    let limitPrice: bigint;
     switch (dashboardState) {
       case DashboardState.CREATE_STAKE:
         if (!dashboardValidator || !dashboardSubnet) return;
+        limitPrice = calculateLimitPrice(dashboardSubnet, slippage);
+        console.log('Limit Price: ', limitPrice, 'AmountinRao: ', amountState.amountInRao);
         params = {
           address,
           subnetId: dashboardSubnet.id,
           validatorHotkey: dashboardValidator.hotkey,
-          amountInRao: amountState.amountInRao,
-          limitPrice: (amountState.amountInRao * BigInt(100 + Number(slippage))) / 100n,
+          amount: amountState.amount,
+          // amountState.amountInRao is a number for some reason
+          amountInRao: BigInt(amountState.amountInRao),
+          limitPrice,
         } as StakeParams;
+        console.log('Setup Params: ', params);
         break;
       case DashboardState.ADD_STAKE:
       case DashboardState.REMOVE_STAKE:
         if (!dashboardStake || !dashboardSubnet) return;
+        limitPrice = calculateLimitPrice(dashboardSubnet, slippage);
+        console.log('Limit Price: ', limitPrice, 'AmountinRao: ', amountState.amountInRao);
         params = {
           address,
           subnetId: dashboardSubnet.id,
           validatorHotkey: dashboardStake.hotkey,
-          amountInRao: amountState.amountInRao,
-          limitPrice: (amountState.amountInRao * BigInt(100 - Number(slippage))) / 100n,
+          amount: amountState.amount,
+          amountInRao: BigInt(amountState.amountInRao),
+          limitPrice,
         } as StakeParams;
+        console.log('Setup Params: ', params);
         break;
       case DashboardState.MOVE_STAKE:
-        if (!dashboardStake || !dashboardValidator || !dashboardSubnet) return;
+        if (!dashboardStake || !toValidator || !toSubnet) return;
         params = {
           address,
           fromSubnetId: dashboardStake.netuid,
           fromHotkey: dashboardStake.hotkey,
-          toSubnetId: dashboardSubnet.id,
-          toHotkey: dashboardValidator.hotkey,
-          amountInRao: amountState.amountInRao,
+          toSubnetId: toSubnet.id,
+          toHotkey: toValidator.hotkey,
+          amount: amountState.amount,
+          amountInRao: BigInt(amountState.amountInRao),
         } as MoveStakeParams;
         break;
       case DashboardState.TRANSFER:
@@ -138,7 +177,8 @@ const Transaction = ({
         params = {
           fromAddress: address,
           toAddress,
-          amountInRao: amountState.amountInRao,
+          amount: amountState.amount,
+          amountInRao: BigInt(amountState.amountInRao),
         } as TransferTaoParams;
         break;
       default:
@@ -184,7 +224,9 @@ const Transaction = ({
         <div className="w-full">
           <SubnetSelection
             subnets={dashboardSubnets}
+            toSubnet={toSubnet}
             isLoadingSubnets={isLoading}
+            setToSubnet={setToSubnet}
             onCancel={handleSubnetCancel}
             onConfirm={handleSubnetConfirm}
           />
@@ -205,22 +247,36 @@ const Transaction = ({
       );
     }
 
+    if (dashboardState === DashboardState.MOVE_STAKE) {
+      if (toSubnet) {
+        return (
+          <div className="w-full p-2 bg-mf-night-400 rounded-md flex items-center justify-between">
+            <p className="text-mf-edge-700 text-sm font-medium">{toSubnet.name}</p>
+            <CircleCheckBig className="w-4 h-4 text-mf-sybil-500" />
+          </div>
+        );
+      }
+      return (
+        <button
+          type="button"
+          className="w-full p-2 bg-mf-night-400 rounded-md cursor-pointer flex items-center justify-between"
+          onClick={handleSubnetSelection}
+        >
+          <p className="text-mf-edge-700 text-sm font-medium">Select Subnet</p>
+          <ChevronRight className="w-4 h-4 text-mf-edge-500" />
+        </button>
+      );
+    }
+
     // Users should not be able to change subnet for adding to or removing from a stake
     return (
-      <button
-        className="w-full p-2 text-sm bg-mf-night-400 rounded-md cursor-pointer flex items-center justify-between disabled:disabled-button disabled:cursor-not-allowed"
-        onClick={handleSubnetSelection}
-        disabled={
-          dashboardState === DashboardState.ADD_STAKE ||
-          dashboardState === DashboardState.REMOVE_STAKE
-        }
-      >
+      <div className="w-full p-2 text-sm bg-mf-night-400 rounded-md flex items-center justify-between">
         <div className="flex gap-1">
           <p className="text-mf-edge-500 font-medium">{dashboardSubnet.name}</p>
           <span className="text-mf-edge-700 font-medium">SN{dashboardSubnet.id}</span>
         </div>
         <CircleCheckBig className="w-4 h-4 text-mf-sybil-500" />
-      </button>
+      </div>
     );
   };
 
@@ -230,6 +286,8 @@ const Transaction = ({
         <div className="w-full">
           <ValidatorSelection
             validators={dashboardValidators}
+            toValidator={toValidator}
+            setToValidator={setToValidator}
             onCancel={handleValidatorCancel}
             onConfirm={handleValidatorConfirm}
           />
@@ -250,16 +308,30 @@ const Transaction = ({
       );
     }
 
+    if (dashboardState === DashboardState.MOVE_STAKE) {
+      if (toValidator) {
+        return (
+          <div className="w-full p-2 bg-mf-night-400 rounded-md flex items-center justify-between">
+            <p className="text-mf-edge-700 text-sm font-medium">{toValidator.name}</p>
+            <CircleCheckBig className="w-4 h-4 text-mf-sybil-500" />
+          </div>
+        );
+      }
+      return (
+        <button
+          type="button"
+          className="w-full p-2 text-sm bg-mf-night-400 rounded-md cursor-pointer flex items-center justify-between"
+          onClick={handleValidatorSelection}
+        >
+          <p className="text-mf-edge-700 font-medium">Select Validator</p>
+          <ChevronRight className="w-4 h-4 text-mf-edge-500" />
+        </button>
+      );
+    }
+
     // Users should not be able to change validator for adding to or removing from a stake
     return (
-      <button
-        className="w-full p-2 text-sm bg-mf-night-400 rounded-md cursor-pointer flex items-center justify-between disabled:disabled-button disabled:cursor-not-allowed"
-        onClick={handleValidatorSelection}
-        disabled={
-          dashboardState === DashboardState.ADD_STAKE ||
-          dashboardState === DashboardState.REMOVE_STAKE
-        }
-      >
+      <div className="w-full p-2 text-sm bg-mf-night-400 rounded-md flex items-center justify-between">
         <div className="flex gap-1">
           <p className="text-mf-edge-500 font-medium truncate max-w-[16ch]">
             {dashboardValidator.name || 'Validator'}
@@ -269,7 +341,7 @@ const Transaction = ({
           </span>
         </div>
         <CircleCheckBig className="w-4 h-4 text-mf-sybil-500" />
-      </button>
+      </div>
     );
   };
 
@@ -319,13 +391,17 @@ const Transaction = ({
       {showSubnetSelection && dashboardSubnets ? (
         <SubnetSelection
           subnets={dashboardSubnets}
+          toSubnet={toSubnet}
           isLoadingSubnets={isLoading}
+          setToSubnet={setToSubnet}
           onCancel={handleSubnetCancel}
           onConfirm={handleSubnetConfirm}
         />
       ) : showValidatorSelection && dashboardValidators ? (
         <ValidatorSelection
           validators={dashboardValidators}
+          toValidator={toValidator}
+          setToValidator={setToValidator}
           onCancel={handleValidatorCancel}
           onConfirm={handleValidatorConfirm}
         />

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 
 import Skeleton from '@/client/components/common/Skeleton';
-import { useDashboard } from '@/client/contexts/DashboardContext';
+import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
 import { useNotification } from '@/client/contexts/NotificationContext';
 import { usePolkadotApi } from '@/client/contexts/PolkadotApiContext';
 import type { Subnet, Validator } from '@/types/client';
@@ -11,7 +11,9 @@ import { NotificationType } from '@/types/client';
 
 interface SubnetSelectionProps {
   subnets: Subnet[];
+  toSubnet: Subnet | null;
   isLoadingSubnets: boolean;
+  setToSubnet: (subnet: Subnet) => void;
   onCancel: () => void;
   onConfirm: (subnet: Subnet, validators: Validator[]) => void;
 }
@@ -52,16 +54,29 @@ const ValidatorSkeleton = () => {
 
 const SubnetSelection = ({
   subnets,
+  toSubnet,
   isLoadingSubnets = true,
+  setToSubnet,
   onCancel,
   onConfirm,
 }: SubnetSelectionProps) => {
   const { api } = usePolkadotApi();
   const { showNotification } = useNotification();
-  const { dashboardSubnet, dashboardValidators, setDashboardSubnet, setDashboardValidators } =
-    useDashboard();
+  const {
+    dashboardSubnet,
+    dashboardValidators,
+    dashboardState,
+    setDashboardSubnet,
+    setDashboardValidators,
+  } = useDashboard();
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoadingValidators, setIsLoadingValidators] = useState(false);
+  const [selectedSubnet, setSelectedSubnet] = useState<Subnet | null>(() => {
+    if (dashboardState === DashboardState.MOVE_STAKE) {
+      return toSubnet;
+    }
+    return dashboardSubnet;
+  });
 
   const getValidators = async (subnetId: number) => {
     if (!api) return;
@@ -89,9 +104,19 @@ const SubnetSelection = ({
   });
 
   const handleSubnetSelect = (subnet: Subnet) => {
-    if (subnet.id === dashboardSubnet?.id) return;
-    setDashboardSubnet(subnet);
+    if (subnet.id === selectedSubnet?.id) return;
+    setSelectedSubnet(subnet);
     getValidators(subnet.id);
+  };
+
+  const handleConfirm = () => {
+    if (!selectedSubnet || !dashboardValidators) return;
+    if (dashboardState === DashboardState.MOVE_STAKE) {
+      setToSubnet(selectedSubnet);
+    } else {
+      setDashboardSubnet(selectedSubnet);
+    }
+    onConfirm(selectedSubnet, dashboardValidators);
   };
 
   return (
@@ -135,12 +160,11 @@ const SubnetSelection = ({
           {filteredSubnets.map(subnet => (
             <div className="flex flex-col gap-3" key={subnet.id}>
               {/* Subnet */}
-              <motion.button
+              <button
                 onClick={() => handleSubnetSelect(subnet)}
-                className={`w-full text-left rounded-md cursor-pointer p-2 transition-colors gap-1 ${
-                  dashboardSubnet?.id === subnet.id ? 'bg-mf-ash-300' : 'bg-mf-ash-500'
+                className={`w-full text-left rounded-md cursor-pointer p-2 transition-colors gap-1 hover:bg-mf-ash-300 ${
+                  selectedSubnet?.id === subnet.id ? 'bg-mf-ash-300' : 'bg-mf-ash-500'
                 }`}
-                whileHover={{ backgroundColor: '#3a3c46' }}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1">
@@ -158,17 +182,17 @@ const SubnetSelection = ({
                 <div className="flex items-center justify-between">
                   <p className="text-mf-sybil-500 text-sm">Validators</p>
                   {/* Validators */}
-                  {dashboardSubnet?.id === subnet.id &&
+                  {selectedSubnet?.id === subnet.id &&
                     (isLoadingValidators ? (
                       <ValidatorSkeleton />
                     ) : (
                       <p className="text-mf-edge-500 text-sm">{dashboardValidators?.length ?? 0}</p>
                     ))}
                 </div>
-              </motion.button>
+              </button>
 
               {/* Action Buttons */}
-              {dashboardSubnet?.id === subnet.id && (
+              {selectedSubnet?.id === subnet.id && (
                 <div className="flex gap-2">
                   <motion.button
                     onClick={onCancel}
@@ -179,11 +203,11 @@ const SubnetSelection = ({
                   </motion.button>
 
                   <motion.button
-                    onClick={() => onConfirm(subnet, dashboardValidators ?? [])}
+                    onClick={handleConfirm}
                     className="w-full rounded-md text-center cursor-pointer w-1/2 py-1.5 bg-mf-sybil-opacity border border-mf-sybil-opacity hover:border-mf-sybil-500 hover:text-mf-edge-500 transition-colors text-mf-sybil-500 gap-1 disabled:disabled-button disabled:cursor-not-allowed"
                     whileHover={{ opacity: 0.5 }}
                     disabled={
-                      dashboardSubnet === null ||
+                      selectedSubnet === null ||
                       dashboardValidators === null ||
                       dashboardValidators.length === 0
                     }

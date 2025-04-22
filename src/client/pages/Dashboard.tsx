@@ -170,7 +170,6 @@ export const Dashboard = () => {
             freeTao={freeTao}
             taoPrice={taoPrice}
             priceChangePercentage={priceChangePercentage}
-            dashboardState={dashboardState}
             isLoading={isLoading}
           />
         </div>

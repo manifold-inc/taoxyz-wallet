@@ -1,3 +1,4 @@
+import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
 import type { Slippage } from '@/types/client';
 import {
   formatNumber,
@@ -8,32 +9,72 @@ import {
 
 interface SlippageDisplayProps {
   amount: string;
-  balance: string;
-  isRoot?: boolean;
-  moveStake?: boolean;
 }
 
-const SlippageDisplay = ({
-  amount,
-  balance,
-  moveStake = false,
-  isRoot = false,
-}: SlippageDisplayProps) => {
+const SlippageDisplay = ({ amount }: SlippageDisplayProps) => {
+  const { dashboardSubnet, dashboardState } = useDashboard();
+  const isRoot = dashboardSubnet?.id === 0;
+  const moveStake = dashboardState === DashboardState.MOVE_STAKE;
+
   const chainFee = moveStake ? 0.0001 : 0.00005;
   const amountInRao = taoToRao(Number(amount));
-  const balanceInRao = taoToRao(Number(balance));
 
   // Calculate slippage based on the operation type
   let slippage: Slippage;
   if (moveStake) {
-    slippage = slippageMoveStakeCalculation(balanceInRao, balanceInRao, amountInRao);
+    slippage = slippageMoveStakeCalculation(
+      BigInt(dashboardSubnet?.alphaIn ?? 0),
+      BigInt(dashboardSubnet?.taoIn ?? 0),
+      BigInt(amountInRao)
+    );
   } else if (isRoot) {
-    slippage = slippageStakeCalculation(balanceInRao, balanceInRao, amountInRao, false, false);
+    slippage = slippageStakeCalculation(
+      BigInt(dashboardSubnet?.alphaIn ?? 0),
+      BigInt(dashboardSubnet?.taoIn ?? 0),
+      BigInt(amountInRao),
+      false,
+      false
+    );
   } else {
-    slippage = slippageStakeCalculation(balanceInRao, balanceInRao, amountInRao, false, true);
+    slippage = slippageStakeCalculation(
+      BigInt(dashboardSubnet?.alphaIn ?? 0),
+      BigInt(dashboardSubnet?.taoIn ?? 0),
+      BigInt(amountInRao),
+      false,
+      true
+    );
   }
 
-  const payToken = moveStake ? (isRoot ? 'τ' : 'α') : 'τ';
+  let receiveToken = 'τ';
+  let payToken = 'τ';
+
+  switch (dashboardState) {
+    case DashboardState.CREATE_STAKE:
+    case DashboardState.ADD_STAKE:
+      payToken = 'τ';
+      if (isRoot) {
+        receiveToken = 'τ';
+      } else {
+        receiveToken = 'α';
+      }
+      break;
+    case DashboardState.REMOVE_STAKE:
+      receiveToken = 'τ';
+      if (isRoot) {
+        payToken = 'τ';
+      } else {
+        payToken = 'α';
+      }
+      break;
+    case DashboardState.MOVE_STAKE:
+      payToken = 'α';
+      if (isRoot) {
+        receiveToken = 'τ';
+      } else {
+        receiveToken = 'α';
+      }
+      break;
+  }
 
   return (
     <div className="w-full flex flex-col gap-2 p-3">
@@ -58,7 +99,7 @@ const SlippageDisplay = ({
       <div className="flex items-center justify-between">
         <p className="text-mf-edge-500 text-sm font-medium">Estimated Total</p>
         <p className="text-mf-sybil-500 text-sm font-medium">
-          {formatNumber(slippage.tokens - chainFee)} {payToken}
+          {formatNumber(slippage.tokens - chainFee)} {receiveToken}
         </p>
       </div>
     </div>

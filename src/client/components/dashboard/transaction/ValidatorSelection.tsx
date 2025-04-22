@@ -9,13 +9,26 @@ import type { Validator } from '../../../../types/client';
 
 interface ValidatorSelectionProps {
   validators: Validator[];
+  toValidator: Validator | null;
+  setToValidator: (validator: Validator) => void;
   onCancel: () => void;
   onConfirm: (validator: Validator) => void;
 }
 
-const ValidatorSelection = ({ validators, onCancel, onConfirm }: ValidatorSelectionProps) => {
-  const { dashboardStakes, dashboardSubnet, dashboardState } = useDashboard();
-  const [selectedValidator, setSelectedValidator] = useState<Validator | null>(null);
+const ValidatorSelection = ({
+  validators,
+  toValidator,
+  setToValidator,
+  onCancel,
+  onConfirm,
+}: ValidatorSelectionProps) => {
+  const { dashboardStakes, dashboardSubnet, dashboardState, dashboardValidator } = useDashboard();
+  const [selectedValidator, setSelectedValidator] = useState<Validator | null>(() => {
+    if (dashboardState === DashboardState.MOVE_STAKE) {
+      return toValidator;
+    }
+    return dashboardValidator;
+  });
   const [searchQuery, setSearchQuery] = useState('');
 
   const filterBySearch = (validatorsToFilter: Validator[]) => {
@@ -45,6 +58,14 @@ const ValidatorSelection = ({ validators, onCancel, onConfirm }: ValidatorSelect
   const handleValidatorSelect = (validator: Validator) => {
     if (validator.hotkey === selectedValidator?.hotkey) return;
     setSelectedValidator(validator);
+  };
+
+  const handleConfirm = () => {
+    if (!selectedValidator) return;
+    if (dashboardState === DashboardState.MOVE_STAKE) {
+      setToValidator(selectedValidator);
+    }
+    onConfirm(selectedValidator);
   };
 
   return (
@@ -116,7 +137,7 @@ const ValidatorSelection = ({ validators, onCancel, onConfirm }: ValidatorSelect
                 </motion.button>
 
                 <motion.button
-                  onClick={() => onConfirm(validator)}
+                  onClick={handleConfirm}
                   className="w-full rounded-md text-center cursor-pointer w-1/2 py-1.5 bg-mf-sybil-opacity border border-mf-sybil-opacity hover:border-mf-sybil-500 hover:text-mf-edge-500 transition-colors text-mf-sybil-500 gap-1"
                   whileHover={{ opacity: 0.5 }}
                 >

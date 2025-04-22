@@ -199,34 +199,14 @@ const TransactionForm = ({
     if (dashboardStake === null || dashboardFreeBalance === null) return;
     if (amountState.amountInRao === null) return;
 
-    const isRoot = dashboardSubnet.id === 0;
     switch (dashboardState) {
       case DashboardState.CREATE_STAKE:
-        return (
-          <SlippageDisplay
-            amount={amountState.amount}
-            balance={dashboardFreeBalance.toString()}
-            isRoot={isRoot}
-          />
-        );
+        return <SlippageDisplay amount={amountState.amount} />;
       case DashboardState.ADD_STAKE:
       case DashboardState.REMOVE_STAKE:
-        return (
-          <SlippageDisplay
-            amount={amountState.amount}
-            balance={dashboardStake.stake.toString()}
-            isRoot={isRoot}
-          />
-        );
+        return <SlippageDisplay amount={amountState.amount} />;
       case DashboardState.MOVE_STAKE:
-        return (
-          <SlippageDisplay
-            amount={amountState.amount}
-            balance={dashboardStake.stake.toString()}
-            moveStake={true}
-            isRoot={isRoot}
-          />
-        );
+        return <SlippageDisplay amount={amountState.amount} />;
       default:
         return null;
     }

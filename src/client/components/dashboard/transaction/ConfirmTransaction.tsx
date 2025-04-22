@@ -5,14 +5,13 @@ import { useState } from 'react';
 import SlippageDisplay from '@/client/components/common/SlippageDisplay';
 import type { TransactionParams } from '@/client/components/dashboard/transaction/Transaction';
 import type { TransactionStatus } from '@/client/components/dashboard/transaction/Transaction';
-import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
+import { useDashboard } from '@/client/contexts/DashboardContext';
 import { useLock } from '@/client/contexts/LockContext';
 import { useNotification } from '@/client/contexts/NotificationContext';
 import { useWallet } from '@/client/contexts/WalletContext';
 import KeyringService from '@/client/services/KeyringService';
 import MessageService from '@/client/services/MessageService';
 import { NotificationType } from '@/types/client';
-import { raoToTao } from '@/utils/utils';
 
 interface ConfirmTransactionProps {
   params: TransactionParams;
@@ -30,8 +29,7 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
   const [password, setPassword] = useState('');
   const [passwordSelected, setPasswordSelected] = useState(false);
   const [status, setStatus] = useState<TransactionStatus>('ready');
-  const { dashboardSubnet, dashboardValidator, dashboardFreeBalance, dashboardState } =
-    useDashboard();
+  const { dashboardSubnet, dashboardValidator } = useDashboard();
 
   const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     setPassword(event.target.value);
@@ -240,12 +238,7 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
               </div>
 
               {/* Amount Details */}
-              <SlippageDisplay
-                amount={raoToTao(params.amountInRao).toString()}
-                balance={raoToTao(dashboardFreeBalance ?? 0n).toString()}
-                moveStake={dashboardState === DashboardState.MOVE_STAKE}
-                isRoot={dashboardSubnet?.id === 0}
-              />
+              <SlippageDisplay amount={params.amount} />
             </div>
 
             {/* Password Input */}
