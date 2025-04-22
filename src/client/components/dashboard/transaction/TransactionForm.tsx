@@ -196,8 +196,24 @@ const TransactionForm = ({
   const renderSlippageDisplay = () => {
     if (dashboardSubnet === null) return;
     if (dashboardValidator === null) return;
-    if (dashboardStake === null || dashboardFreeBalance === null) return;
     if (amountState.amountInRao === null) return;
+
+    if (
+      (dashboardState === DashboardState.ADD_STAKE ||
+        dashboardState === DashboardState.REMOVE_STAKE ||
+        dashboardState === DashboardState.MOVE_STAKE) &&
+      dashboardStake === null
+    ) {
+      return;
+    }
+
+    if (
+      (dashboardState === DashboardState.CREATE_STAKE ||
+        dashboardState === DashboardState.TRANSFER) &&
+      dashboardFreeBalance === null
+    ) {
+      return;
+    }
 
     switch (dashboardState) {
       case DashboardState.CREATE_STAKE:
