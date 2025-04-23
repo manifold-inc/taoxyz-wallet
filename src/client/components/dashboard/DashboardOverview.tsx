@@ -25,7 +25,7 @@ interface DashboardOverviewProps {
   subnets: Subnet[];
   freeTao: number | null;
   taoPrice: number | null;
-  priceChangePercentage: number | null;
+  priceChange24h: number | null;
   isLoading: boolean;
 }
 
@@ -74,7 +74,7 @@ const DashboardOverview = ({
   subnets,
   freeTao,
   taoPrice,
-  priceChangePercentage,
+  priceChange24h,
   isLoading = true,
 }: DashboardOverviewProps) => {
   const { currentAddress } = useWallet();
@@ -207,14 +207,14 @@ const DashboardOverview = ({
 
               <div className="flex flex-col items-end">
                 <p
-                  className={`text-sm font-light flex items-center ${priceChangePercentage && priceChangePercentage >= 0 ? 'text-mf-sybil-500' : 'text-mf-safety-500'}`}
+                  className={`text-sm font-light flex items-center ${priceChange24h && priceChange24h >= 0 ? 'text-mf-sybil-500' : 'text-mf-safety-500'}`}
                 >
-                  {priceChangePercentage && priceChangePercentage >= 0 ? (
+                  {priceChange24h && priceChange24h >= 0 ? (
                     <ChevronUp className="w-4 h-4" />
                   ) : (
                     <ChevronDown className="w-4 h-4" />
                   )}
-                  {Math.abs(priceChangePercentage ?? 0).toFixed(2)}
+                  {Math.abs(priceChange24h ?? 0).toFixed(2)}
                 </p>
                 <p className="text-mf-edge-500 text-sm font-light">${taoPrice?.toFixed(2)}</p>
               </div>

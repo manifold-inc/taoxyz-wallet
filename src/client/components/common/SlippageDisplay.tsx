@@ -5,7 +5,6 @@ import {
   formatNumber,
   moveStakeWithSlippage,
   taoToAlphaWithSlippage,
-  taoToRao,
 } from '@/utils/utils';
 
 interface SlippageDisplayProps {
@@ -18,7 +17,7 @@ const SlippageDisplay = ({ amount }: SlippageDisplayProps) => {
   const moveStake = dashboardState === DashboardState.MOVE_STAKE;
 
   const chainFee = moveStake ? 0.0001 : 0.00005;
-  const amountInRao = Number(taoToRao(Number(amount)));
+  const amountInRao = Number(amount) * 1e9;
 
   let slippage: Slippage;
   switch (dashboardState) {

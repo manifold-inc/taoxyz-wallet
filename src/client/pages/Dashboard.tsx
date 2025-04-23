@@ -12,8 +12,7 @@ import type { Stake, Subnet } from '@/types/client';
 import { NotificationType } from '@/types/client';
 import { raoToTao } from '@/utils/utils';
 
-const API_URL = 'https://api.coingecko.com/api/v3';
-const NETWORK_ID = 'bittensor';
+const API_URL = 'https://tao.xyz/api/price';
 
 /**
  * Dashboard Overview
@@ -51,22 +50,11 @@ const NETWORK_ID = 'bittensor';
  *  Transaction - ADD STAKE / REMOVE STAKE / MOVE STAKE
  */
 
-// [Timestamp, Price]
-interface PriceData {
-  prices: [number, number][];
+interface TaoPriceResponse {
+  currentPrice: number;
+  price24hAgo: number;
+  priceChange24h: number;
 }
-
-const calculatePriceChange = (
-  prices: [number, number][]
-): { price: number; priceChange: number } => {
-  const [price, oldPrice] = [prices[0][1], prices[prices.length - 1][1]];
-  const priceChange = ((price - oldPrice) / oldPrice) * 100;
-
-  return {
-    price,
-    priceChange,
-  };
-};
 
 export const Dashboard = () => {
   const { showNotification } = useNotification();
@@ -80,7 +68,7 @@ export const Dashboard = () => {
   const [freeTao, setFreeTao] = useState<number | null>(null);
 
   const [taoPrice, setTaoPrice] = useState<number | null>(null);
-  const [priceChangePercentage, setPriceChangePercentage] = useState<number | null>(null);
+  const [priceChange24h, setPriceChange24h] = useState<number | null>(null);
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const prevAddressRef = useRef<string | null>(null);
@@ -134,13 +122,10 @@ export const Dashboard = () => {
   const fetchTaoPrice = async (): Promise<void> => {
     setIsLoading(true);
     try {
-      const response = await fetch(
-        `${API_URL}/coins/${NETWORK_ID}/market_chart?vs_currency=usd&days=1`
-      );
-      const data = (await response.json()) as PriceData;
-      const { price, priceChange } = calculatePriceChange(data.prices);
-      setTaoPrice(price);
-      setPriceChangePercentage(priceChange);
+      const response = await fetch(`${API_URL}`);
+      const data = (await response.json()) as TaoPriceResponse;
+      setTaoPrice(data.currentPrice);
+      setPriceChange24h(data.priceChange24h);
     } catch {
       showNotification({
         type: NotificationType.Error,
@@ -169,7 +154,7 @@ export const Dashboard = () => {
             subnets={subnets}
             freeTao={freeTao}
             taoPrice={taoPrice}
-            priceChangePercentage={priceChangePercentage}
+            priceChange24h={priceChange24h}
             isLoading={isLoading}
           />
         </div>

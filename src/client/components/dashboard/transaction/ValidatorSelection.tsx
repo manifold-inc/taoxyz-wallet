@@ -130,7 +130,7 @@ const ValidatorSelection = ({
               <div className="flex gap-2">
                 <motion.button
                   onClick={onCancel}
-                  className="w-full rounded-md text-center cursor-pointer w-1/2 py-1.5 bg-mf-red-opacity border border-mf-red-opacity hover:border-mf-red-500 hover:text-mf-edge-500 transition-colors text-mf-red-500 gap-1"
+                  className="rounded-md text-center cursor-pointer w-1/2 py-1.5 bg-mf-red-opacity border border-mf-red-opacity hover:border-mf-red-500 hover:text-mf-edge-500 transition-colors text-mf-red-500 gap-1"
                   whileHover={{ opacity: 0.5 }}
                 >
                   Cancel
@@ -138,7 +138,7 @@ const ValidatorSelection = ({
 
                 <motion.button
                   onClick={handleConfirm}
-                  className="w-full rounded-md text-center cursor-pointer w-1/2 py-1.5 bg-mf-sybil-opacity border border-mf-sybil-opacity hover:border-mf-sybil-500 hover:text-mf-edge-500 transition-colors text-mf-sybil-500 gap-1"
+                  className="rounded-md text-center cursor-pointer w-1/2 py-1.5 bg-mf-sybil-opacity border border-mf-sybil-opacity hover:border-mf-sybil-500 hover:text-mf-edge-500 transition-colors text-mf-sybil-500 gap-1"
                   whileHover={{ opacity: 0.5 }}
                 >
                   Confirm
