@@ -19,8 +19,8 @@ const AppLayout = ({ children }: AppLayoutProps) => {
     location.pathname === '/';
 
   return (
-    <main className="h-screen w-screen">
-      <div className="h-full">
+    <main className="h-screen w-screen flex flex-col">
+      <div className="flex-1 overflow-y-auto">
         {/* Routes */}
         {children}
       </div>
@@ -29,7 +29,9 @@ const AppLayout = ({ children }: AppLayoutProps) => {
       {isProtectedRoute && (
         <>
           <LockScreen isLocked={isLocked} />
-          <Navigation />
+          <div className="h-14">
+            <Navigation />
+          </div>
         </>
       )}
     </main>

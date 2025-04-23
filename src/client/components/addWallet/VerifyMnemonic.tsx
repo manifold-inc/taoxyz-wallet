@@ -104,16 +104,16 @@ const MnemonicVerify = ({ onContinue }: MnemonicVerifyProps) => {
       </div>
 
       {/* Buttons */}
-      <div className="flex flex-col items-center gap-3 pt-4 px-16">
+      <div className="flex flex-col items-center gap-3 pt-4 px-20">
         <button
           onClick={handleBack}
-          className="w-full cursor-pointer text-center gap-1.5 px-6 py-1.5 bg-mf-safety-opacity rounded-full text-sm text-mf-safety-500 hover:opacity-50"
+          className="w-full cursor-pointer text-center gap-1.5 px-3 py-1.5 bg-mf-safety-opacity rounded-full text-sm text-mf-safety-500 hover:opacity-50"
         >
           Back
         </button>
         <button
           type="submit"
-          className="w-full cursor-pointer text-center gap-1.5 px-6 py-1.5 bg-mf-sybil-opacity rounded-full text-sm text-mf-sybil-500 hover:opacity-50"
+          className="w-full cursor-pointer text-center gap-1.5 px-3 py-1.5 bg-mf-sybil-opacity rounded-full text-sm text-mf-sybil-500 hover:opacity-50"
         >
           Verify
         </button>
