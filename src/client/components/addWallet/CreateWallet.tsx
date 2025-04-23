@@ -115,7 +115,7 @@ const CreateWallet = ({ onSuccess }: CreateWalletProps) => {
     await onSuccess(wallet, mnemonic);
   };
 
-  const handleBack = (): void => {
+  const handleBack = async (): Promise<void> => {
     actions.reset();
     navigate('/welcome', { state: { step: 'GET_STARTED' } });
   };

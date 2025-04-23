@@ -1,6 +1,7 @@
 import taoxyz from '@public/assets/taoxyz.svg';
 import { AnimatePresence, motion } from 'framer-motion';
 
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import type { KeyringPair } from '@polkadot/keyring/types';
@@ -90,10 +91,15 @@ const AddWallet = () => {
         return <ImportMnemonic onContinue={handleImportMnemonic} />;
 
       default:
-        handleBack();
         return null;
     }
   };
+
+  useEffect(() => {
+    if (state.mode === Mode.NULL) {
+      handleBack();
+    }
+  }, [state.mode]);
 
   const handleBack = () => {
     actions.reset();
