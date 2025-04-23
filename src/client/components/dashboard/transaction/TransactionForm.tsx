@@ -274,9 +274,11 @@ const TransactionForm = ({
           <button
             type="submit"
             disabled={
-              !dashboardSubnet ||
-              !dashboardValidator ||
-              !amountValidation(Number(amountState.amount))
+              dashboardState === DashboardState.TRANSFER
+                ? !amountValidation(Number(amountState.amount)) || toAddress === ''
+                : !dashboardSubnet ||
+                  !dashboardValidator ||
+                  !amountValidation(Number(amountState.amount))
             }
             className="w-1/2 rounded-md text-center cursor-pointer py-1.5 gap-1 disabled:cursor-not-allowed hover:opacity-50 disabled:hover:opacity-100 disabled:bg-mf-ash-500 disabled:border-mf-ash-500 disabled:text-mf-edge-700 enabled:bg-mf-sybil-opacity enabled:border-mf-sybil-opacity enabled:text-mf-sybil-500"
           >

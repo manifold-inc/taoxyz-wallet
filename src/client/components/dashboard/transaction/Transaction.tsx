@@ -35,10 +35,9 @@ interface MoveStakeParams extends TransactionParams {
   toHotkey: string;
 }
 
-interface TransferTaoParams extends TransactionParams {
+export interface TransferTaoParams extends TransactionParams {
   fromAddress: string;
   toAddress: string;
-  amountInRao: bigint;
 }
 
 export interface TransactionProps {
