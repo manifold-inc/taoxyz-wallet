@@ -142,7 +142,7 @@ export const Dashboard = () => {
   }
 
   return (
-    <div className="flex flex-col items-center w-full h-full pt-6 bg-mf-night-500">
+    <div className="flex flex-col items-center w-full h-full pt-4 bg-mf-night-500">
       {/* Wallet Selection */}
       <WalletSelection />
 

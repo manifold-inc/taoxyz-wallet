@@ -1,12 +1,14 @@
+import taoxyz from '@public/assets/taoxyz.svg';
+import { ChevronRight } from 'lucide-react';
+
 import { useState } from 'react';
 
-import taoxyzLogo from '../../../public/assets/taoxyz.svg';
-import Disclaimer from '../components/common/Disclaimer';
-import WalletSelection from '../components/common/WalletSelection';
-import ConnectedSites from '../components/settings/ConnectedSites';
-import { useLock } from '../contexts/LockContext';
-import KeyringService from '../services/KeyringService';
-import MessageService from '../services/MessageService';
+import Disclaimer from '@/client/components/common/Disclaimer';
+import WalletSelection from '@/client/components/common/WalletSelection';
+import ConnectedSites from '@/client/components/settings/ConnectedSites';
+import { useLock } from '@/client/contexts/LockContext';
+import KeyringService from '@/client/services/KeyringService';
+import MessageService from '@/client/services/MessageService';
 
 const Settings = () => {
   const { setIsLocked } = useLock();
@@ -19,60 +21,72 @@ const Settings = () => {
     await setIsLocked(true);
   };
 
-  return (
-    <>
-      {showConnectedSites ? (
-        <ConnectedSites onClose={() => setShowConnectedSites(false)} />
-      ) : (
-        <>
-          {showDisclaimer ? (
-            <Disclaimer onClose={() => setShowDisclaimer(false)} />
-          ) : (
-            <div className="flex flex-col items-center w-full [&>*]:w-full">
-              <div className="flex items-center justify-center">
-                <img src={taoxyzLogo} alt="Taoxyz Logo" className="w-16 h-16 mt-12" />
-              </div>
+  const renderMainSettings = () => (
+    <div className="flex flex-col items-center w-full gap-4">
+      {/* Header */}
+      <div className="w-full flex items-center justify-start pt-4 px-5">
+        <div className="flex items-center gap-2">
+          <img src={taoxyz} alt="Taoxyz Logo" className="w-8 h-8" />
+          <p className="text-mf-edge-500 text-3xl font-semibold blinker-font mb-1">SETTINGS</p>
+        </div>
+      </div>
 
-              <div className="flex flex-col mt-4">
-                <div className="text-center space-y-1">
-                  <h2 className="text-lg text-mf-milk-300">Settings</h2>
-                  <button onClick={() => setShowDisclaimer(true)}>
-                    <span className="text-xs text-mf-safety-500 hover:text-mf-safety-300 underline underline-offset-2 decoration-mf-safety-500 hover:decoration-mf-safety-300 cursor-pointer">
-                      Disclaimer
-                    </span>
-                  </button>
-                </div>
-              </div>
+      {/* Wallet Selection */}
+      <WalletSelection />
 
-              <div className="mt-6">
-                <p className="flex justify-center text-sm text-mf-milk-300">Change Wallets</p>
-                <WalletSelection />
-              </div>
+      {/* Settings */}
+      <div className="w-full px-5 py-3 flex flex-col items-center justify-start gap-3">
+        <button
+          onClick={() => setShowConnectedSites(true)}
+          className="w-full bg-mf-ash-500 rounded-md p-2 flex items-center justify-between cursor-pointer hover:bg-mf-ash-300"
+        >
+          <div className="flex flex-col items-start justify-center">
+            <p className="text-mf-edge-700 text-sm">Connected Sites</p>
+            <p className="text-mf-sybil-500 text-xs">Control External Connections</p>
+          </div>
+          <div className="bg-mf-sybil-500 rounded-md p-1">
+            <ChevronRight className="text-black w-6 h-6" />
+          </div>
+        </button>
 
-              <div className="mt-4">
-                <p className="flex justify-center text-sm text-mf-milk-300">Connected Sites</p>
-                <div className="flex justify-center space-x-4 mt-4">
-                  <button
-                    onClick={handleLock}
-                    className="w-44 p-1 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 hover:border-mf-safety-500 border-sm"
-                  >
-                    <span>Lock Wallet</span>
-                  </button>
+        <button
+          onClick={handleLock}
+          className="w-full bg-mf-ash-500 rounded-md p-2 flex items-center justify-between cursor-pointer hover:bg-mf-ash-300"
+        >
+          <div className="flex flex-col items-start justify-center">
+            <p className="text-mf-edge-700 text-sm">Lock Wallet</p>
+            <p className="text-mf-sybil-500 text-xs">Secure Your Wallet</p>
+          </div>
+          <div className="bg-mf-sybil-500 rounded-md p-1">
+            <ChevronRight className="text-black w-6 h-6" />
+          </div>
+        </button>
 
-                  <button
-                    onClick={() => setShowConnectedSites(true)}
-                    className="w-44 p-1 bg-mf-sybil-500 hover:bg-mf-night-500 hover:text-mf-sybil-500 border-2 border-mf-sybil-500 hover:border-mf-sybil-500 border-sm"
-                  >
-                    <span>View Sites</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </>
-      )}
-    </>
+        <button
+          onClick={() => setShowDisclaimer(true)}
+          className="w-full bg-mf-ash-500 rounded-md p-2 flex items-center justify-between cursor-pointer hover:bg-mf-ash-300"
+        >
+          <div className="flex flex-col items-start justify-center">
+            <p className="text-mf-edge-700 text-sm">Disclaimer</p>
+            <p className="text-mf-sybil-500 text-xs">View Privacy Policy</p>
+          </div>
+          <div className="bg-mf-sybil-500 rounded-md p-1">
+            <ChevronRight className="text-black w-6 h-6" />
+          </div>
+        </button>
+      </div>
+    </div>
   );
+
+  if (showConnectedSites) {
+    return <ConnectedSites onClose={() => setShowConnectedSites(false)} />;
+  }
+
+  if (showDisclaimer) {
+    return <Disclaimer onClose={() => setShowDisclaimer(false)} />;
+  }
+
+  return renderMainSettings();
 };
 
 export default Settings;
