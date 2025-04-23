@@ -33,7 +33,7 @@ const Disclaimer = ({ onClose }: DisclaimerProps) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.5 }}
       >
-        <p className="text-mf-edge-500 text-lg blinker-font font-bold">DISCLAIMER</p>
+        <p className="text-mf-edge-500 text-lg blinker-font font-semibold">DISCLAIMER</p>
         <p className="text-mf-safety-300 text-xs bg-mf-ash-500 rounded-xs font-light p-5">
           You can use this wallet to securely store and transfer TAO. Please securely store all
           mnemonics and passwords created.
@@ -47,7 +47,7 @@ const Disclaimer = ({ onClose }: DisclaimerProps) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4, duration: 0.5 }}
       >
-        <p className="text-mf-edge-500 text-lg blinker-font font-bold">DATA PRIVACY</p>
+        <p className="text-mf-edge-500 text-lg blinker-font font-semibold">DATA PRIVACY</p>
         <ul className="rounded-xs bg-mf-ash-500 text-mf-sybil-500 text-xs font-light space-y-4 p-5">
           <li>
             We refrain from transmitting any clicks, page views, or events to a central server.
