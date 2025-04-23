@@ -36,7 +36,7 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
     useDashboard();
   const [password, setPassword] = useState('');
   const [passwordSelected, setPasswordSelected] = useState(false);
-  const [status, setStatus] = useState<TransactionStatus>('ready');
+  const [status, setStatus] = useState<TransactionStatus | null>(null);
   const [actualTotal, setActualTotal] = useState<bigint | null>(null);
   const [initialBalance, setInitialBalance] = useState<bigint | null>(null);
 
