@@ -58,6 +58,7 @@ export interface Stake {
 
 export interface Slippage {
   tokens: number;
+  slippage: number;
   slippagePercentage: number;
 }
 

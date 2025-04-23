@@ -1,9 +1,10 @@
 import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
 import type { Slippage } from '@/types/client';
 import {
+  alphaToTaoWithSlippage,
   formatNumber,
-  slippageMoveStakeCalculation,
-  slippageStakeCalculation,
+  moveStakeWithSlippage,
+  taoToAlphaWithSlippage,
   taoToRao,
 } from '@/utils/utils';
 
@@ -13,65 +14,79 @@ interface SlippageDisplayProps {
 
 const SlippageDisplay = ({ amount }: SlippageDisplayProps) => {
   const { dashboardSubnet, dashboardState } = useDashboard();
-  const isRoot = dashboardSubnet?.id === 0;
+  const isDynamic = dashboardSubnet?.id !== 0;
   const moveStake = dashboardState === DashboardState.MOVE_STAKE;
 
   const chainFee = moveStake ? 0.0001 : 0.00005;
-  const amountInRao = taoToRao(Number(amount));
+  const amountInRao = Number(taoToRao(Number(amount)));
 
-  // Calculate slippage based on the operation type
   let slippage: Slippage;
-  if (moveStake) {
-    slippage = slippageMoveStakeCalculation(
-      BigInt(dashboardSubnet?.alphaIn ?? 0),
-      BigInt(dashboardSubnet?.taoIn ?? 0),
-      BigInt(amountInRao)
-    );
-  } else if (isRoot) {
-    slippage = slippageStakeCalculation(
-      BigInt(dashboardSubnet?.alphaIn ?? 0),
-      BigInt(dashboardSubnet?.taoIn ?? 0),
-      BigInt(amountInRao),
-      false,
-      false
-    );
-  } else {
-    slippage = slippageStakeCalculation(
-      BigInt(dashboardSubnet?.alphaIn ?? 0),
-      BigInt(dashboardSubnet?.taoIn ?? 0),
-      BigInt(amountInRao),
-      false,
-      true
-    );
+  switch (dashboardState) {
+    case DashboardState.CREATE_STAKE:
+    case DashboardState.ADD_STAKE:
+      slippage = taoToAlphaWithSlippage(
+        amountInRao,
+        dashboardSubnet?.alphaIn || 0,
+        dashboardSubnet?.taoIn || 0,
+        isDynamic,
+        dashboardSubnet?.price || 0
+      );
+      break;
+    case DashboardState.REMOVE_STAKE:
+      slippage = alphaToTaoWithSlippage(
+        amountInRao,
+        dashboardSubnet?.alphaIn || 0,
+        dashboardSubnet?.taoIn || 0,
+        isDynamic,
+        dashboardSubnet?.price || 0
+      );
+      break;
+    case DashboardState.MOVE_STAKE:
+      slippage = moveStakeWithSlippage(
+        amountInRao,
+        dashboardSubnet?.alphaIn || 0,
+        dashboardSubnet?.taoIn || 0,
+        isDynamic,
+        dashboardSubnet?.price || 0
+      );
+      break;
+    default:
+      slippage = {
+        tokens: 0,
+        slippage: 0,
+        slippagePercentage: 0,
+      };
+      break;
   }
 
   let receiveToken = 'τ';
   let payToken = 'τ';
+  const receiveAmount = formatNumber(slippage.tokens / 1e9 - chainFee);
 
   switch (dashboardState) {
     case DashboardState.CREATE_STAKE:
     case DashboardState.ADD_STAKE:
       payToken = 'τ';
-      if (isRoot) {
-        receiveToken = 'τ';
-      } else {
+      if (isDynamic) {
         receiveToken = 'α';
+      } else {
+        receiveToken = 'τ';
       }
       break;
     case DashboardState.REMOVE_STAKE:
       receiveToken = 'τ';
-      if (isRoot) {
-        payToken = 'τ';
-      } else {
+      if (isDynamic) {
         payToken = 'α';
+      } else {
+        payToken = 'τ';
       }
       break;
     case DashboardState.MOVE_STAKE:
       payToken = 'α';
-      if (isRoot) {
-        receiveToken = 'τ';
-      } else {
+      if (isDynamic) {
         receiveToken = 'α';
+      } else {
+        receiveToken = 'τ';
       }
       break;
   }
@@ -84,7 +99,7 @@ const SlippageDisplay = ({ amount }: SlippageDisplayProps) => {
           {formatNumber(parseFloat(amount))} {payToken}
         </p>
       </div>
-      {!isRoot && (
+      {isDynamic && (
         <div className="flex items-center justify-between">
           <p className="text-mf-edge-700 text-sm font-medium">Slippage</p>
           <p className="text-mf-safety-500 text-sm font-medium">
@@ -99,7 +114,7 @@ const SlippageDisplay = ({ amount }: SlippageDisplayProps) => {
       <div className="flex items-center justify-between">
         <p className="text-mf-edge-500 text-sm font-medium">Estimated Total</p>
         <p className="text-mf-sybil-500 text-sm font-medium">
-          {formatNumber(slippage.tokens - chainFee)} {receiveToken}
+          {receiveAmount} {receiveToken}
         </p>
       </div>
     </div>
