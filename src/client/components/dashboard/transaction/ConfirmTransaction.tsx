@@ -275,6 +275,7 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
 
   const renderContent = () => {
     switch (status) {
+      case 'ready':
       case 'broadcast':
         return (
           <div className="flex flex-col items-center justify-center gap-4 px-5 pt-16">

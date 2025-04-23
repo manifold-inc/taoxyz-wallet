@@ -97,11 +97,9 @@ const Transaction = ({
       dashboardState === DashboardState.ADD_STAKE
     ) {
       const priceLimit = taoToRao(subnet.price * (1 + slippageValue));
-      console.log('Slippage Limit in RAO:', priceLimit.toString());
       return priceLimit;
     } else if (dashboardState === DashboardState.REMOVE_STAKE) {
       const priceLimit = taoToRao(subnet.price * (1 - slippageValue));
-      console.log('Slippage Limit in RAO:', priceLimit.toString());
       return priceLimit;
     }
     return priceInRao;
@@ -137,7 +135,6 @@ const Transaction = ({
           amountInRao: BigInt(amountState.amountInRao),
           limitPrice,
         } as StakeParams;
-        console.log('Setup Params: ', params);
         break;
       case DashboardState.ADD_STAKE:
       case DashboardState.REMOVE_STAKE:

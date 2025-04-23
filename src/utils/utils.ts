@@ -123,16 +123,6 @@ export const moveStakeWithSlippage = (
   isMovingToRoot = false,
   isMovingFromRoot = false
 ): Slippage => {
-  console.log(
-    'Params: ',
-    alpha,
-    alphaIn,
-    taoIn,
-    isDynamic,
-    price,
-    isMovingToRoot,
-    isMovingFromRoot
-  );
   if (!isDynamic && !isMovingToRoot && !isMovingFromRoot) {
     // Root to Root case: 1:1 conversion
     return {

@@ -165,15 +165,6 @@ class PolkadotApi {
     },
     onStatusChange?: (status: string) => void
   ): Promise<string> {
-    console.log(
-      'API CALL:',
-      address,
-      validatorHotkey,
-      subnetId,
-      amountInRao,
-      limitPrice,
-      allowPartial
-    );
     try {
       const wallet = await KeyringService.getWallet(address);
       if (wallet instanceof Error) throw new Error(wallet.message);
@@ -257,15 +248,6 @@ class PolkadotApi {
       const wallet = await KeyringService.getWallet(address);
       if (wallet instanceof Error) throw new Error(wallet.message);
 
-      console.log(
-        'API CALL:',
-        address,
-        validatorHotkey,
-        subnetId,
-        amountInRao,
-        limitPrice,
-        allowPartial
-      );
       return new Promise((resolve, reject) => {
         let unsubscribe: (() => void) | undefined;
 
@@ -540,16 +522,11 @@ class PolkadotApi {
   ): void {
     switch (true) {
       case status.isReady:
-        console.log('Transaction Ready');
-        break;
       case status.isBroadcast:
-        console.log('Transaction Broadcast');
         break;
       case status.isInBlock: {
-        console.log('Transaction In Block');
         const extrinsicFailed = events.find(({ event }) => event.method === 'ExtrinsicFailed');
         if (extrinsicFailed) {
-          console.log('Transaction Failed');
           unsubscribe();
           reject(new Error('Transaction failed'));
           return;
@@ -557,7 +534,6 @@ class PolkadotApi {
 
         const extrinsicSuccess = events.find(({ event }) => event.method === 'ExtrinsicSuccess');
         if (extrinsicSuccess) {
-          console.log('Transaction Success');
           unsubscribe();
           resolve(status.asInBlock.toHex());
         }
