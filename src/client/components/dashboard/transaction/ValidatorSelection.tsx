@@ -83,21 +83,19 @@ const ValidatorSelection = ({
           }}
         />
         {searchQuery !== '' ? (
-          <motion.button
+          <button
             onClick={() => setSearchQuery('')}
-            className="text-mf-sybil-500 text-sm w-1/5 bg-mf-ash-500 rounded-md border border-mf-ash-500 p-2 cursor-pointer"
-            whileHover={{ opacity: 0.5 }}
+            className="text-mf-sybil-500 text-sm w-1/5 bg-mf-ash-500 rounded-md border border-mf-ash-500 p-2 cursor-pointer hover:opacity-50 transition-colors"
           >
             Clear
-          </motion.button>
+          </button>
         ) : (
-          <motion.button
+          <button
             onClick={onCancel}
-            className="text-mf-red-500 text-sm w-1/5 bg-mf-red-opacity rounded-md border border-mf-red-opacity p-2 cursor-pointer"
-            whileHover={{ opacity: 0.5 }}
+            className="text-mf-red-500 text-sm w-1/5 bg-mf-red-opacity rounded-md border border-mf-red-opacity p-2 cursor-pointer hover:opacity-50 transition-colors"
           >
             Back
-          </motion.button>
+          </button>
         )}
       </div>
 
@@ -106,12 +104,11 @@ const ValidatorSelection = ({
         {displayValidators.map(validator => (
           <div className="flex flex-col gap-3" key={validator.hotkey}>
             {/* Validator */}
-            <motion.button
+            <button
               onClick={() => handleValidatorSelect(validator)}
-              className={`w-full text-left rounded-md cursor-pointer p-2 transition-colors gap-1 ${
+              className={`w-full text-left rounded-md cursor-pointer p-2 transition-colors gap-1 bg-mf-ash-300 ${
                 selectedValidator?.hotkey === validator.hotkey ? 'bg-mf-ash-300' : 'bg-mf-ash-500'
               }`}
-              whileHover={{ backgroundColor: '#3a3c46' }}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1">
@@ -123,26 +120,24 @@ const ValidatorSelection = ({
                   {validator.hotkey.slice(0, 6) + '...' + validator.hotkey.slice(-6)}
                 </span>
               </div>
-            </motion.button>
+            </button>
 
             {/* Action Buttons */}
             {selectedValidator?.hotkey === validator.hotkey && (
               <div className="flex gap-2">
-                <motion.button
+                <button
                   onClick={onCancel}
-                  className="rounded-md text-center cursor-pointer w-1/2 py-1.5 bg-mf-red-opacity border border-mf-red-opacity hover:border-mf-red-500 hover:text-mf-edge-500 transition-colors text-mf-red-500 gap-1"
-                  whileHover={{ opacity: 0.5 }}
+                  className="rounded-md text-center cursor-pointer w-1/2 py-1.5 bg-mf-red-opacity border border-mf-red-opacity hover:opacity-50 transition-colors text-mf-red-500 gap-1"
                 >
                   Cancel
-                </motion.button>
+                </button>
 
-                <motion.button
+                <button
                   onClick={handleConfirm}
-                  className="rounded-md text-center cursor-pointer w-1/2 py-1.5 bg-mf-sybil-opacity border border-mf-sybil-opacity hover:border-mf-sybil-500 hover:text-mf-edge-500 transition-colors text-mf-sybil-500 gap-1"
-                  whileHover={{ opacity: 0.5 }}
+                  className="rounded-md text-center cursor-pointer w-1/2 py-1.5 bg-mf-sybil-opacity border border-mf-sybil-opacity hover:opacity-50 transition-colors text-mf-sybil-500 gap-1"
                 >
                   Confirm
-                </motion.button>
+                </button>
               </div>
             )}
           </div>

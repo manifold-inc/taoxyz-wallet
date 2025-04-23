@@ -93,10 +93,6 @@ const Transaction = ({
     const priceInRao = taoToRao(subnet.price);
     const slippageValue = Number(slippage) / 100;
 
-    console.log('Base Price in TAO:', subnet.price);
-    console.log('Base Price in RAO:', priceInRao.toString());
-    console.log('Slippage Value:', slippageValue);
-
     if (
       dashboardState === DashboardState.CREATE_STAKE ||
       dashboardState === DashboardState.ADD_STAKE
@@ -133,7 +129,6 @@ const Transaction = ({
       case DashboardState.CREATE_STAKE:
         if (!dashboardValidator || !dashboardSubnet) return;
         limitPrice = calculateLimitPrice(dashboardSubnet, slippage);
-        console.log('Limit Price: ', limitPrice, 'AmountinRao: ', amountState.amountInRao);
         params = {
           address,
           subnetId: dashboardSubnet.id,
@@ -149,7 +144,6 @@ const Transaction = ({
       case DashboardState.REMOVE_STAKE:
         if (!dashboardStake || !dashboardSubnet) return;
         limitPrice = calculateLimitPrice(dashboardSubnet, slippage);
-        console.log('Limit Price: ', limitPrice, 'AmountinRao: ', amountState.amountInRao);
         params = {
           address,
           subnetId: dashboardSubnet.id,
@@ -158,7 +152,6 @@ const Transaction = ({
           amountInRao: BigInt(amountState.amountInRao),
           limitPrice,
         } as StakeParams;
-        console.log('Setup Params: ', params);
         break;
       case DashboardState.MOVE_STAKE:
         if (!dashboardStake || !toValidator || !toSubnet) return;
@@ -234,26 +227,32 @@ const Transaction = ({
       );
     }
 
-    if (dashboardSubnet === null) {
+    // Users should not be able to change subnet for adding to or removing from a stake
+    if (
+      dashboardSubnet &&
+      (dashboardState === DashboardState.ADD_STAKE ||
+        dashboardState === DashboardState.REMOVE_STAKE)
+    ) {
       return (
-        <button
-          type="button"
-          className="w-full p-2 bg-mf-night-400 rounded-md cursor-pointer flex items-center justify-between"
-          onClick={handleSubnetSelection}
-        >
-          <p className="text-mf-edge-700 text-sm font-medium">Select Subnet</p>
-          <ChevronRight className="w-4 h-4 text-mf-edge-500" />
-        </button>
+        <div className="w-full p-2 bg-mf-night-400 rounded-md flex items-center justify-between">
+          <p className="text-mf-edge-700 text-sm font-medium">{dashboardSubnet.name}</p>
+          <CircleCheckBig className="w-4 h-4 text-mf-sybil-500" />
+        </div>
       );
     }
 
+    // Show "Select Subnet" and allow changes
     if (dashboardState === DashboardState.MOVE_STAKE) {
       if (toSubnet) {
         return (
-          <div className="w-full p-2 bg-mf-night-400 rounded-md flex items-center justify-between">
+          <button
+            type="button"
+            className="w-full p-2 bg-mf-night-400 rounded-md cursor-pointer flex items-center justify-between"
+            onClick={handleSubnetSelection}
+          >
             <p className="text-mf-edge-700 text-sm font-medium">{toSubnet.name}</p>
-            <CircleCheckBig className="w-4 h-4 text-mf-sybil-500" />
-          </div>
+            <ChevronRight className="w-4 h-4 text-mf-edge-500" />
+          </button>
         );
       }
       return (
@@ -268,15 +267,42 @@ const Transaction = ({
       );
     }
 
-    // Users should not be able to change subnet for adding to or removing from a stake
+    // Show "Select Subnet" and allow changes
+    if (dashboardState === DashboardState.CREATE_STAKE) {
+      if (dashboardSubnet) {
+        return (
+          <button
+            type="button"
+            className="w-full p-2 bg-mf-night-400 rounded-md cursor-pointer flex items-center justify-between"
+            onClick={handleSubnetSelection}
+          >
+            <p className="text-mf-edge-700 text-sm font-medium">{dashboardSubnet.name}</p>
+            <ChevronRight className="w-4 h-4 text-mf-edge-500" />
+          </button>
+        );
+      }
+      return (
+        <button
+          type="button"
+          className="w-full p-2 bg-mf-night-400 rounded-md cursor-pointer flex items-center justify-between"
+          onClick={handleSubnetSelection}
+        >
+          <p className="text-mf-edge-700 text-sm font-medium">Select Subnet</p>
+          <ChevronRight className="w-4 h-4 text-mf-edge-500" />
+        </button>
+      );
+    }
+
+    // Default case
     return (
-      <div className="w-full p-2 text-sm bg-mf-night-400 rounded-md flex items-center justify-between">
-        <div className="flex gap-1">
-          <p className="text-mf-edge-500 font-medium">{dashboardSubnet.name}</p>
-          <span className="text-mf-edge-700 font-medium">SN{dashboardSubnet.id}</span>
-        </div>
-        <CircleCheckBig className="w-4 h-4 text-mf-sybil-500" />
-      </div>
+      <button
+        type="button"
+        className="w-full p-2 bg-mf-night-400 rounded-md cursor-pointer flex items-center justify-between"
+        onClick={handleSubnetSelection}
+      >
+        <p className="text-mf-edge-700 text-sm font-medium">Select Subnet</p>
+        <ChevronRight className="w-4 h-4 text-mf-edge-500" />
+      </button>
     );
   };
 
@@ -295,53 +321,103 @@ const Transaction = ({
       );
     }
 
-    if (dashboardValidator === null) {
+    // Users should not be able to change validator for adding to or removing from a stake
+    if (
+      dashboardValidator &&
+      (dashboardState === DashboardState.ADD_STAKE ||
+        dashboardState === DashboardState.REMOVE_STAKE)
+    ) {
       return (
-        <button
-          type="button"
-          className="w-full p-2 text-sm bg-mf-night-400 rounded-md cursor-pointer flex items-center justify-between"
-          onClick={handleValidatorSelection}
-        >
-          <p className="text-mf-edge-700 font-medium">Select Validator</p>
-          <ChevronRight className="w-4 h-4 text-mf-edge-500" />
-        </button>
+        <div className="w-full p-2 bg-mf-night-400 rounded-md flex items-center justify-between">
+          <div className="flex gap-1">
+            <p className="text-mf-edge-500 font-medium truncate max-w-[16ch]">
+              {dashboardValidator.name || 'Validator'}
+            </p>
+            <span className="text-mf-edge-700 font-medium">
+              {dashboardValidator.hotkey.slice(0, 6)}...{dashboardValidator.hotkey.slice(-6)}
+            </span>
+          </div>
+          <CircleCheckBig className="w-4 h-4 text-mf-sybil-500" />
+        </div>
       );
     }
 
+    // Show "Select Validator" and allow changes
     if (dashboardState === DashboardState.MOVE_STAKE) {
       if (toValidator) {
         return (
-          <div className="w-full p-2 bg-mf-night-400 rounded-md flex items-center justify-between">
-            <p className="text-mf-edge-700 text-sm font-medium">{toValidator.name}</p>
-            <CircleCheckBig className="w-4 h-4 text-mf-sybil-500" />
-          </div>
+          <button
+            type="button"
+            className="w-full p-2 bg-mf-night-400 rounded-md cursor-pointer flex items-center justify-between"
+            onClick={handleValidatorSelection}
+          >
+            <div className="flex gap-1">
+              <p className="text-mf-edge-500 font-medium truncate max-w-[16ch]">
+                {toValidator.name || 'Validator'}
+              </p>
+              <span className="text-mf-edge-700 font-medium">
+                {toValidator.hotkey.slice(0, 6)}...{toValidator.hotkey.slice(-6)}
+              </span>
+            </div>
+            <ChevronRight className="w-4 h-4 text-mf-edge-500" />
+          </button>
         );
       }
       return (
         <button
           type="button"
-          className="w-full p-2 text-sm bg-mf-night-400 rounded-md cursor-pointer flex items-center justify-between"
+          className="w-full p-2 bg-mf-night-400 rounded-md cursor-pointer flex items-center justify-between"
           onClick={handleValidatorSelection}
         >
-          <p className="text-mf-edge-700 font-medium">Select Validator</p>
+          <p className="text-mf-edge-700 text-sm font-medium">Select Validator</p>
           <ChevronRight className="w-4 h-4 text-mf-edge-500" />
         </button>
       );
     }
 
-    // Users should not be able to change validator for adding to or removing from a stake
+    // Show "Select Validator" and allow changes
+    if (dashboardState === DashboardState.CREATE_STAKE) {
+      if (dashboardValidator) {
+        return (
+          <button
+            type="button"
+            className="w-full p-2 bg-mf-night-400 rounded-md cursor-pointer flex items-center justify-between"
+            onClick={handleValidatorSelection}
+          >
+            <div className="flex gap-1">
+              <p className="text-mf-edge-500 font-medium truncate max-w-[16ch]">
+                {dashboardValidator.name || 'Validator'}
+              </p>
+              <span className="text-mf-edge-700 font-medium">
+                {dashboardValidator.hotkey.slice(0, 6)}...{dashboardValidator.hotkey.slice(-6)}
+              </span>
+            </div>
+            <ChevronRight className="w-4 h-4 text-mf-edge-500" />
+          </button>
+        );
+      }
+      return (
+        <button
+          type="button"
+          className="w-full p-2 bg-mf-night-400 rounded-md cursor-pointer flex items-center justify-between"
+          onClick={handleValidatorSelection}
+        >
+          <p className="text-mf-edge-700 text-sm font-medium">Select Validator</p>
+          <ChevronRight className="w-4 h-4 text-mf-edge-500" />
+        </button>
+      );
+    }
+
+    // Default case
     return (
-      <div className="w-full p-2 text-sm bg-mf-night-400 rounded-md flex items-center justify-between">
-        <div className="flex gap-1">
-          <p className="text-mf-edge-500 font-medium truncate max-w-[16ch]">
-            {dashboardValidator.name || 'Validator'}
-          </p>
-          <span className="text-mf-edge-700 font-medium">
-            {dashboardValidator.hotkey.slice(0, 6)}...{dashboardValidator.hotkey.slice(-6)}
-          </span>
-        </div>
-        <CircleCheckBig className="w-4 h-4 text-mf-sybil-500" />
-      </div>
+      <button
+        type="button"
+        className="w-full p-2 bg-mf-night-400 rounded-md cursor-pointer flex items-center justify-between"
+        onClick={handleValidatorSelection}
+      >
+        <p className="text-mf-edge-700 text-sm font-medium">Select Validator</p>
+        <ChevronRight className="w-4 h-4 text-mf-edge-500" />
+      </button>
     );
   };
 

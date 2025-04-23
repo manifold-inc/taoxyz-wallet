@@ -192,17 +192,16 @@ const DashboardOverview = ({
                 <p className="text-mf-sybil-500 text-sm font-light">
                   {currentAddress?.slice(0, 4)}...{currentAddress?.slice(-4)}
                 </p>
-                <motion.button
+                <button
                   onClick={handleCopy}
                   className="cursor-pointer bg-mf-ash-500 rounded-full p-1.5"
-                  whileHover={{ scale: 1.05 }}
                 >
                   <Copy
                     className={`w-3 h-3 cursor-pointer ${
                       copied ? 'text-mf-edge-500' : 'text-mf-sybil-500'
                     }`}
                   />
-                </motion.button>
+                </button>
               </div>
 
               <div className="flex flex-col items-end">
@@ -223,28 +222,24 @@ const DashboardOverview = ({
 
           {/* Action Buttons */}
           <div className="flex justify-between gap-3 w-full">
-            <motion.button
+            <button
               onClick={() => {
                 resetDashboardState();
                 setDashboardState(DashboardState.CREATE_STAKE);
               }}
-              className="w-1/2 py-1.5 bg-mf-sybil-opacity rounded-sm cursor-pointer text-mf-sybil-500 border border-mf-sybil-opacity hover:border-mf-sybil-500 transition-colors hover:text-mf-edge-500"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              className="w-1/2 py-1.5 bg-mf-sybil-opacity rounded-sm cursor-pointer text-mf-sybil-500 border border-mf-sybil-opacity transition-colors hover:opacity-50"
             >
               <span className="text-sm">Stake</span>
-            </motion.button>
-            <motion.button
+            </button>
+            <button
               onClick={() => {
                 resetDashboardState();
                 setDashboardState(DashboardState.TRANSFER);
               }}
-              className="w-1/2 py-1.5 bg-mf-safety-opacity rounded-sm cursor-pointer text-mf-safety-500 border border-mf-safety-opacity hover:border-mf-safety-500 transition-colors hover:text-mf-edge-500"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              className="w-1/2 py-1.5 bg-mf-safety-opacity rounded-sm cursor-pointer text-mf-safety-500 border border-mf-safety-opacity transition-colors hover:opacity-50"
             >
               <span className="text-sm">Transfer</span>
-            </motion.button>
+            </button>
           </div>
         </div>
       )}

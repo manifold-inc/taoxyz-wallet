@@ -134,21 +134,19 @@ const SubnetSelection = ({
           }}
         />
         {searchQuery !== '' ? (
-          <motion.button
+          <button
             onClick={() => setSearchQuery('')}
-            className="text-mf-sybil-500 text-sm w-1/5 bg-mf-ash-500 rounded-md border border-mf-ash-500 p-2 cursor-pointer"
-            whileHover={{ opacity: 0.5 }}
+            className="text-mf-sybil-500 text-sm w-1/5 bg-mf-ash-500 rounded-md border border-mf-ash-500 p-2 cursor-pointer hover:opacity-50 transition-colors"
           >
             Clear
-          </motion.button>
+          </button>
         ) : (
-          <motion.button
+          <button
             onClick={onCancel}
-            className="text-mf-red-500 text-sm w-1/5 bg-mf-red-opacity rounded-md border border-mf-red-opacity p-2 cursor-pointer"
-            whileHover={{ opacity: 0.5 }}
+            className="text-mf-red-500 text-sm w-1/5 bg-mf-red-opacity rounded-md border border-mf-red-opacity p-2 cursor-pointer hover:opacity-50 transition-colors"
           >
             Back
-          </motion.button>
+          </button>
         )}
       </div>
 
@@ -194,18 +192,16 @@ const SubnetSelection = ({
               {/* Action Buttons */}
               {selectedSubnet?.id === subnet.id && (
                 <div className="flex gap-2">
-                  <motion.button
+                  <button
                     onClick={onCancel}
-                    className="w-full rounded-md text-center cursor-pointer w-1/2 py-1.5 bg-mf-red-opacity border border-mf-red-opacity hover:border-mf-red-500 hover:text-mf-edge-500 transition-colors text-mf-red-500 gap-1"
-                    whileHover={{ opacity: 0.5 }}
+                    className="rounded-md text-center cursor-pointer w-1/2 py-1.5 bg-mf-red-opacity border border-mf-red-opacity hover:opacity-50 transition-colors text-mf-red-500 gap-1"
                   >
                     Back
-                  </motion.button>
+                  </button>
 
-                  <motion.button
+                  <button
                     onClick={handleConfirm}
-                    className="w-full rounded-md text-center cursor-pointer w-1/2 py-1.5 bg-mf-sybil-opacity border border-mf-sybil-opacity hover:border-mf-sybil-500 hover:text-mf-edge-500 transition-colors text-mf-sybil-500 gap-1 disabled:disabled-button disabled:cursor-not-allowed"
-                    whileHover={{ opacity: 0.5 }}
+                    className="rounded-md text-center cursor-pointer w-1/2 py-1.5 bg-mf-sybil-opacity border border-mf-sybil-opacity hover:opacity-50 transition-colors text-mf-sybil-500 gap-1 disabled:disabled-button disabled:cursor-not-allowed"
                     disabled={
                       selectedSubnet === null ||
                       dashboardValidators === null ||
@@ -213,7 +209,7 @@ const SubnetSelection = ({
                     }
                   >
                     Confirm
-                  </motion.button>
+                  </button>
                 </div>
               )}
             </div>
