@@ -97,8 +97,8 @@ const openPopup = async (route: string, origin: string): Promise<chrome.windows.
   const popup = await chrome.windows.create({
     url: chrome.runtime.getURL(`index.html#/${route}`),
     type: 'popup',
-    width: 400,
-    height: 667,
+    width: 450,
+    height: 700,
   });
 
   if (popup.id) {

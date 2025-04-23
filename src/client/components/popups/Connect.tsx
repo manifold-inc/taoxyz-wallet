@@ -170,6 +170,7 @@ const Connect = () => {
   return (
     <div className="w-full h-full flex flex-col items-center">
       <div className="max-w-96 p-5 flex flex-col items-center gap-6">
+        {/* Header */}
         <div className="flex justify-center items-center gap-2 w-full">
           <img src={taoxyz} alt="Taoxyz Logo" className="w-6 h-6" />
           <p className="text-mf-edge-500 text-2xl font-semibold blinker-font mb-0.5">
@@ -177,11 +178,13 @@ const Connect = () => {
           </p>
         </div>
 
+        {/* Origin */}
         <div className="w-full bg-mf-ash-500 rounded-md p-2 flex flex-col items-start justify-center">
           <p className="text-mf-sybil-500 text-base">{request?.origin}</p>
           <p className="text-mf-edge-500 text-sm">Wants to connect to your wallet</p>
         </div>
 
+        {/* Wallets */}
         <div className="w-full flex flex-col items-center justify-start gap-6">
           <div className="w-full gap-3 flex flex-col">
             {wallets.map(wallet => (
@@ -210,6 +213,7 @@ const Connect = () => {
             ))}
           </div>
 
+          {/* Buttons */}
           <div className="w-full flex gap-3">
             <button
               onClick={() => handleResponse(false)}
