@@ -32,10 +32,11 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
   const { showNotification } = useNotification();
   const { currentAddress } = useWallet();
   const { api } = usePolkadotApi();
+  const { dashboardSubnet, dashboardValidator, dashboardState, dashboardStake, dashboardStakes } =
+    useDashboard();
   const [password, setPassword] = useState('');
   const [passwordSelected, setPasswordSelected] = useState(false);
   const [status, setStatus] = useState<TransactionStatus>('ready');
-  const { dashboardSubnet, dashboardValidator, dashboardState, dashboardStake } = useDashboard();
   const [actualTotal, setActualTotal] = useState<bigint | null>(null);
   const [initialBalance, setInitialBalance] = useState<bigint | null>(null);
 
@@ -120,12 +121,17 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
 
   const fetchUpdatedStake = async () => {
     if (!api || !currentAddress || !dashboardValidator) return;
+
+    // If moving to a pre-existing stake
+    const existingStake = dashboardStakes?.find(
+      s => s.hotkey === dashboardValidator.hotkey && s.netuid === dashboardSubnet?.id
+    );
+
     try {
       const [stakes, balance] = await Promise.all([
         api.getStake(currentAddress),
         api.getBalance(currentAddress),
       ]);
-
       if (stakes) {
         const stake = stakes.find(
           s => s.hotkey === dashboardValidator.hotkey && s.netuid === dashboardSubnet?.id
@@ -147,8 +153,8 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
               }
               break;
             case DashboardState.MOVE_STAKE:
-              if (dashboardStake) {
-                setActualTotal(stake.stake - dashboardStake.stake);
+              if (existingStake) {
+                setActualTotal(stake.stake - existingStake.stake);
               } else {
                 setActualTotal(stake.stake);
               }
@@ -164,24 +170,50 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
     }
   };
 
+  const getInitialBalance = async () => {
+    if (!api || !currentAddress) return;
+    const balance = await api.getBalance(currentAddress);
+    if (balance) {
+      setInitialBalance(balance);
+    }
+  };
+
   useEffect(() => {
+    void getInitialBalance();
     if (status === 'success') {
-      const getInitialBalance = async () => {
-        if (!api || !currentAddress) return;
-        const balance = await api.getBalance(currentAddress);
-        if (balance) {
-          setInitialBalance(balance);
-        }
-      };
-      void getInitialBalance();
       void fetchUpdatedStake();
     }
   }, [status]);
 
+  // Duplicated logic
   const renderTransferDetails = () => {
+    let receiveToken = 't';
+    const isDynamic = dashboardSubnet?.id !== 0;
+
+    switch (dashboardState) {
+      case DashboardState.CREATE_STAKE:
+      case DashboardState.ADD_STAKE:
+        if (isDynamic) {
+          receiveToken = 'α';
+        } else {
+          receiveToken = 'τ';
+        }
+        break;
+      case DashboardState.REMOVE_STAKE:
+        receiveToken = 'τ';
+        break;
+      case DashboardState.MOVE_STAKE:
+        if (isDynamic) {
+          receiveToken = 'α';
+        } else {
+          receiveToken = 'τ';
+        }
+        break;
+    }
+
     if (dashboardState !== DashboardState.TRANSFER) {
       return (
-        <div>
+        <div className="divide-y divide-mf-ash-300">
           <div className="flex flex-col gap-2 p-3">
             <div className="flex justify-between">
               <p className="text-mf-edge-700 text-sm font-medium">Selected Subnet</p>
@@ -202,6 +234,14 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
             </div>
           </div>
           <SlippageDisplay amount={params.amount} />
+          {status === 'success' && (
+            <div className="flex justify-between p-3">
+              <p className="text-mf-edge-300 text-sm font-medium">Actual Total</p>
+              <p className="text-mf-sybil-500 text-sm font-medium">
+                {formatNumber(raoToTao(actualTotal ?? 0n))} {receiveToken}
+              </p>
+            </div>
+          )}
         </div>
       );
     } else {
@@ -293,13 +333,6 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
             {/* Transaction Details */}
             <div className="w-full flex flex-col bg-mf-ash-500 rounded-md divide-y divide-mf-ash-300">
               {renderTransferDetails()}
-              <div className="flex justify-between p-3">
-                <p className="text-mf-edge-300 text-sm font-medium">Actual Total</p>
-                <p className="text-mf-sybil-500 text-sm font-medium">
-                  {formatNumber(raoToTao(actualTotal ?? 0n))}{' '}
-                  {dashboardSubnet?.id === 0 ? 'τ' : 'α'}
-                </p>
-              </div>
             </div>
 
             <button

@@ -119,11 +119,47 @@ export const moveStakeWithSlippage = (
   alphaIn: number,
   taoIn: number,
   isDynamic: boolean,
-  price: number
+  price: number,
+  isMovingToRoot = false,
+  isMovingFromRoot = false
 ): Slippage => {
-  // Unstake: Convert Alpha to TAO
+  console.log(
+    'Params: ',
+    alpha,
+    alphaIn,
+    taoIn,
+    isDynamic,
+    price,
+    isMovingToRoot,
+    isMovingFromRoot
+  );
+  if (!isDynamic && !isMovingToRoot && !isMovingFromRoot) {
+    // Root to Root case: 1:1 conversion
+    return {
+      tokens: alpha,
+      slippage: 0,
+      slippagePercentage: 0,
+    };
+  }
+
+  if (isMovingFromRoot) {
+    // Root to Alpha case: Convert TAO to Alpha (with slippage if dynamic)
+    return taoToAlphaWithSlippage(alpha, alphaIn, taoIn, isDynamic, price);
+  }
+
+  // Convert Alpha to TAO (with slippage if dynamic)
   const unstakeResult = alphaToTaoWithSlippage(alpha, alphaIn, taoIn, isDynamic, price);
 
+  if (isMovingToRoot) {
+    // When moving to Root, we just return the TAO amount (1:1 conversion)
+    return {
+      tokens: alphaToTao(unstakeResult.tokens, price),
+      slippage: unstakeResult.slippage,
+      slippagePercentage: unstakeResult.slippagePercentage,
+    };
+  }
+
+  // Dynamic case: Calculate with slippage
   // Calculate new pool state after unstaking
   const newAlphaIn = alphaIn - unstakeResult.tokens;
   const newTaoIn = taoIn + alpha;

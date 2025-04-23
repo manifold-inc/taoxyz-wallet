@@ -12,12 +12,13 @@ interface SlippageDisplayProps {
 }
 
 const SlippageDisplay = ({ amount }: SlippageDisplayProps) => {
-  const { dashboardSubnet, dashboardState } = useDashboard();
+  const { dashboardSubnet, dashboardState, dashboardStake, dashboardSubnets } = useDashboard();
   const isDynamic = dashboardSubnet?.id !== 0;
   const moveStake = dashboardState === DashboardState.MOVE_STAKE;
 
   const chainFee = moveStake ? 0.0001 : 0.00005;
   const amountInRao = Number(amount) * 1e9;
+  let stakePrice;
 
   let slippage: Slippage;
   switch (dashboardState) {
@@ -41,12 +42,16 @@ const SlippageDisplay = ({ amount }: SlippageDisplayProps) => {
       );
       break;
     case DashboardState.MOVE_STAKE:
+      stakePrice =
+        dashboardSubnets?.find(subnet => subnet.id === dashboardStake?.netuid)?.price || 0;
       slippage = moveStakeWithSlippage(
         amountInRao,
         dashboardSubnet?.alphaIn || 0,
         dashboardSubnet?.taoIn || 0,
         isDynamic,
-        dashboardSubnet?.price || 0
+        stakePrice,
+        dashboardSubnet?.id === 0,
+        dashboardStake?.netuid === 0
       );
       break;
     default:
@@ -81,7 +86,13 @@ const SlippageDisplay = ({ amount }: SlippageDisplayProps) => {
       }
       break;
     case DashboardState.MOVE_STAKE:
-      payToken = 'α';
+      // If the stake is on root, we pay in τ
+      if (dashboardStake?.netuid === 0) {
+        payToken = 'τ';
+      } else {
+        payToken = 'α';
+      }
+
       if (isDynamic) {
         receiveToken = 'α';
       } else {
@@ -92,24 +103,29 @@ const SlippageDisplay = ({ amount }: SlippageDisplayProps) => {
 
   return (
     <div className="w-full flex flex-col gap-2 p-3">
+      {/* Pay */}
       <div className="flex items-center justify-between">
         <p className="text-mf-edge-700 text-sm font-medium">Pay</p>
         <p className="text-mf-sybil-500 text-sm font-medium">
           {formatNumber(parseFloat(amount))} {payToken}
         </p>
       </div>
-      {isDynamic && (
-        <div className="flex items-center justify-between">
-          <p className="text-mf-edge-700 text-sm font-medium">Slippage</p>
-          <p className="text-mf-safety-500 text-sm font-medium">
-            {formatNumber(slippage.slippagePercentage).toFixed(2)}%
-          </p>
-        </div>
-      )}
+
+      {/* Slippage */}
+      <div className="flex items-center justify-between">
+        <p className="text-mf-edge-700 text-sm font-medium">Slippage</p>
+        <p className="text-mf-safety-500 text-sm font-medium">
+          {formatNumber(slippage.slippagePercentage).toFixed(2)}%
+        </p>
+      </div>
+
+      {/* Chain Fee */}
       <div className="flex items-center justify-between">
         <p className="text-mf-edge-700 text-sm font-medium">Chain Fee</p>
         <p className="text-mf-sybil-500 text-sm font-medium">{chainFee} τ</p>
       </div>
+
+      {/* Receive */}
       <div className="flex items-center justify-between">
         <p className="text-mf-edge-500 text-sm font-medium">Estimated Total</p>
         <p className="text-mf-sybil-500 text-sm font-medium">
