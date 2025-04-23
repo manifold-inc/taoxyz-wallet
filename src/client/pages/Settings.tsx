@@ -28,7 +28,7 @@ const Settings = () => {
           {showDisclaimer ? (
             <Disclaimer onClose={() => setShowDisclaimer(false)} />
           ) : (
-            <div className="flex flex-col items-center w-76 [&>*]:w-full">
+            <div className="flex flex-col items-center w-full [&>*]:w-full">
               <div className="flex items-center justify-center">
                 <img src={taoxyzLogo} alt="Taoxyz Logo" className="w-16 h-16 mt-12" />
               </div>

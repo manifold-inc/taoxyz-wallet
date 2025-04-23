@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useState } from 'react';
 import type { ReactNode } from 'react';
 
 interface LockContextType {
@@ -11,10 +11,6 @@ const LockContext = createContext<LockContextType | undefined>(undefined);
 export const LockProvider = ({ children }: { children: ReactNode }) => {
   const [isLocked, setIsLocked] = useState(false);
 
-  useEffect(() => {
-    init();
-  }, []);
-
   const init = async (): Promise<void> => {
     const lockResult = await chrome.storage.local.get('walletLocked');
     setIsLocked(lockResult.walletLocked === true);
@@ -24,6 +20,8 @@ export const LockProvider = ({ children }: { children: ReactNode }) => {
     await chrome.storage.local.set({ walletLocked: isLocked });
     setIsLocked(isLocked);
   };
+
+  init();
 
   return (
     <LockContext.Provider value={{ isLocked, setIsLocked: updateIsLocked }}>
