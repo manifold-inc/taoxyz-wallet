@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { ChevronUp, Copy } from 'lucide-react';
 
 import { useState } from 'react';
@@ -150,53 +149,37 @@ const ExpandedStake = ({
               <span className="text-mf-edge-500 text-xs">
                 {stake.hotkey.slice(0, 6)}...{stake.hotkey.slice(-6)}
               </span>
-              <motion.button
-                onClick={handleCopy}
-                className="cursor-pointer"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
+              <button onClick={handleCopy} className="cursor-pointer">
                 <Copy className={`w-3 h-3 ${copied ? 'text-mf-sybil-500' : 'text-mf-edge-500'}`} />
-              </motion.button>
+              </button>
             </div>
           </div>
-          <motion.button
-            onClick={onClose}
-            className="p-1 cursor-pointer"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
+          <button onClick={onClose} className="p-1 cursor-pointer">
             <ChevronUp className="w-4 h-4 text-mf-edge-500" />
-          </motion.button>
+          </button>
         </div>
       </div>
 
       {/* Action Buttons */}
       <div className="flex gap-2 pt-2">
-        <motion.button
-          className="cursor-pointer w-1/3 py-1.5 bg-mf-sybil-opacity rounded-sm text-mf-sybil-500 border border-mf-sybil-opacity hover:border-mf-sybil-500 hover:text-mf-edge-500"
+        <button
+          className="cursor-pointer w-1/3 py-1.5 bg-mf-sybil-opacity rounded-sm text-mf-sybil-500 border border-mf-sybil-opacity hover:opacity-50"
           onClick={onAddStake}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
         >
           Add
-        </motion.button>
-        <motion.button
+        </button>
+        <button
           onClick={onRemoveStake}
-          className="cursor-pointer w-1/3 py-1.5 bg-mf-red-opacity rounded-sm text-mf-red-500 border border-mf-red-opacity hover:border-mf-red-500 hover:text-mf-edge-500"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          className="cursor-pointer w-1/3 py-1.5 bg-mf-red-opacity rounded-sm text-mf-red-500 border border-mf-red-opacity hover:opacity-50"
         >
           Remove
-        </motion.button>
-        <motion.button
+        </button>
+        <button
           onClick={onMoveStake}
-          className="cursor-pointer w-1/3 py-1.5 bg-mf-safety-opacity rounded-sm text-mf-safety-500 border border-mf-safety-opacity hover:border-mf-safety-500 hover:text-mf-edge-500"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          className="cursor-pointer w-1/3 py-1.5 bg-mf-safety-opacity rounded-sm text-mf-safety-500 border border-mf-safety-opacity hover:opacity-50"
         >
           Move
-        </motion.button>
+        </button>
       </div>
     </div>
   );

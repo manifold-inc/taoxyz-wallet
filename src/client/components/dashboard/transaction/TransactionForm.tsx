@@ -252,14 +252,13 @@ const TransactionForm = ({
                 borderColor: '#57E8B4',
               }}
             />
-            <motion.button
+            <button
               type="button"
               onClick={handleMaxAmount}
-              className="w-2/5 text-mf-sybil-500 text-sm p-2 items-center rounded-md bg-mf-sybil-opacity cursor-pointer border border-mf-ash-500"
-              whileHover={{ opacity: 0.5 }}
+              className="w-2/5 text-mf-sybil-500 text-sm p-2 items-center rounded-md bg-mf-sybil-opacity cursor-pointer border border-mf-ash-500 hover:opacity-50"
             >
               Max Amount
-            </motion.button>
+            </button>
           </div>
           {renderInputFields()}
         </div>
