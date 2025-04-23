@@ -147,7 +147,7 @@ const WalletSelection = () => {
                   {!isLocked && (
                     <button
                       onClick={event => handleDeleteWallet(w, event)}
-                      className="text-mf-night-500 bg-mf-safety-500 rounded-sm hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 mr-1 cursor-pointer"
+                      className="text-mf-night-500 bg-mf-safety-500 rounded-sm hover:bg-mf-night-500 hover:text-mf-safety-500 border border-mf-safety-500 mr-1 cursor-pointer"
                     >
                       <X className="w-5 h-5" />
                     </button>

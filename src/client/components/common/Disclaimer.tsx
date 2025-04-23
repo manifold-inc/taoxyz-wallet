@@ -18,14 +18,12 @@ const Disclaimer = ({ onClose }: DisclaimerProps) => {
       <div className="flex justify-between items-center w-full px-6 pt-10">
         <img src={taoxyz} alt="Taoxyz Logo" className="w-7 h-7" />
 
-        <motion.button
+        <button
           onClick={onClose}
           className="cursor-pointer bg-mf-sybil-500 p-0.5 rounded-xs border border-mf-sybil-500 hover:bg-mf-ash-500 hover:text-mf-sybil-500"
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
         >
           <X className="w-5 h-5" strokeWidth={3} />
-        </motion.button>
+        </button>
       </div>
 
       {/* Disclaimer */}

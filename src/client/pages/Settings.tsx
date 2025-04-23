@@ -38,40 +38,40 @@ const Settings = () => {
       <div className="w-full px-5 py-3 flex flex-col items-center justify-start gap-3">
         <button
           onClick={() => setShowConnectedSites(true)}
-          className="w-full bg-mf-ash-500 rounded-md p-2 flex items-center justify-between cursor-pointer hover:bg-mf-ash-300"
+          className="w-full bg-mf-ash-500 rounded-md p-3 flex items-center justify-between cursor-pointer hover:bg-mf-ash-300"
         >
           <div className="flex flex-col items-start justify-center">
             <p className="text-mf-edge-700 text-sm">Connected Sites</p>
             <p className="text-mf-sybil-500 text-xs">Control External Connections</p>
           </div>
-          <div className="bg-mf-sybil-500 rounded-md p-1">
-            <ChevronRight className="text-black w-6 h-6" />
+          <div className="border border-mf-sybil-500 text-mf-ash-500 bg-mf-sybil-500 rounded-md p-1 hover:bg-mf-ash-500 hover:text-mf-sybil-500">
+            <ChevronRight className="w-6 h-6" />
           </div>
         </button>
 
         <button
           onClick={handleLock}
-          className="w-full bg-mf-ash-500 rounded-md p-2 flex items-center justify-between cursor-pointer hover:bg-mf-ash-300"
+          className="w-full bg-mf-ash-500 rounded-md p-3 flex items-center justify-between cursor-pointer hover:bg-mf-ash-300"
         >
           <div className="flex flex-col items-start justify-center">
             <p className="text-mf-edge-700 text-sm">Lock Wallet</p>
             <p className="text-mf-sybil-500 text-xs">Secure Your Wallet</p>
           </div>
-          <div className="bg-mf-sybil-500 rounded-md p-1">
-            <ChevronRight className="text-black w-6 h-6" />
+          <div className="border border-mf-sybil-500 text-mf-ash-500 bg-mf-sybil-500 rounded-md p-1 hover:bg-mf-ash-500 hover:text-mf-sybil-500">
+            <ChevronRight className="w-6 h-6" />
           </div>
         </button>
 
         <button
           onClick={() => setShowDisclaimer(true)}
-          className="w-full bg-mf-ash-500 rounded-md p-2 flex items-center justify-between cursor-pointer hover:bg-mf-ash-300"
+          className="w-full bg-mf-ash-500 rounded-md p-3 flex items-center justify-between cursor-pointer hover:bg-mf-ash-300"
         >
           <div className="flex flex-col items-start justify-center">
             <p className="text-mf-edge-700 text-sm">Disclaimer</p>
             <p className="text-mf-sybil-500 text-xs">View Privacy Policy</p>
           </div>
-          <div className="bg-mf-sybil-500 rounded-md p-1">
-            <ChevronRight className="text-black w-6 h-6" />
+          <div className="border border-mf-sybil-500 text-mf-ash-500 bg-mf-sybil-500 rounded-md p-1 hover:bg-mf-ash-500 hover:text-mf-sybil-500">
+            <ChevronRight className="w-6 h-6" />
           </div>
         </button>
       </div>
