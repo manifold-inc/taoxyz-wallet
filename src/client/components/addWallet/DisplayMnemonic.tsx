@@ -71,7 +71,7 @@ const DisplayMnemonic = ({ onContinue }: DisplayMnemonicProps) => {
         />
         <button
           onClick={handleCopyMnemonic}
-          className={`absolute right-2 bottom-3 transition-colors cursor-pointer bg-mf-night-300 ${
+          className={`absolute right-2 bottom-3 cursor-pointer bg-mf-night-300 ${
             copied ? 'text-mf-sybil-500' : 'text-mf-safety-500'
           }`}
         >
@@ -90,7 +90,7 @@ const DisplayMnemonic = ({ onContinue }: DisplayMnemonicProps) => {
       <div className="flex flex-col items-center gap-3 pt-4">
         <motion.button
           onClick={handleBack}
-          className="cursor-pointer flex items-center gap-1.5 px-6 py-1 bg-mf-safety-opacity rounded-full text-sm text-mf-safety-500 border border-mf-safety-opacity hover:border-mf-safety-500 transition-colors hover:text-mf-edge-500"
+          className="cursor-pointer flex items-center gap-1.5 px-6 py-1 bg-mf-safety-opacity rounded-full text-sm text-mf-safety-500 border border-mf-safety-opacity hover:border-mf-safety-500 hover:text-mf-edge-500"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -98,7 +98,7 @@ const DisplayMnemonic = ({ onContinue }: DisplayMnemonicProps) => {
         </motion.button>
         <motion.button
           onClick={() => state.wallet && onContinue(state.wallet)}
-          className="cursor-pointer flex items-center gap-1.5 px-6 py-1 bg-mf-sybil-opacity rounded-full text-sm text-mf-sybil-500 border border-mf-sybil-opacity hover:border-mf-sybil-500 transition-colors hover:text-mf-edge-500"
+          className="cursor-pointer flex items-center gap-1.5 px-6 py-1 bg-mf-sybil-opacity rounded-full text-sm text-mf-sybil-500 border border-mf-sybil-opacity hover:border-mf-sybil-500 hover:text-mf-edge-500"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >

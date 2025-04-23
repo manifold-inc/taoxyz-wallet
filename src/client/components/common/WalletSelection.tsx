@@ -91,7 +91,7 @@ const WalletSelection = () => {
     <>
       <div className="w-72 bg-mf-ash-500 relative" ref={listenerRef}>
         <div
-          className="flex items-center justify-between p-2 hover:bg-mf-night-500 transition-colors cursor-pointer"
+          className="flex items-center justify-between p-2 hover:bg-mf-night-500 cursor-pointer"
           onClick={() => setIsExpanded(!isExpanded)}
         >
           {wallet && (
@@ -125,7 +125,7 @@ const WalletSelection = () => {
               .map(w => (
                 <div
                   key={w.address}
-                  className="flex items-center justify-between p-2 hover:bg-mf-night-500 transition-colors"
+                  className="flex items-center justify-between p-2 hover:bg-mf-night-500"
                 >
                   <button
                     onClick={() => handleSelectWallet(w)}
@@ -144,7 +144,7 @@ const WalletSelection = () => {
                   {!isLocked && (
                     <button
                       onClick={event => handleDeleteWallet(w, event)}
-                      className="text-mf-night-500 bg-mf-safety-500 rounded-sm hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 transition-colors mr-1 cursor-pointer"
+                      className="text-mf-night-500 bg-mf-safety-500 rounded-sm hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 mr-1 cursor-pointer"
                     >
                       <X className="w-5 h-5" />
                     </button>
@@ -154,7 +154,7 @@ const WalletSelection = () => {
 
             <button
               onClick={() => navigate('/welcome', { state: { step: 'GET_STARTED' } })}
-              className="w-full flex items-center gap-3 p-2 hover:bg-mf-night-500 transition-colors cursor-pointer"
+              className="w-full flex items-center gap-3 p-2 hover:bg-mf-night-500 cursor-pointer"
             >
               <div className="flex items-center justify-center bg-mf-safety-500 border border-mf-safety-500 rounded-sm p-1">
                 <Plus className="w-5 h-5 text-mf-ash-500" />

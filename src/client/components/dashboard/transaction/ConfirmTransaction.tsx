@@ -141,7 +141,7 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
             <button
               onClick={onCancel}
               type="button"
-              className="rounded-full cursor-pointer border-sm text-sm text-mf-safety-500 bg-mf-safety-opacity border border-mf-safety-opacity transition-colors px-6 py-1 hover:opacity-50 hover:text-mf-edge-500 hover:border-mf-safety-500"
+              className="rounded-full cursor-pointer border-sm text-sm text-mf-safety-500 bg-mf-safety-opacity border border-mf-safety-opacity px-6 py-1 hover:opacity-50 hover:text-mf-edge-500 hover:border-mf-safety-500"
             >
               <span>Close</span>
             </button>
@@ -169,7 +169,7 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
             <button
               onClick={onCancel}
               type="button"
-              className="rounded-full cursor-pointer border-sm text-sm text-mf-safety-500 bg-mf-safety-opacity border border-mf-safety-opacity transition-colors px-6 py-1 hover:opacity-50 hover:text-mf-edge-500 hover:border-mf-safety-500"
+              className="rounded-full cursor-pointer border-sm text-sm text-mf-safety-500 bg-mf-safety-opacity border border-mf-safety-opacity px-6 py-1 hover:opacity-50 hover:text-mf-edge-500 hover:border-mf-safety-500"
             >
               <span>Close</span>
             </button>
@@ -197,7 +197,7 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
             <button
               onClick={onCancel}
               type="button"
-              className="rounded-full cursor-pointer border-sm text-sm text-mf-safety-500 bg-mf-safety-opacity border border-mf-safety-opacity transition-colors px-6 py-1 hover:opacity-50 hover:text-mf-edge-500 hover:border-mf-safety-500"
+              className="rounded-full cursor-pointer border-sm text-sm text-mf-safety-500 bg-mf-safety-opacity border border-mf-safety-opacity px-6 py-1 hover:opacity-50 hover:text-mf-edge-500 hover:border-mf-safety-500"
             >
               <span>Close</span>
             </button>
@@ -268,14 +268,14 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
                 <button
                   onClick={onCancel}
                   type="button"
-                  className="rounded-full cursor-pointer border-sm text-sm text-mf-safety-500 bg-mf-safety-opacity border border-mf-safety-opacity transition-colors px-6 py-1 hover:opacity-50 hover:text-mf-edge-500 hover:border-mf-safety-500"
+                  className="rounded-full cursor-pointer border-sm text-sm text-mf-safety-500 bg-mf-safety-opacity border border-mf-safety-opacity px-6 py-1 hover:opacity-50 hover:text-mf-edge-500 hover:border-mf-safety-500"
                 >
                   <span>Cancel</span>
                 </button>
                 <button
                   type="submit"
                   disabled={password.length < 8}
-                  className="rounded-full cursor-pointer border-sm text-sm text-mf-sybil-500 bg-mf-sybil-opacity border border-mf-sybil-opacity transition-colors px-6 py-1 disabled:disabled-button disabled:cursor-not-allowed hover:opacity-50 hover:text-[#c5dbff] hover:border-[#57e8b4]"
+                  className="rounded-full cursor-pointer border-sm text-sm text-mf-sybil-500 bg-mf-sybil-opacity border border-mf-sybil-opacity px-6 py-1 disabled:disabled-button disabled:cursor-not-allowed hover:opacity-50 hover:text-[#c5dbff] hover:border-[#57e8b4]"
                 >
                   <span>Submit</span>
                 </button>

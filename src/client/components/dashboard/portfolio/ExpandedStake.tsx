@@ -152,7 +152,7 @@ const ExpandedStake = ({
               </span>
               <motion.button
                 onClick={handleCopy}
-                className="transition-colors cursor-pointer"
+                className="cursor-pointer"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -174,7 +174,7 @@ const ExpandedStake = ({
       {/* Action Buttons */}
       <div className="flex gap-2 pt-2">
         <motion.button
-          className="cursor-pointer w-1/3 py-1.5 bg-mf-sybil-opacity rounded-sm text-mf-sybil-500 border border-mf-sybil-opacity hover:border-mf-sybil-500 transition-colors hover:text-mf-edge-500"
+          className="cursor-pointer w-1/3 py-1.5 bg-mf-sybil-opacity rounded-sm text-mf-sybil-500 border border-mf-sybil-opacity hover:border-mf-sybil-500 hover:text-mf-edge-500"
           onClick={onAddStake}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -183,7 +183,7 @@ const ExpandedStake = ({
         </motion.button>
         <motion.button
           onClick={onRemoveStake}
-          className="cursor-pointer w-1/3 py-1.5 bg-mf-red-opacity rounded-sm text-mf-red-500 border border-mf-red-opacity hover:border-mf-red-500 transition-colors hover:text-mf-edge-500"
+          className="cursor-pointer w-1/3 py-1.5 bg-mf-red-opacity rounded-sm text-mf-red-500 border border-mf-red-opacity hover:border-mf-red-500 hover:text-mf-edge-500"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -191,7 +191,7 @@ const ExpandedStake = ({
         </motion.button>
         <motion.button
           onClick={onMoveStake}
-          className="cursor-pointer w-1/3 py-1.5 bg-mf-safety-opacity rounded-sm text-mf-safety-500 border border-mf-safety-opacity hover:border-mf-safety-500 transition-colors hover:text-mf-edge-500"
+          className="cursor-pointer w-1/3 py-1.5 bg-mf-safety-opacity rounded-sm text-mf-safety-500 border border-mf-safety-opacity hover:border-mf-safety-500 hover:text-mf-edge-500"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >

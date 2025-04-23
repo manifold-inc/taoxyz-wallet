@@ -150,7 +150,7 @@ const ConnectedSites = ({ onClose }: ConnectedSitesProps) => {
                     </span>
                     <button
                       onClick={event => handleRemoveWebsite(website, event)}
-                      className="text-mf-night-500 bg-mf-safety-500 rounded-sm hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 transition-colors w-6 h-6 flex items-center justify-center"
+                      className="text-mf-night-500 bg-mf-safety-500 rounded-sm hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 w-6 h-6 flex items-center justify-center"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -164,7 +164,7 @@ const ConnectedSites = ({ onClose }: ConnectedSitesProps) => {
                     {wallets.map(wallet => (
                       <div
                         key={wallet.address}
-                        className="flex items-center justify-between hover:bg-mf-night-500 transition-colors"
+                        className="flex items-center justify-between hover:bg-mf-night-500"
                       >
                         <div className="flex items-center justify-between w-full space-x-2">
                           <div className="flex items-center text-xs text-mf-milk-300 bg-mf-ash-300 rounded-xs p-1 space-x-2 flex-1 min-w-0">

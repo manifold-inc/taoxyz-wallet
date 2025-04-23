@@ -14,7 +14,7 @@ const StakeOverview = ({ stake, subnet, onClick }: StakeOverviewProps) => {
   return (
     <motion.button
       onClick={onClick}
-      className="w-full text-left rounded-md cursor-pointer p-3 bg-mf-ash-500 hover:bg-mf-ash-300 transition-colors gap-1"
+      className="w-full text-left rounded-md cursor-pointer p-3 bg-mf-ash-500 hover:bg-mf-ash-300 gap-1"
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
     >

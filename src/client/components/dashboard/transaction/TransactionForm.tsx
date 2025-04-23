@@ -268,7 +268,7 @@ const TransactionForm = ({
           <button
             type="button"
             onClick={() => resetDashboardState()}
-            className="rounded-md text-center cursor-pointer w-1/2 py-1.5 bg-mf-red-opacity border border-mf-red-opacity transition-colors text-mf-red-500 gap-1 disabled:cursor-not-allowed hover:opacity-50"
+            className="rounded-md text-center cursor-pointer w-1/2 py-1.5 bg-mf-red-opacity border border-mf-red-opacity text-mf-red-500 gap-1 disabled:cursor-not-allowed hover:opacity-50"
           >
             Cancel
           </button>
@@ -279,7 +279,7 @@ const TransactionForm = ({
               !dashboardValidator ||
               !amountValidation(Number(amountState.amount))
             }
-            className="w-1/2 rounded-md text-center cursor-pointer py-1.5 transition-colors gap-1 disabled:cursor-not-allowed hover:opacity-50 disabled:hover:opacity-100 disabled:bg-mf-ash-500 disabled:border-mf-ash-500 disabled:text-mf-edge-700 enabled:bg-mf-sybil-opacity enabled:border-mf-sybil-opacity enabled:text-mf-sybil-500"
+            className="w-1/2 rounded-md text-center cursor-pointer py-1.5 gap-1 disabled:cursor-not-allowed hover:opacity-50 disabled:hover:opacity-100 disabled:bg-mf-ash-500 disabled:border-mf-ash-500 disabled:text-mf-edge-700 enabled:bg-mf-sybil-opacity enabled:border-mf-sybil-opacity enabled:text-mf-sybil-500"
           >
             Continue
           </button>

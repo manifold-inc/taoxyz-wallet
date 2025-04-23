@@ -109,7 +109,7 @@ const MnemonicVerify = ({ onContinue }: MnemonicVerifyProps) => {
       <div className="flex flex-col items-center gap-3 pt-4">
         <motion.button
           onClick={handleBack}
-          className="cursor-pointer flex items-center gap-1.5 px-6 py-1 bg-mf-safety-opacity rounded-full text-sm text-mf-safety-500 border border-mf-safety-opacity hover:border-mf-safety-500 transition-colors hover:text-mf-edge-500"
+          className="cursor-pointer flex items-center gap-1.5 px-6 py-1 bg-mf-safety-opacity rounded-full text-sm text-mf-safety-500 border border-mf-safety-opacity hover:border-mf-safety-500 hover:text-mf-edge-500"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -117,7 +117,7 @@ const MnemonicVerify = ({ onContinue }: MnemonicVerifyProps) => {
         </motion.button>
         <motion.button
           type="submit"
-          className="cursor-pointer flex items-center gap-1.5 px-6 py-1 bg-mf-sybil-opacity rounded-full text-sm text-mf-sybil-500 border border-mf-sybil-opacity hover:border-mf-sybil-500 transition-colors hover:text-mf-edge-500"
+          className="cursor-pointer flex items-center gap-1.5 px-6 py-1 bg-mf-sybil-opacity rounded-full text-sm text-mf-sybil-500 border border-mf-sybil-opacity hover:border-mf-sybil-500 hover:text-mf-edge-500"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >

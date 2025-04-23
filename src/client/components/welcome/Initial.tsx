@@ -43,7 +43,7 @@ const Initial = ({ onGetStarted }: InitialProps) => {
         transition={{ duration: 1, ease: 'easeInOut', delay: 4.5 }}
       >
         <motion.button
-          className="rounded-full px-6 py-1 bg-mf-sybil-opacity text-sm text-mf-sybil-500 cursor-pointer border border-mf-sybil-opacity hover:border-mf-sybil-500 transition-colors hover:text-mf-edge-500"
+          className="rounded-full px-6 py-1 bg-mf-sybil-opacity text-sm text-mf-sybil-500 cursor-pointer border border-mf-sybil-opacity hover:border-mf-sybil-500 hover:text-mf-edge-500"
           onClick={onGetStarted}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}

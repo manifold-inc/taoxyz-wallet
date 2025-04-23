@@ -117,7 +117,7 @@ const LockScreen = ({ isLocked }: LockScreenProps) => {
                 <motion.button
                   type="submit"
                   disabled={password.length < 8}
-                  className="rounded-full cursor-pointer border-sm text-sm text-mf-sybil-500 bg-mf-sybil-opacity border border-mf-sybil-opacity transition-colors px-6 py-1 disabled:disabled-button disabled:cursor-not-allowed"
+                  className="rounded-full cursor-pointer border-sm text-sm text-mf-sybil-500 bg-mf-sybil-opacity border border-mf-sybil-opacity px-6 py-1 disabled:disabled-button disabled:cursor-not-allowed"
                   whileHover={{ opacity: 0.5, color: '#c5dbff', borderColor: '#57e8b4' }}
                 >
                   <span>Unlock</span>

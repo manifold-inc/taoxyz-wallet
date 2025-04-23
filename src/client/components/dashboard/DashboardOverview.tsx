@@ -227,7 +227,7 @@ const DashboardOverview = ({
                 resetDashboardState();
                 setDashboardState(DashboardState.CREATE_STAKE);
               }}
-              className="w-1/2 py-1.5 bg-mf-sybil-opacity rounded-sm cursor-pointer text-mf-sybil-500 border border-mf-sybil-opacity transition-colors hover:opacity-50"
+              className="w-1/2 py-1.5 bg-mf-sybil-opacity rounded-sm cursor-pointer text-mf-sybil-500 border border-mf-sybil-opacity hover:opacity-50"
             >
               <span className="text-sm">Stake</span>
             </button>
@@ -236,7 +236,7 @@ const DashboardOverview = ({
                 resetDashboardState();
                 setDashboardState(DashboardState.TRANSFER);
               }}
-              className="w-1/2 py-1.5 bg-mf-safety-opacity rounded-sm cursor-pointer text-mf-safety-500 border border-mf-safety-opacity transition-colors hover:opacity-50"
+              className="w-1/2 py-1.5 bg-mf-safety-opacity rounded-sm cursor-pointer text-mf-safety-500 border border-mf-safety-opacity hover:opacity-50"
             >
               <span className="text-sm">Transfer</span>
             </button>

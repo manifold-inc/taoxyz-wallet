@@ -184,7 +184,7 @@ const Connect = () => {
             <button
               key={wallet.address}
               onClick={() => toggleWallet(wallet.address)}
-              className={`w-full flex items-start text-left py-2 px-4 bg-mf-ash-500 cursor-pointer transition-colors`}
+              className={`w-full flex items-start text-left py-2 px-4 bg-mf-ash-500 cursor-pointer`}
             >
               <div className="flex items-center space-x-3">
                 <div className="custom-checkbox">
@@ -209,14 +209,14 @@ const Connect = () => {
         <div className="flex space-x-2 mt-4">
           <button
             onClick={() => handleResponse(false)}
-            className="flex-1 cursor-pointer text-sm border-2 border-sm border-mf-safety-500 bg-mf-ash-500 hover:bg-mf-safety-500 hover:text-mf-night-500 p-2 text-mf-safety-500 transition-colors"
+            className="flex-1 cursor-pointer text-sm border-2 border-sm border-mf-safety-500 bg-mf-ash-500 hover:bg-mf-safety-500 hover:text-mf-night-500 p-2 text-mf-safety-500"
           >
             Reject
           </button>
           <button
             onClick={() => handleResponse(true)}
             disabled={!wallets.some(wallet => wallet.selected)}
-            className="flex-1 cursor-pointer text-sm border-2 border-sm border-mf-sybil-500 bg-mf-sybil-500 hover:bg-mf-night-500 hover:text-mf-sybil-500 p-2 text-mf-night-500 transition-colors"
+            className="flex-1 cursor-pointer text-sm border-2 border-sm border-mf-sybil-500 bg-mf-sybil-500 hover:bg-mf-night-500 hover:text-mf-sybil-500 p-2 text-mf-night-500"
           >
             Approve
           </button>

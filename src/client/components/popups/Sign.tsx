@@ -247,7 +247,7 @@ const Sign = () => {
           <div className="flex space-x-2">
             <button
               onClick={() => handleResponse(false)}
-              className="flex-1 text-sm border-2 border-sm border-mf-safety-500 bg-mf-ash-500 hover:bg-mf-safety-500 hover:text-mf-night-500 p-2 text-mf-safety-500 transition-colors"
+              className="flex-1 text-sm border-2 border-sm border-mf-safety-500 bg-mf-ash-500 hover:bg-mf-safety-500 hover:text-mf-night-500 p-2 text-mf-safety-500"
             >
               Reject
             </button>
@@ -258,7 +258,7 @@ const Sign = () => {
                 !password
                   ? 'bg-mf-ash-500 text-mf-edge-500 cursor-not-allowed'
                   : 'bg-mf-sybil-500 hover:bg-mf-night-500 hover:text-mf-sybil-500 text-mf-night-500'
-              } p-2 transition-colors`}
+              } p-2`}
             >
               Sign
             </button>
@@ -266,7 +266,7 @@ const Sign = () => {
 
           <div className="flex justify-center">
             <button onClick={handleForgetPassword}>
-              <span className="text-xs text-mf-safety-500 hover:text-mf-safety-300 transition-colors underline underline-offset-2 decoration-mf-safety-500 hover:decoration-mf-safety-300 cursor-pointer">
+              <span className="text-xs text-mf-safety-500 hover:text-mf-safety-300 underline underline-offset-2 decoration-mf-safety-500 hover:decoration-mf-safety-300 cursor-pointer">
                 Forget Password
               </span>
             </button>

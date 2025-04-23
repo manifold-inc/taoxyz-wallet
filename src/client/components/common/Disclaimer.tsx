@@ -20,7 +20,7 @@ const Disclaimer = ({ onClose }: DisclaimerProps) => {
 
         <motion.button
           onClick={onClose}
-          className="cursor-pointer bg-mf-sybil-500 p-0.5 rounded-xs border border-mf-sybil-500 hover:bg-mf-ash-500 transition-colors text-mf-ash-500 hover:text-mf-sybil-500"
+          className="cursor-pointer bg-mf-sybil-500 p-0.5 rounded-xs border border-mf-sybil-500 hover:bg-mf-ash-500 hover:text-mf-sybil-500"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
         >
@@ -30,7 +30,7 @@ const Disclaimer = ({ onClose }: DisclaimerProps) => {
 
       {/* Disclaimer */}
       <motion.div
-        className="flex flex-col gap-4 flex flex-col items-center px-10"
+        className="flex flex-col gap-4 items-center px-10"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.5 }}
@@ -44,7 +44,7 @@ const Disclaimer = ({ onClose }: DisclaimerProps) => {
 
       {/* Data Privacy */}
       <motion.div
-        className="flex flex-col gap-4 flex flex-col items-center px-10"
+        className="flex flex-col gap-4 items-center px-10"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4, duration: 0.5 }}

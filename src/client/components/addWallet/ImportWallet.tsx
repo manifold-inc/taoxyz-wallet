@@ -202,7 +202,7 @@ const ImportWallet = ({ onSuccess }: ImportWalletProps) => {
         <motion.button
           type="button"
           onClick={handleBack}
-          className="cursor-pointer flex items-center gap-1.5 px-6 py-1 bg-mf-safety-opacity rounded-full text-sm text-mf-safety-500 border border-mf-safety-opacity hover:border-mf-safety-500 transition-colors hover:text-mf-edge-500"
+          className="cursor-pointer flex items-center gap-1.5 px-6 py-1 bg-mf-safety-opacity rounded-full text-sm text-mf-safety-500 border border-mf-safety-opacity hover:border-mf-safety-500 hover:text-mf-edge-500"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -211,7 +211,7 @@ const ImportWallet = ({ onSuccess }: ImportWalletProps) => {
         <motion.button
           type="submit"
           disabled={nameStatus !== 'Valid Wallet Name' || passwordStatus !== 'Valid Password'}
-          className="cursor-pointer flex items-center gap-1.5 px-6 py-1 bg-mf-sybil-opacity rounded-full text-sm text-mf-sybil-500 border border-mf-sybil-opacity hover:border-mf-sybil-500 transition-colors hover:text-mf-edge-500 disabled:bg-mf-ash-500 disabled:border-mf-ash-500 disabled:text-mf-edge-700 disabled:cursor-not-allowed"
+          className="cursor-pointer flex items-center gap-1.5 px-6 py-1 bg-mf-sybil-opacity rounded-full text-sm text-mf-sybil-500 border border-mf-sybil-opacity hover:border-mf-sybil-500 hover:text-mf-edge-500 disabled:bg-mf-ash-500 disabled:border-mf-ash-500 disabled:text-mf-edge-700 disabled:cursor-not-allowed"
           whileHover={
             nameStatus === 'Valid Wallet Name' && passwordStatus === 'Valid Password'
               ? { scale: 1.05 }

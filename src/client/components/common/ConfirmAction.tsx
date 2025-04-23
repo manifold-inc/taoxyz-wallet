@@ -28,13 +28,13 @@ const ConfirmAction = ({ isOpen, title, message, onConfirm, onCancel }: ConfirmA
           <div className="flex w-full items-center space-x-2">
             <button
               onClick={onCancel}
-              className="p-2 flex-1 text-xs text-mf-safety-500 border-2 border-sm border-mf-safety-500 bg-mf-night-500 hover:bg-mf-safety-500 hover:text-mf-night-500 transition-colors"
+              className="p-2 flex-1 text-xs text-mf-safety-500 border-2 border-sm border-mf-safety-500 bg-mf-night-500 hover:bg-mf-safety-500 hover:text-mf-night-500"
             >
               Cancel
             </button>
             <button
               onClick={onConfirm}
-              className="p-2 flex-1 text-xs text-mf-night-500 border-2 border-sm border-mf-safety-500 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 transition-colors"
+              className="p-2 flex-1 text-xs text-mf-night-500 border-2 border-sm border-mf-safety-500 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500"
             >
               Confirm
             </button>

@@ -136,14 +136,14 @@ const SubnetSelection = ({
         {searchQuery !== '' ? (
           <button
             onClick={() => setSearchQuery('')}
-            className="text-mf-sybil-500 text-sm w-1/5 bg-mf-ash-500 rounded-md border border-mf-ash-500 p-2 cursor-pointer hover:opacity-50 transition-colors"
+            className="text-mf-sybil-500 text-sm w-1/5 bg-mf-ash-500 rounded-md border border-mf-ash-500 p-2 cursor-pointer hover:opacity-50"
           >
             Clear
           </button>
         ) : (
           <button
             onClick={onCancel}
-            className="text-mf-red-500 text-sm w-1/5 bg-mf-red-opacity rounded-md border border-mf-red-opacity p-2 cursor-pointer hover:opacity-50 transition-colors"
+            className="text-mf-red-500 text-sm w-1/5 bg-mf-red-opacity rounded-md border border-mf-red-opacity p-2 cursor-pointer hover:opacity-50"
           >
             Back
           </button>
@@ -160,7 +160,7 @@ const SubnetSelection = ({
               {/* Subnet */}
               <button
                 onClick={() => handleSubnetSelect(subnet)}
-                className={`w-full text-left rounded-md cursor-pointer p-2 transition-colors gap-1 hover:bg-mf-ash-300 ${
+                className={`w-full text-left rounded-md cursor-pointer p-2 gap-1 hover:bg-mf-ash-300 ${
                   selectedSubnet?.id === subnet.id ? 'bg-mf-ash-300' : 'bg-mf-ash-500'
                 }`}
               >
@@ -194,14 +194,14 @@ const SubnetSelection = ({
                 <div className="flex gap-2">
                   <button
                     onClick={onCancel}
-                    className="rounded-md text-center cursor-pointer w-1/2 py-1.5 bg-mf-red-opacity border border-mf-red-opacity hover:opacity-50 transition-colors text-mf-red-500 gap-1"
+                    className="rounded-md text-center cursor-pointer w-1/2 py-1.5 bg-mf-red-opacity border border-mf-red-opacity hover:opacity-50 text-mf-red-500 gap-1"
                   >
                     Back
                   </button>
 
                   <button
                     onClick={handleConfirm}
-                    className="rounded-md text-center cursor-pointer w-1/2 py-1.5 bg-mf-sybil-opacity border border-mf-sybil-opacity hover:opacity-50 transition-colors text-mf-sybil-500 gap-1 disabled:disabled-button disabled:cursor-not-allowed"
+                    className="rounded-md text-center cursor-pointer w-1/2 py-1.5 bg-mf-sybil-opacity border border-mf-sybil-opacity hover:opacity-50 text-mf-sybil-500 gap-1 disabled:disabled-button disabled:cursor-not-allowed"
                     disabled={
                       selectedSubnet === null ||
                       dashboardValidators === null ||
