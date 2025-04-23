@@ -1,5 +1,3 @@
-import { motion } from 'framer-motion';
-
 import { formatNumber, raoToTao } from '@/utils/utils';
 
 import type { Stake, Subnet } from '../../../../types/client';
@@ -12,11 +10,9 @@ interface StakeOverviewProps {
 
 const StakeOverview = ({ stake, subnet, onClick }: StakeOverviewProps) => {
   return (
-    <motion.button
+    <button
       onClick={onClick}
       className="w-full text-left rounded-md cursor-pointer p-3 bg-mf-ash-500 hover:bg-mf-ash-300 gap-1"
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1">
@@ -33,7 +29,7 @@ const StakeOverview = ({ stake, subnet, onClick }: StakeOverviewProps) => {
         </p>
         <p className="text-mf-edge-500 text-sm">{formatNumber(raoToTao(stake.stake))}</p>
       </div>
-    </motion.button>
+    </button>
   );
 };
 
