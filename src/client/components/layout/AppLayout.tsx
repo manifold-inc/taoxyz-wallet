@@ -19,8 +19,8 @@ const AppLayout = ({ children }: AppLayoutProps) => {
     location.pathname === '/';
 
   return (
-    <main className="min-h-screen min-w-screen">
-      <div className="pb-14">
+    <main className="h-screen w-screen">
+      <div className="h-full">
         {/* Routes */}
         {children}
       </div>

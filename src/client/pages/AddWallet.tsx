@@ -114,7 +114,7 @@ const AddWallet = () => {
           {/* Header */}
           <div className="flex flex-col items-center justify-center gap-3">
             <img src={taoxyz} alt="Taoxyz Logo" className="w-8 h-8" />
-            <p className="text-mf-edge-500 text-2xl font-bold blinker-font">
+            <p className="text-mf-edge-500 text-2xl font-semibold blinker-font">
               {getStepTitle(state.mode)}
             </p>
           </div>

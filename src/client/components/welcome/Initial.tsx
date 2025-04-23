@@ -7,7 +7,7 @@ interface InitialProps {
 
 const Initial = ({ onGetStarted }: InitialProps) => {
   return (
-    <div className="flex h-full w-full bg-mf-night-500 justify-center items-center relative overflow-hidden">
+    <div className="flex w-full h-full bg-mf-night-500 justify-center items-center relative">
       {/* Background Animation */}
       <motion.div
         className="absolute inset-0 bg-mf-safety-500 z-10"
@@ -42,14 +42,12 @@ const Initial = ({ onGetStarted }: InitialProps) => {
         animate={{ y: -24, opacity: 1 }}
         transition={{ duration: 1, ease: 'easeInOut', delay: 4.5 }}
       >
-        <motion.button
-          className="rounded-full px-6 py-1 bg-mf-sybil-opacity text-sm text-mf-sybil-500 cursor-pointer border border-mf-sybil-opacity hover:border-mf-sybil-500 hover:text-mf-edge-500"
+        <button
+          className="rounded-full px-6 py-1.5 bg-mf-sybil-opacity text-sm text-center text-mf-sybil-500 cursor-pointer hover:opacity-50"
           onClick={onGetStarted}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
         >
-          <span>Get Started</span>
-        </motion.button>
+          Get Started
+        </button>
       </motion.div>
     </div>
   );
