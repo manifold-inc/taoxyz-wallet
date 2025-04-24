@@ -68,7 +68,6 @@ const DashboardOverviewSkeleton = () => {
   );
 };
 
-// TODO: Remove nullish coalescing checks
 const DashboardOverview = ({
   stakes,
   subnets,
@@ -79,7 +78,8 @@ const DashboardOverview = ({
 }: DashboardOverviewProps) => {
   const { currentAddress } = useWallet();
   const { showNotification } = useNotification();
-  const { setDashboardState, setDashboardTotalBalance, resetDashboardState } = useDashboard();
+  const { dashboardState, setDashboardState, setDashboardTotalBalance, resetDashboardState } =
+    useDashboard();
   const [balances, setBalances] = useState<Balances>({
     totalTao: null,
     totalInUSD: null,
@@ -138,7 +138,6 @@ const DashboardOverview = ({
     }
   }, [updatedBalances, calculatedTotalTao]);
 
-  // TODO: Render 3 different views based on dashboardState
   return (
     <>
       {isLoading ? (
@@ -227,7 +226,12 @@ const DashboardOverview = ({
                 resetDashboardState();
                 setDashboardState(DashboardState.CREATE_STAKE);
               }}
-              className="w-1/2 py-1.5 bg-mf-sybil-opacity rounded-sm cursor-pointer text-mf-sybil-500 border border-mf-sybil-opacity hover:opacity-50"
+              className={`w-1/2 py-1.5 rounded-sm cursor-pointer hover:opacity-50 ${
+                dashboardState === DashboardState.CREATE_STAKE ||
+                dashboardState === DashboardState.OVERVIEW
+                  ? 'bg-mf-sybil-opacity text-mf-sybil-500'
+                  : 'bg-mf-ash-500 text-mf-edge-500'
+              }`}
             >
               <span className="text-sm">Stake</span>
             </button>
@@ -236,7 +240,12 @@ const DashboardOverview = ({
                 resetDashboardState();
                 setDashboardState(DashboardState.TRANSFER);
               }}
-              className="w-1/2 py-1.5 bg-mf-safety-opacity rounded-sm cursor-pointer text-mf-safety-500 border border-mf-safety-opacity hover:opacity-50"
+              className={`w-1/2 py-1.5 rounded-sm cursor-pointer hover:opacity-50 ${
+                dashboardState === DashboardState.TRANSFER ||
+                dashboardState === DashboardState.OVERVIEW
+                  ? 'bg-mf-safety-opacity text-mf-safety-500'
+                  : 'bg-mf-ash-500 text-mf-edge-500'
+              }`}
             >
               <span className="text-sm">Transfer</span>
             </button>

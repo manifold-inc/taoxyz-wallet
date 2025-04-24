@@ -47,7 +47,6 @@ const SubnetSkeleton = () => {
   );
 };
 
-// TODO: Better styling
 const ValidatorSkeleton = () => {
   return <Skeleton className="h-4 w-8 bg-mf-ash-500" />;
 };
