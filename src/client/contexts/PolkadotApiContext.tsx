@@ -1,5 +1,6 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import PolkadotApi from "../api/PolkadotApi";
+import { createContext, useContext, useEffect, useState } from 'react';
+
+import PolkadotApi from '../api/PolkadotApi';
 
 interface ApiContext {
   api: PolkadotApi | null;
@@ -13,11 +14,7 @@ const PolkadotApiContext = createContext<ApiContext>({
   error: null,
 });
 
-export const PolkadotApiProvider = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
+export const PolkadotApiProvider = ({ children }: { children: React.ReactNode }) => {
   const [api, setApi] = useState<PolkadotApi | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -44,7 +41,7 @@ export const PolkadotApiProvider = ({
       if (error instanceof Error) {
         setError(error);
       } else {
-        setError(new Error("Failed to initialize Polkadot API"));
+        setError(new Error('Failed to initialize Polkadot API'));
       }
       throw error;
     } finally {
@@ -62,7 +59,7 @@ export const PolkadotApiProvider = ({
 export const usePolkadotApi = () => {
   const context = useContext(PolkadotApiContext);
   if (context === undefined) {
-    throw new Error("usePolkadotApi must be used within a PolkadotApiProvider");
+    throw new Error('usePolkadotApi must be used within a PolkadotApiProvider');
   }
   return context;
 };

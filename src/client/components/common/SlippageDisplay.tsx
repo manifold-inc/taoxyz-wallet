@@ -1,106 +1,138 @@
-import type { Slippage } from '../../../types/client';
-import { formatNumber } from '../../../utils/utils';
+import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
+import type { Slippage } from '@/types/client';
+import {
+  alphaToTaoWithSlippage,
+  formatNumber,
+  moveStakeWithSlippage,
+  taoToAlphaWithSlippage,
+} from '@/utils/utils';
 
 interface SlippageDisplayProps {
   amount: string;
-  balance: string;
-  balanceInRao: bigint;
-  amountInRao: bigint;
-  slippage?: Slippage;
-  isRoot?: boolean;
-  moveStake?: boolean;
-  handleAmountChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-const SlippageDisplay = ({
-  amount,
-  balance,
-  amountInRao,
-  balanceInRao,
-  slippage,
-  moveStake = false,
-  isRoot = false,
-  handleAmountChange,
-}: SlippageDisplayProps) => {
-  const fee = moveStake ? 0.0001 : 0.00005;
-  const receiveAmount = isRoot ? parseFloat(amount) : slippage?.tokens || 0;
+const SlippageDisplay = ({ amount }: SlippageDisplayProps) => {
+  const { dashboardSubnet, dashboardState, dashboardStake, dashboardSubnets } = useDashboard();
+  const isDynamic = dashboardSubnet?.id !== 0;
+  const moveStake = dashboardState === DashboardState.MOVE_STAKE;
 
-  let payToken: string;
-  if (moveStake) {
-    if (isRoot) {
-      payToken = 'τ';
-    } else {
-      payToken = 'α';
-    }
-  } else {
-    payToken = 'τ';
+  const chainFee = moveStake ? 0.0001 : 0.00005;
+  const amountInRao = Number(amount) * 1e9;
+  let stakePrice;
+
+  let slippage: Slippage;
+  switch (dashboardState) {
+    case DashboardState.CREATE_STAKE:
+    case DashboardState.ADD_STAKE:
+      slippage = taoToAlphaWithSlippage(
+        amountInRao,
+        dashboardSubnet?.alphaIn || 0,
+        dashboardSubnet?.taoIn || 0,
+        isDynamic,
+        dashboardSubnet?.price || 0
+      );
+      break;
+    case DashboardState.REMOVE_STAKE:
+      slippage = alphaToTaoWithSlippage(
+        amountInRao,
+        dashboardSubnet?.alphaIn || 0,
+        dashboardSubnet?.taoIn || 0,
+        isDynamic,
+        dashboardSubnet?.price || 0
+      );
+      break;
+    case DashboardState.MOVE_STAKE:
+      stakePrice =
+        dashboardSubnets?.find(subnet => subnet.id === dashboardStake?.netuid)?.price || 0;
+      slippage = moveStakeWithSlippage(
+        amountInRao,
+        dashboardSubnet?.alphaIn || 0,
+        dashboardSubnet?.taoIn || 0,
+        isDynamic,
+        stakePrice,
+        dashboardSubnet?.id === 0,
+        dashboardStake?.netuid === 0
+      );
+      break;
+    default:
+      slippage = {
+        tokens: 0,
+        slippage: 0,
+        slippagePercentage: 0,
+      };
+      break;
   }
 
-  let receiveToken: string;
-  if (moveStake) {
-    if (isRoot) {
+  let receiveToken = 'τ';
+  let payToken = 'τ';
+  const receiveAmount = formatNumber(slippage.tokens / 1e9 - chainFee);
+
+  switch (dashboardState) {
+    case DashboardState.CREATE_STAKE:
+    case DashboardState.ADD_STAKE:
+      payToken = 'τ';
+      if (isDynamic) {
+        receiveToken = 'α';
+      } else {
+        receiveToken = 'τ';
+      }
+      break;
+    case DashboardState.REMOVE_STAKE:
       receiveToken = 'τ';
-    } else {
-      receiveToken = 'α';
-    }
-  } else {
-    if (isRoot) {
-      receiveToken = 'τ';
-    } else {
-      receiveToken = 'α';
-    }
+      if (isDynamic) {
+        payToken = 'α';
+      } else {
+        payToken = 'τ';
+      }
+      break;
+    case DashboardState.MOVE_STAKE:
+      // If the stake is on root, we pay in τ
+      if (dashboardStake?.netuid === 0) {
+        payToken = 'τ';
+      } else {
+        payToken = 'α';
+      }
+
+      if (isDynamic) {
+        receiveToken = 'α';
+      } else {
+        receiveToken = 'τ';
+      }
+      break;
   }
 
   return (
-    <>
-      <div className="text-xs">
-        <input
-          type="text"
-          inputMode="decimal"
-          value={amount}
-          onChange={handleAmountChange}
-          placeholder={`Enter Amount (${payToken})`}
-          className={`w-full px-3 py-2 border-sm bg-mf-ash-300 text-mf-milk-300 border-2 ${
-            !amount
-              ? 'border-transparent focus:border-mf-safety-500'
-              : amountInRao > balanceInRao
-                ? 'border-mf-safety-500'
-                : 'border-mf-sybil-500'
-          }`}
-        />
-        <p className="ml-2 mt-2 text-mf-sybil-500">Balance: {`${balance} ${payToken}`}</p>
+    <div className="w-full flex flex-col gap-2 p-3">
+      {/* Pay */}
+      <div className="flex items-center justify-between">
+        <p className="text-mf-edge-700 text-sm font-medium">Pay</p>
+        <p className="text-mf-sybil-500 text-sm font-medium">
+          {formatNumber(parseFloat(amount))} {payToken}
+        </p>
       </div>
-      {amountInRao > 0 && slippage && (
-        <div className="border-2 border-mf-ash-500 rounded-sm bg-mf-ash-500 p-2 space-y-2 text-xs mt-2">
-          <div className="flex justify-between items-center">
-            <span className="text-mf-edge-300">Your Price:</span>
-            <span className="text-mf-sybil-500">
-              {formatNumber(parseFloat(amount))} {payToken}
-            </span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-mf-edge-300">You Receive:</span>
-            <span className="text-mf-sybil-500">
-              {formatNumber(receiveAmount)} {receiveToken}
-            </span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-mf-edge-300">Slippage:</span>
-            <span
-              className={`${
-                slippage?.slippagePercentage > 5 ? 'text-mf-safety-500' : 'text-mf-edge-300'
-              }`}
-            >
-              {slippage.slippagePercentage.toFixed(2)}%
-            </span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-mf-edge-300">Fee:</span>
-            <span className="text-mf-safety-500">{fee} τ</span>
-          </div>
-        </div>
-      )}
-    </>
+
+      {/* Slippage */}
+      <div className="flex items-center justify-between">
+        <p className="text-mf-edge-700 text-sm font-medium">Slippage</p>
+        <p className="text-mf-safety-500 text-sm font-medium">
+          {formatNumber(slippage.slippagePercentage).toFixed(2)}%
+        </p>
+      </div>
+
+      {/* Chain Fee */}
+      <div className="flex items-center justify-between">
+        <p className="text-mf-edge-700 text-sm font-medium">Chain Fee</p>
+        <p className="text-mf-sybil-500 text-sm font-medium">{chainFee} τ</p>
+      </div>
+
+      {/* Receive */}
+      <div className="flex items-center justify-between">
+        <p className="text-mf-edge-500 text-sm font-medium">Estimated Total</p>
+        <p className="text-mf-sybil-500 text-sm font-medium">
+          {receiveAmount} {receiveToken}
+        </p>
+      </div>
+    </div>
   );
 };
 

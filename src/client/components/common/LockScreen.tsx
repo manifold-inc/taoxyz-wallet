@@ -1,119 +1,119 @@
-import { useState } from "react";
+import taoxyz from '@public/assets/taoxyz.svg';
 
-import { useLock } from "../../contexts/LockContext";
-import { useWallet } from "../../contexts/WalletContext";
-import { useNotification } from "../../contexts/NotificationContext";
-import KeyringService from "../../services/KeyringService";
-import MessageService from "../../services/MessageService";
-import WalletSelection from "../common/WalletSelection";
-import { NotificationType } from "../../../types/client";
-import taoxyz from "../../../../public/icons/taoxyz.svg";
+import { useState } from 'react';
 
-const LockScreen = () => {
+import WalletSelection from '@/client/components/common/WalletSelection';
+import { useLock } from '@/client/contexts/LockContext';
+import { useNotification } from '@/client/contexts/NotificationContext';
+import { useWallet } from '@/client/contexts/WalletContext';
+import KeyringService from '@/client/services/KeyringService';
+import MessageService from '@/client/services/MessageService';
+import { NotificationType } from '@/types/client';
+
+interface LockScreenProps {
+  isLocked: boolean;
+}
+
+const LockScreen = ({ isLocked }: LockScreenProps) => {
   const { setIsLocked } = useLock();
   const { showNotification } = useNotification();
   const { currentAddress } = useWallet();
-  const [password, setPassword] = useState("");
+  const [password, setPassword] = useState('');
   const [passwordSelected, setPasswordSelected] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const handlePasswordChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ): void => {
+  const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     setPassword(event.target.value);
-    setError(null);
   };
 
-  const handleUnlock = async (
-    event: React.FormEvent<HTMLFormElement>
-  ): Promise<void> => {
+  const handleUnlock = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
-    if (password.length < 3) return;
+    if (password.length < 8) return;
 
     if (!currentAddress) {
-      setError("No wallet selected");
+      showNotification({
+        type: NotificationType.Error,
+        message: 'No Wallet Selected',
+      });
       return;
     }
-
-    setError(null);
 
     try {
       const isUnlocked = KeyringService.unlockWallet(currentAddress, password);
       if (isUnlocked) {
+        setPassword('');
         await setIsLocked(false);
         await MessageService.sendStartLockTimer();
       } else {
         showNotification({
           type: NotificationType.Error,
-          message: "Failed to Unlock Wallet",
+          message: 'Failed to Unlock Wallet',
         });
       }
     } catch (error) {
       if (
         error instanceof Error &&
-        error.message === "Unable to decode using the supplied passphrase"
+        error.message === 'Unable to decode using the supplied passphrase'
       ) {
-        setError("Invalid Password");
+        showNotification({
+          type: NotificationType.Error,
+          message: 'Invalid Password',
+        });
       } else {
         showNotification({
           type: NotificationType.Error,
-          message: "Failed to Unlock Wallet",
+          message: 'Failed to Unlock Wallet',
         });
       }
     }
   };
 
+  if (!isLocked) return null;
+
   return (
-    <div className="flex flex-col items-center min-h-screen">
-      <div className="w-74 [&>*]:w-full mt-4">
+    <div className="fixed inset-0 z-50 bg-mf-night-500">
+      <div className="flex flex-col items-center justify-start w-full h-full pt-6 gap-10">
+        {/* Wallet Selection */}
         <WalletSelection />
-        <div className="flex flex-col items-center justify-center mt-8">
-          <img src={taoxyz} alt="Taoxyz Logo" className="w-16 h-16" />
 
-          <div className="text-center text-lg text-mf-milk-500 mt-4">
-            <h1>Unlock Wallet</h1>
-          </div>
-
-          <form
-            onSubmit={handleUnlock}
-            className="flex flex-col items-center justify-center [&>*]:w-full mt-8"
-            autoComplete="off"
-          >
-            <input
-              type="password"
-              value={password}
-              onChange={handlePasswordChange}
-              onFocus={() => setPasswordSelected(true)}
-              onBlur={() => setPasswordSelected(false)}
-              placeholder="Enter Password"
-              className={`p-3 rounded-sm text-base text-mf-milk-300 bg-mf-ash-300 placeholder:text-mf-milk-300 border-2 focus:outline-none ${
-                error
-                  ? "border-mf-safety-500"
-                  : password.length >= 3
-                  ? passwordSelected
-                    ? "border-mf-sybil-500"
-                    : "border-transparent"
-                  : "border-transparent focus:border-mf-safety-500"
-              }`}
-              minLength={3}
-            />
-            <div className="h-8">
-              {error && (
-                <p className="mt-2 text-xs text-mf-safety-500">{error}</p>
-              )}
-            </div>
-
-            <div className="flex flex-col items-center mt-1">
-              <button
-                type="submit"
-                disabled={password.length < 3}
-                className="w-44 border-sm text-sm text-mf-night-500 bg-mf-safety-500 hover:bg-mf-night-500 hover:text-mf-safety-500 border-2 border-mf-safety-500 transition-colors p-1.5"
-              >
-                <span>Unlock</span>
-              </button>
-            </div>
-          </form>
+        {/* Header */}
+        <div className="flex flex-col items-center justify-center gap-3 pt-8">
+          <img src={taoxyz} alt="Taoxyz Logo" className="w-8 h-8" />
+          <p className="text-mf-edge-500 text-2xl font-bold blinker-font">UNLOCK WALLET</p>
         </div>
+
+        {/* Unlock Form */}
+        <form
+          onSubmit={handleUnlock}
+          className="flex flex-col items-center justify-center [&>*]:w-full gap-4"
+          autoComplete="off"
+        >
+          <input
+            type="password"
+            value={password}
+            onChange={handlePasswordChange}
+            onFocus={() => setPasswordSelected(true)}
+            onBlur={() => setPasswordSelected(false)}
+            placeholder="Enter Password"
+            className={`p-2 rounded-sm text-base text-mf-edge-300 bg-mf-night-300 placeholder:text-mf-edge-700 border-1 focus:outline-none ${
+              password.length >= 8
+                ? passwordSelected
+                  ? 'border-mf-sybil-500'
+                  : 'border-transparent'
+                : 'border-transparent focus:border-mf-safety-500'
+            }`}
+            minLength={8}
+          />
+
+          <div className="flex flex-col items-center pt-4">
+            <button
+              type="submit"
+              disabled={password.length < 8}
+              className="rounded-full cursor-pointer border-sm text-sm text-mf-sybil-500 bg-mf-sybil-opacity border border-mf-sybil-opacity px-6 py-1 hover:opacity-50 disabled:disabled-button disabled:cursor-not-allowed"
+            >
+              <span>Unlock</span>
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

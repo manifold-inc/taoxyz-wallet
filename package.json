@@ -29,12 +29,13 @@
     "@polkadot/extension-dapp": "^0.58.4",
     "@polkadot/types": "^15.7.1",
     "@polkadot/ui-keyring": "^3.12.2",
+    "framer-motion": "^12.6.3",
     "react-router-dom": "^7.2.0",
     "recharts": "^2.15.1"
   },
   "scripts": {
     "dev": "bun run scripts/build.ts --watch",
-    "build": "bun run lint && bun run scripts/build.ts && bun run zip:firefox && bun run zip",
+    "build": "bun run lint && bun run format && bun run scripts/build.ts && bun run zip:firefox && bun run zip",
     "lint": "npx eslint . --format=stylish",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,css,md,json}\"",
     "zip:firefox": "web-ext build -s dists/firefox -a ./dists/firefox_zip",
