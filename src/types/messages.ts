@@ -1,8 +1,5 @@
-import type {
-  SignerPayloadJSON,
-  SignerPayloadRaw,
-} from "@polkadot/types/types";
-import type { InjectedAccount } from "@polkadot/extension-inject/types";
+import type { InjectedAccount } from '@polkadot/extension-inject/types';
+import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 
 export interface ConnectRequestPayload extends BasePayload {
   origin: string;
@@ -86,22 +83,22 @@ export interface PopupInfo {
 }
 
 export const MESSAGE_TYPES = {
-  CONNECT_REQUEST: "dapp(connectRequest)",
-  CONNECT_RESPONSE: "ext(connectResponse)",
-  SIGN_REQUEST: "dapp(signRequest)",
-  SIGN_RESPONSE: "ext(signResponse)",
-  WALLETS_LOCKED: "ext(walletsLocked)",
-  START_LOCK_TIMER: "ext(startLockTimer)",
-  CLEAR_LOCK_TIMER: "ext(clearLockTimer)",
+  CONNECT_REQUEST: 'dapp(connectRequest)',
+  CONNECT_RESPONSE: 'ext(connectResponse)',
+  SIGN_REQUEST: 'dapp(signRequest)',
+  SIGN_RESPONSE: 'ext(signResponse)',
+  WALLETS_LOCKED: 'ext(walletsLocked)',
+  START_LOCK_TIMER: 'ext(startLockTimer)',
+  CLEAR_LOCK_TIMER: 'ext(clearLockTimer)',
 } as const;
 
 export const ERROR_TYPES = {
-  NO_TAB: "No tab found",
-  NO_ORIGIN: "Origin is required",
-  NO_REQUEST: "No pending request",
-  PERMISSION_DENIED: "Permission denied",
-  INVALID_MESSAGE: "Invalid message format",
-  SIGNING_FAILED: "Signing failed",
-  CONNECTION_REJECTED: "Connection rejected",
-  UNKNOWN_ERROR: "Unknown error",
+  NO_TAB: 'No tab found',
+  NO_ORIGIN: 'Origin is required',
+  NO_REQUEST: 'No pending request',
+  PERMISSION_DENIED: 'Permission denied',
+  INVALID_MESSAGE: 'Invalid message format',
+  SIGNING_FAILED: 'Signing failed',
+  CONNECTION_REJECTED: 'Connection rejected',
+  UNKNOWN_ERROR: 'Unknown error',
 } as const;

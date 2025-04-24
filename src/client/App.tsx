@@ -3,6 +3,7 @@ import { HashRouter } from 'react-router-dom';
 
 import AppLayout from '@/client/components/layout/AppLayout';
 import AppRoutes from '@/client/components/routes/AppRoutes';
+import { DashboardProvider } from '@/client/contexts/DashboardContext';
 import { LockProvider } from '@/client/contexts/LockContext';
 import { NotificationProvider } from '@/client/contexts/NotificationContext';
 import { PolkadotApiProvider } from '@/client/contexts/PolkadotApiContext';
@@ -25,9 +26,11 @@ const App = () => {
           <WalletProvider>
             <NotificationProvider>
               <WalletCreationProvider>
-                <AppLayout>
-                  <AppRoutes />
-                </AppLayout>
+                <DashboardProvider>
+                  <AppLayout>
+                    <AppRoutes />
+                  </AppLayout>
+                </DashboardProvider>
               </WalletCreationProvider>
             </NotificationProvider>
           </WalletProvider>

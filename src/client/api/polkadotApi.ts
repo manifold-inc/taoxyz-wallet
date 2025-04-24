@@ -2,6 +2,7 @@ import { ApiPromise, WsProvider } from '@polkadot/api';
 import type { EventRecord, ExtrinsicStatus } from '@polkadot/types/interfaces';
 import type { ISubmittableResult } from '@polkadot/types/types';
 
+import KeyringService from '@/client/services/KeyringService';
 import type {
   BittensorMetagraph,
   BittensorSubnet,
@@ -10,9 +11,7 @@ import type {
   SubstrateAccount,
   Validator,
   ValidatorIdentity,
-} from '../../types/client';
-import { raoToTao } from '../../utils/utils';
-import KeyringService from '../services/KeyringService';
+} from '@/types/client';
 
 class PolkadotApi {
   private api!: ApiPromise;
@@ -59,15 +58,18 @@ class PolkadotApi {
     return this.api;
   }
 
-  public async transfer({
-    fromAddress,
-    toAddress,
-    amountInRao,
-  }: {
-    fromAddress: string;
-    toAddress: string;
-    amountInRao: bigint;
-  }): Promise<string> {
+  public async transfer(
+    {
+      fromAddress,
+      toAddress,
+      amountInRao,
+    }: {
+      fromAddress: string;
+      toAddress: string;
+      amountInRao: bigint;
+    },
+    onStatusChange?: (status: string) => void
+  ): Promise<string> {
     try {
       const wallet = await KeyringService.getWallet(fromAddress);
       const toWallet = (await this.api.query.system.account(
@@ -90,6 +92,31 @@ class PolkadotApi {
               if (unsubscribe) unsubscribe();
               reject(new Error(dispatchError.toString()));
               return;
+            }
+
+            switch (true) {
+              case status.isReady:
+                onStatusChange?.('ready');
+                break;
+              case status.isBroadcast:
+                onStatusChange?.('broadcast');
+                break;
+              case status.isInBlock: {
+                const extrinsicFailed = events.find(
+                  ({ event }) => event.method === 'ExtrinsicFailed'
+                );
+                if (extrinsicFailed) {
+                  onStatusChange?.('failed');
+                } else {
+                  const extrinsicSuccess = events.find(
+                    ({ event }) => event.method === 'ExtrinsicSuccess'
+                  );
+                  if (extrinsicSuccess) {
+                    onStatusChange?.('success');
+                  }
+                }
+                break;
+              }
             }
 
             if (unsubscribe) {
@@ -120,17 +147,24 @@ class PolkadotApi {
     }
   }
 
-  public async createStake({
-    address,
-    subnetId,
-    validatorHotkey,
-    amountInRao,
-  }: {
-    address: string;
-    subnetId: number;
-    validatorHotkey: string;
-    amountInRao: bigint;
-  }): Promise<string> {
+  public async createStakeLimit(
+    {
+      address,
+      validatorHotkey,
+      subnetId,
+      amountInRao,
+      limitPrice,
+      allowPartial = false,
+    }: {
+      validatorHotkey: string;
+      address: string;
+      subnetId: number;
+      amountInRao: bigint;
+      limitPrice: bigint;
+      allowPartial?: boolean;
+    },
+    onStatusChange?: (status: string) => void
+  ): Promise<string> {
     try {
       const wallet = await KeyringService.getWallet(address);
       if (wallet instanceof Error) throw new Error(wallet.message);
@@ -139,7 +173,7 @@ class PolkadotApi {
         let unsubscribe: (() => void) | undefined;
 
         this.api.tx.subtensorModule
-          .addStake(validatorHotkey, subnetId, amountInRao)
+          .addStakeLimit(validatorHotkey, subnetId, amountInRao, limitPrice, allowPartial)
           .signAndSend(wallet, {}, (result: ISubmittableResult) => {
             const { status, dispatchError, events = [] } = result;
 
@@ -147,6 +181,31 @@ class PolkadotApi {
               if (unsubscribe) unsubscribe();
               reject(new Error(dispatchError.toString()));
               return;
+            }
+
+            switch (true) {
+              case status.isReady:
+                onStatusChange?.('ready');
+                break;
+              case status.isBroadcast:
+                onStatusChange?.('broadcast');
+                break;
+              case status.isInBlock: {
+                const extrinsicFailed = events.find(
+                  ({ event }) => event.method === 'ExtrinsicFailed'
+                );
+                if (extrinsicFailed) {
+                  onStatusChange?.('failed');
+                } else {
+                  const extrinsicSuccess = events.find(
+                    ({ event }) => event.method === 'ExtrinsicSuccess'
+                  );
+                  if (extrinsicSuccess) {
+                    onStatusChange?.('success');
+                  }
+                }
+                break;
+              }
             }
 
             if (unsubscribe) {
@@ -162,24 +221,29 @@ class PolkadotApi {
           });
       });
     } catch (error) {
-      console.error('Error in Create Stake:', error);
+      console.error('Error in Create Stake Limit:', error);
       throw error;
     }
   }
 
-  public async removeStake({
-    address,
-    validatorHotkey,
-    subnetId,
-    amountInRao,
-  }: {
-    address: string;
-    validatorHotkey: string;
-    subnetId: number;
-    amountInRao: bigint;
-  }): Promise<string> {
-    if (!this.api) throw new Error('API Not Initialized');
-
+  public async removeStakeLimit(
+    {
+      address,
+      validatorHotkey,
+      subnetId,
+      amountInRao,
+      limitPrice,
+      allowPartial = false,
+    }: {
+      validatorHotkey: string;
+      address: string;
+      subnetId: number;
+      amountInRao: bigint;
+      limitPrice: bigint;
+      allowPartial?: boolean;
+    },
+    onStatusChange?: (status: string) => void
+  ): Promise<string> {
     try {
       const wallet = await KeyringService.getWallet(address);
       if (wallet instanceof Error) throw new Error(wallet.message);
@@ -188,7 +252,7 @@ class PolkadotApi {
         let unsubscribe: (() => void) | undefined;
 
         this.api.tx.subtensorModule
-          .removeStake(validatorHotkey, subnetId, amountInRao)
+          .removeStakeLimit(validatorHotkey, subnetId, amountInRao, limitPrice, allowPartial)
           .signAndSend(wallet, {}, (result: ISubmittableResult) => {
             const { status, dispatchError, events = [] } = result;
 
@@ -196,6 +260,31 @@ class PolkadotApi {
               if (unsubscribe) unsubscribe();
               reject(new Error(dispatchError.toString()));
               return;
+            }
+
+            switch (true) {
+              case status.isReady:
+                onStatusChange?.('ready');
+                break;
+              case status.isBroadcast:
+                onStatusChange?.('broadcast');
+                break;
+              case status.isInBlock: {
+                const extrinsicFailed = events.find(
+                  ({ event }) => event.method === 'ExtrinsicFailed'
+                );
+                if (extrinsicFailed) {
+                  onStatusChange?.('failed');
+                } else {
+                  const extrinsicSuccess = events.find(
+                    ({ event }) => event.method === 'ExtrinsicSuccess'
+                  );
+                  if (extrinsicSuccess) {
+                    onStatusChange?.('success');
+                  }
+                }
+                break;
+              }
             }
 
             if (unsubscribe) {
@@ -211,26 +300,29 @@ class PolkadotApi {
           });
       });
     } catch (error) {
-      console.error('Error in Remove Stake:', error);
+      console.error('Error in Remove Stake Limit:', error);
       throw error;
     }
   }
 
-  public async moveStake({
-    address,
-    fromHotkey,
-    toHotkey,
-    fromSubnetId,
-    toSubnetId,
-    amountInRao,
-  }: {
-    address: string;
-    fromHotkey: string;
-    toHotkey: string;
-    fromSubnetId: number;
-    toSubnetId: number;
-    amountInRao: bigint;
-  }): Promise<string> {
+  public async moveStake(
+    {
+      address,
+      fromHotkey,
+      toHotkey,
+      fromSubnetId,
+      toSubnetId,
+      amountInRao,
+    }: {
+      address: string;
+      fromHotkey: string;
+      toHotkey: string;
+      fromSubnetId: number;
+      toSubnetId: number;
+      amountInRao: bigint;
+    },
+    onStatusChange?: (status: string) => void
+  ): Promise<string> {
     try {
       const wallet = await KeyringService.getWallet(address);
       if (wallet instanceof Error) throw new Error(wallet.message);
@@ -247,6 +339,31 @@ class PolkadotApi {
               if (unsubscribe) unsubscribe();
               reject(new Error(dispatchError.toString()));
               return;
+            }
+
+            switch (true) {
+              case status.isReady:
+                onStatusChange?.('ready');
+                break;
+              case status.isBroadcast:
+                onStatusChange?.('broadcast');
+                break;
+              case status.isInBlock: {
+                const extrinsicFailed = events.find(
+                  ({ event }) => event.method === 'ExtrinsicFailed'
+                );
+                if (extrinsicFailed) {
+                  onStatusChange?.('failed');
+                } else {
+                  const extrinsicSuccess = events.find(
+                    ({ event }) => event.method === 'ExtrinsicSuccess'
+                  );
+                  if (extrinsicSuccess) {
+                    onStatusChange?.('success');
+                  }
+                }
+                break;
+              }
             }
 
             if (unsubscribe) {
@@ -267,12 +384,12 @@ class PolkadotApi {
     }
   }
 
-  public async getBalance(address: string): Promise<number | null> {
+  public async getBalance(address: string): Promise<bigint | null> {
     try {
       const result = await this.api.query.system.account(address);
       const account = result.toJSON() as unknown as SubstrateAccount;
-      const balance = raoToTao(BigInt(account.data.free));
-      return balance;
+      const balance = account.data.free;
+      return BigInt(balance);
     } catch (error) {
       console.error('Error in Get Balance:', error);
       return null;
@@ -354,7 +471,7 @@ class PolkadotApi {
     }
   }
 
-  public async getValidators(subnetId: number): Promise<Validator[]> {
+  public async getValidators(subnetId: number): Promise<Validator[] | null> {
     try {
       const result = await this.api.call.subnetInfoRuntimeApi.getMetagraph(subnetId);
       const btMetagraph = result.toJSON() as unknown as BittensorMetagraph;
@@ -392,7 +509,7 @@ class PolkadotApi {
       return validators;
     } catch (error) {
       console.error('Error in Get Validators:', error);
-      throw error;
+      return null;
     }
   }
 
@@ -405,7 +522,6 @@ class PolkadotApi {
   ): void {
     switch (true) {
       case status.isReady:
-        break;
       case status.isBroadcast:
         break;
       case status.isInBlock: {

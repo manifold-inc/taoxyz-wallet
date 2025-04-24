@@ -1,5 +1,4 @@
 import taoxyz from '@public/assets/taoxyz.svg';
-import { AnimatePresence, motion } from 'framer-motion';
 
 import { useState } from 'react';
 
@@ -21,7 +20,6 @@ const LockScreen = ({ isLocked }: LockScreenProps) => {
   const { currentAddress } = useWallet();
   const [password, setPassword] = useState('');
   const [passwordSelected, setPasswordSelected] = useState(false);
-  const [isExiting, setIsExiting] = useState(false);
 
   const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     setPassword(event.target.value);
@@ -42,11 +40,9 @@ const LockScreen = ({ isLocked }: LockScreenProps) => {
     try {
       const isUnlocked = KeyringService.unlockWallet(currentAddress, password);
       if (isUnlocked) {
-        setIsExiting(true);
-        setTimeout(async () => {
-          await setIsLocked(false);
-          await MessageService.sendStartLockTimer();
-        }, 500);
+        setPassword('');
+        await setIsLocked(false);
+        await MessageService.sendStartLockTimer();
       } else {
         showNotification({
           type: NotificationType.Error,
@@ -71,64 +67,55 @@ const LockScreen = ({ isLocked }: LockScreenProps) => {
     }
   };
 
+  if (!isLocked) return null;
+
   return (
-    <AnimatePresence>
-      {isLocked && (
-        <motion.div
-          className="fixed inset-0 z-50 bg-mf-night-500"
-          initial={false}
-          animate={{ y: isExiting ? '-100%' : 0 }}
-          transition={{ duration: 0.5, ease: 'easeInOut' }}
+    <div className="fixed inset-0 z-50 bg-mf-night-500">
+      <div className="flex flex-col items-center justify-start w-full h-full pt-6 gap-10">
+        {/* Wallet Selection */}
+        <WalletSelection />
+
+        {/* Header */}
+        <div className="flex flex-col items-center justify-center gap-3 pt-8">
+          <img src={taoxyz} alt="Taoxyz Logo" className="w-8 h-8" />
+          <p className="text-mf-edge-500 text-2xl font-bold blinker-font">UNLOCK WALLET</p>
+        </div>
+
+        {/* Unlock Form */}
+        <form
+          onSubmit={handleUnlock}
+          className="flex flex-col items-center justify-center [&>*]:w-full gap-4"
+          autoComplete="off"
         >
-          <div className="flex flex-col items-center justify-start w-full h-full pt-12 gap-10">
-            {/* Wallet Selection */}
-            <WalletSelection />
+          <input
+            type="password"
+            value={password}
+            onChange={handlePasswordChange}
+            onFocus={() => setPasswordSelected(true)}
+            onBlur={() => setPasswordSelected(false)}
+            placeholder="Enter Password"
+            className={`p-2 rounded-sm text-base text-mf-edge-300 bg-mf-night-300 placeholder:text-mf-edge-700 border-1 focus:outline-none ${
+              password.length >= 8
+                ? passwordSelected
+                  ? 'border-mf-sybil-500'
+                  : 'border-transparent'
+                : 'border-transparent focus:border-mf-safety-500'
+            }`}
+            minLength={8}
+          />
 
-            {/* Header */}
-            <div className="flex flex-col items-center justify-center gap-3 pt-4">
-              <img src={taoxyz} alt="Taoxyz Logo" className="w-8 h-8" />
-              <p className="text-mf-edge-500 text-2xl font-bold blinker-font">UNLOCK WALLET</p>
-            </div>
-
-            {/* Unlock Form */}
-            <form
-              onSubmit={handleUnlock}
-              className="flex flex-col items-center justify-center [&>*]:w-full gap-4"
-              autoComplete="off"
+          <div className="flex flex-col items-center pt-4">
+            <button
+              type="submit"
+              disabled={password.length < 8}
+              className="rounded-full cursor-pointer border-sm text-sm text-mf-sybil-500 bg-mf-sybil-opacity border border-mf-sybil-opacity px-6 py-1 hover:opacity-50 disabled:disabled-button disabled:cursor-not-allowed"
             >
-              <input
-                type="password"
-                value={password}
-                onChange={handlePasswordChange}
-                onFocus={() => setPasswordSelected(true)}
-                onBlur={() => setPasswordSelected(false)}
-                placeholder="Enter Password"
-                className={`p-2 rounded-sm text-base text-mf-edge-300 bg-mf-night-300 placeholder:text-mf-edge-700 border-1 focus:outline-none ${
-                  password.length >= 8
-                    ? passwordSelected
-                      ? 'border-mf-sybil-500'
-                      : 'border-transparent'
-                    : 'border-transparent focus:border-mf-safety-500'
-                }`}
-                minLength={8}
-              />
-
-              <div className="flex flex-col items-center pt-4">
-                <motion.button
-                  type="submit"
-                  disabled={password.length < 8}
-                  className="rounded-full cursor-pointer border-sm text-sm text-mf-sybil-500 bg-mf-sybil-opacity border border-mf-sybil-opacity hover:border-mf-sybil-500 transition-colors px-6 py-1 disabled:text-mf-edge-700 disabled:bg-mf-night-300 disabled:border-mf-night-300 disabled:cursor-not-allowed"
-                  whileHover={{ scale: password.length >= 8 ? 1.05 : undefined }}
-                  whileTap={{ scale: password.length >= 8 ? 0.95 : undefined }}
-                >
-                  <span>Unlock</span>
-                </motion.button>
-              </div>
-            </form>
+              <span>Unlock</span>
+            </button>
           </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        </form>
+      </div>
+    </div>
   );
 };
 

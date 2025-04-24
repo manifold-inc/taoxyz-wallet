@@ -1,12 +1,13 @@
+import taoxyz from '@public/assets/taoxyz.svg';
+
 import { useState } from 'react';
 
 import type { InjectedAccount } from '@polkadot/extension-inject/types';
 
-import taoxyzLogo from '../../../../public/assets/taoxyz.svg';
-import { NotificationType } from '../../../types/client';
-import { MESSAGE_TYPES } from '../../../types/messages';
-import { useNotification } from '../../contexts/NotificationContext';
-import KeyringService from '../../services/KeyringService';
+import { useNotification } from '@/client/contexts/NotificationContext';
+import KeyringService from '@/client/services/KeyringService';
+import { NotificationType } from '@/types/client';
+import { MESSAGE_TYPES } from '@/types/messages';
 
 interface AuthRequest {
   origin: string;
@@ -167,59 +168,67 @@ const Connect = () => {
   }
 
   return (
-    <div className="flex flex-col items-center w-full">
-      <div className="flex flex-col justify-center items-center space-y-2">
-        <img src={taoxyzLogo} alt="Taoxyz Logo" className="w-16 h-16 mt-12" />
-        <h1 className="text-lg text-mf-milk-300">Connection Request</h1>
-      </div>
-
-      <div className="mt-6 bg-mf-ash-500 rounded-sm p-3 text-sm flex flex-col justify-start w-80">
-        <p className="text-mf-sybil-500">{request?.origin}</p>
-        <p className="text-mf-milk-300">Wants to connect to your wallet</p>
-      </div>
-
-      <div className="mt-4 w-80 [&>*]:w-full">
-        <div className="h-60 space-y-3 rounded-sm overflow-y-scroll">
-          {wallets.map(wallet => (
-            <button
-              key={wallet.address}
-              onClick={() => toggleWallet(wallet.address)}
-              className={`w-full flex items-start text-left py-2 px-4 bg-mf-ash-500 cursor-pointer transition-colors`}
-            >
-              <div className="flex items-center space-x-3">
-                <div className="custom-checkbox">
-                  <input
-                    type="checkbox"
-                    checked={wallet.selected}
-                    readOnly
-                    className="pointer-events-none"
-                  />
-                </div>
-                <div className="flex flex-col text-sm">
-                  <p className="text-mf-sybil-500">{wallet.name}</p>
-                  <p className="text-mf-milk-300">
-                    {wallet.address.slice(0, 6)}...{wallet.address.slice(-6)}
-                  </p>
-                </div>
-              </div>
-            </button>
-          ))}
+    <div className="w-full h-full flex flex-col items-center">
+      <div className="max-w-96 p-5 flex flex-col items-center gap-6">
+        {/* Header */}
+        <div className="flex justify-center items-center gap-2 w-full">
+          <img src={taoxyz} alt="Taoxyz Logo" className="w-6 h-6" />
+          <p className="text-mf-edge-500 text-2xl font-semibold blinker-font mb-0.5">
+            CONNECTION REQUEST
+          </p>
         </div>
 
-        <div className="flex space-x-2 mt-4">
-          <button
-            onClick={() => handleResponse(false)}
-            className="flex-1 cursor-pointer text-sm border-2 border-sm border-mf-safety-500 bg-mf-ash-500 hover:bg-mf-safety-500 hover:text-mf-night-500 p-2 text-mf-safety-500 transition-colors"
-          >
-            Reject
-          </button>
-          <button
-            onClick={() => handleResponse(true)}
-            disabled={!wallets.some(wallet => wallet.selected)}
-            className="flex-1 cursor-pointer text-sm border-2 border-sm border-mf-sybil-500 bg-mf-sybil-500 hover:bg-mf-night-500 hover:text-mf-sybil-500 p-2 text-mf-night-500 transition-colors"
-          >
-            Approve
-          </button>
+        {/* Origin */}
+        <div className="w-full bg-mf-ash-500 rounded-md p-2 flex flex-col items-start justify-center">
+          <p className="text-mf-sybil-500 text-base">{request?.origin}</p>
+          <p className="text-mf-edge-500 text-sm">Wants to connect to your wallet</p>
+        </div>
+
+        {/* Wallets */}
+        <div className="w-full flex flex-col items-center justify-start gap-6">
+          <div className="w-full gap-3 flex flex-col">
+            {wallets.map(wallet => (
+              <button
+                key={wallet.address}
+                onClick={() => toggleWallet(wallet.address)}
+                className={`w-full flex items-start text-left py-2 px-4 rounded-md bg-mf-ash-500 cursor-pointer hover:bg-mf-ash-300`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="custom-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={wallet.selected}
+                      readOnly
+                      className="pointer-events-none"
+                    />
+                  </div>
+                  <div className="flex flex-col text-sm">
+                    <p className="text-mf-sybil-500">{wallet.name}</p>
+                    <p className="text-mf-edge-500">
+                      {wallet.address.slice(0, 6)}...{wallet.address.slice(-6)}
+                    </p>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {/* Buttons */}
+          <div className="w-full flex gap-3">
+            <button
+              onClick={() => handleResponse(false)}
+              className="w-1/2 cursor-pointer px-3 py-1.5 text-sm rounded-md bg-mf-safety-opacity text-mf-safety-500 hover:opacity-50"
+            >
+              Reject
+            </button>
+            <button
+              onClick={() => handleResponse(true)}
+              disabled={!wallets.some(wallet => wallet.selected)}
+              className="w-1/2 cursor-pointer px-3 py-1.5 text-sm rounded-md bg-mf-sybil-opacity text-mf-sybil-500 hover:opacity-50 disabled:bg-mf-ash-500 disabled:text-mf-edge-700"
+            >
+              Approve
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -1,17 +1,13 @@
-import { KeyringService } from "./KeyringService";
-import { MESSAGE_TYPES, ERROR_TYPES } from "../../types/messages";
-import type {
-  ResponseMessage,
-  ExtensionMessage,
-  DappMessage,
-} from "../../types/messages";
+import { ERROR_TYPES, MESSAGE_TYPES } from '../../types/messages';
+import type { DappMessage, ExtensionMessage, ResponseMessage } from '../../types/messages';
+import { KeyringService } from './KeyringService';
 
 const sendErrorResponse = (
   sendResponse: (response: ResponseMessage) => void,
   error: string,
   details?: unknown
 ) => {
-  console.error(`[MessageHandler] ${error}`, details || "");
+  console.error(`[MessageHandler] ${error}`, details || '');
   sendResponse({ success: false, error, details });
 };
 
@@ -44,7 +40,7 @@ const MessageService = {
       KeyringService.lockWallets();
       sendResponse({ success: true });
     } catch (error) {
-      console.error("[MessageHandler] Error handling wallets locked:", error);
+      console.error('[MessageHandler] Error handling wallets locked:', error);
       sendErrorResponse(sendResponse, ERROR_TYPES.UNKNOWN_ERROR, error);
     }
     return true;
@@ -78,7 +74,7 @@ const MessageService = {
           return true;
 
         default:
-          console.log("[MessageHandler] Unknown message type:", message.type);
+          console.log('[MessageHandler] Unknown message type:', message.type);
           sendErrorResponse(sendResponse, ERROR_TYPES.UNKNOWN_ERROR);
           return true;
       }

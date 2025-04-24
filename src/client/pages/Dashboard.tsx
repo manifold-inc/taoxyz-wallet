@@ -1,41 +1,66 @@
-import { motion } from 'framer-motion';
-
 import { useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
-import type { Stake, Subnet } from '../../types/client';
-import { NotificationType } from '../../types/client';
-import WalletSelection from '../components/common/WalletSelection';
-import DashboardOverview from '../components/dashboard/DashboardOverview';
-import PortfolioOverview from '../components/dashboard/PortfolioOverview';
-import { useNotification } from '../contexts/NotificationContext';
-import { usePolkadotApi } from '../contexts/PolkadotApiContext';
-import { useWallet } from '../contexts/WalletContext';
+import WalletSelection from '@/client/components/common/WalletSelection';
+import DashboardOverview from '@/client/components/dashboard/DashboardOverview';
+import PortfolioOverview from '@/client/components/dashboard/portfolio/PortfolioOverview';
+import Transaction from '@/client/components/dashboard/transaction/Transaction';
+import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
+import { useNotification } from '@/client/contexts/NotificationContext';
+import { usePolkadotApi } from '@/client/contexts/PolkadotApiContext';
+import { useWallet } from '@/client/contexts/WalletContext';
+import type { Stake, Subnet } from '@/types/client';
+import { NotificationType } from '@/types/client';
+import { raoToTao } from '@/utils/utils';
 
-const API_URL = 'https://api.coingecko.com/api/v3';
-const NETWORK_ID = 'bittensor';
+const API_URL = 'https://tao.xyz/api/price';
 
-// [Timestamp, Price]
-interface PriceData {
-  prices: [number, number][];
+/**
+ * Dashboard Overview
+ *  Overview Modal
+ *    Total Balance / Free Balance - OVERVIEW
+ *      - Fetch Free Balance
+ *      - Fetch Subnets
+ *      - Fetch Stakes
+ *      - Calculate Total Balance (Free + (Stakes * Subnet Price))
+ *    Free Balance / Subnet Price - CREATE STAKE
+ *      - Fetch Free Balance
+ *      - Fetch Subnet
+ *    Stake Balance(a) / Subnet Price - ADD STAKE
+ *      - Fetch Free Balance
+ *      - Fetch Stake
+ *      - Fetch Subnet
+ *    Stake Balance(a) / Subnet Price - REMOVE STAKE
+ *      - Fetch Stake
+ *      - Fetch Subnet
+ *    Stake Balance(a) / Subnet Price - MOVE STAKE
+ *      - Fetch Stake (What if they want to move to another existing stake?)
+ *      - Fetch Subnet
+ *    Free Balance / Total Balance - TRANSFER
+ *      - Fetch Free Balance
+ *      - Fetch Subnet
+ *      - Fetch Stake
+ *      - Calculate Total Balance (Free + (Stakes * Subnet Price))
+ *
+ *  Action Buttons
+ *    Stake (Selected) - CREATE STAKE
+ *    Transfer (Selected) - TRANSFER
+ *
+ * Modular Section
+ *  Portfolio Overview - OVERVIEW
+ *  Transaction - ADD STAKE / REMOVE STAKE / MOVE STAKE
+ */
+
+interface TaoPriceResponse {
+  currentPrice: number;
+  price24hAgo: number;
+  priceChange24h: number;
 }
 
-const calculatePriceChange = (
-  prices: [number, number][]
-): { price: number; priceChange: number } => {
-  const [price, oldPrice] = [prices[0][1], prices[prices.length - 1][1]];
-  const priceChange = ((price - oldPrice) / oldPrice) * 100;
-
-  return {
-    price,
-    priceChange,
-  };
-};
-
 export const Dashboard = () => {
-  const navigate = useNavigate();
   const { showNotification } = useNotification();
   const { api } = usePolkadotApi();
+  const { dashboardState, setDashboardFreeBalance, setDashboardSubnets, setDashboardStakes } =
+    useDashboard();
   const { currentAddress } = useWallet();
 
   const [stakes, setStakes] = useState<Stake[]>([]);
@@ -43,7 +68,7 @@ export const Dashboard = () => {
   const [freeTao, setFreeTao] = useState<number | null>(null);
 
   const [taoPrice, setTaoPrice] = useState<number | null>(null);
-  const [priceChangePercentage, setPriceChangePercentage] = useState<number | null>(null);
+  const [priceChange24h, setPriceChange24h] = useState<number | null>(null);
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const prevAddressRef = useRef<string | null>(null);
@@ -52,7 +77,6 @@ export const Dashboard = () => {
     if (!api || !address || (!forceRefresh && address === prevAddressRef.current)) return;
     setIsLoading(true);
     prevAddressRef.current = address;
-
     try {
       const [subnets, freeTao, stakes] = await Promise.all([
         api.getSubnets(),
@@ -85,8 +109,11 @@ export const Dashboard = () => {
       }
 
       setSubnets(subnets);
-      setFreeTao(freeTao);
+      setDashboardSubnets(subnets);
+      setFreeTao(raoToTao(freeTao));
+      setDashboardFreeBalance(freeTao);
       setStakes(stakes);
+      setDashboardStakes(stakes);
     } finally {
       setIsLoading(false);
     }
@@ -95,13 +122,10 @@ export const Dashboard = () => {
   const fetchTaoPrice = async (): Promise<void> => {
     setIsLoading(true);
     try {
-      const response = await fetch(
-        `${API_URL}/coins/${NETWORK_ID}/market_chart?vs_currency=usd&days=1`
-      );
-      const data = (await response.json()) as PriceData;
-      const { price, priceChange } = calculatePriceChange(data.prices);
-      setTaoPrice(price);
-      setPriceChangePercentage(priceChange);
+      const response = await fetch(`${API_URL}`);
+      const data = (await response.json()) as TaoPriceResponse;
+      setTaoPrice(data.currentPrice);
+      setPriceChange24h(data.priceChange24h);
     } catch {
       showNotification({
         type: NotificationType.Error,
@@ -118,60 +142,41 @@ export const Dashboard = () => {
   }
 
   return (
-    <div className="flex flex-col items-center w-full h-full pt-6 bg-mf-night-500">
+    <div className="flex flex-col items-center w-full h-full pt-4 bg-mf-night-500">
       {/* Wallet Selection */}
       <WalletSelection />
 
+      {/* Modular Overview */}
       <div className="border-b border-mf-ash-300 w-full">
-        <div className="flex flex-col w-full gap-3 px-5 py-3">
-          {/* Overview */}
+        <div className="w-full px-5 py-3">
           <DashboardOverview
             stakes={stakes}
             subnets={subnets}
             freeTao={freeTao}
             taoPrice={taoPrice}
-            priceChangePercentage={priceChangePercentage}
+            priceChange24h={priceChange24h}
             isLoading={isLoading}
           />
-          {/* Action Buttons */}
-          <div className="flex justify-between gap-3 w-full">
-            <motion.button
-              onClick={() => navigate('/add-stake')}
-              className="w-1/3 py-1.5 bg-mf-sybil-opacity rounded-sm cursor-pointer text-mf-sybil-500 border border-mf-sybil-opacity hover:border-mf-sybil-500 transition-colors hover:text-mf-edge-500"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <span className="text-sm">Stake</span>
-            </motion.button>
-            <motion.button
-              onClick={() => navigate('/move-stake')}
-              className="w-1/3 py-1.5 bg-mf-red-opacity rounded-sm cursor-pointer text-mf-red-500 border border-mf-red-opacity hover:border-mf-red-500 transition-colors hover:text-mf-edge-500"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <span className="text-sm">Unstake</span>
-            </motion.button>
-            <motion.button
-              onClick={() => navigate('/transfer')}
-              className="w-1/3 py-1.5 bg-mf-safety-opacity rounded-sm cursor-pointer text-mf-safety-500 border border-mf-safety-opacity hover:border-mf-safety-500 transition-colors hover:text-mf-edge-500"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <span className="text-sm">Transfer</span>
-            </motion.button>
-          </div>
         </div>
       </div>
 
-      {/* Portfolio Overview */}
+      {/* Modular Section */}
       <div className="w-full px-5 py-3">
-        {currentAddress && (
+        {dashboardState === DashboardState.OVERVIEW && currentAddress && (
           <PortfolioOverview
             stakes={stakes}
             subnets={subnets}
-            address={currentAddress}
             isLoading={isLoading}
-            onRefresh={() => (currentAddress ? fetchData(currentAddress, true) : Promise.resolve())}
+            onRefresh={() => fetchData(currentAddress, true)}
+          />
+        )}
+
+        {dashboardState !== DashboardState.OVERVIEW && currentAddress && (
+          <Transaction
+            address={currentAddress}
+            dashboardState={dashboardState}
+            isLoading={isLoading}
+            onRefresh={() => fetchData(currentAddress, true)}
           />
         )}
       </div>

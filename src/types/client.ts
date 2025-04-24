@@ -48,7 +48,7 @@ export interface Stake {
   netuid: number;
   hotkey: string;
   coldkey: string;
-  stake: number;
+  stake: bigint;
   emission: number;
   taoEmission: number;
   drain: number;
@@ -58,6 +58,7 @@ export interface Stake {
 
 export interface Slippage {
   tokens: number;
+  slippage: number;
   slippagePercentage: number;
 }
 
