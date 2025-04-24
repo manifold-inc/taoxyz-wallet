@@ -72,20 +72,10 @@ const Sign = () => {
         );
 
         if (signature instanceof Error) {
-          if (signature.message === 'Wallet is Locked') {
-            showNotification({
-              type: NotificationType.Error,
-              message: 'Invalid Password',
-            });
-            return;
-          }
           showNotification({
             type: NotificationType.Error,
-            message: signature.message,
+            message: 'Invalid Password',
           });
-          setTimeout(() => {
-            window.close();
-          }, 3000);
           return;
         }
 
