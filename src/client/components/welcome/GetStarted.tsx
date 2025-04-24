@@ -1,4 +1,4 @@
-import taoxyz from '@public/icons/taoxyz.svg';
+import taoxyz from '@public/assets/taoxyz.svg';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Info, Plus, WalletCards } from 'lucide-react';
 
@@ -92,33 +92,27 @@ const GetStarted = () => {
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.2, duration: 0.5 }}
               >
-                <motion.button
-                  className="rounded-full cursor-pointer flex items-center gap-1.5 px-6 py-1 bg-mf-sybil-opacity rounded-full text-sm text-mf-sybil-500 cursor-pointer border border-mf-sybil-opacity hover:border-mf-sybil-500 transition-colors hover:text-mf-edge-500"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                <button
+                  className="w-full rounded-full cursor-pointer flex items-center gap-1.5 px-6 py-1.5 bg-mf-sybil-opacity text-sm text-mf-sybil-500 hover:opacity-50"
                   onClick={() => handleNavigation('/add-wallet', Mode.CREATE_WALLET)}
                 >
                   <WalletCards className="w-4 h-4" />
                   <span>Create Wallet</span>
-                </motion.button>
-                <motion.button
-                  className="rounded-full cursor-pointer flex items-center gap-1.5 px-6 py-1 bg-mf-safety-opacity rounded-full text-sm text-mf-safety-500 cursor-pointer border border-mf-safety-opacity hover:border-mf-safety-500 transition-colors hover:text-mf-edge-500"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                </button>
+                <button
+                  className="w-full rounded-full cursor-pointer flex items-center gap-1.5 px-6 py-1.5 bg-mf-safety-opacity text-sm text-mf-safety-500 hover:opacity-50"
                   onClick={() => handleNavigation('/add-wallet', Mode.IMPORT_MNEMONIC)}
                 >
                   <Plus className="w-4 h-4" />
                   <span>Existing Wallet</span>
-                </motion.button>
-                <motion.button
-                  className="rounded-full cursor-pointer flex items-center gap-1.5 text-mf-ash-300 text-xs hover:text-mf-edge-500 transition-colors"
+                </button>
+                <button
+                  className="rounded-full cursor-pointer flex items-center gap-1.5 text-mf-edge-700 text-xs hover:text-mf-edge-500"
                   onClick={() => setShowDisclaimer(true)}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
                 >
                   <Info className="w-4 h-4" />
                   <span>Disclaimer</span>
-                </motion.button>
+                </button>
               </motion.div>
             </motion.div>
 

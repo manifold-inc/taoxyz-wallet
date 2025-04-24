@@ -1,21 +1,22 @@
+import taoxyz from '@public/assets/taoxyz.svg';
 import { AnimatePresence, motion } from 'framer-motion';
 
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import type { KeyringPair } from '@polkadot/keyring/types';
 
-import taoxyz from '../../../public/icons/taoxyz.svg';
-import { NotificationType } from '../../types/client';
-import CreateWallet from '../components/addWallet/CreateWallet';
-import DisplayMnemonic from '../components/addWallet/DisplayMnemonic';
-import ImportMnemonic from '../components/addWallet/ImportMnemonic';
-import ImportWallet from '../components/addWallet/ImportWallet';
-import MnemonicVerify from '../components/addWallet/VerifyMnemonic';
-import { useLock } from '../contexts/LockContext';
-import { useNotification } from '../contexts/NotificationContext';
-import { useWallet } from '../contexts/WalletContext';
-import { Mode, useWalletCreation } from '../contexts/WalletCreationContext';
-import MessageService from '../services/MessageService';
+import CreateWallet from '@/client/components/addWallet/CreateWallet';
+import DisplayMnemonic from '@/client/components/addWallet/DisplayMnemonic';
+import ImportMnemonic from '@/client/components/addWallet/ImportMnemonic';
+import ImportWallet from '@/client/components/addWallet/ImportWallet';
+import MnemonicVerify from '@/client/components/addWallet/VerifyMnemonic';
+import { useLock } from '@/client/contexts/LockContext';
+import { useNotification } from '@/client/contexts/NotificationContext';
+import { useWallet } from '@/client/contexts/WalletContext';
+import { Mode, useWalletCreation } from '@/client/contexts/WalletCreationContext';
+import MessageService from '@/client/services/MessageService';
+import { NotificationType } from '@/types/client';
 
 const getStepTitle = (mode: Mode) => {
   switch (mode) {
@@ -90,10 +91,15 @@ const AddWallet = () => {
         return <ImportMnemonic onContinue={handleImportMnemonic} />;
 
       default:
-        handleBack();
         return null;
     }
   };
+
+  useEffect(() => {
+    if (state.mode === Mode.NULL) {
+      handleBack();
+    }
+  }, [state.mode]);
 
   const handleBack = () => {
     actions.reset();
@@ -114,7 +120,7 @@ const AddWallet = () => {
           {/* Header */}
           <div className="flex flex-col items-center justify-center gap-3">
             <img src={taoxyz} alt="Taoxyz Logo" className="w-8 h-8" />
-            <p className="text-mf-edge-500 text-2xl font-bold blinker-font">
+            <p className="text-mf-edge-500 text-2xl font-semibold blinker-font">
               {getStepTitle(state.mode)}
             </p>
           </div>

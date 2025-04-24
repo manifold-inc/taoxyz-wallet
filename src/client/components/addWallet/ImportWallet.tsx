@@ -1,15 +1,12 @@
-import { motion } from 'framer-motion';
-
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import type { KeyringPair } from '@polkadot/keyring/types';
 
+import { useNotification } from '@/client/contexts/NotificationContext';
 import { useWalletCreation } from '@/client/contexts/WalletCreationContext';
-
-import { NotificationType } from '../../../types/client';
-import { useNotification } from '../../contexts/NotificationContext';
-import KeyringService from '../../services/KeyringService';
+import KeyringService from '@/client/services/KeyringService';
+import { NotificationType } from '@/types/client';
 
 interface ImportWalletProps {
   onSuccess: (wallet: KeyringPair) => Promise<void>;
@@ -199,33 +196,21 @@ const ImportWallet = ({ onSuccess }: ImportWalletProps) => {
       </div>
 
       {/* Buttons */}
-      <div className="flex flex-col items-center gap-3 pt-4">
-        <motion.button
+      <div className="flex flex-col items-center gap-3 pt-4 px-16">
+        <button
           type="button"
           onClick={handleBack}
-          className="cursor-pointer flex items-center gap-1.5 px-6 py-1 bg-mf-safety-opacity rounded-full text-sm text-mf-safety-500 border border-mf-safety-opacity hover:border-mf-safety-500 transition-colors hover:text-mf-edge-500"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          className="w-full cursor-pointer text-center gap-1.5 px-6 py-1.5 bg-mf-safety-opacity rounded-full text-sm text-mf-safety-500 hover:opacity-50"
         >
-          <span>Back</span>
-        </motion.button>
-        <motion.button
+          Back
+        </button>
+        <button
           type="submit"
           disabled={nameStatus !== 'Valid Wallet Name' || passwordStatus !== 'Valid Password'}
-          className="cursor-pointer flex items-center gap-1.5 px-6 py-1 bg-mf-sybil-opacity rounded-full text-sm text-mf-sybil-500 border border-mf-sybil-opacity hover:border-mf-sybil-500 transition-colors hover:text-mf-edge-500 disabled:bg-mf-ash-500 disabled:border-mf-ash-500 disabled:text-mf-edge-700 disabled:cursor-not-allowed"
-          whileHover={
-            nameStatus === 'Valid Wallet Name' && passwordStatus === 'Valid Password'
-              ? { scale: 1.05 }
-              : undefined
-          }
-          whileTap={
-            nameStatus === 'Valid Wallet Name' && passwordStatus === 'Valid Password'
-              ? { scale: 0.95 }
-              : undefined
-          }
+          className="w-full cursor-pointer text-center gap-1.5 px-6 py-1.5 bg-mf-sybil-opacity rounded-full text-sm text-mf-sybil-500 hover:opacity-50 disabled:bg-mf-ash-500 disabled:text-mf-edge-700 disabled:cursor-not-allowed"
         >
-          <span>Import</span>
-        </motion.button>
+          Import
+        </button>
       </div>
     </form>
   );

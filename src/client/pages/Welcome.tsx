@@ -11,7 +11,7 @@ enum Step {
 
 const Welcome = () => {
   const location = useLocation();
-  const [step, setStep] = useState<Step>(location.state.step || Step.INITIAL);
+  const [step, setStep] = useState<Step>(location.state?.step ?? Step.INITIAL);
 
   const handleGetStarted = () => {
     setStep(Step.GET_STARTED);
@@ -28,7 +28,7 @@ const Welcome = () => {
     }
   };
 
-  return <div className="h-screen w-screen">{renderStep()}</div>;
+  return <div className="h-full w-full">{renderStep()}</div>;
 };
 
 export default Welcome;
