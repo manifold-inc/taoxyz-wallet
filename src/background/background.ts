@@ -1,14 +1,14 @@
-import { MESSAGE_TYPES, ERROR_TYPES } from "../types/messages";
+import { ERROR_TYPES, MESSAGE_TYPES } from '../types/messages';
 import type {
-  StoredRequest,
-  StoredSignRequest,
   DappMessage,
   ExtensionMessage,
   MessagePayloadMap,
-  ResponseMessage,
   PopupInfo,
-} from "../types/messages";
-import { generateId } from "../utils/utils";
+  ResponseMessage,
+  StoredRequest,
+  StoredSignRequest,
+} from '../types/messages';
+import { generateId } from '../utils/utils';
 
 const activePopups = new Map<number, PopupInfo>();
 
@@ -44,10 +44,7 @@ const sendMessageToTab = async <T extends keyof MessagePayloadMap>(
 
     await chrome.tabs.sendMessage(tabId, message);
   } catch (error) {
-    console.error(
-      `[Background] Failed to send message to tab ${tabId}:`,
-      error
-    );
+    console.error(`[Background] Failed to send message to tab ${tabId}:`, error);
     throw error;
   }
 };
@@ -57,15 +54,15 @@ const sendErrorResponse = (
   error: string,
   details?: unknown
 ) => {
-  console.error(`[Background] ${error}`, details || "");
+  console.error(`[Background] ${error}`, details || '');
   sendResponse({ success: false, error, details });
 };
 
 const rejectRequest = async (popupInfo: PopupInfo): Promise<void> => {
   let storedRequest = null;
   switch (popupInfo.route) {
-    case "connect":
-      storedRequest = await getStoredRequest("connectRequest");
+    case 'connect':
+      storedRequest = await getStoredRequest('connectRequest');
       if (storedRequest) {
         await sendMessageToTab(storedRequest.tabId, {
           type: MESSAGE_TYPES.CONNECT_RESPONSE,
@@ -74,11 +71,11 @@ const rejectRequest = async (popupInfo: PopupInfo): Promise<void> => {
             wallets: [],
           },
         });
-        await cleanupRequest("connectRequest");
+        await cleanupRequest('connectRequest');
       }
       break;
-    case "sign":
-      storedRequest = await getStoredRequest("signRequest");
+    case 'sign':
+      storedRequest = await getStoredRequest('signRequest');
       if (storedRequest) {
         await sendMessageToTab(storedRequest.tabId, {
           type: MESSAGE_TYPES.SIGN_RESPONSE,
@@ -87,24 +84,21 @@ const rejectRequest = async (popupInfo: PopupInfo): Promise<void> => {
             approved: false,
           },
         });
-        await cleanupRequest("signRequest");
+        await cleanupRequest('signRequest');
       }
       break;
     default:
-      console.log("[Background] Unknown Route:", popupInfo.route);
+      console.log('[Background] Unknown Route:', popupInfo.route);
       break;
   }
 };
 
-const openPopup = async (
-  route: string,
-  origin: string
-): Promise<chrome.windows.Window> => {
+const openPopup = async (route: string, origin: string): Promise<chrome.windows.Window> => {
   const popup = await chrome.windows.create({
     url: chrome.runtime.getURL(`index.html#/${route}`),
-    type: "popup",
-    width: 366,
-    height: 628,
+    type: 'popup',
+    width: 450,
+    height: 700,
   });
 
   if (popup.id) {
@@ -144,16 +138,16 @@ async function handleConnectRequest(
     }
 
     const requestId = generateId();
-    await storeRequest("connectRequest", {
+    await storeRequest('connectRequest', {
       origin: message.payload.origin,
       requestId: requestId.toString(),
       tabId: sender.tab.id,
     });
 
-    await openPopup("connect", message.payload.origin);
+    await openPopup('connect', message.payload.origin);
     sendResponse({ success: true });
   } catch (error) {
-    console.error("[Background] Error handling connect request:", error);
+    console.error('[Background] Error handling connect request:', error);
     sendErrorResponse(sendResponse, ERROR_TYPES.UNKNOWN_ERROR, error);
   }
 }
@@ -162,7 +156,7 @@ async function handleConnectResponse(
   message: ExtensionMessage & { type: typeof MESSAGE_TYPES.CONNECT_RESPONSE },
   sendResponse: (response: { success: boolean; error?: string }) => void
 ) {
-  const request = await getStoredRequest("connectRequest");
+  const request = await getStoredRequest('connectRequest');
   if (!request) {
     sendErrorResponse(sendResponse, ERROR_TYPES.NO_REQUEST);
     return;
@@ -179,10 +173,10 @@ async function handleConnectResponse(
       payload: message.payload,
     });
 
-    await cleanupRequest("connectRequest");
+    await cleanupRequest('connectRequest');
     sendResponse({ success: true });
   } catch (error) {
-    console.error("[Background] Error handling connect response:", error);
+    console.error('[Background] Error handling connect response:', error);
     sendErrorResponse(sendResponse, ERROR_TYPES.UNKNOWN_ERROR, error);
   }
 }
@@ -234,7 +228,7 @@ async function handleSignRequest(
     }
 
     const requestId = generateId();
-    await storeRequest("signRequest", {
+    await storeRequest('signRequest', {
       address,
       data: message.payload.data,
       origin,
@@ -242,7 +236,7 @@ async function handleSignRequest(
       tabId: sender.tab.id,
     });
 
-    await openPopup("sign", origin);
+    await openPopup('sign', origin);
     sendResponse({ success: true });
   } catch (error) {
     sendErrorResponse(sendResponse, ERROR_TYPES.UNKNOWN_ERROR, error);
@@ -253,7 +247,7 @@ async function handleSignResponse(
   message: ExtensionMessage & { type: typeof MESSAGE_TYPES.SIGN_RESPONSE },
   sendResponse: (response: { success: boolean; error?: string }) => void
 ) {
-  const request = await getStoredRequest("signRequest");
+  const request = await getStoredRequest('signRequest');
   if (!request.tabId) {
     sendErrorResponse(sendResponse, ERROR_TYPES.NO_TAB);
     return;
@@ -269,10 +263,10 @@ async function handleSignResponse(
       },
     });
 
-    await cleanupRequest("signRequest");
+    await cleanupRequest('signRequest');
     sendResponse({ success: true });
   } catch (error) {
-    console.error("[Background] Error handling sign response:", error);
+    console.error('[Background] Error handling sign response:', error);
     sendErrorResponse(sendResponse, ERROR_TYPES.UNKNOWN_ERROR, error);
   }
 }
@@ -287,7 +281,7 @@ async function handleWalletsLocked(
     });
     sendResponse({ success: true });
   } catch (error) {
-    console.error("[Background] Error handling wallets locked:", error);
+    console.error('[Background] Error handling wallets locked:', error);
     sendErrorResponse(sendResponse, ERROR_TYPES.UNKNOWN_ERROR, error);
   }
 }
@@ -297,10 +291,10 @@ async function handleStartLockTimer(
   sendResponse: (response: { success: boolean; error?: string }) => void
 ) {
   try {
-    chrome.alarms.create("lockTimer", { delayInMinutes: 15 });
+    chrome.alarms.create('lockTimer', { delayInMinutes: 15 });
     sendResponse({ success: true });
   } catch (error) {
-    console.error("[Background] Error starting lock timer:", error);
+    console.error('[Background] Error starting lock timer:', error);
     sendErrorResponse(sendResponse, ERROR_TYPES.UNKNOWN_ERROR, error);
   }
 }
@@ -310,7 +304,7 @@ async function handleClearLockTimer(
   sendResponse: (response: { success: boolean; error?: string }) => void
 ) {
   try {
-    chrome.alarms.clear("lockTimer");
+    chrome.alarms.clear('lockTimer');
     sendResponse({ success: true });
   } catch (error) {
     sendErrorResponse(sendResponse, ERROR_TYPES.UNKNOWN_ERROR, error);
@@ -348,7 +342,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       break;
 
     default:
-      console.log("[Background] Unknown message type:", message.type);
+      console.log('[Background] Unknown message type:', message.type);
       sendErrorResponse(sendResponse, ERROR_TYPES.UNKNOWN_ERROR);
   }
 
@@ -356,8 +350,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 // When timer goes up, lock all accounts
-chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === "lockTimer") {
+chrome.alarms.onAlarm.addListener(alarm => {
+  if (alarm.name === 'lockTimer') {
     chrome.storage.local.set({ walletLocked: true }, () => {
       chrome.runtime.sendMessage({
         type: MESSAGE_TYPES.WALLETS_LOCKED,
@@ -367,7 +361,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 });
 
 // Popup close handler
-chrome.windows.onRemoved.addListener(async (windowId) => {
+chrome.windows.onRemoved.addListener(async windowId => {
   const popupInfo = activePopups.get(windowId);
   if (!popupInfo) return;
   activePopups.delete(windowId);
@@ -377,6 +371,6 @@ chrome.windows.onRemoved.addListener(async (windowId) => {
     await getStoredRequest(storageKey);
     await rejectRequest(popupInfo);
   } catch {
-    console.log("[Background] Request Already Handled");
+    console.log('[Background] Request Already Handled');
   }
 });

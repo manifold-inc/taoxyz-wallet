@@ -1,7 +1,8 @@
-import { copyFile, mkdir, rm, cp } from 'node:fs/promises';
 import { build } from 'bun';
 import { exec } from 'child_process';
+import { copyFile, cp, mkdir, rm } from 'node:fs/promises';
 import { promisify } from 'util';
+
 import config from '../build.config';
 
 const execAsync = promisify(exec);
