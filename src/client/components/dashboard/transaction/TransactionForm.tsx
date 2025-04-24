@@ -147,6 +147,11 @@ const TransactionForm = ({
         return true;
 
       case DashboardState.ADD_STAKE:
+        if (dashboardStake === null) return false;
+        if (dashboardFreeBalance === null) return false;
+        if (amountInRao > dashboardFreeBalance) return false;
+        return true;
+
       case DashboardState.REMOVE_STAKE:
       case DashboardState.MOVE_STAKE:
         if (dashboardStake === null) return false;
@@ -237,6 +242,15 @@ const TransactionForm = ({
     await handleSetupTransaction(e);
   };
 
+  const allowContinue = () => {
+    let result: boolean | null = null;
+    if (dashboardState === DashboardState.TRANSFER) {
+      result = amountValidation(Number(amountState.amount)) && toAddress !== '';
+    }
+    result = dashboardSubnet && dashboardValidator && amountValidation(Number(amountState.amount));
+    return result;
+  };
+
   return (
     <div className="w-full h-full flex flex-col gap-3">
       <form className="flex flex-col gap-4 items-center justify-center" onSubmit={handleFormSubmit}>
@@ -273,13 +287,7 @@ const TransactionForm = ({
           </button>
           <button
             type="submit"
-            disabled={
-              dashboardState === DashboardState.TRANSFER
-                ? !amountValidation(Number(amountState.amount)) || toAddress === ''
-                : !dashboardSubnet ||
-                  !dashboardValidator ||
-                  !amountValidation(Number(amountState.amount))
-            }
+            disabled={!allowContinue()}
             className="w-1/2 rounded-md text-center cursor-pointer py-1.5 gap-1 disabled:cursor-not-allowed hover:opacity-50 disabled:hover:opacity-100 disabled:bg-mf-ash-500 disabled:border-mf-ash-500 disabled:text-mf-edge-700 enabled:bg-mf-sybil-opacity enabled:border-mf-sybil-opacity enabled:text-mf-sybil-500"
           >
             Continue

@@ -14,42 +14,6 @@ import { raoToTao } from '@/utils/utils';
 
 const API_URL = 'https://tao.xyz/api/price';
 
-/**
- * Dashboard Overview
- *  Overview Modal
- *    Total Balance / Free Balance - OVERVIEW
- *      - Fetch Free Balance
- *      - Fetch Subnets
- *      - Fetch Stakes
- *      - Calculate Total Balance (Free + (Stakes * Subnet Price))
- *    Free Balance / Subnet Price - CREATE STAKE
- *      - Fetch Free Balance
- *      - Fetch Subnet
- *    Stake Balance(a) / Subnet Price - ADD STAKE
- *      - Fetch Free Balance
- *      - Fetch Stake
- *      - Fetch Subnet
- *    Stake Balance(a) / Subnet Price - REMOVE STAKE
- *      - Fetch Stake
- *      - Fetch Subnet
- *    Stake Balance(a) / Subnet Price - MOVE STAKE
- *      - Fetch Stake (What if they want to move to another existing stake?)
- *      - Fetch Subnet
- *    Free Balance / Total Balance - TRANSFER
- *      - Fetch Free Balance
- *      - Fetch Subnet
- *      - Fetch Stake
- *      - Calculate Total Balance (Free + (Stakes * Subnet Price))
- *
- *  Action Buttons
- *    Stake (Selected) - CREATE STAKE
- *    Transfer (Selected) - TRANSFER
- *
- * Modular Section
- *  Portfolio Overview - OVERVIEW
- *  Transaction - ADD STAKE / REMOVE STAKE / MOVE STAKE
- */
-
 interface TaoPriceResponse {
   currentPrice: number;
   price24hAgo: number;

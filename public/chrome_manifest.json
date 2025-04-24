@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Taoxyz Wallet",
-  "version": "1.1.4",
+  "version": "1.2.0",
   "description": "A wallet extension for the Bittensor network",
   "permissions": ["storage", "alarms"],
   "content_security_policy": {

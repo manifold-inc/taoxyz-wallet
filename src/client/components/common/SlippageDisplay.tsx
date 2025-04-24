@@ -105,7 +105,7 @@ const SlippageDisplay = ({ amount }: SlippageDisplayProps) => {
     <div className="w-full flex flex-col gap-2 p-3">
       {/* Pay */}
       <div className="flex items-center justify-between">
-        <p className="text-mf-edge-700 text-sm font-medium">Pay</p>
+        <p className="text-mf-edge-700 text-sm font-medium">Amount</p>
         <p className="text-mf-sybil-500 text-sm font-medium">
           {formatNumber(parseFloat(amount))} {payToken}
         </p>

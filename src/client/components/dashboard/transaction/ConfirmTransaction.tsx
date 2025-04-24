@@ -36,7 +36,7 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
     useDashboard();
   const [password, setPassword] = useState('');
   const [passwordSelected, setPasswordSelected] = useState(false);
-  const [status, setStatus] = useState<TransactionStatus>('ready');
+  const [status, setStatus] = useState<TransactionStatus | null>(null);
   const [actualTotal, setActualTotal] = useState<bigint | null>(null);
   const [initialBalance, setInitialBalance] = useState<bigint | null>(null);
 
@@ -136,33 +136,35 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
         const stake = stakes.find(
           s => s.hotkey === dashboardValidator.hotkey && s.netuid === dashboardSubnet?.id
         );
-        if (stake) {
-          // Calculate actual total based on transaction type
-          switch (dashboardState) {
-            case DashboardState.CREATE_STAKE:
+        // Calculate actual total based on transaction type
+        switch (dashboardState) {
+          case DashboardState.CREATE_STAKE:
+            if (!stake) return;
+            setActualTotal(stake.stake);
+            break;
+          case DashboardState.ADD_STAKE:
+            if (dashboardStake) {
+              if (!stake) return;
+              setActualTotal(stake.stake - dashboardStake.stake);
+            }
+            break;
+          case DashboardState.REMOVE_STAKE:
+            if (initialBalance && balance) {
+              setActualTotal(balance - initialBalance);
+            }
+            break;
+          case DashboardState.MOVE_STAKE:
+            if (existingStake) {
+              if (!stake) return;
+              setActualTotal(stake.stake - existingStake.stake);
+            } else {
+              if (!stake) return;
               setActualTotal(stake.stake);
-              break;
-            case DashboardState.ADD_STAKE:
-              if (dashboardStake) {
-                setActualTotal(stake.stake - dashboardStake.stake);
-              }
-              break;
-            case DashboardState.REMOVE_STAKE:
-              if (initialBalance && balance) {
-                setActualTotal(balance - initialBalance);
-              }
-              break;
-            case DashboardState.MOVE_STAKE:
-              if (existingStake) {
-                setActualTotal(stake.stake - existingStake.stake);
-              } else {
-                setActualTotal(stake.stake);
-              }
-              break;
-            case DashboardState.TRANSFER:
-              setActualTotal(BigInt(params.amountInRao));
-              break;
-          }
+            }
+            break;
+          case DashboardState.TRANSFER:
+            setActualTotal(BigInt(params.amountInRao));
+            break;
         }
       }
     } catch (error) {

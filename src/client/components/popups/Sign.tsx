@@ -72,20 +72,10 @@ const Sign = () => {
         );
 
         if (signature instanceof Error) {
-          if (signature.message === 'Wallet is Locked') {
-            showNotification({
-              type: NotificationType.Error,
-              message: 'Invalid Password',
-            });
-            return;
-          }
           showNotification({
             type: NotificationType.Error,
-            message: signature.message,
+            message: 'Invalid Password',
           });
-          setTimeout(() => {
-            window.close();
-          }, 3000);
           return;
         }
 
@@ -241,7 +231,15 @@ const Sign = () => {
           <div className="w-full bg-mf-ash-500 rounded-md p-2">{renderPayload()}</div>
 
           {/* Buttons */}
-          <div className="w-full flex flex-col gap-3">
+          <form
+            onSubmit={e => {
+              e.preventDefault();
+              if (password) {
+                handleResponse(true);
+              }
+            }}
+            className="w-full flex flex-col gap-3"
+          >
             <input
               type="password"
               value={password}
@@ -252,13 +250,14 @@ const Sign = () => {
 
             <div className="w-full flex gap-3">
               <button
+                type="button"
                 onClick={() => handleResponse(false)}
                 className="w-1/2 text-sm rounded-md cursor-pointer px-3 py-1.5 bg-mf-safety-opacity text-mf-safety-500 hover:opacity-50"
               >
                 Reject
               </button>
               <button
-                onClick={() => handleResponse(true)}
+                type="submit"
                 disabled={!password}
                 className={`w-1/2 text-sm rounded-md px-3 py-1.5 hover:opacity-50 ${
                   !password
@@ -271,13 +270,13 @@ const Sign = () => {
             </div>
 
             <div className="flex justify-center">
-              <button onClick={handleForgetPassword}>
+              <button type="button" onClick={handleForgetPassword}>
                 <span className="text-xs text-mf-safety-500 hover:text-mf-safety-300 underline underline-offset-2 decoration-mf-safety-500 hover:decoration-mf-safety-300 cursor-pointer">
                   Forgot Password?
                 </span>
               </button>
             </div>
-          </div>
+          </form>
         </div>
       </div>
     </>
