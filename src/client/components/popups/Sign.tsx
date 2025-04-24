@@ -1,40 +1,36 @@
-import { useState } from "react";
-import type {
-  SignerPayloadJSON,
-  SignerPayloadRaw,
-} from "@polkadot/types/types";
+import taoxyz from '@public/assets/taoxyz.svg';
 
-import KeyringService from "../../services/KeyringService";
-import { useNotification } from "../../contexts/NotificationContext";
-import { useWallet } from "../../contexts/WalletContext";
-import MessageService from "../../services/MessageService";
-import ConfirmAction from "../common/ConfirmAction";
-import { NotificationType } from "../../../types/client";
-import { MESSAGE_TYPES } from "../../../types/messages";
-import type {
-  StoredSignRequest,
-  SignResponsePayload,
-} from "../../../types/messages";
-import taoxyz from "../../../../public/icons/taoxyz.svg";
+import { useState } from 'react';
+
+import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
+
+import ConfirmAction from '@/client/components/common/ConfirmAction';
+import { useNotification } from '@/client/contexts/NotificationContext';
+import { useWallet } from '@/client/contexts/WalletContext';
+import KeyringService from '@/client/services/KeyringService';
+import MessageService from '@/client/services/MessageService';
+import { NotificationType } from '@/types/client';
+import { MESSAGE_TYPES } from '@/types/messages';
+import type { SignResponsePayload, StoredSignRequest } from '@/types/messages';
 
 const Sign = () => {
   const { showNotification } = useNotification();
   const { setCurrentAddress } = useWallet();
   const [request, setRequest] = useState<StoredSignRequest | null>(null);
-  const [password, setPassword] = useState("");
+  const [password, setPassword] = useState('');
   const [showForgetPassword, setShowForgetPassword] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
   const getRequest = async () => {
     try {
-      const result = await chrome.storage.local.get("signRequest");
+      const result = await chrome.storage.local.get('signRequest');
       if (!result.signRequest) throw new Error();
       setRequest(result.signRequest);
       return result.signRequest;
     } catch {
       showNotification({
         type: NotificationType.Error,
-        message: "Failed to Get Request",
+        message: 'Failed to Get Request',
       });
       setTimeout(() => {
         window.close();
@@ -48,7 +44,7 @@ const Sign = () => {
       if (!request) {
         showNotification({
           type: NotificationType.Error,
-          message: "No Request Found",
+          message: 'No Request Found',
         });
         setTimeout(() => {
           window.close();
@@ -58,10 +54,10 @@ const Sign = () => {
 
       if (approved) {
         const type = checkPayloadType(request.data);
-        if (type === "INVALID") {
+        if (type === 'INVALID') {
           showNotification({
             type: NotificationType.Error,
-            message: "Invalid Payload Format",
+            message: 'Invalid Payload Format',
           });
           setTimeout(() => {
             window.close();
@@ -76,20 +72,10 @@ const Sign = () => {
         );
 
         if (signature instanceof Error) {
-          if (signature.message === "Wallet is Locked") {
-            showNotification({
-              type: NotificationType.Error,
-              message: "Invalid Password",
-            });
-            return;
-          }
           showNotification({
             type: NotificationType.Error,
-            message: signature.message,
+            message: 'Invalid Password',
           });
-          setTimeout(() => {
-            window.close();
-          }, 3000);
           return;
         }
 
@@ -120,18 +106,18 @@ const Sign = () => {
     } catch {
       showNotification({
         type: NotificationType.Error,
-        message: approved ? "Failed to Sign" : "Failed to Reject",
+        message: approved ? 'Failed to Sign' : 'Failed to Reject',
       });
     }
   };
 
   const checkPayloadType = (data: SignerPayloadJSON | SignerPayloadRaw) => {
-    if ("method" in data) {
-      return "JSON";
-    } else if ("data" in data) {
-      return "RAW";
+    if ('method' in data) {
+      return 'JSON';
+    } else if ('data' in data) {
+      return 'RAW';
     } else {
-      return "INVALID";
+      return 'INVALID';
     }
   };
 
@@ -143,18 +129,18 @@ const Sign = () => {
     if (!request) return null;
     const type = checkPayloadType(request.data);
 
-    if (type === "JSON") {
+    if (type === 'JSON') {
       const payload = request.data as SignerPayloadJSON;
       return (
-        <div className="flex">
+        <div className="flex gap-2">
           <div className="flex flex-col flex-shrink-0">
-            <p className="text-mf-milk-300">Method:</p>
-            <p className="text-mf-milk-300">Block Hash:</p>
-            <p className="text-mf-milk-300">Genesis:</p>
-            <p className="text-mf-milk-300">Era:</p>
-            <p className="text-mf-milk-300">Nonce:</p>
+            <p className="text-mf-edge-500">Method:</p>
+            <p className="text-mf-edge-500">Block Hash:</p>
+            <p className="text-mf-edge-500">Genesis:</p>
+            <p className="text-mf-edge-500">Era:</p>
+            <p className="text-mf-edge-500">Nonce:</p>
           </div>
-          <div className="flex flex-col min-w-0 flex-1 ml-2">
+          <div className="flex flex-col flex-1 min-w-0">
             <p className="text-mf-sybil-500 truncate">{payload.method}</p>
             <p className="text-mf-sybil-500 truncate">{payload.blockHash}</p>
             <p className="text-mf-sybil-500 truncate">{payload.genesisHash}</p>
@@ -165,13 +151,13 @@ const Sign = () => {
       );
     }
 
-    if (type === "RAW") {
+    if (type === 'RAW') {
       const payload = request.data as SignerPayloadRaw;
       return (
-        <div className="flex space-x-2">
+        <div className="flex gap-2">
           <div className="flex flex-col">
-            <p className="text-mf-milk-300">Data:</p>
-            <p className="text-mf-milk-300">Type:</p>
+            <p className="text-mf-edge-500">Data:</p>
+            <p className="text-mf-edge-500">Type:</p>
           </div>
           <div className="flex flex-col min-w-0">
             <p className="text-mf-sybil-500 truncate">{payload.data}</p>
@@ -199,8 +185,8 @@ const Sign = () => {
     <>
       <ConfirmAction
         isOpen={showForgetPassword}
-        title="Reset Password"
-        message="Are you sure you want to reset your password? This will require you to re-import your wallet."
+        title="Remove Wallet"
+        message="Are you sure you want to continue? This will remove your wallet and require you to re-import your wallet."
         onConfirm={async () => {
           setShowForgetPassword(false);
           KeyringService.deleteWallet(request?.address as string);
@@ -217,65 +203,80 @@ const Sign = () => {
         }}
         onCancel={() => setShowForgetPassword(false)}
       />
-      <div className="flex flex-col items-center h-full">
-        <div className="flex flex-col justify-center items-center space-y-2">
-          <img src={taoxyz} alt="Taoxyz Logo" className="w-16 h-16 mt-12" />
-          <h1 className="text-lg text-mf-milk-300">Sign Request</h1>
-        </div>
-
-        <div className="mt-6 bg-mf-ash-500 border-sm border-2 border-mf-sybil-500 p-3 text-sm flex space-x-2 w-80">
-          <div className="flex flex-col">
-            <p className="text-mf-milk-300">Origin</p>
-            <p className="text-mf-milk-300">Address</p>
-          </div>
-          <div className="flex flex-col min-w-0">
-            <p className="text-mf-sybil-500 truncate">{request?.origin}</p>
-            <p className="text-mf-sybil-500">
-              {request?.address.slice(0, 6)}...{request?.address.slice(-6)}
+      <div className="w-full h-full flex flex-col items-center">
+        <div className="max-w-88 p-5 flex flex-col items-center gap-6">
+          {/* Header */}
+          <div className="flex justify-center items-center gap-2 w-full">
+            <img src={taoxyz} alt="Taoxyz Logo" className="w-6 h-6" />
+            <p className="text-mf-edge-500 text-2xl font-semibold blinker-font mb-0.5">
+              SIGN REQUEST
             </p>
           </div>
-        </div>
 
-        <div className="mt-4 w-80 [&>*]:w-full bg-mf-ash-500 border-sm border-2 border-mf-ash-500 p-2">
-          {renderPayload()}
-        </div>
-
-        <div className="mt-4 w-80 [&>*]:w-full space-y-4">
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter Password to Sign"
-            className="p-2 text-sm bg-mf-ash-500 border-2 border-mf-ash-500 border-sm focus:outline-none focus:border-mf-sybil-500 text-mf-silver-500 placeholder-mf-silver-500"
-          />
-
-          <div className="flex space-x-2">
-            <button
-              onClick={() => handleResponse(false)}
-              className="flex-1 text-sm border-2 border-sm border-mf-safety-500 bg-mf-ash-500 hover:bg-mf-safety-500 hover:text-mf-night-500 p-2 text-mf-safety-500 transition-colors"
-            >
-              Reject
-            </button>
-            <button
-              onClick={() => handleResponse(true)}
-              disabled={!password}
-              className={`flex-1 text-sm border-2 border-sm border-mf-sybil-500 ${
-                !password
-                  ? "bg-mf-ash-500 text-mf-silver-500 cursor-not-allowed"
-                  : "bg-mf-sybil-500 hover:bg-mf-night-500 hover:text-mf-sybil-500 text-mf-night-500"
-              } p-2 transition-colors`}
-            >
-              Sign
-            </button>
+          {/* Origin */}
+          <div className="bg-mf-ash-500 rounded-md text-sm flex w-full gap-3 p-2">
+            <div className="flex flex-col">
+              <p className="text-mf-edge-500">Origin:</p>
+              <p className="text-mf-edge-500">Address:</p>
+            </div>
+            <div className="flex flex-col">
+              <p className="text-mf-sybil-500 truncate">{request?.origin}</p>
+              <p className="text-mf-sybil-500">
+                {request?.address.slice(0, 6)}...{request?.address.slice(-6)}
+              </p>
+            </div>
           </div>
 
-          <div className="flex justify-center">
-            <button onClick={handleForgetPassword}>
-              <span className="text-xs text-mf-safety-500 hover:text-mf-safety-300 transition-colors underline underline-offset-2 decoration-mf-safety-500 hover:decoration-mf-safety-300 cursor-pointer">
-                Forget Password
-              </span>
-            </button>
-          </div>
+          {/* Payload */}
+          <div className="w-full bg-mf-ash-500 rounded-md p-2">{renderPayload()}</div>
+
+          {/* Buttons */}
+          <form
+            onSubmit={e => {
+              e.preventDefault();
+              if (password) {
+                handleResponse(true);
+              }
+            }}
+            className="w-full flex flex-col gap-3"
+          >
+            <input
+              type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              placeholder="Enter Password to Sign"
+              className="p-2 text-sm bg-mf-ash-500 border border-mf-ash-500 rounded-md focus:outline-none focus:border-mf-sybil-500 text-mf-edge-500 placeholder:text-mf-edge-700"
+            />
+
+            <div className="w-full flex gap-3">
+              <button
+                type="button"
+                onClick={() => handleResponse(false)}
+                className="w-1/2 text-sm rounded-md cursor-pointer px-3 py-1.5 bg-mf-safety-opacity text-mf-safety-500 hover:opacity-50"
+              >
+                Reject
+              </button>
+              <button
+                type="submit"
+                disabled={!password}
+                className={`w-1/2 text-sm rounded-md px-3 py-1.5 hover:opacity-50 ${
+                  !password
+                    ? 'bg-mf-ash-500 text-mf-edge-700 cursor-not-allowed'
+                    : 'bg-mf-sybil-opacity text-mf-sybil-500 cursor-pointer'
+                }`}
+              >
+                Sign
+              </button>
+            </div>
+
+            <div className="flex justify-center">
+              <button type="button" onClick={handleForgetPassword}>
+                <span className="text-xs text-mf-safety-500 hover:text-mf-safety-300 underline underline-offset-2 decoration-mf-safety-500 hover:decoration-mf-safety-300 cursor-pointer">
+                  Forgot Password?
+                </span>
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </>

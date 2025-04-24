@@ -1,10 +1,69 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+
+/* Poppins Font */
+@font-face {
+  font-family: 'Poppins';
+  src: url('/fonts/Poppins-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Poppins';
+  src: url('/fonts/Poppins-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Poppins';
+  src: url('/fonts/Poppins-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Poppins';
+  src: url('/fonts/Poppins-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Blinker Font */
+@font-face {
+  font-family: 'Blinker';
+  src: url('/fonts/Blinker-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Blinker';
+  src: url('/fonts/Blinker-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Blinker';
+  src: url('/fonts/Blinker-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 
 @theme {
   /* Safety Colors */
   --color-mf-safety-300: #ff9b7a; /* #FF9B7A */
   --color-mf-safety-500: #ff8159; /* #FF8159 */
   --color-mf-safety-700: #d96547; /* #D96547 */
+  --color-mf-safety-opacity: #4f3736; /* #4F3736 */
 
   /* Ash Colors */
   --color-mf-ash-300: #3a3c46; /* #3A3C46 */
@@ -13,13 +72,14 @@
 
   /* Night Colors */
   --color-mf-night-300: #2a2c33; /* #2A2C33 */
+  --color-mf-night-400: #22242e; /* #22242E */
   --color-mf-night-500: #191b20; /* #191B20 */
   --color-mf-night-700: #101114; /* #101114 */
 
-  /* Silver Colors */
-  --color-mf-silver-300: #d8e5ff; /* #D8E5FF */
-  --color-mf-silver-500: #c5dbff; /* #C5DBFF */
-  --color-mf-silver-700: #a3b5d6; /* #A3B5D6 */
+  /* Edge Colors */
+  --color-mf-edge-300: #d8e5ff; /* #D8E5FF */
+  --color-mf-edge-500: #c5dbff; /* #C5DBFF */
+  --color-mf-edge-700: #a3b5d6; /* #A3B5D6 */
 
   /* Milk Colors */
   --color-mf-milk-300: #e0ebff; /* #E5F0FF */
@@ -27,7 +87,12 @@
   --color-mf-milk-700: #aec0d6; /* #B9C4D6 */
 
   /* Sybil Colors */
-  --color-mf-sybil-500: #57e8b4; /* #56E8B4 */
+  --color-mf-sybil-500: #57e8b4; /* #57E8B4 */
+  --color-mf-sybil-opacity: #2d4b49; /* #2D4B49 */
+
+  /* Red Colors */
+  --color-mf-red-500: #ff5a5a; /* #FF5A5A */
+  --color-mf-red-opacity: #3a2a33; /* #3A2A33 */
 }
 
 body {
@@ -44,7 +109,7 @@ input {
   height: 100%;
   margin: 0;
   padding: 0;
-  font-family: "Inconsolata", monospace;
+  font-family: 'Poppins', 'Blinker', sans-serif;
 }
 
 ::-webkit-scrollbar {
@@ -64,10 +129,6 @@ input {
   background: var(--color-mf-ash-400);
 }
 
-.portfolio-container::-webkit-scrollbar {
-  width: 4px;
-}
-
 .custom-checkbox {
   display: grid;
   grid-template-columns: 1.25em auto;
@@ -76,7 +137,7 @@ input {
 }
 
 /* Remove default styles */
-.custom-checkbox input[type="checkbox"] {
+.custom-checkbox input[type='checkbox'] {
   appearance: none;
   background-color: transparent;
   margin: 0;
@@ -90,8 +151,8 @@ input {
   place-content: center;
 }
 
-.custom-checkbox input[type="checkbox"]::before {
-  content: "";
+.custom-checkbox input[type='checkbox']::before {
+  content: '';
   width: 0.75em;
   height: 0.75em;
   transform: scale(0);
@@ -101,44 +162,19 @@ input {
   clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
 }
 
-.custom-checkbox input[type="checkbox"]:checked::before {
+.custom-checkbox input[type='checkbox']:checked::before {
   transform: scale(1);
 }
 
-.custom-checkbox input[type="checkbox"]:focus {
+.custom-checkbox input[type='checkbox']:focus {
   outline: none;
 }
 
-.custom-checkbox input[type="checkbox"]:hover {
+.custom-checkbox input[type='checkbox']:hover {
   cursor: pointer;
 }
 
-@keyframes slideDown {
-  0% {
-    transform: translateY(-100%);
-    opacity: 0;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.animate-slideDown {
-  animation: slideDown 0.3s ease-out forwards;
-}
-
-@keyframes slideUp {
-  0% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(-100%);
-    opacity: 0;
-  }
-}
-
-.animate-slideUp {
-  animation: slideUp 0.5s ease-in forwards;
+/* Custom Blinker Font Class */
+.blinker-font {
+  font-family: 'Blinker', sans-serif;
 }

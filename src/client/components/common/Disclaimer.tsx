@@ -1,5 +1,6 @@
-import { ArrowLeftToLine } from "lucide-react";
-import taoxyz from "../../../../public/icons/taoxyz.svg";
+import taoxyz from '@public/assets/taoxyz.svg';
+import { motion } from 'framer-motion';
+import { X } from 'lucide-react';
 
 interface DisclaimerProps {
   onClose: () => void;
@@ -7,42 +8,59 @@ interface DisclaimerProps {
 
 const Disclaimer = ({ onClose }: DisclaimerProps) => {
   return (
-    <div className="flex flex-col items-center min-h-screen">
-      <div className="relative flex justify-center items-center w-72 mt-12">
-        <ArrowLeftToLine
-          className="absolute left-3 w-6 h-6 text-mf-milk-500"
+    <motion.div
+      className="flex w-full flex-col h-full items-center bg-mf-night-500 gap-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
+      {/* Header */}
+      <div className="flex justify-between items-center w-full px-6 pt-10">
+        <img src={taoxyz} alt="Taoxyz Logo" className="w-7 h-7" />
+
+        <button
           onClick={onClose}
-        />
-        <img src={taoxyz} alt="Taoxyz Logo" className="w-16 h-16" />
+          className="cursor-pointer bg-mf-sybil-500 p-0.5 rounded-xs border border-mf-sybil-500 hover:bg-mf-ash-500 hover:text-mf-sybil-500"
+        >
+          <X className="w-5 h-5" strokeWidth={3} />
+        </button>
       </div>
 
-      <div className="flex flex-col items-center w-72 [&>*]:w-full mt-4 space-y-4">
-        <div className="text-center text-lg text-mf-milk-500">
-          <h1>Disclaimer</h1>
-        </div>
-
-        <p className="text-mf-safety-500 text-xs bg-mf-ash-500 p-3 rounded-sm">
-          You can use this wallet to securely store and transfer TAO. Please
-          securely store all mnemonics and passwords created.
+      {/* Disclaimer */}
+      <motion.div
+        className="flex flex-col gap-4 items-center px-10"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.5 }}
+      >
+        <p className="text-mf-edge-500 text-lg blinker-font font-semibold">DISCLAIMER</p>
+        <p className="text-mf-safety-300 text-xs bg-mf-ash-500 rounded-xs font-light p-5">
+          You can use this wallet to securely store and transfer TAO. Please securely store all
+          mnemonics and passwords created.
         </p>
+      </motion.div>
 
-        <div className="text-center text-xs text-mf-milk-300">
-          <p>Data Privacy</p>
-        </div>
-
-        <ul className="rounded-sm bg-mf-ash-500 text-mf-sybil-500 text-xs space-y-4 p-3">
+      {/* Data Privacy */}
+      <motion.div
+        className="flex flex-col gap-4 items-center px-10"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4, duration: 0.5 }}
+      >
+        <p className="text-mf-edge-500 text-lg blinker-font font-semibold">DATA PRIVACY</p>
+        <ul className="rounded-xs bg-mf-ash-500 text-mf-sybil-500 text-xs font-light space-y-4 p-5">
           <li>
-            We refrain from transmitting any clicks, page views, or events to a
-            central server.
+            We refrain from transmitting any clicks, page views, or events to a central server.
           </li>
           <li>We abstain from utilizing any trackers or analytics.</li>
+          <li>We do not gather addresses, keys, or other personal information.</li>
           <li>
-            We do not gather addresses, keys, or other personal information.
+            For support or questions, please contact{' '}
+            <span className="underline">devs@manifoldlabs.inc</span>
           </li>
-          <p>For support or questions, please contact devs@manifoldlabs.inc</p>
         </ul>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

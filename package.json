@@ -7,33 +7,37 @@
     "@polkadot/extension-inject": "^0.58.4",
     "@tailwindcss/cli": "^4.0.8",
     "@tailwindcss/postcss": "^4.0.12",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/bun": "latest",
     "@types/chrome": "^0.0.304",
+    "@types/firefox-webext-browser": "^120.0.4",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "bun-types": "^1.2.2",
     "eslint": "^9.22.0",
     "lucide-react": "^0.477.0",
     "postcss": "^8.5.3",
+    "prettier": "^3.5.3",
+    "prettier-plugin-tailwindcss": "^0.6.11",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwindcss": "^4.0.7",
     "typescript": "^5.0.0",
-    "typescript-eslint": "^8.26.1",
-    "@types/firefox-webext-browser": "^120.0.4"
+    "typescript-eslint": "^8.26.1"
   },
   "dependencies": {
-    "@fontsource/inconsolata": "^5.1.1",
     "@polkadot/extension-dapp": "^0.58.4",
     "@polkadot/types": "^15.7.1",
     "@polkadot/ui-keyring": "^3.12.2",
+    "framer-motion": "^12.6.3",
     "react-router-dom": "^7.2.0",
     "recharts": "^2.15.1"
   },
   "scripts": {
     "dev": "bun run scripts/build.ts --watch",
-    "build": "bun run lint && bun run scripts/build.ts && bun run zip:firefox && bun run zip",
+    "build": "bun run lint && bun run format && bun run scripts/build.ts && bun run zip:firefox && bun run zip",
     "lint": "npx eslint . --format=stylish",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,css,md,json}\"",
     "zip:firefox": "web-ext build -s dists/firefox -a ./dists/firefox_zip",
     "zip": "zip -r -x './node_modules/*' -x './.git/*' -x './dists/*' -X './dists/taoxyz-wallet-source.zip' ."
   }
