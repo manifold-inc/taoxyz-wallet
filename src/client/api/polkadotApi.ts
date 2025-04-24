@@ -247,7 +247,6 @@ class PolkadotApi {
     try {
       const wallet = await KeyringService.getWallet(address);
       if (wallet instanceof Error) throw new Error(wallet.message);
-
       return new Promise((resolve, reject) => {
         let unsubscribe: (() => void) | undefined;
 
