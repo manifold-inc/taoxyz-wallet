@@ -1,4 +1,4 @@
-import type { Slippage } from "../types/client";
+import type { Slippage } from '@/types/client';
 
 export const generateId = (): number => {
   return Math.floor(Math.random() * 1000000);
@@ -17,105 +17,155 @@ export const raoToTao = (amount: bigint): number => {
   return Number(amount) / 1e9;
 };
 
-export const slippageStakeCalculation = (
-  alphaIn: bigint,
-  taoIn: bigint,
-  amountInRao: bigint,
-  toAlpha: boolean,
-  isDynamic?: boolean
+// Price-based conversion without slippage
+export const taoToAlpha = (tao: number, price: number): number => {
+  return tao / price;
+};
+
+export const alphaToTao = (alpha: number, price: number): number => {
+  return alpha * price;
+};
+
+// All in RAO denomination
+export const taoToAlphaWithSlippage = (
+  tao: number,
+  alphaIn: number,
+  taoIn: number,
+  isDynamic: boolean,
+  price: number
 ): Slippage => {
-  let slippage: bigint;
-  let slippagePercentage: number;
-  // Slippage for Dynamic Tao
   if (isDynamic) {
-    const k = alphaIn * taoIn;
-    if (toAlpha) {
-      const newTaoIn = taoIn + amountInRao;
-      const newAlphaIn = k / newTaoIn;
-      const alphaReturned = alphaIn - newAlphaIn;
-      const alphaIdeal = (alphaIn / taoIn) * amountInRao;
+    const newTaoIn = taoIn + tao;
+    const newAlphaIn = (alphaIn * taoIn) / newTaoIn;
 
-      if (alphaIdeal > alphaReturned) {
-        slippage = alphaIdeal - alphaReturned;
-      } else {
-        slippage = 0n;
-      }
-
-      if (slippage + alphaReturned != 0n) {
-        slippagePercentage =
-          (100 * Number(slippage)) / Number(slippage + alphaReturned);
-      } else {
-        slippagePercentage = 0;
-      }
-
+    if (newTaoIn === 0) {
       return {
-        tokens: raoToTao(alphaReturned),
+        tokens: tao,
+        slippage: 0,
+        slippagePercentage: 0,
+      };
+    }
+
+    const alphaReturned = alphaIn - newAlphaIn;
+    const alphaIdeal = taoToAlpha(tao, price);
+
+    if (alphaIdeal > alphaReturned) {
+      const slippage = alphaIdeal - alphaReturned;
+      const slippagePercentage = (100 * slippage) / (slippage + alphaReturned);
+      return {
+        tokens: alphaReturned,
+        slippage,
         slippagePercentage,
       };
     } else {
-      const newAlphaIn = alphaIn + amountInRao;
-      const newTaoReserve = k / newAlphaIn;
-      const taoReturned = taoIn - newTaoReserve;
-      const taoIdeal = (taoIn / alphaIn) * amountInRao;
-
-      if (taoIdeal > taoReturned) {
-        slippage = taoIdeal - taoReturned;
-      } else {
-        slippage = 0n;
-      }
-
-      if (slippage + taoReturned != 0n) {
-        slippagePercentage =
-          (100 * Number(slippage)) / Number(slippage + taoReturned);
-      } else {
-        slippagePercentage = 0;
-      }
-
       return {
-        tokens: raoToTao(taoReturned),
-        slippagePercentage,
+        tokens: alphaReturned,
+        slippage: 0,
+        slippagePercentage: 0,
       };
     }
   }
 
-  // Slippage for Staking on Root
-  const taoReturned = raoToTao(amountInRao);
+  // Root
   return {
-    tokens: taoReturned,
+    tokens: tao,
+    slippage: 0,
     slippagePercentage: 0,
   };
 };
 
-export const slippageMoveStakeCalculation = (
-  alphaIn: bigint,
-  taoIn: bigint,
-  amountInRao: bigint
+// All in RAO denomination
+export const alphaToTaoWithSlippage = (
+  alpha: number,
+  alphaIn: number,
+  taoIn: number,
+  isDynamic: boolean,
+  price: number
 ): Slippage => {
-  const unstakeResult = slippageStakeCalculation(
-    alphaIn,
-    taoIn,
-    amountInRao,
-    false,
-    true
-  );
+  if (isDynamic) {
+    const newAlphaIn = alphaIn + alpha;
+    const newTaoReserve = (alphaIn * taoIn) / newAlphaIn;
 
-  const newAlphaIn = alphaIn - taoToRao(unstakeResult.tokens);
-  const newTaoIn = taoIn + amountInRao;
+    const taoReturned = taoIn - newTaoReserve;
+    const taoIdeal = alphaToTao(alpha, price);
 
-  const restakeResult = slippageStakeCalculation(
+    if (taoIdeal > taoReturned) {
+      const slippage = taoIdeal - taoReturned;
+      const slippagePercentage = (100 * slippage) / (slippage + taoReturned);
+      return {
+        tokens: taoReturned,
+        slippage,
+        slippagePercentage,
+      };
+    } else {
+      return {
+        tokens: taoReturned,
+        slippage: 0,
+        slippagePercentage: 0,
+      };
+    }
+  }
+
+  // Root
+  return {
+    tokens: alpha,
+    slippage: 0,
+    slippagePercentage: 0,
+  };
+};
+
+export const moveStakeWithSlippage = (
+  alpha: number,
+  alphaIn: number,
+  taoIn: number,
+  isDynamic: boolean,
+  price: number,
+  isMovingToRoot = false,
+  isMovingFromRoot = false
+): Slippage => {
+  if (!isDynamic && !isMovingToRoot && !isMovingFromRoot) {
+    // Root to Root case: 1:1 conversion
+    return {
+      tokens: alpha,
+      slippage: 0,
+      slippagePercentage: 0,
+    };
+  }
+
+  if (isMovingFromRoot) {
+    // Root to Alpha case: Convert TAO to Alpha (with slippage if dynamic)
+    return taoToAlphaWithSlippage(alpha, alphaIn, taoIn, isDynamic, price);
+  }
+
+  // Convert Alpha to TAO (with slippage if dynamic)
+  const unstakeResult = alphaToTaoWithSlippage(alpha, alphaIn, taoIn, isDynamic, price);
+
+  if (isMovingToRoot) {
+    // When moving to Root, we just return the TAO amount (1:1 conversion)
+    return {
+      tokens: alphaToTao(unstakeResult.tokens, price),
+      slippage: unstakeResult.slippage,
+      slippagePercentage: unstakeResult.slippagePercentage,
+    };
+  }
+
+  // Dynamic case: Calculate with slippage
+  // Calculate new pool state after unstaking
+  const newAlphaIn = alphaIn - unstakeResult.tokens;
+  const newTaoIn = taoIn + alpha;
+
+  // Restake: Convert TAO back to Alpha
+  const restakeResult = taoToAlphaWithSlippage(
+    unstakeResult.tokens,
     newAlphaIn,
     newTaoIn,
-    taoToRao(unstakeResult.tokens),
-    true,
-    true
+    isDynamic,
+    price
   );
 
-  const totalTokens = restakeResult.tokens;
-  const totalSlippagePercentage =
-    unstakeResult.slippagePercentage + restakeResult.slippagePercentage;
-
   return {
-    tokens: totalTokens,
-    slippagePercentage: totalSlippagePercentage,
+    tokens: restakeResult.tokens,
+    slippage: unstakeResult.slippage + restakeResult.slippage,
+    slippagePercentage: unstakeResult.slippagePercentage + restakeResult.slippagePercentage,
   };
 };

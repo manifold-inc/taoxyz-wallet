@@ -1,10 +1,10 @@
-import keyring from "@polkadot/ui-keyring";
-import { mnemonicGenerate, mnemonicValidate } from "@polkadot/util-crypto";
-import { TypeRegistry } from "@polkadot/types";
-import type { KeyringPair, KeyringPair$Meta } from "@polkadot/keyring/types";
-import type { SignerPayloadJSON } from "@polkadot/types/types";
+import type { KeyringPair, KeyringPair$Meta } from '@polkadot/keyring/types';
+import { TypeRegistry } from '@polkadot/types';
+import type { SignerPayloadJSON } from '@polkadot/types/types';
+import keyring from '@polkadot/ui-keyring';
+import { mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 
-import type { Permissions } from "../../types/client";
+import type { Permissions } from '../../types/client';
 
 const registry = new TypeRegistry();
 
@@ -13,27 +13,23 @@ export const KeyringService = {
     try {
       const wallets = this.getWallets();
       const address = keyring.createFromUri(mnemonic).address;
-      const isDuplicate = wallets.some((wallet) => wallet.address === address);
+      const isDuplicate = wallets.some(wallet => wallet.address === address);
       return isDuplicate;
     } catch {
-      return new Error("Failed to Verify Wallet");
+      return new Error('Failed to Verify Wallet');
     }
   },
 
-  async addWallet(
-    mnemonic: string,
-    name: string,
-    password: string
-  ): Promise<KeyringPair | Error> {
+  async addWallet(mnemonic: string, name: string, password: string): Promise<KeyringPair | Error> {
     try {
       const result = await keyring.addUri(mnemonic, password, {
         name,
         websitePermissions: {} as Permissions,
       } as KeyringPair$Meta);
-      if (!result.pair) return new Error("Failed to Add Wallet");
+      if (!result.pair) return new Error('Failed to Add Wallet');
       return result.pair;
     } catch {
-      return new Error("Failed to Add Wallet");
+      return new Error('Failed to Add Wallet');
     }
   },
 
@@ -56,16 +52,16 @@ export const KeyringService = {
 
   async getAddress(name: string): Promise<string | Error> {
     const wallets = this.getWallets();
-    if (!wallets) return new Error("Keyring not initialized");
-    const wallet = wallets.find((wallet) => wallet.meta.name === name);
-    if (!wallet) return new Error("Wallet not found");
+    if (!wallets) return new Error('Keyring not initialized');
+    const wallet = wallets.find(wallet => wallet.meta.name === name);
+    if (!wallet) return new Error('Wallet not found');
 
     return wallet.address;
   },
 
   getWallet(address: string): KeyringPair | Error {
     const wallet = keyring.getPair(address);
-    if (!wallet) return new Error("Wallet not found");
+    if (!wallet) return new Error('Wallet not found');
     return wallet;
   },
 
@@ -91,21 +87,17 @@ export const KeyringService = {
     if (wallet instanceof Error) return new Error(wallet.message);
     try {
       this.unlockWallet(address, password);
-      if (wallet.isLocked) return new Error("Wallet is Locked");
+      if (wallet.isLocked) return new Error('Wallet is Locked');
 
       registry.setSignedExtensions(payload.signedExtensions);
-      const extrinsicPayload = registry.createType(
-        "ExtrinsicPayload",
-        payload,
-        {
-          version: payload.version,
-        }
-      );
+      const extrinsicPayload = registry.createType('ExtrinsicPayload', payload, {
+        version: payload.version,
+      });
 
       const { signature } = extrinsicPayload.sign(wallet);
       return signature;
     } catch {
-      return new Error("Failed to Sign Transaction");
+      return new Error('Failed to Sign Transaction');
     }
   },
 
@@ -143,22 +135,22 @@ export const KeyringService = {
 
       return true;
     } catch {
-      return new Error("Failed to Update Permissions");
+      return new Error('Failed to Update Permissions');
     }
   },
 
   lockWallets(): boolean | Error {
     const pairs = keyring.getPairs();
-    if (!pairs) return new Error("Keyring not initialized");
+    if (!pairs) return new Error('Keyring not initialized');
     try {
-      pairs.forEach((pair) => {
+      pairs.forEach(pair => {
         if (!pair.isLocked) {
           pair.lock();
         }
       });
       return true;
     } catch {
-      return new Error("Failed to Lock All Wallets");
+      return new Error('Failed to Lock All Wallets');
     }
   },
 

@@ -1,77 +1,105 @@
-import { createContext, useContext, useState, useCallback } from "react";
+import { createContext, useCallback, useContext, useState } from 'react';
 
-import Notification from "../components/common/Notification";
-import { NotificationType } from "../../types/client";
+import { NotificationType } from '../../types/client';
+import Notification from '../components/common/Notification';
 
 interface NotificationContextType {
-  showNotification: (params: ShowNotificationParams) => void;
-  clearNotification: () => void;
+  showNotification: (params: Notification) => void;
+  dismissNotification: (notification: Notification) => void;
 }
 
-interface ShowNotificationParams {
+interface Notification {
   type: NotificationType;
+  title?: string;
   message?: string;
   hash?: string;
-  autoHide?: boolean;
+  duration?: number;
 }
 
-const NotificationContext = createContext<NotificationContextType | undefined>(
-  undefined
-);
+const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
-export const NotificationProvider = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
-  const [notification, setNotification] = useState<
-    ShowNotificationParams & { show: boolean; message: string }
-  >({
-    show: false,
-    message: "",
-    type: NotificationType.Error,
-  });
+export const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
+  const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  const showNotification = useCallback((params: ShowNotificationParams) => {
-    let defaultMessage = "";
+  const showNotification = useCallback((params: Notification) => {
+    let defaultTitle = '';
     switch (params.type) {
       case NotificationType.Pending:
-        defaultMessage = "Transaction submitted to network";
+        defaultTitle = 'Pending';
         break;
       case NotificationType.InBlock:
-        defaultMessage = "Transaction included in block";
+        defaultTitle = 'In Block';
         break;
       case NotificationType.Success:
-        defaultMessage = "Transaction finalized";
+        defaultTitle = 'Success';
         break;
       case NotificationType.Error:
-        defaultMessage = "Transaction failed";
+        defaultTitle = 'Error';
+        break;
+      case NotificationType.Info:
+        defaultTitle = 'Info';
+        break;
+      case NotificationType.Warning:
+        defaultTitle = 'Warning';
+        break;
+      default:
+        defaultTitle = 'Unknown';
         break;
     }
 
-    const shouldAutoHide =
-      params.autoHide ??
-      (params.type === NotificationType.Success ||
-        params.type === NotificationType.Error);
+    let defaultMessage = '';
+    switch (params.type) {
+      case NotificationType.Pending:
+        defaultMessage = 'Pending';
+        break;
+      case NotificationType.InBlock:
+        defaultMessage = 'In Block';
+        break;
+      case NotificationType.Success:
+        defaultMessage = 'Success';
+        break;
+      case NotificationType.Error:
+        defaultMessage = 'Error';
+        break;
+      case NotificationType.Info:
+        defaultMessage = 'Info';
+        break;
+      case NotificationType.Warning:
+        defaultMessage = 'Warning';
+        break;
+      default:
+        defaultMessage = 'Unknown';
+        break;
+    }
 
-    setNotification({
+    const notification = {
       ...params,
-      show: true,
+      title: params.title || defaultTitle,
       message: params.message || defaultMessage,
-      autoHide: shouldAutoHide,
-    });
+      duration: params.duration || 2500,
+    };
+
+    setNotifications(prev => [...prev, notification]);
   }, []);
 
-  const clearNotification = useCallback(() => {
-    setNotification((prev) => ({ ...prev, show: false }));
+  const dismissNotification = useCallback((notification: Notification) => {
+    setNotifications(prev => prev.filter(n => n !== notification));
   }, []);
 
   return (
-    <NotificationContext.Provider
-      value={{ showNotification, clearNotification }}
-    >
+    <NotificationContext.Provider value={{ showNotification, dismissNotification }}>
       {children}
-      <Notification {...notification} onDismiss={clearNotification} />
+      {notifications.map((notification, index) => (
+        <Notification
+          key={index}
+          type={notification.type}
+          title={notification.title}
+          message={notification.message}
+          hash={notification.hash}
+          duration={notification.duration}
+          onDismiss={() => dismissNotification(notification)}
+        />
+      ))}
     </NotificationContext.Provider>
   );
 };
@@ -79,9 +107,7 @@ export const NotificationProvider = ({
 export const useNotification = () => {
   const context = useContext(NotificationContext);
   if (context === undefined) {
-    throw new Error(
-      "useNotification must be used within a NotificationProvider"
-    );
+    throw new Error('useNotification must be used within a NotificationProvider');
   }
   return context;
 };
