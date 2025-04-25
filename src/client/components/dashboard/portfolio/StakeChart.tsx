@@ -27,7 +27,7 @@ const SkeletonChart = () => {
 
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <AreaChart data={skeletonData} margin={{ top: 10, right: 0, left: -17, bottom: 0 }}>
+      <AreaChart data={skeletonData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
         <XAxis
           dataKey="displayDate"
           tick={{ fill: '#374151', fontSize: 10 }}
@@ -46,7 +46,7 @@ const SkeletonChart = () => {
           tickSize={2}
           tickMargin={2}
           tickCount={5}
-          dx={-5}
+          dx={0}
         />
         <Area
           type="monotoneX"
@@ -106,7 +106,10 @@ const StakeChart = ({ data }: StakeChartProps) => {
     const range = maxPrice - minPrice;
     const padding = Math.max(range * 0.1, 0.0001);
 
-    return [Math.max(0, minPrice - padding), maxPrice + padding];
+    const yMin = Math.max(0, minPrice - padding);
+    const yMax = maxPrice + padding;
+
+    return [yMin, yMax];
   };
 
   const init = async (d: PriceResponse[]) => {
@@ -129,7 +132,7 @@ const StakeChart = ({ data }: StakeChartProps) => {
 
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <AreaChart data={priceData} margin={{ top: 10, right: 0, left: -17, bottom: 0 }}>
+      <AreaChart data={priceData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
         <XAxis
           dataKey="displayDate"
           tick={{ fill: '#9CA3AF', fontSize: 10 }}
@@ -153,13 +156,13 @@ const StakeChart = ({ data }: StakeChartProps) => {
           axisLine={{ stroke: '#374151' }}
           tickLine={{ stroke: '#374151' }}
           tickFormatter={value =>
-            `${parseFloat(value).toLocaleString('en-US', { maximumFractionDigits: 9 })}τ`
+            `${parseFloat(value).toLocaleString('en-US', { maximumFractionDigits: 4 })}τ`
           }
           width={60}
           tickSize={2}
           tickMargin={2}
           tickCount={5}
-          dx={-5}
+          dx={0}
         />
         <Tooltip
           contentStyle={{
