@@ -207,7 +207,7 @@ const ImportWallet = ({ onSuccess }: ImportWalletProps) => {
         <button
           type="submit"
           disabled={nameStatus !== 'Valid Wallet Name' || passwordStatus !== 'Valid Password'}
-          className="w-full cursor-pointer text-center gap-1.5 px-6 py-1.5 bg-mf-sybil-opacity rounded-full text-sm text-mf-sybil-500 hover:opacity-50 disabled:bg-mf-ash-500 disabled:text-mf-edge-700 disabled:cursor-not-allowed"
+          className="w-full cursor-pointer text-center gap-1.5 px-6 py-1.5 bg-mf-sybil-opacity rounded-full text-sm text-mf-sybil-500 hover:opacity-50 disabled:bg-mf-ash-500 disabled:text-mf-edge-700"
         >
           Import
         </button>

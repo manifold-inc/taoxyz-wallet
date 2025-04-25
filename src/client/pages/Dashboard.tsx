@@ -8,9 +8,7 @@ import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext
 import { useNotification } from '@/client/contexts/NotificationContext';
 import { usePolkadotApi } from '@/client/contexts/PolkadotApiContext';
 import { useWallet } from '@/client/contexts/WalletContext';
-import type { Stake, Subnet } from '@/types/client';
 import { NotificationType } from '@/types/client';
-import { raoToTao } from '@/utils/utils';
 
 const API_URL = 'https://tao.xyz/api/price';
 
@@ -27,64 +25,50 @@ export const Dashboard = () => {
     useDashboard();
   const { currentAddress } = useWallet();
 
-  const [stakes, setStakes] = useState<Stake[]>([]);
-  const [subnets, setSubnets] = useState<Subnet[]>([]);
-  const [freeTao, setFreeTao] = useState<number | null>(null);
-
   const [taoPrice, setTaoPrice] = useState<number | null>(null);
   const [priceChange24h, setPriceChange24h] = useState<number | null>(null);
 
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const prevAddressRef = useRef<string | null>(null);
 
   const fetchData = async (address: string, forceRefresh = false): Promise<void> => {
     if (!api || !address || (!forceRefresh && address === prevAddressRef.current)) return;
-    setIsLoading(true);
     prevAddressRef.current = address;
-    try {
-      const [subnets, freeTao, stakes] = await Promise.all([
-        api.getSubnets(),
-        api.getBalance(address),
-        api.getStake(address),
-      ]);
+    const [subnets, freeTao, _stakes] = await Promise.all([
+      api.getSubnets(),
+      api.getBalance(address),
+      api.getStake(address),
+    ]);
 
-      if (subnets === null) {
-        showNotification({
-          type: NotificationType.Error,
-          message: 'Failed to Fetch Subnets',
-        });
-        return;
-      }
-
-      if (freeTao === null) {
-        showNotification({
-          type: NotificationType.Error,
-          message: 'Failed to Fetch Free TAO',
-        });
-        return;
-      }
-
-      if (stakes === null) {
-        showNotification({
-          type: NotificationType.Error,
-          message: 'Failed to Fetch Stakes',
-        });
-        return;
-      }
-
-      setSubnets(subnets);
-      setDashboardSubnets(subnets);
-      setFreeTao(raoToTao(freeTao));
-      setDashboardFreeBalance(freeTao);
-      setStakes(stakes);
-      setDashboardStakes(stakes);
-    } finally {
-      setIsLoading(false);
+    if (subnets === null) {
+      showNotification({
+        type: NotificationType.Error,
+        message: 'Failed to Fetch Subnets',
+      });
+      return;
     }
+
+    if (freeTao === null) {
+      showNotification({
+        type: NotificationType.Error,
+        message: 'Failed to Fetch Free TAO',
+      });
+      return;
+    }
+
+    if (_stakes === null) {
+      showNotification({
+        type: NotificationType.Error,
+        message: 'Failed to Fetch Stakes',
+      });
+      return;
+    }
+
+    setDashboardSubnets(subnets);
+    setDashboardFreeBalance(freeTao);
+    setDashboardStakes(_stakes);
   };
 
   const fetchTaoPrice = async (): Promise<void> => {
-    setIsLoading(true);
     try {
       const response = await fetch(`${API_URL}`);
       const data = (await response.json()) as TaoPriceResponse;
@@ -95,8 +79,6 @@ export const Dashboard = () => {
         type: NotificationType.Error,
         message: 'Failed to Fetch TAO Price',
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -113,33 +95,18 @@ export const Dashboard = () => {
       {/* Modular Overview */}
       <div className="border-b border-mf-ash-300 w-full">
         <div className="w-full px-5 py-3">
-          <DashboardOverview
-            stakes={stakes}
-            subnets={subnets}
-            freeTao={freeTao}
-            taoPrice={taoPrice}
-            priceChange24h={priceChange24h}
-            isLoading={isLoading}
-          />
+          <DashboardOverview taoPrice={taoPrice} priceChange24h={priceChange24h} />
         </div>
       </div>
 
       {/* Modular Section */}
       <div className="w-full px-5 py-3">
-        {dashboardState === DashboardState.OVERVIEW && currentAddress && (
-          <PortfolioOverview
-            stakes={stakes}
-            subnets={subnets}
-            isLoading={isLoading}
-            onRefresh={() => fetchData(currentAddress, true)}
-          />
-        )}
+        {dashboardState === DashboardState.OVERVIEW && currentAddress && <PortfolioOverview />}
 
         {dashboardState !== DashboardState.OVERVIEW && currentAddress && (
           <Transaction
             address={currentAddress}
             dashboardState={dashboardState}
-            isLoading={isLoading}
             onRefresh={() => fetchData(currentAddress, true)}
           />
         )}

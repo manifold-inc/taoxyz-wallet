@@ -64,7 +64,7 @@ const DisplayMnemonic = ({ onContinue }: DisplayMnemonicProps) => {
         <textarea
           value={state.mnemonic}
           readOnly
-          className={`cursor-not-allowed p-3 h-36 text-base rounded-sm bg-mf-night-300 text-mf-edge-700 border-2 border-mf-night-300 focus:outline-none w-full resize-none ${
+          className={`p-3 h-36 text-base rounded-sm bg-mf-night-300 text-mf-edge-700 border-2 border-mf-night-300 focus:outline-none w-full resize-none ${
             copied ? 'border-mf-sybil-500' : 'border-mf-safety-500'
           }`}
         />

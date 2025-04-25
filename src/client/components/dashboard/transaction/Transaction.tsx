@@ -43,7 +43,6 @@ export interface TransferTaoParams extends TransactionParams {
 export interface TransactionProps {
   address: string;
   dashboardState: DashboardState;
-  isLoading: boolean;
   onRefresh: () => void;
 }
 
@@ -54,12 +53,7 @@ export interface AmountState {
 
 export type TransactionStatus = 'ready' | 'broadcast' | 'inBlock' | 'success' | 'failed';
 
-const Transaction = ({
-  address,
-  isLoading = true,
-  dashboardState,
-  onRefresh,
-}: TransactionProps) => {
+const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) => {
   const { api } = usePolkadotApi();
   const {
     dashboardSubnet,
@@ -214,7 +208,6 @@ const Transaction = ({
           <SubnetSelection
             subnets={dashboardSubnets}
             toSubnet={toSubnet}
-            isLoadingSubnets={isLoading}
             setToSubnet={setToSubnet}
             onCancel={handleSubnetCancel}
             onConfirm={handleSubnetConfirm}
@@ -464,7 +457,6 @@ const Transaction = ({
         <SubnetSelection
           subnets={dashboardSubnets}
           toSubnet={toSubnet}
-          isLoadingSubnets={isLoading}
           setToSubnet={setToSubnet}
           onCancel={handleSubnetCancel}
           onConfirm={handleSubnetConfirm}

@@ -50,7 +50,7 @@ const WalletSelection = () => {
 
   const getWallet = async (): Promise<void> => {
     if (!currentAddress) return;
-    const wallet = await KeyringService.getWallet(currentAddress);
+    const wallet = KeyringService.getWallet(currentAddress);
     if (wallet instanceof Error) {
       setWallet(null);
     } else {
@@ -59,7 +59,7 @@ const WalletSelection = () => {
   };
 
   const getWallets = async (): Promise<void> => {
-    const wallets = await KeyringService.getWallets();
+    const wallets = KeyringService.getWallets();
     setWallets(wallets);
   };
 
@@ -80,7 +80,7 @@ const WalletSelection = () => {
 
   const confirmDelete = async (): Promise<void> => {
     if (!walletToDelete) return;
-    await KeyringService.deleteWallet(walletToDelete.address);
+    KeyringService.deleteWallet(walletToDelete.address);
     await chrome.storage.local.remove(`permissions_${walletToDelete.address}`);
     await getWallets();
     await clearSavedTransactions();
