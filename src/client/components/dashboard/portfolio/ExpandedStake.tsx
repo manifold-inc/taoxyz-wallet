@@ -36,12 +36,15 @@ const ExpandedStake = ({
 }: ExpandedStakeProps) => {
   const { showNotification } = useNotification();
   const [copied, setCopied] = useState(false);
-  const [priceData, setPriceData] = useState<PriceResponse[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [priceData, setPriceData] = useState<PriceResponse[] | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
   const fetchSubnetPrice = async () => {
-    setIsLoading(true);
+    void chrome.storage.local.get([`price_data_cache_sn${stake.netuid}`], r => {
+      if (r[`price_data_cache_sn${stake.netuid}`]) {
+        setPriceData(r[`price_data_cache_sn${stake.netuid}`]);
+      }
+    });
     try {
       const response = await fetch('https://tao.xyz/api/subnets/price', {
         method: 'POST',
@@ -66,13 +69,12 @@ const ExpandedStake = ({
         return converted;
       });
       setPriceData(convertedData);
+      void chrome.storage.local.set({ [`price_data_cache_sn${stake.netuid}`]: convertedData });
     } catch {
       showNotification({
         type: NotificationType.Error,
         message: 'Failed to Fetch Subnet Price History',
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -88,7 +90,6 @@ const ExpandedStake = ({
 
   const init = async () => {
     await fetchSubnetPrice();
-    setIsInitialized(true);
   };
 
   if (!isInitialized) {
@@ -135,7 +136,7 @@ const ExpandedStake = ({
         {/* Chart */}
         <div className="h-32 border-b border-mf-ash-300">
           <div className="px-3 h-full">
-            <StakeChart data={priceData} isLoading={isLoading} />
+            <StakeChart data={priceData} />
           </div>
         </div>
 

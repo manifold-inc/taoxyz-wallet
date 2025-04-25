@@ -97,28 +97,30 @@ const WalletSelection = () => {
           className="flex items-center justify-between p-2 hover:bg-mf-night-500 cursor-pointer"
           onClick={() => setIsExpanded(!isExpanded)}
         >
-          {wallet && (
-            <>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center bg-mf-sybil-500 border border-mf-sybil-500 rounded-sm p-1">
-                  <WalletCards className="w-5 h-5 text-mf-night-500" />
-                </div>
-                <div className="text-left text-mf-milk-300 text-xs flex flex-col">
-                  <span>{wallet.meta.name || 'Unknown'}</span>
-                  <span className="text-mf-sybil-500">
-                    {wallet.address.slice(0, 6)}...{wallet.address.slice(-6)}
-                  </span>
-                </div>
+          <>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center bg-mf-sybil-500 border border-mf-sybil-500 rounded-sm p-1">
+                <WalletCards className="w-5 h-5 text-mf-night-500" />
               </div>
-              <div className="p-1">
-                {isExpanded ? (
-                  <ChevronUp className="w-6 h-6 text-mf-edge-300 p-1" />
-                ) : (
-                  <ChevronDown className="w-6 h-6 text-mf-edge-300 p-1" />
-                )}
+              <div className="text-left text-mf-milk-300 text-xs flex flex-col">
+                <span>{wallet?.meta.name || 'Unknown'}</span>
+                <span className="text-mf-sybil-500">
+                  {wallet && (
+                    <>
+                      {wallet?.address.slice(0, 6)}...{wallet?.address.slice(-6)}
+                    </>
+                  )}
+                </span>
               </div>
-            </>
-          )}
+            </div>
+            <div className="p-1">
+              {isExpanded ? (
+                <ChevronUp className="w-6 h-6 text-mf-edge-300 p-1" />
+              ) : (
+                <ChevronDown className="w-6 h-6 text-mf-edge-300 p-1" />
+              )}
+            </div>
+          </>
         </div>
 
         {isExpanded && (

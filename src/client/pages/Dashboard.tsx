@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import WalletSelection from '@/client/components/common/WalletSelection';
 import DashboardOverview from '@/client/components/dashboard/DashboardOverview';
@@ -66,6 +66,13 @@ export const Dashboard = () => {
     setDashboardSubnets(subnets);
     setDashboardFreeBalance(freeTao);
     setDashboardStakes(_stakes);
+    await chrome.storage.local.set({
+      wallet_cache: {
+        subnets,
+        freeTao,
+        _stakes,
+      },
+    });
   };
 
   const fetchTaoPrice = async (): Promise<void> => {
@@ -74,6 +81,12 @@ export const Dashboard = () => {
       const data = (await response.json()) as TaoPriceResponse;
       setTaoPrice(data.currentPrice);
       setPriceChange24h(data.priceChange24h);
+      await chrome.storage.local.set({
+        tao_price_cache: {
+          taoPrice: data.currentPrice,
+          priceChange24h: data.priceChange24h,
+        },
+      });
     } catch {
       showNotification({
         type: NotificationType.Error,
@@ -81,6 +94,20 @@ export const Dashboard = () => {
       });
     }
   };
+
+  useEffect(() => {
+    chrome.storage.local.get(['tao_price_cache', 'wallet_cache'], r => {
+      if (r.tao_price_cache) {
+        setTaoPrice(r.tao_price_cache.taoPrice);
+        setPriceChange24h(r.tao_price_cache.priceChange24h);
+      }
+      if (r.wallet_cache) {
+        setDashboardSubnets(r.wallet_cache.subnets);
+        setDashboardFreeBalance(r.wallet_cache.freeTao);
+        setDashboardStakes(r.wallet_cache._stakes);
+      }
+    });
+  }, []);
 
   if (api && currentAddress && currentAddress !== prevAddressRef.current) {
     void fetchData(currentAddress);

@@ -3,8 +3,7 @@ import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'rec
 import { useState } from 'react';
 
 interface StakeChartProps {
-  data: PriceResponse[];
-  isLoading: boolean;
+  data: PriceResponse[] | null;
 }
 
 interface PriceResponse {
@@ -64,7 +63,7 @@ const SkeletonChart = () => {
   );
 };
 
-const StakeChart = ({ data, isLoading = true }: StakeChartProps) => {
+const StakeChart = ({ data }: StakeChartProps) => {
   const [priceData, setPriceData] = useState<ChartDataPoint[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -110,17 +109,17 @@ const StakeChart = ({ data, isLoading = true }: StakeChartProps) => {
     return [Math.max(0, minPrice - padding), maxPrice + padding];
   };
 
-  const init = async () => {
-    const dataWithTimestamps = addTimestamps(data);
+  const init = async (d: PriceResponse[]) => {
+    const dataWithTimestamps = addTimestamps(d);
     setPriceData(dataWithTimestamps);
-    setIsInitialized(true);
   };
 
-  if (!isInitialized && data.length > 0) {
-    void init();
+  if (!isInitialized && data && data.length > 0) {
+    setIsInitialized(true);
+    void init(data);
   }
 
-  if (isLoading) {
+  if (!data) {
     return <SkeletonChart />;
   }
 
