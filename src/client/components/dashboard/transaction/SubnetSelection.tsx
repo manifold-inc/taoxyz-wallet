@@ -72,7 +72,6 @@ const SubnetSelection = ({
   });
 
   const handleSubnetSelect = (subnet: Subnet) => {
-    if (subnet.id === selectedSubnet?.id) return;
     setSelectedSubnet(subnet);
     getValidators(subnet.id);
   };
