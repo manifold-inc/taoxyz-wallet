@@ -81,7 +81,7 @@ const Notification = ({
             ease: 'easeInOut',
           }}
         >
-          <motion.div className="w-full mx-10 bg-mf-ash-500 px-4 py-3 rounded-md shadow-lg">
+          <motion.div className="w-full mx-4 bg-mf-ash-500 px-4 py-3 rounded-md shadow-lg">
             <div className="flex items-center justify-between gap-4">
               <div className="flex flex-col items-start">
                 {/* Message Title */}

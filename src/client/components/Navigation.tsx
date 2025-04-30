@@ -1,4 +1,5 @@
-import { Home, Settings } from 'lucide-react';
+import { Cog6ToothIcon } from '@heroicons/react/24/solid';
+import { WalletCards } from 'lucide-react';
 
 import { Link, useLocation } from 'react-router-dom';
 
@@ -8,11 +9,11 @@ const Navigation = () => {
   const links = [
     {
       path: '/dashboard',
-      icon: <Home className="w-8 h-8" />,
+      icon: <WalletCards className="w-8 h-8" />,
     },
     {
       path: '/settings',
-      icon: <Settings className="w-8 h-8" />,
+      icon: <Cog6ToothIcon className="w-8 h-8" />,
     },
   ];
 
@@ -24,10 +25,10 @@ const Navigation = () => {
             <Link
               key={link.path}
               to={link.path}
-              className={`flex items-center p-2 border-t border-mf-ash-300 ${
+              className={`flex items-center p-2 border-t ${
                 location.pathname === link.path
                   ? 'text-mf-safety-500 border-mf-safety-500'
-                  : 'text-mf-milk-300 border-mf-ash-300'
+                  : 'text-mf-milk-300 border-transparent'
               }`}
             >
               {link.icon}

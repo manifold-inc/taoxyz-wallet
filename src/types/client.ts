@@ -22,7 +22,7 @@ export interface Subnet {
   pendingRootEmission?: number;
   subnetVolume?: number;
   networkRegisteredAt?: number;
-  subnetIdentity?: string;
+  subnetIdentity?: SubnetIdentity;
   movingPrice?: {
     bits: number;
   };
@@ -85,6 +85,16 @@ export enum NotificationType {
   Success = 'success',
 }
 
+interface SubnetIdentity {
+  subnetName: string;
+  githubRepo: string;
+  subnetContact: string;
+  subnetUrl: string;
+  discord: string;
+  description: string;
+  additional?: string;
+}
+
 // BLOCKCHAIN TYPES
 export interface BittensorSubnet {
   netuid: number;
@@ -97,6 +107,7 @@ export interface BittensorSubnet {
   blocksSinceLastStep: number;
   emission: number;
   taoIn: number;
+  subnetIdentity: SubnetIdentity;
   alphaIn: number;
   alphaOut: number;
   alphaOutEmission: number;

@@ -123,19 +123,15 @@ const DashboardOverview = ({ taoPrice, priceChange24h }: DashboardOverviewProps)
 
           {/* Address, TAO Price, TAO Percentage Change */}
           <div className="flex flex-col items-end justify-between w-1/3">
-            <div className="flex items-center justify-end gap-1">
-              <p className="text-mf-sybil-500 text-sm font-light">
+            <div className="flex items-center justify-end gap-1 text-mf-edge-500 hover:text-mf-sybil-500">
+              <p className=" text-sm font-light">
                 {currentAddress?.slice(0, 4)}...{currentAddress?.slice(-4)}
               </p>
               <button
                 onClick={handleCopy}
                 className="cursor-pointer bg-mf-ash-500 rounded-full p-1.5"
               >
-                <Copy
-                  className={`w-3 h-3 cursor-pointer ${
-                    copied ? 'text-mf-edge-500' : 'text-mf-sybil-500'
-                  }`}
-                />
+                <Copy className={`w-3 h-3 cursor-pointer}`} />
               </button>
             </div>
 

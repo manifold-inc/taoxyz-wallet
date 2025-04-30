@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 
-import WalletSelection from '@/client/components/common/WalletSelection';
 import DashboardOverview from '@/client/components/dashboard/DashboardOverview';
 import PortfolioOverview from '@/client/components/dashboard/portfolio/PortfolioOverview';
 import Transaction from '@/client/components/dashboard/transaction/Transaction';
@@ -9,6 +8,8 @@ import { useNotification } from '@/client/contexts/NotificationContext';
 import { usePolkadotApi } from '@/client/contexts/PolkadotApiContext';
 import { useWallet } from '@/client/contexts/WalletContext';
 import { NotificationType } from '@/types/client';
+
+import Header from '../components/common/Header';
 
 const API_URL = 'https://tao.xyz/api/price';
 
@@ -117,7 +118,7 @@ export const Dashboard = () => {
   return (
     <div className="flex flex-col items-center w-full h-full pt-4 bg-mf-night-500">
       {/* Wallet Selection */}
-      <WalletSelection />
+      <Header />
 
       {/* Modular Overview */}
       <div className="border-b border-mf-ash-300 w-full">

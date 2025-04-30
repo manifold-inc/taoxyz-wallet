@@ -109,28 +109,6 @@ const ExpandedStake = ({
             </p>
             <span className="text-mf-edge-700 font-semibold text-sm">SN{subnet.id}</span>
           </div>
-
-          <div className="flex gap-2">
-            {/* Stake */}
-            <div className="flex items-center gap-1">
-              <div className="rounded-full flex items-center bg-mf-sybil-opacity px-2 py-0.5">
-                <span className="text-mf-sybil-500 text-xs">Stake</span>
-              </div>
-              <span className="text-mf-edge-500 text-xs">
-                {formatNumber(raoToTao(stake.stake))}α
-              </span>
-            </div>
-
-            {/* Price */}
-            <div className="flex items-center gap-1">
-              <div className="rounded-full flex items-center bg-mf-sybil-opacity px-2 py-0.5">
-                <span className="text-mf-sybil-500 text-xs">Price</span>
-              </div>
-              <span className="text-mf-edge-500 text-xs">
-                {subnet.price ? formatNumber(subnet.price) : '-'}τ
-              </span>
-            </div>
-          </div>
         </div>
 
         {/* Chart */}
@@ -141,23 +119,40 @@ const ExpandedStake = ({
         </div>
 
         {/* Validator */}
-        <div className="flex items-center justify-between px-3">
-          <div className="flex items-center gap-2">
-            <div className="rounded-full flex items-center bg-mf-sybil-opacity px-2 py-0.5">
-              <p className="text-mf-sybil-500 text-xs">Validator</p>
-            </div>
-            <div className="flex items-center gap-0.5">
-              <span className="text-mf-edge-500 text-xs">
-                {stake.hotkey.slice(0, 6)}...{stake.hotkey.slice(-6)}
-              </span>
+        <div className="flex items-center justify-center">
+          {/* Pills container */}
+          <div className="flex items-center gap-2 text-[10px]">
+            {/* Validator */}
+            <div className="rounded-full flex space-x-1 items-center bg-mf-sybil-opacity px-2 py-0.5">
+              <p className="text-mf-sybil-500">Validator</p>
               <button onClick={handleCopy} className="cursor-pointer">
-                <Copy className={`w-3 h-3 ${copied ? 'text-mf-sybil-500' : 'text-mf-edge-500'}`} />
+                <Copy className={`w-3 h-3 hover:text-mf-sybil-500 text-mf-edge-500`} />
               </button>
             </div>
+
+            {/* Stake */}
+            <div className="rounded-full flex items-center bg-mf-sybil-opacity px-2 py-0.5">
+              <span className="text-mf-sybil-500 mr-1">Stake</span>
+              <span className="text-mf-edge-500">
+                {formatNumber(raoToTao(stake.stake)).toFixed(2)}α
+              </span>
+            </div>
+
+            {/* Price */}
+            <div className="rounded-full flex items-center bg-mf-sybil-opacity px-2 py-0.5">
+              <span className="text-mf-sybil-500 mr-1">Price</span>
+              <span className="text-mf-edge-500">
+                {subnet.price ? formatNumber(subnet.price) : '-'}τ
+              </span>
+            </div>
+            {/* Collapse button */}
+            <button
+              onClick={onClose}
+              className="flex p-1 items-center justify-center cursor-pointer bg-mf-ash-300 rounded-full"
+            >
+              <ChevronUp className="w-4 h-4 text-mf-edge-500" />
+            </button>
           </div>
-          <button onClick={onClose} className="p-1 cursor-pointer">
-            <ChevronUp className="w-4 h-4 text-mf-edge-500" />
-          </button>
         </div>
       </div>
 

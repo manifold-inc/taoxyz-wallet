@@ -26,12 +26,14 @@
     "typescript-eslint": "^8.26.1"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@polkadot/extension-dapp": "^0.58.4",
     "@polkadot/types": "^15.7.1",
     "@polkadot/ui-keyring": "^3.12.2",
     "framer-motion": "^12.6.3",
     "react-router-dom": "^7.2.0",
-    "recharts": "^2.15.1"
+    "recharts": "^2.15.1",
+    "web-ext": "^8.6.0"
   },
   "scripts": {
     "dev": "bun run scripts/build.ts --watch",

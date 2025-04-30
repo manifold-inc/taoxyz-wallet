@@ -129,7 +129,7 @@ const StakeChart = ({ data }: StakeChartProps) => {
 
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <AreaChart data={priceData} margin={{ top: 10, right: 0, left: -17, bottom: 0 }}>
+      <AreaChart data={priceData} margin={{ top: 10, right: 0, left: -8, bottom: 0 }}>
         <XAxis
           dataKey="displayDate"
           tick={{ fill: '#9CA3AF', fontSize: 10 }}
@@ -153,7 +153,7 @@ const StakeChart = ({ data }: StakeChartProps) => {
           axisLine={{ stroke: '#374151' }}
           tickLine={{ stroke: '#374151' }}
           tickFormatter={value =>
-            `${parseFloat(value).toLocaleString('en-US', { maximumFractionDigits: 9 })}τ`
+            `${parseFloat(value).toLocaleString('en-US', { maximumFractionDigits: 4 })}τ`
           }
           width={60}
           tickSize={2}
