@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp, Plus, WalletCards, X } from 'lucide-react';
+import { Plus, WalletCards, X } from 'lucide-react';
 
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -98,10 +98,7 @@ const WalletSelection = () => {
           onClick={() => setIsExpanded(!isExpanded)}
         >
           <>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center bg-mf-sybil-500 border border-mf-sybil-500 rounded-sm p-1">
-                <WalletCards className="w-5 h-5 text-mf-night-500" />
-              </div>
+            <div className="flex items-center justify-between w-full gap-3">
               <div className="text-left text-mf-milk-300 text-xs flex flex-col">
                 <span>{wallet?.meta.name || 'Unknown'}</span>
                 <span className="text-mf-sybil-500">
@@ -112,13 +109,9 @@ const WalletSelection = () => {
                   )}
                 </span>
               </div>
-            </div>
-            <div className="p-1">
-              {isExpanded ? (
-                <ChevronUp className="w-6 h-6 text-mf-edge-300 p-1" />
-              ) : (
-                <ChevronDown className="w-6 h-6 text-mf-edge-300 p-1" />
-              )}
+              <div className="flex items-center justify-center bg-mf-sybil-500 border border-mf-sybil-500 rounded-sm p-1">
+                <WalletCards className="w-5 h-5 text-mf-night-500" />
+              </div>
             </div>
           </>
         </div>
@@ -159,13 +152,13 @@ const WalletSelection = () => {
 
             <button
               onClick={() => navigate('/welcome', { state: { step: 'GET_STARTED' } })}
-              className="w-full flex items-center gap-3 p-2 hover:bg-mf-night-500 cursor-pointer rounded-b-md"
+              className="w-full flex items-center justify-between  p-2 hover:bg-mf-night-500 cursor-pointer rounded-b-md"
             >
-              <div className="flex items-center justify-center bg-mf-safety-500 border border-mf-safety-500 rounded-sm p-1">
-                <Plus className="w-5 h-5 text-mf-ash-500" />
-              </div>
               <div className="text-left text-mf-safety-500 text-xs">
                 <span>Add New Wallet</span>
+              </div>
+              <div className="flex items-center justify-center bg-mf-safety-500 border border-mf-safety-500 rounded-sm p-1">
+                <Plus className="w-5 h-5 text-mf-ash-500" />
               </div>
             </button>
           </div>

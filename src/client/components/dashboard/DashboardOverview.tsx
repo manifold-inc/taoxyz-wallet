@@ -2,7 +2,7 @@ import GreenDollar from '@public/assets/green-dollar.svg';
 import GreenTao from '@public/assets/green-tao.svg';
 import SilverDollar from '@public/assets/silver-dollar.svg';
 import SilverTao from '@public/assets/silver-tao.svg';
-import { ChevronDown, ChevronUp, Copy } from 'lucide-react';
+import { Copy } from 'lucide-react';
 
 import { useEffect, useMemo, useState } from 'react';
 
@@ -14,10 +14,9 @@ import { formatNumber, raoToTao, taoToRao } from '@/utils/utils';
 
 interface DashboardOverviewProps {
   taoPrice: number | null;
-  priceChange24h: number | null;
 }
 
-const DashboardOverview = ({ taoPrice, priceChange24h }: DashboardOverviewProps) => {
+const DashboardOverview = ({ taoPrice }: DashboardOverviewProps) => {
   const { currentAddress } = useWallet();
   const { showNotification } = useNotification();
   const {
@@ -29,7 +28,6 @@ const DashboardOverview = ({ taoPrice, priceChange24h }: DashboardOverviewProps)
     dashboardSubnets: subnets,
     dashboardFreeBalance,
   } = useDashboard();
-  const [copied, setCopied] = useState(false);
   const [showUSD, setShowUSD] = useState(false);
   const freeTao = raoToTao(dashboardFreeBalance ?? BigInt(0));
 
@@ -58,8 +56,6 @@ const DashboardOverview = ({ taoPrice, priceChange24h }: DashboardOverviewProps)
   const handleCopy = async (): Promise<void> => {
     if (!currentAddress) return;
     await navigator.clipboard.writeText(currentAddress);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
     showNotification({
       type: NotificationType.Success,
       message: 'Address Copied',
@@ -135,19 +131,12 @@ const DashboardOverview = ({ taoPrice, priceChange24h }: DashboardOverviewProps)
               </button>
             </div>
 
-            <div className="flex flex-col items-end">
-              <p
-                className={`text-sm font-light flex items-center ${priceChange24h && priceChange24h >= 0 ? 'text-mf-sybil-500' : 'text-mf-safety-500'}`}
-              >
-                {priceChange24h && priceChange24h >= 0 ? (
-                  <ChevronUp className="w-4 h-4" />
-                ) : (
-                  <ChevronDown className="w-4 h-4" />
-                )}
-                {Math.abs(priceChange24h ?? 0).toFixed(2)}
-              </p>
-              <p className="text-mf-edge-500 text-sm font-light">${taoPrice?.toFixed(2)}</p>
-            </div>
+            <button
+              className="flex items-center justify-center cursor-pointer bg-mf-ash-500 rounded-full w-6 h-6 p-2 text-mf-edge-500"
+              onClick={() => setShowUSD(!showUSD)}
+            >
+              {showUSD ? <img src={SilverTao} /> : <p>$</p>}
+            </button>
           </div>
         </div>
 

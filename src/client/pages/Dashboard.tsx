@@ -13,7 +13,7 @@ import Header from '../components/common/Header';
 
 const API_URL = 'https://tao.xyz/api/price';
 
-interface TaoPriceResponse {
+export interface TaoPriceResponse {
   currentPrice: number;
   price24hAgo: number;
   priceChange24h: number;
@@ -27,8 +27,6 @@ export const Dashboard = () => {
   const { currentAddress } = useWallet();
 
   const [taoPrice, setTaoPrice] = useState<number | null>(null);
-  const [priceChange24h, setPriceChange24h] = useState<number | null>(null);
-
   const prevAddressRef = useRef<string | null>(null);
 
   const fetchData = async (address: string, forceRefresh = false): Promise<void> => {
@@ -81,7 +79,6 @@ export const Dashboard = () => {
       const response = await fetch(`${API_URL}`);
       const data = (await response.json()) as TaoPriceResponse;
       setTaoPrice(data.currentPrice);
-      setPriceChange24h(data.priceChange24h);
       await chrome.storage.local.set({
         tao_price_cache: {
           taoPrice: data.currentPrice,
@@ -100,7 +97,6 @@ export const Dashboard = () => {
     chrome.storage.local.get(['tao_price_cache', 'wallet_cache'], r => {
       if (r.tao_price_cache) {
         setTaoPrice(r.tao_price_cache.taoPrice);
-        setPriceChange24h(r.tao_price_cache.priceChange24h);
       }
       if (r.wallet_cache) {
         setDashboardSubnets(r.wallet_cache.subnets);
@@ -123,7 +119,7 @@ export const Dashboard = () => {
       {/* Modular Overview */}
       <div className="border-b border-mf-ash-300 w-full">
         <div className="w-full px-5 py-3">
-          <DashboardOverview taoPrice={taoPrice} priceChange24h={priceChange24h} />
+          <DashboardOverview taoPrice={taoPrice} />
         </div>
       </div>
 

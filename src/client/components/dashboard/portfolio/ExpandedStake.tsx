@@ -35,7 +35,6 @@ const ExpandedStake = ({
   onMoveStake,
 }: ExpandedStakeProps) => {
   const { showNotification } = useNotification();
-  const [copied, setCopied] = useState(false);
   const [priceData, setPriceData] = useState<PriceResponse[] | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -80,8 +79,6 @@ const ExpandedStake = ({
 
   const handleCopy = () => {
     navigator.clipboard.writeText(stake.hotkey);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
     showNotification({
       type: NotificationType.Success,
       message: 'Validator Hotkey Copied',
@@ -126,9 +123,9 @@ const ExpandedStake = ({
         </div>
 
         {/* Validator */}
-        <div className="flex items-center justify-center">
+        <div className="flex items-center w-full justify-center">
           {/* Pills container */}
-          <div className="flex items-center gap-2 text-xs">
+          <div className="flex justify-around w-full gap-2 text-xs">
             {/* Validator */}
             <div className="rounded-full flex space-x-1 items-center bg-mf-sybil-opacity px-2 py-0.5">
               <p className="text-mf-sybil-500">Validator</p>

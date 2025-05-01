@@ -153,7 +153,7 @@ const StakeChart = ({ data }: StakeChartProps) => {
           axisLine={{ stroke: '#374151' }}
           tickLine={{ stroke: '#374151' }}
           tickFormatter={value =>
-            `${parseFloat(value).toLocaleString('en-US', { maximumFractionDigits: 4 })}τ`
+            `${parseFloat(value).toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}τ`
           }
           width={60}
           tickSize={2}

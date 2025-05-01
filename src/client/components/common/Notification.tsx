@@ -72,9 +72,9 @@ const Notification = ({
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          className="fixed top-4 left-0 right-0 flex justify-center z-50"
+          className="fixed top-0 left-0 right-0 flex justify-center z-50"
           initial={{ y: -100, opacity: 0 }}
-          animate={{ y: 25, opacity: 1 }}
+          animate={{ y: 8, opacity: 1 }}
           exit={{ y: -100, opacity: 0 }}
           transition={{
             duration: 0.5,
