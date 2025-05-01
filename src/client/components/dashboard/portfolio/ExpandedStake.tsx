@@ -109,6 +109,13 @@ const ExpandedStake = ({
             </p>
             <span className="text-mf-edge-700 font-semibold text-sm">SN{subnet.id}</span>
           </div>
+          {/* Collapse button */}
+          <button
+            onClick={onClose}
+            className="flex p-1 items-center justify-center cursor-pointer bg-mf-ash-300 rounded-full"
+          >
+            <ChevronUp className="w-4 h-4 text-mf-edge-500" />
+          </button>
         </div>
 
         {/* Chart */}
@@ -121,7 +128,7 @@ const ExpandedStake = ({
         {/* Validator */}
         <div className="flex items-center justify-center">
           {/* Pills container */}
-          <div className="flex items-center gap-2 text-[10px]">
+          <div className="flex items-center gap-2 text-xs">
             {/* Validator */}
             <div className="rounded-full flex space-x-1 items-center bg-mf-sybil-opacity px-2 py-0.5">
               <p className="text-mf-sybil-500">Validator</p>
@@ -145,13 +152,6 @@ const ExpandedStake = ({
                 {subnet.price ? formatNumber(subnet.price) : '-'}τ
               </span>
             </div>
-            {/* Collapse button */}
-            <button
-              onClick={onClose}
-              className="flex p-1 items-center justify-center cursor-pointer bg-mf-ash-300 rounded-full"
-            >
-              <ChevronUp className="w-4 h-4 text-mf-edge-500" />
-            </button>
           </div>
         </div>
       </div>
