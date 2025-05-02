@@ -1,5 +1,4 @@
-import { Cog6ToothIcon } from '@heroicons/react/24/solid';
-import { WalletCards } from 'lucide-react';
+import { Settings, WalletCards } from 'lucide-react';
 
 import { Link, useLocation } from 'react-router-dom';
 
@@ -13,7 +12,7 @@ const Navigation = () => {
     },
     {
       path: '/settings',
-      icon: <Cog6ToothIcon className="w-8 h-8" />,
+      icon: <Settings className="w-8 h-8" />,
     },
   ];
 
