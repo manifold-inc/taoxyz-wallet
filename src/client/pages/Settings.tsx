@@ -22,12 +22,12 @@ const Settings = () => {
   };
 
   const renderMainSettings = () => (
-    <div className="flex flex-col items-center w-full gap-4">
+    <div className="flex flex-col items-center w-full gap-4 p-6 ">
       {/* Header */}
-      <div className="w-full flex items-center justify-start pt-4 px-5">
+      <div className="w-full flex items-center justify-start">
         <div className="flex items-center gap-2">
-          <img src={taoxyz} alt="Taoxyz Logo" className="w-8 h-8" />
-          <p className="text-mf-edge-500 text-3xl font-semibold blinker-font mb-1">SETTINGS</p>
+          <img src={taoxyz} alt="Taoxyz Logo" className="w-6 h-6" />
+          <p className="text-base font-bold text-mf-milk-300">SETTINGS</p>
         </div>
       </div>
 
@@ -35,7 +35,7 @@ const Settings = () => {
       <WalletSelection />
 
       {/* Settings */}
-      <div className="w-full px-5 py-3 flex flex-col items-center justify-start gap-3">
+      <div className="w-full flex flex-col items-center justify-start gap-3">
         <button
           onClick={() => setShowConnectedSites(true)}
           className="w-full bg-mf-ash-500 rounded-md p-3 flex items-center justify-between cursor-pointer hover:bg-mf-ash-300"

@@ -70,7 +70,7 @@ const LockScreen = ({ isLocked }: LockScreenProps) => {
   if (!isLocked) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-mf-night-500">
+    <div className="fixed inset-0 z-50 bg-mf-night-500 px-6">
       <div className="flex flex-col items-center justify-start w-full h-full pt-6 gap-10">
         {/* Wallet Selection */}
         <WalletSelection />

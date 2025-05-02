@@ -1,16 +1,21 @@
-import { Plus, WalletCards, X } from 'lucide-react';
+import taoxyz from '@public/assets/taoxyz.svg';
+import { ChevronDown, ChevronUp, Plus, WalletCards, X } from 'lucide-react';
 
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import type { KeyringPair } from '@polkadot/keyring/types';
 
+import { useNotification } from '@/client/contexts/NotificationContext';
+import type { TaoPriceResponse } from '@/client/pages/Dashboard';
+import { NotificationType } from '@/types/client';
+
 import { useLock } from '../../contexts/LockContext';
 import { useWallet } from '../../contexts/WalletContext';
 import KeyringService from '../../services/KeyringService';
 import ConfirmAction from './ConfirmAction';
 
-const WalletSelection = () => {
+const Header = () => {
   const navigate = useNavigate();
   const { currentAddress, setCurrentAddress } = useWallet();
   const { isLocked } = useLock();
@@ -18,7 +23,12 @@ const WalletSelection = () => {
   const [wallets, setWallets] = useState<KeyringPair[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
   const [walletToDelete, setWalletToDelete] = useState<KeyringPair | null>(null);
+  const [taoPrice, setTaoPrice] = useState<number | null>(null);
+  const [priceChange24h, setPriceChange24h] = useState<number | null>(null);
+  const [showPrice, setShowPrice] = useState(false);
   const listenerRef = useRef<HTMLDivElement>(null);
+  const { showNotification } = useNotification();
+  const prevAddressRef = useRef<string | null>(null);
 
   useEffect(() => {
     getWallet();
@@ -41,6 +51,26 @@ const WalletSelection = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  const fetchTaoPrice = async (): Promise<void> => {
+    try {
+      const response = await fetch(`https://tao.xyz/api/price`);
+      const data = (await response.json()) as TaoPriceResponse;
+      setTaoPrice(data.currentPrice);
+      setPriceChange24h(data.priceChange24h);
+      await chrome.storage.local.set({
+        tao_price_cache: {
+          taoPrice: data.currentPrice,
+          priceChange24h: data.priceChange24h,
+        },
+      });
+    } catch {
+      showNotification({
+        type: NotificationType.Error,
+        message: 'Failed to Fetch TAO Price',
+      });
+    }
+  };
 
   const clearSavedTransactions = async (): Promise<void> => {
     await chrome.storage.local.remove('storeMoveStakeTransaction');
@@ -87,37 +117,67 @@ const WalletSelection = () => {
     setWalletToDelete(null);
   };
 
+  if (currentAddress && currentAddress !== prevAddressRef.current) {
+    fetchTaoPrice();
+  }
+
   return (
     <>
       <div
-        className={`w-full bg-mf-ash-500 relative ${isExpanded ? 'rounded-t-md' : 'rounded-md'}`}
+        className={`w-82 relative ${isExpanded ? 'rounded-t-md' : 'rounded-md'}`}
         ref={listenerRef}
       >
-        <div
-          className="flex items-center justify-between p-2 hover:bg-mf-night-500 cursor-pointer"
-          onClick={() => setIsExpanded(!isExpanded)}
-        >
-          <>
-            <div className="flex items-center justify-between w-full gap-3">
+        <div className={`flex items-center justify-between p-2 bg-mf-night-500 `}>
+          <div className="flex items-center justify-between w-full">
+            {showPrice ? (
+              <div
+                className="flex items-center space-x-2 cursor-pointer"
+                onClick={() => setShowPrice(!showPrice)}
+              >
+                <img src={taoxyz} alt="Taoxyz Logo" className="w-6 h-6" />
+                <div>
+                  <div>
+                    <div className="flex items-center space-x-1 text-xs">
+                      <p className="text-mf-edge-500 font-light">${taoPrice?.toFixed(2)}</p>
+                      <p
+                        className={`font-light flex items-center ${priceChange24h && priceChange24h >= 0 ? 'text-mf-sybil-500' : 'text-mf-safety-500'}`}
+                      >
+                        {priceChange24h && priceChange24h >= 0 ? (
+                          <ChevronUp className="w-3 h-3" />
+                        ) : (
+                          <ChevronDown className="w-3 h-3" />
+                        )}
+                        {Math.abs(priceChange24h ?? 0).toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div
+                className="flex items-center space-x-2 cursor-pointer"
+                onClick={() => setShowPrice(!showPrice)}
+              >
+                <img src={taoxyz} alt="Taoxyz Logo" className="w-6 h-6" />
+                <p className="text-base font-bold text-mf-milk-300">TAO.XYZ</p>
+              </div>
+            )}
+            <div
+              className="flex items-center gap-3 cursor-pointer"
+              onClick={() => setIsExpanded(!isExpanded)}
+            >
               <div className="text-left text-mf-milk-300 text-xs flex flex-col">
                 <span>{wallet?.meta.name || 'Unknown'}</span>
-                <span className="text-mf-sybil-500">
-                  {wallet && (
-                    <>
-                      {wallet?.address.slice(0, 6)}...{wallet?.address.slice(-6)}
-                    </>
-                  )}
-                </span>
               </div>
-              <div className="flex items-center justify-center bg-mf-sybil-500 border border-mf-sybil-500 rounded-sm p-1">
-                <WalletCards className="w-5 h-5 text-mf-night-500" />
+              <div className="flex h-6 w-6 items-center justify-center bg-mf-sybil-500 border border-mf-sybil-500 rounded-sm p-1">
+                <WalletCards className=" text-mf-night-500" />
               </div>
             </div>
-          </>
+          </div>
         </div>
 
         {isExpanded && (
-          <div className="absolute top-full left-0 right-0 z-50 bg-mf-ash-500 rounded-b-md">
+          <div className="absolute top-full left-0 right-0 z-50 bg-mf-ash-500 rounded-md">
             {wallets
               .filter(w => w.address !== wallet?.address)
               .map(w => (
@@ -152,13 +212,13 @@ const WalletSelection = () => {
 
             <button
               onClick={() => navigate('/welcome', { state: { step: 'GET_STARTED' } })}
-              className="w-full flex items-center justify-between  p-2 hover:bg-mf-night-500 cursor-pointer rounded-b-md"
+              className="w-full flex items-center gap-3 p-2 hover:bg-mf-night-500 cursor-pointer rounded-b-md"
             >
-              <div className="text-left text-mf-safety-500 text-xs">
-                <span>Add New Wallet</span>
-              </div>
               <div className="flex items-center justify-center bg-mf-safety-500 border border-mf-safety-500 rounded-sm p-1">
                 <Plus className="w-5 h-5 text-mf-ash-500" />
+              </div>
+              <div className="text-left text-mf-safety-500 text-xs">
+                <span>Add New Wallet</span>
               </div>
             </button>
           </div>
@@ -177,4 +237,4 @@ const WalletSelection = () => {
   );
 };
 
-export default WalletSelection;
+export default Header;

@@ -72,16 +72,16 @@ const Notification = ({
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          className="fixed top-4 left-0 right-0 flex justify-center z-50"
+          className="fixed top-0 left-0 right-0 flex justify-center z-50"
           initial={{ y: -100, opacity: 0 }}
-          animate={{ y: 25, opacity: 1 }}
+          animate={{ y: 8, opacity: 1 }}
           exit={{ y: -100, opacity: 0 }}
           transition={{
             duration: 0.5,
             ease: 'easeInOut',
           }}
         >
-          <motion.div className="w-full mx-10 bg-mf-ash-500 px-4 py-3 rounded-md shadow-lg">
+          <motion.div className="w-full mx-4 bg-mf-ash-500 px-4 py-3 rounded-md shadow-lg">
             <div className="flex items-center justify-between gap-4">
               <div className="flex flex-col items-start">
                 {/* Message Title */}
