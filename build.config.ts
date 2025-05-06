@@ -10,7 +10,7 @@ const config: BuildConfig = {
   outdir: './dists/chrome',
   target: 'browser',
   format: 'esm',
-  minify: process.env.NODE_ENV === 'production',
+  minify: true,
   sourcemap: 'external',
   naming: {
     entry: '[dir]/[name].[ext]',
