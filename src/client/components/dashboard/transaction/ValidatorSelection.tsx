@@ -91,8 +91,9 @@ const ValidatorSelection = ({
             {/* Validator */}
             <button
               onClick={() => handleValidatorSelect(validator)}
-              className={`w-full text-left rounded-md cursor-pointer p-2 gap-1 bg-mf-ash-300 ${selectedValidator?.hotkey === validator.hotkey ? 'bg-mf-ash-300' : 'bg-mf-ash-500'
-                }`}
+              className={`w-full text-left rounded-md cursor-pointer p-2 gap-1 bg-mf-ash-300 ${
+                selectedValidator?.hotkey === validator.hotkey ? 'bg-mf-ash-300' : 'bg-mf-ash-500'
+              }`}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1">
