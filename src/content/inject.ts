@@ -9,7 +9,7 @@ injectExtension(
   },
   {
     name: 'taoxyz-wallet',
-    version: '1.2.3',
+    version: '1.2.4',
   }
 );
 
