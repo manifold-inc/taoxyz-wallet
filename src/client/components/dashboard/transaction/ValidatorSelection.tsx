@@ -22,7 +22,7 @@ const ValidatorSelection = ({
   onCancel,
   onConfirm,
 }: ValidatorSelectionProps) => {
-  const { dashboardStakes, dashboardSubnet, dashboardState, dashboardValidator } = useDashboard();
+  const { dashboardState, dashboardValidator } = useDashboard();
   const [selectedValidator, setSelectedValidator] = useState<Validator | null>(() => {
     if (dashboardState === DashboardState.MOVE_STAKE) {
       return toValidator;
@@ -39,21 +39,6 @@ const ValidatorSelection = ({
       return validatorName.includes(query) || validatorHotkey.includes(query);
     });
   };
-
-  // Gets validators users are not staked on for the selected subnet
-  const uniqueValidators = () => {
-    if (!dashboardStakes || !dashboardSubnet) {
-      return validators;
-    }
-    const subnetStakes = dashboardStakes.filter(stake => stake.netuid === dashboardSubnet.id);
-    const subnetValidators = subnetStakes.map(stake => stake.hotkey);
-    return validators.filter(validator => !subnetValidators.includes(validator.hotkey));
-  };
-
-  const displayValidators =
-    dashboardState === DashboardState.CREATE_STAKE
-      ? filterBySearch(uniqueValidators())
-      : filterBySearch(validators);
 
   const handleValidatorSelect = (validator: Validator) => {
     if (validator.hotkey === selectedValidator?.hotkey) return;
@@ -101,14 +86,13 @@ const ValidatorSelection = ({
 
       {/* Validators */}
       <div className="flex flex-col gap-3">
-        {displayValidators.map(validator => (
+        {filterBySearch(validators).map(validator => (
           <div className="flex flex-col gap-3" key={validator.hotkey}>
             {/* Validator */}
             <button
               onClick={() => handleValidatorSelect(validator)}
-              className={`w-full text-left rounded-md cursor-pointer p-2 gap-1 bg-mf-ash-300 ${
-                selectedValidator?.hotkey === validator.hotkey ? 'bg-mf-ash-300' : 'bg-mf-ash-500'
-              }`}
+              className={`w-full text-left rounded-md cursor-pointer p-2 gap-1 bg-mf-ash-300 ${selectedValidator?.hotkey === validator.hotkey ? 'bg-mf-ash-300' : 'bg-mf-ash-500'
+                }`}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1">
