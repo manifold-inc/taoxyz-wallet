@@ -144,8 +144,12 @@ const DashboardOverview = ({ taoPrice }: DashboardOverviewProps) => {
         <div className="flex justify-between gap-3 w-full">
           <button
             onClick={() => {
-              resetDashboardState();
-              setDashboardState(DashboardState.CREATE_STAKE);
+              if (dashboardState === DashboardState.CREATE_STAKE) {
+                resetDashboardState(); // Go back to overview (acts as cancel)
+              } else {
+                resetDashboardState();
+                setDashboardState(DashboardState.CREATE_STAKE); // Go to stake form
+              }
             }}
             className={`w-1/2 py-1.5 rounded-sm cursor-pointer hover:opacity-50 ${
               dashboardState === DashboardState.CREATE_STAKE ||
@@ -158,8 +162,12 @@ const DashboardOverview = ({ taoPrice }: DashboardOverviewProps) => {
           </button>
           <button
             onClick={() => {
-              resetDashboardState();
-              setDashboardState(DashboardState.TRANSFER);
+              if (dashboardState === DashboardState.TRANSFER) {
+                resetDashboardState();
+              } else {
+                resetDashboardState();
+                setDashboardState(DashboardState.TRANSFER);
+              }
             }}
             className={`w-1/2 py-1.5 rounded-sm cursor-pointer hover:opacity-50 ${
               dashboardState === DashboardState.TRANSFER ||
