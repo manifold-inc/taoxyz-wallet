@@ -29,14 +29,14 @@ class PolkadotApi {
 
   private async initialize(): Promise<void> {
     console.log('[Client] Initializing API');
-    const provider = new WsProvider(this.endpoints.test);
+    const provider = new WsProvider(this.endpoints.main);
     try {
       if (this.api?.isConnected) {
         await this.api.disconnect();
       }
 
       this.api = await ApiPromise.create({ provider });
-      console.log(`[Client] Connected to Endpoint: ${this.endpoints.test}`);
+      console.log(`[Client] Connected to Endpoint: ${this.endpoints.main}`);
     } catch (error) {
       console.error('Error in initialize:', error);
       throw error;
@@ -404,11 +404,11 @@ class PolkadotApi {
           if (!btSubnet) return null;
           const subnetName = btSubnet.subnetIdentity?.subnetName
             ? new TextDecoder('utf-8').decode(
-                Uint8Array.from(
-                  btSubnet.subnetIdentity.subnetName?.match(/.{1,2}/g)?.map(b => parseInt(b, 16)) ||
-                    []
-                )
+              Uint8Array.from(
+                btSubnet.subnetIdentity.subnetName?.match(/.{1,2}/g)?.map(b => parseInt(b, 16)) ||
+                []
               )
+            )
             : `Subnet ${btSubnet.netuid}`;
 
           const price =

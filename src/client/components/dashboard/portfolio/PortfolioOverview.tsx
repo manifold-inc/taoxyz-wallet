@@ -129,7 +129,6 @@ const PortfolioOverview = () => {
               ))
             ) : (
               <div className="flex flex-col gap-3">
-                {/* Transfer Tao Button */}
                 <button
                   onClick={() => {
                     resetDashboardState();
@@ -152,7 +151,6 @@ const PortfolioOverview = () => {
                   </div>
                 </button>
 
-                {/* New Stake Button */}
                 <button
                   onClick={() => {
                     resetDashboardState();
@@ -171,7 +169,6 @@ const PortfolioOverview = () => {
                   </div>
                 </button>
 
-                {/* Bottom message */}
                 <div className="text-center pt-8">
                   <p className="text-mf-safety-500 font-thin text-xs">Add TAO to get Started</p>
                 </div>
