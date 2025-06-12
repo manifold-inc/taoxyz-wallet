@@ -145,10 +145,10 @@ const DashboardOverview = ({ taoPrice }: DashboardOverviewProps) => {
           <button
             onClick={() => {
               if (dashboardState === DashboardState.CREATE_STAKE) {
-                resetDashboardState(); // Go back to overview (acts as cancel)
+                resetDashboardState();
               } else {
                 resetDashboardState();
-                setDashboardState(DashboardState.CREATE_STAKE); // Go to stake form
+                setDashboardState(DashboardState.CREATE_STAKE);
               }
             }}
             className={`w-1/2 py-1.5 rounded-sm cursor-pointer hover:opacity-50 ${
