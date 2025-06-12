@@ -1,3 +1,5 @@
+import { Download, Plus } from 'lucide-react';
+
 import ExpandedStake from '@/client/components/dashboard/portfolio/ExpandedStake';
 import StakeOverview from '@/client/components/dashboard/portfolio/StakeOverview';
 import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
@@ -15,6 +17,7 @@ const PortfolioOverview = () => {
     setDashboardValidator,
     setDashboardValidators,
     setDashboardStake,
+    resetDashboardState,
     dashboardStake,
     dashboardSubnet,
     dashboardSubnets: subnets,
@@ -115,14 +118,65 @@ const PortfolioOverview = () => {
       ) : (
         <div className="w-full">
           <div className="flex flex-col gap-3">
-            {stakes?.map((stake, index) => (
-              <StakeOverview
-                key={index}
-                stake={stake}
-                subnet={subnets?.find(subnet => subnet.id === stake.netuid) as Subnet}
-                onClick={() => handleStakeSelect(stake)}
-              />
-            ))}
+            {stakes && stakes.length > 0 ? (
+              stakes.map((stake, index) => (
+                <StakeOverview
+                  key={index}
+                  stake={stake}
+                  subnet={subnets?.find(subnet => subnet.id === stake.netuid) as Subnet}
+                  onClick={() => handleStakeSelect(stake)}
+                />
+              ))
+            ) : (
+              <div className="flex flex-col gap-3">
+                {/* Transfer Tao Button */}
+                <button
+                  onClick={() => {
+                    resetDashboardState();
+                    setDashboardState(DashboardState.TRANSFER);
+                  }}
+                  className="w-full p-4 bg-mf-ash-500 rounded-md hover:bg-mf-ash-300 cursor-pointer"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="text-left">
+                      <h3 className="text-mf-edge-500 font-semibold text-xs-sm pb-1">
+                        Transfer Tao
+                      </h3>
+                      <p className="text-mf-sybil-500 font-light text-xs">
+                        Add Tao to Tao.xyz Wallet
+                      </p>
+                    </div>
+                    <div className="flex items-center justify-center w-10 h-10 bg-mf-ash-300 rounded-full">
+                      <Download className="w-5 h-5 text-mf-safety-500" />
+                    </div>
+                  </div>
+                </button>
+
+                {/* New Stake Button */}
+                <button
+                  onClick={() => {
+                    resetDashboardState();
+                    setDashboardState(DashboardState.CREATE_STAKE);
+                  }}
+                  className="w-full p-4 bg-mf-ash-500 rounded-md hover:bg-mf-ash-300 cursor-pointer"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="text-left">
+                      <h3 className="text-mf-edge-500 font-semibold text-xs-sm pb-1">New Stake</h3>
+                      <p className="text-mf-sybil-500 font-light text-xs">Stake Tao on a Subnet</p>
+                    </div>
+                    <div className="flex items-center justify-center w-10 h-10 bg-mf-ash-300 rounded-full">
+                      <Plus className="w-5 h-5 text-mf-safety-500" />
+                    </div>
+                  </div>
+                </button>
+
+                {/* Bottom message */}
+                <div className="text-center pt-8">
+                  <p className="text-mf-safety-500 font-thin text-xs">Add TAO to get Started</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

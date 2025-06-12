@@ -60,39 +60,60 @@
 
 @theme {
   /* Safety Colors */
-  --color-mf-safety-300: #ff9b7a; /* #FF9B7A */
-  --color-mf-safety-500: #ff8159; /* #FF8159 */
-  --color-mf-safety-700: #d96547; /* #D96547 */
-  --color-mf-safety-opacity: #4f3736; /* #4F3736 */
+  --color-mf-safety-300: #ff9b7a;
+  /* #FF9B7A */
+  --color-mf-safety-500: #ff8159;
+  /* #FF8159 */
+  --color-mf-safety-700: #d96547;
+  /* #D96547 */
+  --color-mf-safety-opacity: #4f3736;
+  /* #4F3736 */
 
   /* Ash Colors */
-  --color-mf-ash-300: #3a3c46; /* #3A3C46 */
-  --color-mf-ash-500: #22242e; /* #22242E */
-  --color-mf-ash-700: #17181f; /* #17181F */
+  --color-mf-ash-300: #3a3c46;
+  /* #3A3C46 */
+  --color-mf-ash-500: #22242e;
+  /* #22242E */
+  --color-mf-ash-700: #17181f;
+  /* #17181F */
 
   /* Night Colors */
-  --color-mf-night-300: #2a2c33; /* #2A2C33 */
-  --color-mf-night-400: #22242e; /* #22242E */
-  --color-mf-night-500: #191b20; /* #191B20 */
-  --color-mf-night-700: #101114; /* #101114 */
+  --color-mf-night-300: #2a2c33;
+  /* #2A2C33 */
+  --color-mf-night-400: #22242e;
+  /* #22242E */
+  --color-mf-night-500: #191b20;
+  /* #191B20 */
+  --color-mf-night-700: #101114;
+  /* #101114 */
 
   /* Edge Colors */
-  --color-mf-edge-300: #d8e5ff; /* #D8E5FF */
-  --color-mf-edge-500: #c5dbff; /* #C5DBFF */
-  --color-mf-edge-700: #a3b5d6; /* #A3B5D6 */
+  --color-mf-edge-300: #d8e5ff;
+  /* #D8E5FF */
+  --color-mf-edge-500: #c5dbff;
+  /* #C5DBFF */
+  --color-mf-edge-700: #a3b5d6;
+  /* #A3B5D6 */
 
   /* Milk Colors */
-  --color-mf-milk-300: #e0ebff; /* #E5F0FF */
-  --color-mf-milk-500: #dbe9ff; /* #DBE9FF */
-  --color-mf-milk-700: #aec0d6; /* #B9C4D6 */
+  --color-mf-milk-300: #e0ebff;
+  /* #E5F0FF */
+  --color-mf-milk-500: #dbe9ff;
+  /* #DBE9FF */
+  --color-mf-milk-700: #aec0d6;
+  /* #B9C4D6 */
 
   /* Sybil Colors */
-  --color-mf-sybil-500: #57e8b4; /* #57E8B4 */
-  --color-mf-sybil-opacity: #2d4b49; /* #2D4B49 */
+  --color-mf-sybil-500: #57e8b4;
+  /* #57E8B4 */
+  --color-mf-sybil-opacity: #2d4b49;
+  /* #2D4B49 */
 
   /* Red Colors */
-  --color-mf-red-500: #ff5a5a; /* #FF5A5A */
-  --color-mf-red-opacity: #3a2a33; /* #3A2A33 */
+  --color-mf-red-500: #ff5a5a;
+  /* #FF5A5A */
+  --color-mf-red-opacity: #3a2a33;
+  /* #3A2A33 */
 }
 
 body {
@@ -177,4 +198,9 @@ input {
 /* Custom Blinker Font Class */
 .blinker-font {
   font-family: 'Blinker', sans-serif;
+}
+
+.text-xs-sm {
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
 }
