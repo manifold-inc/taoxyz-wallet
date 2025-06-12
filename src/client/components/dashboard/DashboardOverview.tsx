@@ -78,7 +78,7 @@ const DashboardOverview = ({ taoPrice }: DashboardOverviewProps) => {
     <>
       <div className="w-full h-full flex flex-col gap-3">
         {/* Total and Free TAO */}
-        <div className="w-full h-full rounded-md bg-mf-sybil-opacity p-3 flex justify-between">
+        <div className="w-full h-full rounded-md [background:linear-gradient(to_bottom,_#375250_0%,_#204b44_100%)] p-3 flex justify-between">
           <div
             className="flex flex-col items-start justify-center gap-2 w-2/3 cursor-pointer"
             onClick={handleToggleUnit}
