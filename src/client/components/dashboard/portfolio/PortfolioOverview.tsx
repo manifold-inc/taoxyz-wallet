@@ -150,7 +150,6 @@ const PortfolioOverview = () => {
                     </div>
                   </div>
                 </button>
-
                 <button
                   onClick={() => {
                     resetDashboardState();
@@ -168,7 +167,6 @@ const PortfolioOverview = () => {
                     </div>
                   </div>
                 </button>
-
                 <div className="text-center pt-8">
                   <p className="text-mf-safety-500 font-thin text-xs">Add TAO to get Started</p>
                 </div>
