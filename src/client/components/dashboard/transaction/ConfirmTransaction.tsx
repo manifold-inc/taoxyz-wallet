@@ -331,7 +331,7 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
                 />
               </svg>
             </div>
-            <p className="text-mf-sybil-500 text-lg">Transaction Finalized</p>
+            <p className="text-mf-edge-500 text-lg">Transaction Finalized</p>
 
             {/* Transaction Details */}
             <div className="w-full flex flex-col bg-mf-ash-500 rounded-md divide-y divide-mf-ash-300">
