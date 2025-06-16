@@ -280,14 +280,14 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
       case 'ready':
       case 'broadcast':
         return (
-          <div className="flex flex-col items-center justify-center gap-4 px-5 pt-16">
+          <div className="flex flex-col justify-center items-center gap-4 px-5">
             <div className="w-8 h-8 border-4 border-mf-sybil-500 border-t-transparent rounded-full animate-spin" />
             <p className="text-mf-edge-500 text-lg">Submitting Transaction...</p>
           </div>
         );
       case 'inBlock':
         return (
-          <div className="flex flex-col items-center justify-center gap-4 px-5 pt-16">
+          <div className="flex flex-col items-center justify-center gap-4 px-5 pt-12">
             <div className="w-8 h-8 bg-mf-sybil-500 rounded-full flex items-center justify-center">
               <svg
                 className="w-4 h-4 text-mf-night-500"
@@ -315,10 +315,10 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
         );
       case 'success':
         return (
-          <div className="flex flex-col items-center justify-center gap-4 px-5 pt-12">
-            <div className="w-8 h-8 bg-mf-sybil-500 rounded-full flex items-center justify-center">
+          <div className="flex flex-col items-center justify-center gap-2 px-5 pt-2">
+            <div className="w-7 h-7 bg-mf-sybil-500 rounded-full flex items-center justify-center">
               <svg
-                className="w-4 h-4 text-mf-night-500"
+                className="w-3 h-3 text-mf-night-500"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -326,12 +326,12 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={2}
+                  strokeWidth={5}
                   d="M5 13l4 4L19 7"
                 />
               </svg>
             </div>
-            <p className="text-mf-sybil-500 text-lg">Transaction Finalized</p>
+            <p className="text-mf-edge-500 text-lg">Transaction Finalized</p>
 
             {/* Transaction Details */}
             <div className="w-full flex flex-col bg-mf-ash-500 rounded-md divide-y divide-mf-ash-300">
@@ -341,7 +341,7 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
             <button
               onClick={onCancel}
               type="button"
-              className="rounded-full cursor-pointer text-sm text-mf-safety-500 bg-mf-safety-opacity px-6 py-1 hover:opacity-50"
+              className="rounded-full cursor-pointer text-sm text-mf-safety-500 bg-mf-safety-opacity px-6 py-1 mt-1 hover:opacity-50"
             >
               <span>Close</span>
             </button>
@@ -369,7 +369,7 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
             <button
               onClick={onCancel}
               type="button"
-              className="rounded-full cursor-pointer text-sm text-mf-safety-500 bg-mf-safety-opacity px-6 py-1 hover:opacity-50"
+              className="rounded-full cursor-pointer text-sm text-mf-safety-500 bg-mf-safety-opacity px-6 py-4 hover:opacity-50"
             >
               <span>Close</span>
             </button>
@@ -436,7 +436,11 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
     }
   };
 
-  return <div className="w-full h-full fixed inset-0 z-50 bg-mf-night-500">{renderContent()}</div>;
+  return (
+    <div className="w-full h-full fixed inset-0 z-50 bg-mf-night-500 flex justify-center items-center">
+      {renderContent()}
+    </div>
+  );
 };
 
 export default ConfirmTransaction;
