@@ -246,6 +246,7 @@ const TransactionForm = ({
     let result: boolean | null = null;
     if (dashboardState === DashboardState.TRANSFER) {
       result = amountValidation(Number(amountState.amount)) && toAddress !== '';
+      return result;
     }
     result = dashboardSubnet && dashboardValidator && amountValidation(Number(amountState.amount));
     return result;
