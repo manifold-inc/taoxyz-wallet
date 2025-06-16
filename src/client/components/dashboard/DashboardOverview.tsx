@@ -78,7 +78,7 @@ const DashboardOverview = ({ taoPrice }: DashboardOverviewProps) => {
     <>
       <div className="w-full h-full flex flex-col gap-3">
         {/* Total and Free TAO */}
-        <div className="w-full h-full rounded-md bg-mf-sybil-opacity p-3 flex justify-between">
+        <div className="w-full h-full rounded-md [background:linear-gradient(to_bottom,_#375250_0%,_#204b44_100%)] p-3 flex justify-between">
           <div
             className="flex flex-col items-start justify-center gap-2 w-2/3 cursor-pointer"
             onClick={handleToggleUnit}
@@ -144,8 +144,12 @@ const DashboardOverview = ({ taoPrice }: DashboardOverviewProps) => {
         <div className="flex justify-between gap-3 w-full">
           <button
             onClick={() => {
-              resetDashboardState();
-              setDashboardState(DashboardState.CREATE_STAKE);
+              if (dashboardState === DashboardState.CREATE_STAKE) {
+                resetDashboardState();
+              } else {
+                resetDashboardState();
+                setDashboardState(DashboardState.CREATE_STAKE);
+              }
             }}
             className={`w-1/2 py-1.5 rounded-sm cursor-pointer hover:opacity-50 ${
               dashboardState === DashboardState.CREATE_STAKE ||
@@ -158,8 +162,12 @@ const DashboardOverview = ({ taoPrice }: DashboardOverviewProps) => {
           </button>
           <button
             onClick={() => {
-              resetDashboardState();
-              setDashboardState(DashboardState.TRANSFER);
+              if (dashboardState === DashboardState.TRANSFER) {
+                resetDashboardState();
+              } else {
+                resetDashboardState();
+                setDashboardState(DashboardState.TRANSFER);
+              }
             }}
             className={`w-1/2 py-1.5 rounded-sm cursor-pointer hover:opacity-50 ${
               dashboardState === DashboardState.TRANSFER ||
