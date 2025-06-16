@@ -404,11 +404,11 @@ class PolkadotApi {
           if (!btSubnet) return null;
           const subnetName = btSubnet.subnetIdentity?.subnetName
             ? new TextDecoder('utf-8').decode(
-                Uint8Array.from(
-                  btSubnet.subnetIdentity.subnetName?.match(/.{1,2}/g)?.map(b => parseInt(b, 16)) ||
-                    []
-                )
+              Uint8Array.from(
+                btSubnet.subnetIdentity.subnetName?.match(/.{1,2}/g)?.map(b => parseInt(b, 16)) ||
+                []
               )
+            )
             : `Subnet ${btSubnet.netuid}`;
 
           const price =
