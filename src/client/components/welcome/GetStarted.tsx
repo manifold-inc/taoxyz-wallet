@@ -40,8 +40,6 @@ const GetStarted = () => {
               animate={{ opacity: showDisclaimer ? 0.5 : 1 }}
               transition={{ duration: 0.3 }}
             >
-              {/* Logo */}
-
               {/* Logo + Text Combined */}
               <motion.div
                 className="absolute left-[45%] top-[41%] -translate-x-1/2 -translate-y-1/2 z-10 flex items-center gap-3"
@@ -56,19 +54,21 @@ const GetStarted = () => {
                   transition={{ duration: 0.6, ease: 'easeOut', delay: 0.2 }}
                 />
                 <img src={taoxyz} alt="Taoxyz Logo" className="h-8 w-8" />
-                <span className="text-mf-edge-500 text-4xl font-bold blinker-font whitespace-nowrap">
+                <span className="text-mf-edge-500 text-3xl font-bold blinker-font whitespace-nowrap">
                   TAO.XYZ WALLET
                 </span>
               </motion.div>
 
               {/* Subtitle */}
               <motion.p
-                className="text-mf-sybil-500 text-base font-light text-center px-12"
+                className="text-mf-sybil-500 text-base font-light text-center mt-10 px-8 max-w-xs w-full mx-auto"
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.6, duration: 0.6 }}
               >
-                To get started, create a new wallet or import an existing one.
+                <p>To get started, create a</p>
+                <p>new wallet or import</p>
+                <p>an existing one.</p>
               </motion.p>
 
               {/* Buttons */}
