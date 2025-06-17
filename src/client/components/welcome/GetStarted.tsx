@@ -12,7 +12,6 @@ const GetStarted = () => {
   const navigate = useNavigate();
   const { actions } = useWalletCreation();
   const [showDisclaimer, setShowDisclaimer] = useState(false);
-  const [showWalletText, setShowWalletText] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
 
   const handleNavigation = (path: string, mode: Mode) => {
@@ -25,13 +24,15 @@ const GetStarted = () => {
 
   return (
     <div className="flex h-full w-full bg-mf-night-500 justify-center items-center relative overflow-hidden">
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {!isExiting && (
           <motion.div
+            key="get-started"
             className="flex h-full w-full justify-center items-center relative overflow-hidden"
-            initial={{ y: 0, opacity: 1 }}
-            exit={{ y: -1000, opacity: 0 }}
-            transition={{ duration: 1, ease: 'easeInOut' }}
+            initial={{ y: '100vh', opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: '-100vh', opacity: 0 }}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
           >
             {/* Main Content */}
             <motion.div
@@ -40,47 +41,32 @@ const GetStarted = () => {
               transition={{ duration: 0.3 }}
             >
               {/* Logo */}
-              <motion.div
-                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
-                initial={{ y: 0, x: -80, scale: 1 }}
-                animate={{ y: -50, x: -120, scale: 0.9 }}
-                transition={{ duration: 1, ease: 'easeInOut' }}
-              >
-                <img src={taoxyz} alt="Taoxyz Logo" className="h-8 w-8" />
-              </motion.div>
 
-              {/* Text */}
+              {/* Logo + Text Combined */}
               <motion.div
-                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
-                initial={{ y: -2, x: 8, scale: 1 }}
-                animate={{ y: -52, x: -40, scale: 0.9 }}
-                transition={{
-                  duration: 1,
-                  ease: 'easeInOut',
-                  onComplete: () => setShowWalletText(true),
-                }}
+                className="absolute left-[45%] top-[41%] -translate-x-1/2 -translate-y-1/2 z-10 flex items-center gap-3"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.6, ease: 'easeOut', delay: 0.2 }}
               >
-                <div className="relative">
-                  <span className="text-mf-edge-500 text-4xl font-bold blinker-font">TAO.XYZ</span>
-                  <motion.span
-                    className="absolute left-full ml-2 text-mf-edge-500 text-4xl font-bold blinker-font"
-                    initial={{ opacity: 0 }}
-                    animate={{
-                      opacity: showWalletText ? 1 : 0,
-                    }}
-                    transition={{ duration: 1 }}
-                  >
-                    WALLET
-                  </motion.span>
-                </div>
+                <motion.div
+                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
+                  initial={{ y: 500, x: -120, opacity: 0 }}
+                  animate={{ y: -50, x: -120, opacity: 1 }}
+                  transition={{ duration: 0.6, ease: 'easeOut', delay: 0.2 }}
+                />
+                <img src={taoxyz} alt="Taoxyz Logo" className="h-8 w-8" />
+                <span className="text-mf-edge-500 text-4xl font-bold blinker-font whitespace-nowrap">
+                  TAO.XYZ WALLET
+                </span>
               </motion.div>
 
               {/* Subtitle */}
               <motion.p
                 className="text-mf-sybil-500 text-base font-light text-center px-12"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 5 }}
-                transition={{ delay: 0.5, duration: 1 }}
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.6, duration: 0.6 }}
               >
                 To get started, create a new wallet or import an existing one.
               </motion.p>
@@ -90,7 +76,7 @@ const GetStarted = () => {
                 className="absolute bottom-16 flex flex-col items-center gap-4"
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.2, duration: 0.5 }}
+                transition={{ delay: 0.8, duration: 0.6 }}
               >
                 <button
                   className="w-full rounded-full cursor-pointer flex items-center gap-1.5 px-6 py-1.5 bg-mf-sybil-opacity text-sm text-mf-sybil-500 hover:opacity-50"
@@ -116,7 +102,7 @@ const GetStarted = () => {
               </motion.div>
             </motion.div>
 
-            {/* Disclaimer - Always present but positioned off-screen */}
+            {/* Disclaimer Slide-up */}
             <motion.div
               className="absolute inset-0 z-10"
               initial={{ y: '100%' }}

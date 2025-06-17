@@ -25,7 +25,7 @@ const Initial = ({ onGetStarted }: InitialProps) => {
             className="absolute inset-0 bg-mf-safety-500 z-10 pointer-events-none"
             initial={{ opacity: 1 }}
             animate={{ opacity: 0 }}
-            transition={{ duration: 0.5, ease: 'easeInOut' }}
+            transition={{ duration: 2.5, ease: 'easeInOut' }}
           />
         )}
       </AnimatePresence>
@@ -80,6 +80,7 @@ const Initial = ({ onGetStarted }: InitialProps) => {
         className="absolute bottom-16 z-0"
         initial={{ y: 0, opacity: 0 }}
         animate={{ y: -24, opacity: 1 }}
+        exit={{ y: -1000, opacity: 0 }}
         {...st({ duration: 1, ease: 'easeInOut', delay: 2 })}
       >
         <button
