@@ -25,7 +25,7 @@ const Initial = ({ onGetStarted }: InitialProps) => {
             className="absolute inset-0 bg-mf-safety-500 z-10 pointer-events-none"
             initial={{ opacity: 1 }}
             animate={{ opacity: 0 }}
-            transition={{ duration: 0.5, ease: 'easeInOut' }}
+            transition={{ duration: 2, ease: 'easeInOut' }}
           />
         )}
       </AnimatePresence>
@@ -35,7 +35,7 @@ const Initial = ({ onGetStarted }: InitialProps) => {
         className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
         initial={{ x: 0 }}
         animate={{ x: -80 }}
-        {...st({ duration: 0.5, ease: 'easeInOut', delay: 0.75 })}
+        {...st({ duration: 0.75, ease: 'easeInOut', delay: 2 })}
       >
         <img src={taoxyz} alt="Taoxyz Logo" className="h-8 w-8" />
       </motion.div>
@@ -44,7 +44,7 @@ const Initial = ({ onGetStarted }: InitialProps) => {
         className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pl-4"
         initial={{ y: -2, opacity: 0 }}
         animate={{ opacity: 1 }}
-        {...st({ duration: 0.75, ease: 'easeInOut', delay: 1 })}
+        {...st({ duration: 0.5, ease: 'easeInOut', delay: 2.5 })}
       >
         <p className="text-mf-edge-500 text-4xl font-bold blinker-font">
           TAO.
@@ -52,7 +52,7 @@ const Initial = ({ onGetStarted }: InitialProps) => {
             className="inline-block"
             initial={{ y: 3 }}
             animate={{ y: 0, rotateX: [180, 360] }}
-            transition={{ duration: 0.2, delay: 1.4 }}
+            transition={{ duration: 0.2, delay: 2.8 }}
           >
             X
           </motion.span>
@@ -60,7 +60,7 @@ const Initial = ({ onGetStarted }: InitialProps) => {
             className="inline-block"
             initial={{ y: 3 }}
             animate={{ y: 0, rotateX: [180, 360] }}
-            transition={{ duration: 0.2, delay: 1.6 }}
+            transition={{ duration: 0.2, delay: 3.0 }}
           >
             Y
           </motion.span>
@@ -68,7 +68,7 @@ const Initial = ({ onGetStarted }: InitialProps) => {
             className="inline-block"
             initial={{ y: 3 }}
             animate={{ y: 0, rotateX: [180, 360] }}
-            transition={{ duration: 0.2, delay: 1.8 }}
+            transition={{ duration: 0.2, delay: 3.2 }}
           >
             Z
           </motion.span>
@@ -80,7 +80,8 @@ const Initial = ({ onGetStarted }: InitialProps) => {
         className="absolute bottom-16 z-0"
         initial={{ y: 0, opacity: 0 }}
         animate={{ y: -24, opacity: 1 }}
-        {...st({ duration: 1, ease: 'easeInOut', delay: 2 })}
+        exit={{ y: -1000, opacity: 0 }}
+        {...st({ duration: 1, ease: 'easeInOut', delay: 2.8 })}
       >
         <button
           className="rounded-full px-6 py-1.5 bg-mf-sybil-opacity text-sm text-center text-mf-sybil-500 cursor-pointer hover:opacity-50"
