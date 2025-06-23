@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query';
 import { Download, Plus } from 'lucide-react';
 
 import ExpandedStake from '@/client/components/dashboard/portfolio/ExpandedStake';
@@ -5,6 +6,7 @@ import StakeOverview from '@/client/components/dashboard/portfolio/StakeOverview
 import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
 import { useNotification } from '@/client/contexts/NotificationContext';
 import { usePolkadotApi } from '@/client/contexts/PolkadotApiContext';
+import { useWallet } from '@/client/contexts/WalletContext';
 import { NotificationType } from '@/types/client';
 import type { Stake, Subnet, Validator } from '@/types/client';
 
@@ -21,8 +23,15 @@ const PortfolioOverview = () => {
     dashboardStake,
     dashboardSubnet,
     dashboardSubnets: subnets,
-    dashboardStakes: stakes,
   } = useDashboard();
+
+  const { currentAddress } = useWallet();
+  const { data: stakes } = useQuery({
+    queryKey: ['stakes'],
+    queryFn: () => api?.getStake(currentAddress ?? ''),
+    enabled: !!api && !!currentAddress,
+    refetchInterval: 10000,
+  });
 
   const getValidator = async (subnet: Subnet, hotkey: string): Promise<Validator | null> => {
     const result = await api?.getValidators(subnet.id);

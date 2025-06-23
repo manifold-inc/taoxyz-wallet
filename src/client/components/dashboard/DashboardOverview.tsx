@@ -26,7 +26,6 @@ const DashboardOverview = ({ taoPrice }: DashboardOverviewProps) => {
     setDashboardState,
     setDashboardTotalBalance,
     resetDashboardState,
-    dashboardStakes: stakes,
     dashboardSubnets: subnets,
   } = useDashboard();
 
@@ -41,12 +40,19 @@ const DashboardOverview = ({ taoPrice }: DashboardOverviewProps) => {
 
   const freeTao = raoToTao(freeBalance ?? BigInt(0));
 
+  const { data: stakes } = useQuery({
+    queryKey: ['stakes'],
+    queryFn: () => api?.getStake(currentAddress ?? ''),
+    enabled: !!api && !!currentAddress,
+    refetchInterval: 10000,
+  });
+
   // resonable memo because this is a potenially costly function
   const calculatedTotalTao = useMemo((): number | null => {
     if (freeTao === null || subnets === null || stakes === null) return null;
 
     let total = freeTao;
-    for (const stake of stakes) {
+    for (const stake of stakes ?? []) {
       const subnet = subnets.find(subnet => subnet.id === stake.netuid) as Subnet;
       if (subnet) {
         total += raoToTao(BigInt(stake.stake)) * subnet.price;

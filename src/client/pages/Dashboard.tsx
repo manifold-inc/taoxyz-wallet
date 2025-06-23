@@ -22,7 +22,7 @@ export interface TaoPriceResponse {
 export const Dashboard = () => {
   const { showNotification } = useNotification();
   const { api } = usePolkadotApi();
-  const { dashboardState, setDashboardSubnets, setDashboardStakes } = useDashboard();
+  const { dashboardState, setDashboardSubnets } = useDashboard();
   const { currentAddress } = useWallet();
 
   const [taoPrice, setTaoPrice] = useState<number | null>(null);
@@ -62,7 +62,6 @@ export const Dashboard = () => {
     }
 
     setDashboardSubnets(subnets);
-    setDashboardStakes(_stakes);
     await chrome.storage.local.set({
       wallet_cache: {
         subnets,
@@ -98,7 +97,6 @@ export const Dashboard = () => {
       }
       if (r.wallet_cache) {
         setDashboardSubnets(r.wallet_cache.subnets);
-        setDashboardStakes(r.wallet_cache._stakes);
       }
     });
   }, []);
