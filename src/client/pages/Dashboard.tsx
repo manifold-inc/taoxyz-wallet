@@ -1,3 +1,5 @@
+import { useQuery } from '@tanstack/react-query';
+
 import { useEffect, useRef, useState } from 'react';
 
 import DashboardOverview from '@/client/components/dashboard/DashboardOverview';
@@ -24,6 +26,12 @@ export const Dashboard = () => {
   const { api } = usePolkadotApi();
   const { dashboardState, setDashboardSubnets } = useDashboard();
   const { currentAddress } = useWallet();
+  const { data: _stakes } = useQuery({
+    queryKey: ['_stakes'],
+    queryFn: () => api?.getStake(currentAddress ?? ''),
+    enabled: !!api && !!currentAddress,
+    refetchInterval: 10000,
+  });
 
   const [taoPrice, setTaoPrice] = useState<number | null>(null);
   const prevAddressRef = useRef<string | null>(null);
@@ -31,11 +39,7 @@ export const Dashboard = () => {
   const fetchData = async (address: string, forceRefresh = false): Promise<void> => {
     if (!api || !address || (!forceRefresh && address === prevAddressRef.current)) return;
     prevAddressRef.current = address;
-    const [subnets, freeTao, _stakes] = await Promise.all([
-      api.getSubnets(),
-      api.getBalance(address),
-      api.getStake(address),
-    ]);
+    const [subnets, freeTao] = await Promise.all([api.getSubnets(), api.getBalance(address)]);
 
     if (subnets === null) {
       showNotification({
