@@ -15,7 +15,6 @@ export interface DashboardContextType {
   dashboardState: DashboardState;
   dashboardStake: Stake | null;
   dashboardStakes: Stake[] | null;
-  dashboardFreeBalance: bigint | null;
   dashboardTotalBalance: bigint | null;
   dashboardSubnet: Subnet | null;
   dashboardSubnets: Subnet[] | null;
@@ -24,7 +23,6 @@ export interface DashboardContextType {
   setDashboardState: (state: DashboardState) => void;
   setDashboardStake: (stake: Stake | null) => void;
   setDashboardStakes: (stakes: Stake[] | null) => void;
-  setDashboardFreeBalance: (balance: bigint | null) => void;
   setDashboardTotalBalance: (balance: bigint | null) => void;
   setDashboardSubnet: (subnet: Subnet | null) => void;
   setDashboardSubnets: (subnets: Subnet[] | null) => void;
@@ -43,7 +41,6 @@ export const DashboardProvider = ({ children }: DashboardProviderProps) => {
   const [dashboardState, setDashboardState] = useState<DashboardState>(DashboardState.OVERVIEW);
   const [dashboardStake, setDashboardStake] = useState<Stake | null>(null);
   const [dashboardStakes, setDashboardStakes] = useState<Stake[] | null>(null);
-  const [dashboardFreeBalance, setDashboardFreeBalance] = useState<bigint | null>(null);
   const [dashboardTotalBalance, setDashboardTotalBalance] = useState<bigint | null>(null);
   const [dashboardSubnet, setDashboardSubnet] = useState<Subnet | null>(null);
   const [dashboardSubnets, setDashboardSubnets] = useState<Subnet[] | null>(null);
@@ -64,7 +61,6 @@ export const DashboardProvider = ({ children }: DashboardProviderProps) => {
         dashboardState,
         dashboardStake,
         dashboardStakes,
-        dashboardFreeBalance,
         dashboardTotalBalance,
         dashboardSubnet,
         dashboardSubnets,
@@ -73,7 +69,6 @@ export const DashboardProvider = ({ children }: DashboardProviderProps) => {
         setDashboardState,
         setDashboardStake,
         setDashboardStakes,
-        setDashboardFreeBalance,
         setDashboardTotalBalance,
         setDashboardSubnet,
         setDashboardSubnets,

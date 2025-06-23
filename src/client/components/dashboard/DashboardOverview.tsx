@@ -2,12 +2,14 @@ import GreenDollar from '@public/assets/green-dollar.svg';
 import GreenTao from '@public/assets/green-tao.svg';
 import SilverDollar from '@public/assets/silver-dollar.svg';
 import SilverTao from '@public/assets/silver-tao.svg';
+import { useQuery } from '@tanstack/react-query';
 import { Copy } from 'lucide-react';
 
 import { useEffect, useMemo, useState } from 'react';
 
 import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
 import { useNotification } from '@/client/contexts/NotificationContext';
+import { usePolkadotApi } from '@/client/contexts/PolkadotApiContext';
 import { useWallet } from '@/client/contexts/WalletContext';
 import { NotificationType, type Subnet } from '@/types/client';
 import { formatNumber, raoToTao, taoToRao } from '@/utils/utils';
@@ -26,10 +28,18 @@ const DashboardOverview = ({ taoPrice }: DashboardOverviewProps) => {
     resetDashboardState,
     dashboardStakes: stakes,
     dashboardSubnets: subnets,
-    dashboardFreeBalance,
   } = useDashboard();
+
+  const { api } = usePolkadotApi();
   const [showUSD, setShowUSD] = useState(false);
-  const freeTao = raoToTao(dashboardFreeBalance ?? BigInt(0));
+  const { data: freeBalance } = useQuery({
+    queryKey: ['freeBalance', currentAddress],
+    queryFn: () => api?.getBalance(currentAddress ?? ''),
+    enabled: !!api && !!currentAddress,
+    refetchInterval: 10000,
+  });
+
+  const freeTao = raoToTao(freeBalance ?? BigInt(0));
 
   // resonable memo because this is a potenially costly function
   const calculatedTotalTao = useMemo((): number | null => {

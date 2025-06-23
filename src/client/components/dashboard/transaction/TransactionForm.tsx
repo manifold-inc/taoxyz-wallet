@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 
 import { useEffect } from 'react';
@@ -5,6 +6,8 @@ import { useEffect } from 'react';
 import SlippageDisplay from '@/client/components/common/SlippageDisplay';
 import type { AmountState } from '@/client/components/dashboard/transaction/Transaction';
 import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
+import { usePolkadotApi } from '@/client/contexts/PolkadotApiContext';
+import { useWallet } from '@/client/contexts/WalletContext';
 import { raoToTao, taoToRao } from '@/utils/utils';
 
 interface TransactionFormProps {
@@ -34,11 +37,18 @@ const TransactionForm = ({
     resetDashboardState,
     dashboardSubnet,
     dashboardStake,
-    dashboardFreeBalance,
     dashboardState,
     dashboardValidator,
-    setDashboardFreeBalance,
   } = useDashboard();
+
+  const { api } = usePolkadotApi();
+  const { currentAddress } = useWallet();
+  const { data: freeBalance } = useQuery({
+    queryKey: ['freeBalance'],
+    queryFn: () => api?.getBalance(currentAddress ?? ''),
+    enabled: !!api && !!currentAddress,
+    refetchInterval: 10000,
+  });
 
   const handleSlippageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -82,14 +92,11 @@ const TransactionForm = ({
       case DashboardState.CREATE_STAKE:
       case DashboardState.ADD_STAKE:
       case DashboardState.TRANSFER:
-        // Free balance for tao is set when dashboard does api call - only for explicitness
-        setDashboardFreeBalance(dashboardFreeBalance);
         break;
       case DashboardState.MOVE_STAKE:
       case DashboardState.REMOVE_STAKE:
         // Is needed when stake is selected
         if (dashboardStake === null) return;
-        setDashboardFreeBalance(dashboardStake.stake);
         break;
       default:
         break;
@@ -116,9 +123,9 @@ const TransactionForm = ({
       case DashboardState.CREATE_STAKE:
       case DashboardState.ADD_STAKE:
       case DashboardState.TRANSFER:
-        if (dashboardFreeBalance === null) return;
-        amount = raoToTao(dashboardFreeBalance).toString();
-        amountInRao = dashboardFreeBalance;
+        if (freeBalance === null) return;
+        amount = raoToTao(freeBalance ?? BigInt(0)).toString();
+        amountInRao = freeBalance ?? BigInt(0);
         break;
       case DashboardState.REMOVE_STAKE:
       case DashboardState.MOVE_STAKE:
@@ -142,14 +149,14 @@ const TransactionForm = ({
     switch (dashboardState) {
       case DashboardState.CREATE_STAKE:
       case DashboardState.TRANSFER:
-        if (dashboardFreeBalance === null) return false;
-        if (amountInRao > dashboardFreeBalance) return false;
+        if (freeBalance === null) return false;
+        if (amountInRao > (freeBalance ?? BigInt(0))) return false;
         return true;
 
       case DashboardState.ADD_STAKE:
         if (dashboardStake === null) return false;
-        if (dashboardFreeBalance === null) return false;
-        if (amountInRao > dashboardFreeBalance) return false;
+        if (freeBalance === null) return false;
+        if (amountInRao > (freeBalance ?? BigInt(0))) return false;
         return true;
 
       case DashboardState.REMOVE_STAKE:
@@ -215,7 +222,7 @@ const TransactionForm = ({
     if (
       (dashboardState === DashboardState.CREATE_STAKE ||
         dashboardState === DashboardState.TRANSFER) &&
-      dashboardFreeBalance === null
+      freeBalance === null
     ) {
       return;
     }
