@@ -33,13 +33,8 @@ const TransactionForm = ({
   renderSubnetSelection,
   renderValidatorSelection,
 }: TransactionFormProps) => {
-  const {
-    resetDashboardState,
-    dashboardSubnet,
-    dashboardStake,
-    dashboardState,
-    dashboardValidator,
-  } = useDashboard();
+  const { resetDashboardState, dashboardSubnet, dashboardState, dashboardValidator } =
+    useDashboard();
 
   const { api } = usePolkadotApi();
   const { currentAddress } = useWallet();
@@ -49,6 +44,18 @@ const TransactionForm = ({
     enabled: !!api && !!currentAddress,
     refetchInterval: 10000,
   });
+
+  const { data: stakes } = useQuery({
+    queryKey: ['stakes'],
+    queryFn: () => api?.getStake(currentAddress ?? ''),
+    enabled: !!api && !!currentAddress,
+    refetchInterval: 10000,
+  });
+
+  const stake =
+    stakes?.find(
+      stake => stake.hotkey === dashboardValidator?.hotkey && stake.netuid === dashboardSubnet?.id
+    ) || null;
 
   const handleSlippageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -96,7 +103,7 @@ const TransactionForm = ({
       case DashboardState.MOVE_STAKE:
       case DashboardState.REMOVE_STAKE:
         // Is needed when stake is selected
-        if (dashboardStake === null) return;
+        if (stake === null) return;
         break;
       default:
         break;
@@ -129,9 +136,9 @@ const TransactionForm = ({
         break;
       case DashboardState.REMOVE_STAKE:
       case DashboardState.MOVE_STAKE:
-        if (dashboardStake === null) return;
-        amount = raoToTao(dashboardStake.stake).toString();
-        amountInRao = dashboardStake.stake;
+        if (stake === null) return;
+        amount = raoToTao(stake.stake).toString();
+        amountInRao = stake.stake;
         break;
       default:
         return;
@@ -154,15 +161,15 @@ const TransactionForm = ({
         return true;
 
       case DashboardState.ADD_STAKE:
-        if (dashboardStake === null) return false;
+        if (stake === null) return false;
         if (freeBalance === null) return false;
         if (amountInRao > (freeBalance ?? BigInt(0))) return false;
         return true;
 
       case DashboardState.REMOVE_STAKE:
       case DashboardState.MOVE_STAKE:
-        if (dashboardStake === null) return false;
-        if (amountInRao > dashboardStake.stake) return false;
+        if (stake === null) return false;
+        if (amountInRao > stake.stake) return false;
         return true;
 
       default:
@@ -214,7 +221,7 @@ const TransactionForm = ({
       (dashboardState === DashboardState.ADD_STAKE ||
         dashboardState === DashboardState.REMOVE_STAKE ||
         dashboardState === DashboardState.MOVE_STAKE) &&
-      dashboardStake === null
+      stake === null
     ) {
       return;
     }

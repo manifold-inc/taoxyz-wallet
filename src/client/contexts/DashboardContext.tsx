@@ -1,6 +1,6 @@
 import { type ReactNode, createContext, useContext, useState } from 'react';
 
-import { type Stake, type Subnet, type Validator } from '@/types/client';
+import { type Subnet, type Validator } from '@/types/client';
 
 export enum DashboardState {
   OVERVIEW = 'OVERVIEW',
@@ -13,14 +13,12 @@ export enum DashboardState {
 
 export interface DashboardContextType {
   dashboardState: DashboardState;
-  dashboardStake: Stake | null;
   dashboardTotalBalance: bigint | null;
   dashboardSubnet: Subnet | null;
   dashboardSubnets: Subnet[] | null;
   dashboardValidator: Validator | null;
   dashboardValidators: Validator[] | null;
   setDashboardState: (state: DashboardState) => void;
-  setDashboardStake: (stake: Stake | null) => void;
   setDashboardTotalBalance: (balance: bigint | null) => void;
   setDashboardSubnet: (subnet: Subnet | null) => void;
   setDashboardSubnets: (subnets: Subnet[] | null) => void;
@@ -37,7 +35,6 @@ interface DashboardProviderProps {
 
 export const DashboardProvider = ({ children }: DashboardProviderProps) => {
   const [dashboardState, setDashboardState] = useState<DashboardState>(DashboardState.OVERVIEW);
-  const [dashboardStake, setDashboardStake] = useState<Stake | null>(null);
   const [dashboardTotalBalance, setDashboardTotalBalance] = useState<bigint | null>(null);
   const [dashboardSubnet, setDashboardSubnet] = useState<Subnet | null>(null);
   const [dashboardSubnets, setDashboardSubnets] = useState<Subnet[] | null>(null);
@@ -46,7 +43,6 @@ export const DashboardProvider = ({ children }: DashboardProviderProps) => {
 
   const resetDashboardState = () => {
     setDashboardState(DashboardState.OVERVIEW);
-    setDashboardStake(null);
     setDashboardSubnet(null);
     setDashboardValidator(null);
     setDashboardValidators(null);
@@ -56,14 +52,12 @@ export const DashboardProvider = ({ children }: DashboardProviderProps) => {
     <DashboardContext.Provider
       value={{
         dashboardState,
-        dashboardStake,
         dashboardTotalBalance,
         dashboardSubnet,
         dashboardSubnets,
         dashboardValidator,
         dashboardValidators,
         setDashboardState,
-        setDashboardStake,
         setDashboardTotalBalance,
         setDashboardSubnet,
         setDashboardSubnets,
