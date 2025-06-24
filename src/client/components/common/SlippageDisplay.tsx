@@ -1,8 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
-
 import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
-import { usePolkadotApi } from '@/client/contexts/PolkadotApiContext';
-import { useWallet } from '@/client/contexts/WalletContext';
 import type { Slippage } from '@/types/client';
 import {
   alphaToTaoWithSlippage,
@@ -16,7 +12,7 @@ interface SlippageDisplayProps {
 }
 
 const SlippageDisplay = ({ amount }: SlippageDisplayProps) => {
-  const { dashboardSubnet, dashboardState, dashboardSubnets, dashboardValidator } = useDashboard();
+  const { dashboardSubnet, dashboardState, dashboardStake, dashboardSubnets } = useDashboard();
   const isDynamic = dashboardSubnet?.id !== 0;
   const moveStake = dashboardState === DashboardState.MOVE_STAKE;
 
@@ -24,6 +20,7 @@ const SlippageDisplay = ({ amount }: SlippageDisplayProps) => {
   const amountInRao = Number(amount) * 1e9;
   let stakePrice;
 
+<<<<<<< HEAD
   const { currentAddress } = useWallet();
   const { api } = usePolkadotApi();
   const { data: stakes } = useQuery({
@@ -38,6 +35,8 @@ const SlippageDisplay = ({ amount }: SlippageDisplayProps) => {
       stake => stake.hotkey === dashboardValidator?.hotkey && stake.netuid === dashboardSubnet?.id
     ) || null;
 
+=======
+>>>>>>> parent of 1a45207 (feat: implemented stake)
   let slippage: Slippage;
   switch (dashboardState) {
     case DashboardState.CREATE_STAKE:
@@ -60,7 +59,8 @@ const SlippageDisplay = ({ amount }: SlippageDisplayProps) => {
       );
       break;
     case DashboardState.MOVE_STAKE:
-      stakePrice = dashboardSubnets?.find(subnet => subnet.id === stake?.netuid)?.price || 0;
+      stakePrice =
+        dashboardSubnets?.find(subnet => subnet.id === dashboardStake?.netuid)?.price || 0;
       slippage = moveStakeWithSlippage(
         amountInRao,
         dashboardSubnet?.alphaIn || 0,
@@ -68,7 +68,7 @@ const SlippageDisplay = ({ amount }: SlippageDisplayProps) => {
         isDynamic,
         stakePrice,
         dashboardSubnet?.id === 0,
-        stake?.netuid === 0
+        dashboardStake?.netuid === 0
       );
       break;
     default:
@@ -104,7 +104,7 @@ const SlippageDisplay = ({ amount }: SlippageDisplayProps) => {
       break;
     case DashboardState.MOVE_STAKE:
       // If the stake is on root, we pay in τ
-      if (stake?.netuid === 0) {
+      if (dashboardStake?.netuid === 0) {
         payToken = 'τ';
       } else {
         payToken = 'α';

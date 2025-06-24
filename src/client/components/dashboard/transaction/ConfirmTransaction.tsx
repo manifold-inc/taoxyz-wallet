@@ -33,7 +33,7 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
   const { showNotification } = useNotification();
   const { currentAddress } = useWallet();
   const { api } = usePolkadotApi();
-  const { dashboardSubnet, dashboardValidator, dashboardState } = useDashboard();
+  const { dashboardSubnet, dashboardValidator, dashboardState, dashboardStake } = useDashboard();
   const [password, setPassword] = useState('');
   const [passwordSelected, setPasswordSelected] = useState(false);
   const [status, setStatus] = useState<TransactionStatus | null>(null);
@@ -147,9 +147,9 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
             setActualTotal(stake.stake);
             break;
           case DashboardState.ADD_STAKE:
-            if (existingStake) {
+            if (dashboardStake) {
               if (!stake) return;
-              setActualTotal(stake.stake - existingStake.stake);
+              setActualTotal(stake.stake - dashboardStake.stake);
             }
             break;
           case DashboardState.REMOVE_STAKE:

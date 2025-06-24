@@ -18,9 +18,10 @@ const PortfolioOverview = () => {
     setDashboardSubnet,
     setDashboardValidator,
     setDashboardValidators,
+    setDashboardStake,
     resetDashboardState,
+    dashboardStake,
     dashboardSubnet,
-    dashboardValidator,
     dashboardSubnets: subnets,
   } = useDashboard();
 
@@ -32,28 +33,6 @@ const PortfolioOverview = () => {
     enabled: !!api && !!currentAddress,
     refetchInterval: 10000,
   });
-
-  const queryClient = useQueryClient();
-
-  // Derived query for current stake (uses cached data)
-  const { data: currentStakeData } = useQuery({
-    queryKey: ['current-stake', currentAddress, dashboardValidator?.hotkey, dashboardSubnet?.id],
-    queryFn: () => {
-      return {
-        allStakes: stakes,
-        currentStake:
-          stakes?.find(
-            (stake: Stake) =>
-              stake.hotkey === dashboardValidator?.hotkey && stake.netuid === dashboardSubnet?.id
-          ) || null,
-      };
-    },
-    enabled: !!currentAddress && !!dashboardValidator?.hotkey && !!dashboardSubnet?.id && !!stakes,
-    staleTime: 5000,
-  });
-
-  const allStakes = currentStakeData?.allStakes || stakes;
-  const stake = currentStakeData?.currentStake;
 
   const getValidator = async (subnet: Subnet, hotkey: string): Promise<Validator | null> => {
     const result = await api?.getValidators(subnet.id);
@@ -83,25 +62,21 @@ const PortfolioOverview = () => {
     const subnet = subnets?.find(subnet => subnet.id === stake.netuid);
     if (subnet) {
       setDashboardSubnet(subnet);
-
-      // Manually cache the individual stake data
-      queryClient.setQueryData(['current-stake', currentAddress, stake.hotkey, stake.netuid], {
-        allStakes: stakes,
-        currentStake: stake,
-      });
+      setDashboardStake(stake);
     } else {
       showNotification({
         message: 'Failed to Fetch Subnet',
         type: NotificationType.Error,
       });
       setDashboardSubnet(null);
+      setDashboardStake(null);
     }
   };
 
   const handleAddStake = async (): Promise<void> => {
     setDashboardState(DashboardState.ADD_STAKE);
     const [validator, validators] = await Promise.all([
-      getValidator(dashboardSubnet as Subnet, stake?.hotkey as string),
+      getValidator(dashboardSubnet as Subnet, dashboardStake?.hotkey as string),
       getValidators(dashboardSubnet as Subnet),
     ]);
     if (validator === null) return;
@@ -113,7 +88,7 @@ const PortfolioOverview = () => {
   const handleMoveStake = async (): Promise<void> => {
     setDashboardState(DashboardState.MOVE_STAKE);
     const [validator, validators] = await Promise.all([
-      getValidator(dashboardSubnet as Subnet, stake?.hotkey as string),
+      getValidator(dashboardSubnet as Subnet, dashboardStake?.hotkey as string),
       getValidators(dashboardSubnet as Subnet),
     ]);
     if (validator === null) return;
@@ -125,7 +100,7 @@ const PortfolioOverview = () => {
   const handleRemoveStake = async (): Promise<void> => {
     setDashboardState(DashboardState.REMOVE_STAKE);
     const [validator, validators] = await Promise.all([
-      getValidator(dashboardSubnet as Subnet, stake?.hotkey as string),
+      getValidator(dashboardSubnet as Subnet, dashboardStake?.hotkey as string),
       getValidators(dashboardSubnet as Subnet),
     ]);
     if (validator === null) return;
@@ -136,11 +111,12 @@ const PortfolioOverview = () => {
 
   return (
     <>
-      {stake ? (
+      {dashboardStake ? (
         <ExpandedStake
-          stake={stake}
+          stake={dashboardStake}
           subnet={dashboardSubnet as Subnet}
           onClose={() => {
+            setDashboardStake(null);
             setDashboardSubnet(null);
             setDashboardValidator(null);
             setDashboardValidators(null);

@@ -1,4 +1,3 @@
-import { useQuery } from '@tanstack/react-query';
 import { ChevronRight, CircleCheckBig } from 'lucide-react';
 
 import { useState } from 'react';
@@ -10,7 +9,6 @@ import ValidatorSelection from '@/client/components/dashboard/transaction/Valida
 import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
 import { useNotification } from '@/client/contexts/NotificationContext';
 import { usePolkadotApi } from '@/client/contexts/PolkadotApiContext';
-import { useWallet } from '@/client/contexts/WalletContext';
 import { NotificationType } from '@/types/client';
 import type { Subnet, Validator } from '@/types/client';
 import { taoToRao } from '@/utils/utils';
@@ -56,17 +54,20 @@ export interface AmountState {
 export type TransactionStatus = 'ready' | 'broadcast' | 'inBlock' | 'success' | 'failed';
 
 const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) => {
+  const { api } = usePolkadotApi();
   const {
     dashboardSubnet,
     dashboardSubnets,
     dashboardValidator,
     dashboardValidators,
+    dashboardStake,
     setDashboardSubnet,
     setDashboardValidator,
     setDashboardValidators,
     resetDashboardState,
   } = useDashboard();
   const { showNotification } = useNotification();
+<<<<<<< HEAD
   const { api } = usePolkadotApi();
   const { currentAddress } = useWallet();
   const { data: stakes } = useQuery({
@@ -80,12 +81,13 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
     stakes?.find(
       stake => stake.hotkey === dashboardValidator?.hotkey && stake.netuid === dashboardSubnet?.id
     ) || null;
+=======
+>>>>>>> parent of 1a45207 (feat: implemented stake)
 
   const [amountState, setAmountState] = useState<AmountState>({
     amount: '',
     amountInRao: null,
   });
-
   // Slippage defaults to 0.5%
   const [slippage, setSlippage] = useState<string>('0.5');
   const [toAddress, setToAddress] = useState<string>('');
@@ -146,23 +148,23 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
         break;
       case DashboardState.ADD_STAKE:
       case DashboardState.REMOVE_STAKE:
-        if (!currentStake || !dashboardSubnet) return;
+        if (!dashboardStake || !dashboardSubnet) return;
         limitPrice = calculateLimitPrice(dashboardSubnet, slippage);
         params = {
           address,
           subnetId: dashboardSubnet.id,
-          validatorHotkey: currentStake.hotkey,
+          validatorHotkey: dashboardStake.hotkey,
           amount: amountState.amount,
           amountInRao: BigInt(amountState.amountInRao),
           limitPrice,
         } as StakeParams;
         break;
       case DashboardState.MOVE_STAKE:
-        if (!currentStake || !toValidator || !toSubnet) return;
+        if (!dashboardStake || !toValidator || !toSubnet) return;
         params = {
           address,
-          fromSubnetId: currentStake.netuid,
-          fromHotkey: currentStake.hotkey,
+          fromSubnetId: dashboardStake.netuid,
+          fromHotkey: dashboardStake.hotkey,
           toSubnetId: toSubnet.id,
           toHotkey: toValidator.hotkey,
           amount: amountState.amount,
