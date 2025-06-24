@@ -41,7 +41,7 @@ const DashboardOverview = ({ taoPrice }: DashboardOverviewProps) => {
   const freeTao = raoToTao(freeBalance ?? BigInt(0));
 
   const { data: stakes } = useQuery({
-    queryKey: ['stakes'],
+    queryKey: ['stakes', currentAddress],
     queryFn: () => api?.getStake(currentAddress ?? ''),
     enabled: !!api && !!currentAddress,
     refetchInterval: 10000,

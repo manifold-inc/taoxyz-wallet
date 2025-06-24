@@ -120,7 +120,7 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
   };
 
   const { data: stakes } = useQuery({
-    queryKey: ['stakes'],
+    queryKey: ['stakes', currentAddress],
     queryFn: () => api?.getStake(currentAddress ?? ''),
     enabled: !!api && !!currentAddress,
     refetchInterval: 10000,

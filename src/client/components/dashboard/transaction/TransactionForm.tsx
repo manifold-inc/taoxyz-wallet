@@ -46,7 +46,7 @@ const TransactionForm = ({
   });
 
   const { data: stakes } = useQuery({
-    queryKey: ['stakes'],
+    queryKey: ['stakes', currentAddress],
     queryFn: () => api?.getStake(currentAddress ?? ''),
     enabled: !!api && !!currentAddress,
     refetchInterval: 10000,
@@ -161,6 +161,7 @@ const TransactionForm = ({
         return true;
 
       case DashboardState.ADD_STAKE:
+        if (amountInRao > (stake?.stake ?? BigInt(0))) return false;
         if (stake === null) return false;
         if (freeBalance === null) return false;
         if (amountInRao > (freeBalance ?? BigInt(0))) return false;

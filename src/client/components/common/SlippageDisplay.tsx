@@ -27,7 +27,7 @@ const SlippageDisplay = ({ amount }: SlippageDisplayProps) => {
   const { currentAddress } = useWallet();
   const { api } = usePolkadotApi();
   const { data: stakes } = useQuery({
-    queryKey: ['stakes'],
+    queryKey: ['stakes', currentAddress],
     queryFn: () => api?.getStake(currentAddress ?? ''),
     enabled: !!api && !!currentAddress,
     refetchInterval: 10000,

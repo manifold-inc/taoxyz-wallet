@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Download, Plus } from 'lucide-react';
 
 import ExpandedStake from '@/client/components/dashboard/portfolio/ExpandedStake';
@@ -25,17 +25,35 @@ const PortfolioOverview = () => {
   } = useDashboard();
 
   const { currentAddress } = useWallet();
+
   const { data: stakes } = useQuery({
-    queryKey: ['stakes'],
+    queryKey: ['stakes', currentAddress],
     queryFn: () => api?.getStake(currentAddress ?? ''),
     enabled: !!api && !!currentAddress,
     refetchInterval: 10000,
   });
 
-  const stake =
-    stakes?.find(
-      stake => stake.hotkey === dashboardValidator?.hotkey && stake.netuid === dashboardSubnet?.id
-    ) || null;
+  const queryClient = useQueryClient();
+
+  // Derived query for current stake (uses cached data)
+  const { data: currentStakeData } = useQuery({
+    queryKey: ['current-stake', currentAddress, dashboardValidator?.hotkey, dashboardSubnet?.id],
+    queryFn: () => {
+      return {
+        allStakes: stakes,
+        currentStake:
+          stakes?.find(
+            (stake: Stake) =>
+              stake.hotkey === dashboardValidator?.hotkey && stake.netuid === dashboardSubnet?.id
+          ) || null,
+      };
+    },
+    enabled: !!currentAddress && !!dashboardValidator?.hotkey && !!dashboardSubnet?.id && !!stakes,
+    staleTime: 5000,
+  });
+
+  const allStakes = currentStakeData?.allStakes || stakes;
+  const stake = currentStakeData?.currentStake;
 
   const getValidator = async (subnet: Subnet, hotkey: string): Promise<Validator | null> => {
     const result = await api?.getValidators(subnet.id);
@@ -65,6 +83,12 @@ const PortfolioOverview = () => {
     const subnet = subnets?.find(subnet => subnet.id === stake.netuid);
     if (subnet) {
       setDashboardSubnet(subnet);
+
+      // Manually cache the individual stake data
+      queryClient.setQueryData(['current-stake', currentAddress, stake.hotkey, stake.netuid], {
+        allStakes: stakes,
+        currentStake: stake,
+      });
     } else {
       showNotification({
         message: 'Failed to Fetch Subnet',
@@ -128,8 +152,8 @@ const PortfolioOverview = () => {
       ) : (
         <div className="w-full">
           <div className="flex flex-col gap-3">
-            {stakes && stakes.length > 0 ? (
-              stakes.map((stake, index) => (
+            {allStakes && allStakes.length > 0 ? (
+              allStakes.map((stake, index) => (
                 <StakeOverview
                   key={index}
                   stake={stake}

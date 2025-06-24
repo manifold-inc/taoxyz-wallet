@@ -26,8 +26,8 @@ export const Dashboard = () => {
   const { api } = usePolkadotApi();
   const { dashboardState, setDashboardSubnets } = useDashboard();
   const { currentAddress } = useWallet();
-  const { data: _stakes } = useQuery({
-    queryKey: ['_stakes'],
+  const { data: stakes } = useQuery({
+    queryKey: ['stakes', currentAddress],
     queryFn: () => api?.getStake(currentAddress ?? ''),
     enabled: !!api && !!currentAddress,
     refetchInterval: 10000,
@@ -57,7 +57,7 @@ export const Dashboard = () => {
       return;
     }
 
-    if (_stakes === null) {
+    if (stakes === null) {
       showNotification({
         type: NotificationType.Error,
         message: 'Failed to Fetch Stakes',
@@ -70,7 +70,7 @@ export const Dashboard = () => {
       wallet_cache: {
         subnets,
         freeTao,
-        _stakes,
+        stakes,
       },
     });
   };

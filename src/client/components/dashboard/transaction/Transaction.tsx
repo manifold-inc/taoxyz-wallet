@@ -70,7 +70,7 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
   const { api } = usePolkadotApi();
   const { currentAddress } = useWallet();
   const { data: stakes } = useQuery({
-    queryKey: ['stakes'],
+    queryKey: ['stakes', currentAddress],
     queryFn: () => api?.getStake(currentAddress ?? ''),
     enabled: !!api && !!address,
     refetchInterval: 10000,
