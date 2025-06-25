@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useState } from 'react';
 
-import { NotificationType } from '../../types/client';
-import Notification from '../components/common/Notification';
+import Notification from '@/client/components/common/Notification';
+import { NotificationType } from '@/types/client';
 
 interface NotificationContextType {
   showNotification: (params: Notification) => void;
