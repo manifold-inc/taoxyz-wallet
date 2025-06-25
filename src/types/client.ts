@@ -136,5 +136,4 @@ export interface SubstrateAccount {
     reserved: number;
     frozen: number;
   };
-  flags: number[];
 }

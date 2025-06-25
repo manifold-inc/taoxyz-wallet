@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
+import { newApi } from '@/api/api';
+import Header from '@/client/components/common/Header';
 import DashboardOverview from '@/client/components/dashboard/DashboardOverview';
 import PortfolioOverview from '@/client/components/dashboard/portfolio/PortfolioOverview';
 import Transaction from '@/client/components/dashboard/transaction/Transaction';
@@ -8,8 +10,6 @@ import { useNotification } from '@/client/contexts/NotificationContext';
 import { usePolkadotApi } from '@/client/contexts/PolkadotApiContext';
 import { useWallet } from '@/client/contexts/WalletContext';
 import { NotificationType } from '@/types/client';
-
-import Header from '../components/common/Header';
 
 const API_URL = 'https://tao.xyz/api/price';
 
@@ -29,27 +29,23 @@ export const Dashboard = () => {
   const [taoPrice, setTaoPrice] = useState<number | null>(null);
   const prevAddressRef = useRef<string | null>(null);
 
+  // Example Implementation
+  const { data: freeTao, status } = newApi.balance.getFree(currentAddress || '');
+  useEffect(() => {
+    if (status === 'success') {
+      setDashboardFreeBalance(freeTao);
+    }
+  }, [status, freeTao]);
+
   const fetchData = async (address: string, forceRefresh = false): Promise<void> => {
     if (!api || !address || (!forceRefresh && address === prevAddressRef.current)) return;
     prevAddressRef.current = address;
-    const [subnets, freeTao, _stakes] = await Promise.all([
-      api.getSubnets(),
-      api.getBalance(address),
-      api.getStake(address),
-    ]);
+    const [subnets, _stakes] = await Promise.all([api.getSubnets(), api.getStake(address)]);
 
     if (subnets === null) {
       showNotification({
         type: NotificationType.Error,
         message: 'Failed to Fetch Subnets',
-      });
-      return;
-    }
-
-    if (freeTao === null) {
-      showNotification({
-        type: NotificationType.Error,
-        message: 'Failed to Fetch Free TAO',
       });
       return;
     }
@@ -63,7 +59,6 @@ export const Dashboard = () => {
     }
 
     setDashboardSubnets(subnets);
-    setDashboardFreeBalance(freeTao);
     setDashboardStakes(_stakes);
     await chrome.storage.local.set({
       wallet_cache: {

@@ -1,5 +1,7 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
 
+import { createBalanceAPI } from '@/api/api/BalanceAPI';
+
 const ENDPOINTS = {
   main: 'wss://entrypoint-finney.opentensor.ai:443',
   test: 'wss://test.finney.opentensor.ai:443',
@@ -10,11 +12,30 @@ class ApiManager {
   private api: ApiPromise | null = null;
   private initPromise: Promise<void> | null = null;
 
+  public balance = createBalanceAPI(() => this.getApi());
+
   public static getInstance(): ApiManager {
     if (!ApiManager.instance) {
       ApiManager.instance = new ApiManager();
     }
     return ApiManager.instance;
+  }
+
+  private async initialize(): Promise<void> {
+    if (this.api?.isConnected) {
+      await this.api.disconnect();
+    }
+
+    try {
+      const provider = new WsProvider(ENDPOINTS.main);
+      this.api = await ApiPromise.create({ provider });
+      console.log('[ApiManager] Connected to Endpoint: ', ENDPOINTS.main);
+    } catch (error) {
+      console.error('[ApiManager] Failed to Connect to Endpoint: ', ENDPOINTS.main, error);
+      this.api = null;
+      this.initPromise = null;
+      throw error;
+    }
   }
 
   public async getApi(): Promise<ApiPromise> {
@@ -47,25 +68,6 @@ class ApiManager {
     return this.api;
   }
 
-  private async initialize(): Promise<void> {
-    if (this.api?.isConnected) {
-      console.log('[ApiManager] Clearing Connection');
-      await this.api.disconnect();
-    }
-
-    try {
-      console.log('[ApiManager] Connecting to Endpoint: ', ENDPOINTS.main);
-      const provider = new WsProvider(ENDPOINTS.main);
-      this.api = await ApiPromise.create({ provider });
-      console.log('[ApiManager] Connected to Endpoint: ', ENDPOINTS.main);
-    } catch (error) {
-      console.error('[ApiManager] Failed to Connect to Endpoint: ', ENDPOINTS.main, error);
-      this.api = null;
-      this.initPromise = null;
-      throw error;
-    }
-  }
-
   public async disconnect(): Promise<void> {
     if (this.api?.isConnected) {
       await this.api.disconnect();
@@ -78,4 +80,5 @@ class ApiManager {
   }
 }
 
-export const apiManager = ApiManager.getInstance();
+// TODO: Rename this to api once polkadot is fully replaced
+export const newApi = ApiManager.getInstance();
