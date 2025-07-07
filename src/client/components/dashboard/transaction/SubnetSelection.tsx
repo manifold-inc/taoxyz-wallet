@@ -12,7 +12,10 @@ import { NotificationType } from '@/types/client';
 interface SubnetSelectionProps {
   subnets: Subnet[];
   toSubnet: Subnet | null;
+  dashboardSubnet: Subnet | null;
+  dashboardValidators: Validator[] | null;
   setToSubnet: (subnet: Subnet) => void;
+  setDashboardValidators: (validators: Validator[] | null) => void;
   onCancel: () => void;
   onConfirm: (subnet: Subnet, validators: Validator[]) => void;
 }
@@ -24,19 +27,16 @@ const ValidatorSkeleton = () => {
 const SubnetSelection = ({
   subnets,
   toSubnet,
+  dashboardSubnet,
+  dashboardValidators,
   setToSubnet,
+  setDashboardValidators,
   onCancel,
   onConfirm,
 }: SubnetSelectionProps) => {
   const { api } = usePolkadotApi();
   const { showNotification } = useNotification();
-  const {
-    dashboardSubnet,
-    dashboardValidators,
-    dashboardState,
-    setDashboardSubnet,
-    setDashboardValidators,
-  } = useDashboard();
+  const { dashboardState } = useDashboard();
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoadingValidators, setIsLoadingValidators] = useState(false);
   const [selectedSubnet, setSelectedSubnet] = useState<Subnet | null>(() => {
@@ -80,8 +80,6 @@ const SubnetSelection = ({
     if (!selectedSubnet || !dashboardValidators) return;
     if (dashboardState === DashboardState.MOVE_STAKE) {
       setToSubnet(selectedSubnet);
-    } else {
-      setDashboardSubnet(selectedSubnet);
     }
     onConfirm(selectedSubnet, dashboardValidators);
   };

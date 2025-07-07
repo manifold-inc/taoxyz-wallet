@@ -7,12 +7,15 @@ import SlippageDisplay from '@/client/components/common/SlippageDisplay';
 import type { AmountState } from '@/client/components/dashboard/transaction/Transaction';
 import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
 import { useWallet } from '@/client/contexts/WalletContext';
+import type { Subnet } from '@/types/client';
 import { raoToTao, taoToRao } from '@/utils/utils';
 
 interface TransactionFormProps {
   amountState: AmountState;
   toAddress: string;
   slippage: string;
+  dashboardSubnet: Subnet | null;
+  dashboardSubnets: Subnet[] | null;
   setAmountState: (amountState: AmountState) => void;
   setToAddress: (toAddress: string) => void;
   setSlippage: (slippage: string) => void;
@@ -25,6 +28,8 @@ const TransactionForm = ({
   amountState,
   toAddress,
   slippage,
+  dashboardSubnet,
+  dashboardSubnets,
   setAmountState,
   setToAddress,
   setSlippage,
@@ -34,7 +39,6 @@ const TransactionForm = ({
 }: TransactionFormProps) => {
   const {
     resetDashboardState,
-    dashboardSubnet,
     setDashboardFreeBalance,
     dashboardStake,
     dashboardState,
@@ -232,12 +236,30 @@ const TransactionForm = ({
 
     switch (dashboardState) {
       case DashboardState.CREATE_STAKE:
-        return <SlippageDisplay amount={amountState.amount} />;
+        return (
+          <SlippageDisplay
+            amount={amountState.amount}
+            dashboardSubnet={dashboardSubnet}
+            dashboardSubnets={dashboardSubnets}
+          />
+        );
       case DashboardState.ADD_STAKE:
       case DashboardState.REMOVE_STAKE:
-        return <SlippageDisplay amount={amountState.amount} />;
+        return (
+          <SlippageDisplay
+            amount={amountState.amount}
+            dashboardSubnet={dashboardSubnet}
+            dashboardSubnets={dashboardSubnets}
+          />
+        );
       case DashboardState.MOVE_STAKE:
-        return <SlippageDisplay amount={amountState.amount} />;
+        return (
+          <SlippageDisplay
+            amount={amountState.amount}
+            dashboardSubnet={dashboardSubnet}
+            dashboardSubnets={dashboardSubnets}
+          />
+        );
       default:
         return null;
     }

@@ -26,7 +26,6 @@ const DashboardOverview = ({ taoPrice }: DashboardOverviewProps) => {
     setDashboardTotalBalance,
     resetDashboardState,
     dashboardStakes: stakes,
-    // dashboardFreeBalance,
     dashboardStake,
   } = useDashboard();
 
