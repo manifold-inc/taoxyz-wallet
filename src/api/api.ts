@@ -2,6 +2,8 @@ import { ApiPromise, WsProvider } from '@polkadot/api';
 
 import { createBalanceAPI } from '@/api/api/BalanceAPI';
 
+import { createSubnetsAPI } from './api/SubnetsAPI';
+
 const ENDPOINTS = {
   main: 'wss://entrypoint-finney.opentensor.ai:443',
   test: 'wss://test.finney.opentensor.ai:443',
@@ -13,6 +15,7 @@ class ApiManager {
   private initPromise: Promise<void> | null = null;
 
   public balance = createBalanceAPI(() => this.getApi());
+  public subnets = createSubnetsAPI(() => this.getApi());
 
   public static getInstance(): ApiManager {
     if (!ApiManager.instance) {
@@ -31,7 +34,7 @@ class ApiManager {
       this.api = await ApiPromise.create({ provider });
       console.log('[ApiManager] Connected to Endpoint: ', ENDPOINTS.test);
     } catch (error) {
-      console.error('[ApiManager] Failed to Connect to Endpoint: ', ENDPOINTS.main, error);
+      console.error('[ApiManager] Failed to Connect to Endpoint: ', ENDPOINTS.test, error);
       this.api = null;
       this.initPromise = null;
       throw error;

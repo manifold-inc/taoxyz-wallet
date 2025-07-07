@@ -2,6 +2,7 @@ import { ChevronRight, CircleCheckBig } from 'lucide-react';
 
 import { useState } from 'react';
 
+// import { newApi } from '@/api/api';
 import ConfirmTransaction from '@/client/components/dashboard/transaction/ConfirmTransaction';
 import SubnetSelection from '@/client/components/dashboard/transaction/SubnetSelection';
 import TransactionForm from '@/client/components/dashboard/transaction/TransactionForm';
@@ -67,6 +68,8 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
     resetDashboardState,
   } = useDashboard();
   const { showNotification } = useNotification();
+
+  // const { data: dashboardSubnets } = newApi.subnets.getAll();
 
   const [amountState, setAmountState] = useState<AmountState>({
     amount: '',

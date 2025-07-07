@@ -2,9 +2,11 @@ import { motion } from 'framer-motion';
 
 import { useEffect } from 'react';
 
+import { newApi } from '@/api/api';
 import SlippageDisplay from '@/client/components/common/SlippageDisplay';
 import type { AmountState } from '@/client/components/dashboard/transaction/Transaction';
 import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
+import { useWallet } from '@/client/contexts/WalletContext';
 import { raoToTao, taoToRao } from '@/utils/utils';
 
 interface TransactionFormProps {
@@ -33,12 +35,19 @@ const TransactionForm = ({
   const {
     resetDashboardState,
     dashboardSubnet,
+    setDashboardFreeBalance,
     dashboardStake,
-    dashboardFreeBalance,
     dashboardState,
     dashboardValidator,
-    setDashboardFreeBalance,
   } = useDashboard();
+
+  const { currentAddress } = useWallet();
+  const { data: fRao, status } = newApi.balance.getFree(currentAddress || '');
+  const freeRao = fRao ?? BigInt(0);
+
+  if (status === 'success') {
+    console.log('freeRao', freeRao);
+  }
 
   const handleSlippageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -83,7 +92,8 @@ const TransactionForm = ({
       case DashboardState.ADD_STAKE:
       case DashboardState.TRANSFER:
         // Free balance for tao is set when dashboard does api call - only for explicitness
-        setDashboardFreeBalance(dashboardFreeBalance);
+        setDashboardFreeBalance(freeRao);
+
         break;
       case DashboardState.MOVE_STAKE:
       case DashboardState.REMOVE_STAKE:
@@ -116,9 +126,9 @@ const TransactionForm = ({
       case DashboardState.CREATE_STAKE:
       case DashboardState.ADD_STAKE:
       case DashboardState.TRANSFER:
-        if (dashboardFreeBalance === null) return;
-        amount = raoToTao(dashboardFreeBalance).toString();
-        amountInRao = dashboardFreeBalance;
+        if (freeRao === null) return;
+        amount = raoToTao(freeRao).toString();
+        amountInRao = freeRao;
         break;
       case DashboardState.REMOVE_STAKE:
       case DashboardState.MOVE_STAKE:
@@ -142,14 +152,14 @@ const TransactionForm = ({
     switch (dashboardState) {
       case DashboardState.CREATE_STAKE:
       case DashboardState.TRANSFER:
-        if (dashboardFreeBalance === null) return false;
-        if (amountInRao > dashboardFreeBalance) return false;
+        if (freeRao === null) return false;
+        if (amountInRao > freeRao) return false;
         return true;
 
       case DashboardState.ADD_STAKE:
         if (dashboardStake === null) return false;
-        if (dashboardFreeBalance === null) return false;
-        if (amountInRao > dashboardFreeBalance) return false;
+        if (freeRao === null) return false;
+        if (amountInRao > freeRao) return false;
         return true;
 
       case DashboardState.REMOVE_STAKE:
@@ -215,7 +225,7 @@ const TransactionForm = ({
     if (
       (dashboardState === DashboardState.CREATE_STAKE ||
         dashboardState === DashboardState.TRANSFER) &&
-      dashboardFreeBalance === null
+      freeRao === null
     ) {
       return;
     }
@@ -231,6 +241,12 @@ const TransactionForm = ({
       default:
         return null;
     }
+  };
+
+  const handleCancel = () => {
+    // Reset the balance to actual wallet balance before resetting state
+    setDashboardFreeBalance(freeRao);
+    resetDashboardState();
   };
 
   useEffect(() => {
@@ -281,7 +297,7 @@ const TransactionForm = ({
         <div className="w-full flex gap-2 items-center justify-center">
           <button
             type="button"
-            onClick={() => resetDashboardState()}
+            onClick={handleCancel}
             className="rounded-md text-center cursor-pointer w-1/2 py-1.5 bg-mf-red-opacity border border-mf-red-opacity text-mf-red-500 gap-1 disabled:cursor-not-allowed hover:opacity-50"
           >
             Cancel
