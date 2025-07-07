@@ -2,7 +2,7 @@ import { ChevronRight, CircleCheckBig } from 'lucide-react';
 
 import { useState } from 'react';
 
-// import { newApi } from '@/api/api';
+import { newApi } from '@/api/api';
 import ConfirmTransaction from '@/client/components/dashboard/transaction/ConfirmTransaction';
 import SubnetSelection from '@/client/components/dashboard/transaction/SubnetSelection';
 import TransactionForm from '@/client/components/dashboard/transaction/TransactionForm';
@@ -58,7 +58,6 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
   const { api } = usePolkadotApi();
   const {
     dashboardSubnet,
-    dashboardSubnets,
     dashboardValidator,
     dashboardValidators,
     dashboardStake,
@@ -69,7 +68,7 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
   } = useDashboard();
   const { showNotification } = useNotification();
 
-  // const { data: dashboardSubnets } = newApi.subnets.getAll();
+  const { data: dashboardSubnets, isLoading: isLoadingSubnets } = newApi.subnets.getAll();
 
   const [amountState, setAmountState] = useState<AmountState>({
     amount: '',
@@ -205,7 +204,7 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
   };
 
   const renderSubnetSelection = () => {
-    if (showSubnetSelection && dashboardSubnets) {
+    if (showSubnetSelection && dashboardSubnets && !isLoadingSubnets) {
       return (
         <div className="w-full">
           <SubnetSelection
@@ -456,7 +455,7 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
 
   return (
     <>
-      {showSubnetSelection && dashboardSubnets ? (
+      {showSubnetSelection && dashboardSubnets && !isLoadingSubnets ? (
         <SubnetSelection
           subnets={dashboardSubnets}
           toSubnet={toSubnet}

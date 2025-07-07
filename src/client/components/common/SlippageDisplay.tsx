@@ -1,3 +1,4 @@
+import { newApi } from '@/api/api';
 import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
 import type { Slippage } from '@/types/client';
 import {
@@ -12,9 +13,11 @@ interface SlippageDisplayProps {
 }
 
 const SlippageDisplay = ({ amount }: SlippageDisplayProps) => {
-  const { dashboardSubnet, dashboardState, dashboardStake, dashboardSubnets } = useDashboard();
+  const { dashboardSubnet, dashboardState, dashboardStake } = useDashboard();
   const isDynamic = dashboardSubnet?.id !== 0;
   const moveStake = dashboardState === DashboardState.MOVE_STAKE;
+
+  const { data: dashboardSubnets } = newApi.subnets.getAll();
 
   const chainFee = moveStake ? 0.0001 : 0.00005;
   const amountInRao = Number(amount) * 1e9;

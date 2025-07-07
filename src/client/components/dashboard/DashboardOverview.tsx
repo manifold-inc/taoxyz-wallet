@@ -26,10 +26,11 @@ const DashboardOverview = ({ taoPrice }: DashboardOverviewProps) => {
     setDashboardTotalBalance,
     resetDashboardState,
     dashboardStakes: stakes,
-    dashboardFreeBalance,
+    // dashboardFreeBalance,
     dashboardStake,
   } = useDashboard();
 
+  const { data: dashboardFreeBalance } = newApi.balance.getFree(currentAddress || '');
   const { data: subnets, isLoading: isLoadingSubnets } = newApi.subnets.getAll();
   const [showUSD, setShowUSD] = useState(false);
   const freeTao = raoToTao(dashboardFreeBalance ?? BigInt(0));
