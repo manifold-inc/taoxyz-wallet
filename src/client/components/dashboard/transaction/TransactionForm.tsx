@@ -40,7 +40,7 @@ const TransactionForm = ({
   const { resetDashboardState, dashboardState, dashboardValidator } = useDashboard();
 
   const { currentAddress } = useWallet();
-  const { data: fRao, status } = newApi.balance.getFree(currentAddress || '');
+  const { data: fRao } = newApi.balance.getFree(currentAddress || '');
   const freeRao = fRao ?? BigInt(0);
 
   const { data: dashboardStake } = newApi.stakes.getStakesByValidatorAndSubnet(
