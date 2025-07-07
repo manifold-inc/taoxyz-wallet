@@ -15,11 +15,17 @@ import { usePolkadotApi } from '@/client/contexts/PolkadotApiContext';
 import { useWallet } from '@/client/contexts/WalletContext';
 import KeyringService from '@/client/services/KeyringService';
 import MessageService from '@/client/services/MessageService';
+import type { Stake, Subnet, Validator } from '@/types/client';
 import { NotificationType } from '@/types/client';
 import { formatNumber, raoToTao } from '@/utils/utils';
 
 interface ConfirmTransactionProps {
   params: TransactionParams | TransferTaoParams;
+  dashboardSubnet: Subnet | null;
+  dashboardSubnets: Subnet[] | null;
+  dashboardValidator: Validator | null;
+  dashboardStake: Stake | null;
+  dashboardStakes: Stake[] | null;
   submitTransaction: (
     params: TransactionParams | TransferTaoParams,
     onStatusChange: (status: string) => void
@@ -27,13 +33,21 @@ interface ConfirmTransactionProps {
   onCancel: () => void;
 }
 
-const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTransactionProps) => {
+const ConfirmTransaction = ({
+  params,
+  dashboardSubnet,
+  dashboardSubnets,
+  dashboardValidator,
+  dashboardStake,
+  dashboardStakes,
+  submitTransaction,
+  onCancel,
+}: ConfirmTransactionProps) => {
   const { setIsLocked } = useLock();
   const { showNotification } = useNotification();
   const { currentAddress } = useWallet();
   const { api } = usePolkadotApi();
-  const { dashboardSubnet, dashboardValidator, dashboardState, dashboardStake, dashboardStakes } =
-    useDashboard();
+  const { dashboardState } = useDashboard();
   const [password, setPassword] = useState('');
   const [passwordSelected, setPasswordSelected] = useState(false);
   const [status, setStatus] = useState<TransactionStatus | null>(null);
@@ -235,7 +249,11 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
               </p>
             </div>
           </div>
-          <SlippageDisplay amount={params.amount} />
+          <SlippageDisplay
+            amount={params.amount}
+            dashboardSubnet={dashboardSubnet}
+            dashboardSubnets={dashboardSubnets}
+          />
           {status === 'success' && (
             <div className="flex justify-between p-3">
               <p className="text-mf-edge-300 text-sm font-medium">Actual Total</p>

@@ -60,6 +60,7 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
     dashboardValidator,
     dashboardValidators,
     dashboardStake,
+    dashboardStakes,
     setDashboardValidator,
     setDashboardValidators,
     resetDashboardState,
@@ -485,6 +486,11 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
       ) : showTransactionConfirmation && transactionParams ? (
         <ConfirmTransaction
           params={transactionParams}
+          dashboardSubnet={dashboardSubnet}
+          dashboardSubnets={dashboardSubnets || null}
+          dashboardValidator={dashboardValidator}
+          dashboardStake={dashboardStake}
+          dashboardStakes={dashboardStakes}
           submitTransaction={submitTransaction}
           onCancel={handleTransactionConfirmationCancel}
         />
