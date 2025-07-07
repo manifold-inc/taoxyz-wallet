@@ -29,6 +29,8 @@ export const Dashboard = () => {
   const [taoPrice, setTaoPrice] = useState<number | null>(null);
   const prevAddressRef = useRef<string | null>(null);
 
+  const [selectedStakeKey, setSelectedStakeKey] = useState<string | null>(null);
+
   // Example Implementation
   const { data: freeTao, status } = newApi.balance.getFree(currentAddress || '');
   useEffect(() => {
@@ -114,13 +116,18 @@ export const Dashboard = () => {
       {/* Modular Overview */}
       <div className="border-b border-mf-ash-300 w-full">
         <div className="w-full px-5 py-3">
-          <DashboardOverview taoPrice={taoPrice} />
+          <DashboardOverview taoPrice={taoPrice} selectedStakeKey={selectedStakeKey} />
         </div>
       </div>
 
       {/* Modular Section */}
       <div className="w-full px-5 py-3">
-        {dashboardState === DashboardState.OVERVIEW && currentAddress && <PortfolioOverview />}
+        {dashboardState === DashboardState.OVERVIEW && currentAddress && (
+          <PortfolioOverview
+            selectedStakeKey={selectedStakeKey}
+            onStakeSelect={setSelectedStakeKey}
+          />
+        )}
 
         {dashboardState !== DashboardState.OVERVIEW && currentAddress && (
           <Transaction

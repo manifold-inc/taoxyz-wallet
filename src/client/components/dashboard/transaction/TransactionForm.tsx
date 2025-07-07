@@ -37,17 +37,18 @@ const TransactionForm = ({
   renderSubnetSelection,
   renderValidatorSelection,
 }: TransactionFormProps) => {
-  const {
-    resetDashboardState,
-    setDashboardFreeBalance,
-    dashboardStake,
-    dashboardState,
-    dashboardValidator,
-  } = useDashboard();
+  const { resetDashboardState, setDashboardFreeBalance, dashboardState, dashboardValidator } =
+    useDashboard();
 
   const { currentAddress } = useWallet();
   const { data: fRao, status } = newApi.balance.getFree(currentAddress || '');
   const freeRao = fRao ?? BigInt(0);
+
+  const { data: dashboardStake } = newApi.stakes.getStakesByValidatorAndSubnet(
+    currentAddress || '',
+    dashboardValidator?.hotkey || '',
+    dashboardSubnet?.id || 0
+  );
 
   if (status === 'success') {
     console.log('freeRao', freeRao);

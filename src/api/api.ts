@@ -1,6 +1,7 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
 
 import { createBalanceAPI } from '@/api/api/BalanceAPI';
+import { createStakeAPI } from '@/api/api/StakeAPI';
 
 import { createSubnetsAPI } from './api/SubnetsAPI';
 
@@ -16,6 +17,7 @@ class ApiManager {
 
   public balance = createBalanceAPI(() => this.getApi());
   public subnets = createSubnetsAPI(() => this.getApi());
+  public stakes = createStakeAPI(() => this.getApi());
 
   public static getInstance(): ApiManager {
     if (!ApiManager.instance) {
