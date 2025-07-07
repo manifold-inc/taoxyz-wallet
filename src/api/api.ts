@@ -27,9 +27,9 @@ class ApiManager {
     }
 
     try {
-      const provider = new WsProvider(ENDPOINTS.main);
+      const provider = new WsProvider(ENDPOINTS.test);
       this.api = await ApiPromise.create({ provider });
-      console.log('[ApiManager] Connected to Endpoint: ', ENDPOINTS.main);
+      console.log('[ApiManager] Connected to Endpoint: ', ENDPOINTS.test);
     } catch (error) {
       console.error('[ApiManager] Failed to Connect to Endpoint: ', ENDPOINTS.main, error);
       this.api = null;
@@ -40,7 +40,7 @@ class ApiManager {
 
   public async getApi(): Promise<ApiPromise> {
     if (this.api?.isConnected) {
-      console.log('[ApiManager] Already connected to Endpoint: ', ENDPOINTS.main);
+      console.log('[ApiManager] Already connected to Endpoint: ', ENDPOINTS.test);
       return this.api;
     }
 

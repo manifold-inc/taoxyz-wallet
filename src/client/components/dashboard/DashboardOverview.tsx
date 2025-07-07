@@ -49,7 +49,7 @@ const DashboardOverview = ({ taoPrice }: DashboardOverviewProps) => {
   // not costly
   const balances = {
     totalTao: calculatedTotalTao,
-    totalInUSD: (calculatedTotalTao ?? 0) * (taoPrice ?? 0),
+    totalInUSD: (calculatedTotalTao ?? 0) * (taoPrice ?? 0),  
     freeInUSD: (freeTao ?? 0) * (taoPrice ?? 0),
   };
 
