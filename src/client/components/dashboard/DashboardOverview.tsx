@@ -21,19 +21,14 @@ interface DashboardOverviewProps {
 const DashboardOverview = ({ taoPrice, selectedStakeKey }: DashboardOverviewProps) => {
   const { currentAddress } = useWallet();
   const { showNotification } = useNotification();
-  const {
-    dashboardState,
-    setDashboardState,
-    setDashboardTotalBalance,
-    resetDashboardState,
-  } = useDashboard();
+  const { dashboardState, setDashboardState, setDashboardTotalBalance, resetDashboardState } =
+    useDashboard();
 
   const { data: dashboardFreeBalance } = newApi.balance.getFree(currentAddress || '');
   const { data: subnets, isLoading: isLoadingSubnets } = newApi.subnets.getAll();
   const [showUSD, setShowUSD] = useState(false);
   const freeTao = raoToTao(dashboardFreeBalance ?? BigInt(0));
 
-  // Replace context with queries
   const { data: stakes } = newApi.stakes.getAllStakes(currentAddress || '');
 
   const dashboardStake = useMemo(() => {

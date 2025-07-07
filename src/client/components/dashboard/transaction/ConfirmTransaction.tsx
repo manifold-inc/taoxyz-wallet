@@ -1,4 +1,5 @@
 import taoxyz from '@public/assets/taoxyz.svg';
+import { useQuery } from '@tanstack/react-query';
 
 import { useEffect, useState } from 'react';
 
@@ -39,7 +40,6 @@ const ConfirmTransaction = ({
   dashboardSubnets,
   dashboardValidator,
   dashboardStake,
-  dashboardStakes,
   submitTransaction,
   onCancel,
 }: ConfirmTransactionProps) => {
@@ -133,19 +133,23 @@ const ConfirmTransaction = ({
     }
   };
 
+  const { data: stakes } = useQuery({
+    queryKey: ['stakes', currentAddress],
+    queryFn: () => api?.getStake(currentAddress ?? ''),
+    enabled: !!api && !!currentAddress,
+    refetchInterval: 10000,
+  });
+
   const fetchUpdatedStake = async () => {
     if (!api || !currentAddress || !dashboardValidator) return;
 
     // If moving to a pre-existing stake
-    const existingStake = dashboardStakes?.find(
+    const existingStake = stakes?.find(
       s => s.hotkey === dashboardValidator.hotkey && s.netuid === dashboardSubnet?.id
     );
 
     try {
-      const [stakes, balance] = await Promise.all([
-        api.getStake(currentAddress),
-        api.getBalance(currentAddress),
-      ]);
+      const [balance] = await Promise.all([api.getBalance(currentAddress)]);
       if (stakes) {
         const stake = stakes.find(
           s => s.hotkey === dashboardValidator.hotkey && s.netuid === dashboardSubnet?.id

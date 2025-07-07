@@ -37,8 +37,7 @@ const TransactionForm = ({
   renderSubnetSelection,
   renderValidatorSelection,
 }: TransactionFormProps) => {
-  const { resetDashboardState, setDashboardFreeBalance, dashboardState, dashboardValidator } =
-    useDashboard();
+  const { resetDashboardState, dashboardState, dashboardValidator } = useDashboard();
 
   const { currentAddress } = useWallet();
   const { data: fRao, status } = newApi.balance.getFree(currentAddress || '');
@@ -49,10 +48,6 @@ const TransactionForm = ({
     dashboardValidator?.hotkey || '',
     dashboardSubnet?.id || 0
   );
-
-  if (status === 'success') {
-    console.log('freeRao', freeRao);
-  }
 
   const handleSlippageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -96,15 +91,12 @@ const TransactionForm = ({
       case DashboardState.CREATE_STAKE:
       case DashboardState.ADD_STAKE:
       case DashboardState.TRANSFER:
-        // Free balance for tao is set when dashboard does api call - only for explicitness
-        setDashboardFreeBalance(freeRao);
-
+        // Free balance is managed by React Query
         break;
       case DashboardState.MOVE_STAKE:
       case DashboardState.REMOVE_STAKE:
         // Is needed when stake is selected
         if (dashboardStake === null) return;
-        setDashboardFreeBalance(dashboardStake.stake);
         break;
       default:
         break;
@@ -137,7 +129,7 @@ const TransactionForm = ({
         break;
       case DashboardState.REMOVE_STAKE:
       case DashboardState.MOVE_STAKE:
-        if (dashboardStake === null) return;
+        if (!dashboardStake) return;
         amount = raoToTao(dashboardStake.stake).toString();
         amountInRao = dashboardStake.stake;
         break;
@@ -169,7 +161,7 @@ const TransactionForm = ({
 
       case DashboardState.REMOVE_STAKE:
       case DashboardState.MOVE_STAKE:
-        if (dashboardStake === null) return false;
+        if (!dashboardStake) return false;
         if (amountInRao > dashboardStake.stake) return false;
         return true;
 
@@ -267,8 +259,7 @@ const TransactionForm = ({
   };
 
   const handleCancel = () => {
-    // Reset the balance to actual wallet balance before resetting state
-    setDashboardFreeBalance(freeRao);
+    // React Query manages balance state automatically
     resetDashboardState();
   };
 

@@ -1,3 +1,5 @@
+import { QueryClientProvider } from '@tanstack/react-query';
+
 import { useEffect } from 'react';
 import { HashRouter } from 'react-router-dom';
 
@@ -7,10 +9,10 @@ import { DashboardProvider } from '@/client/contexts/DashboardContext';
 import { LockProvider } from '@/client/contexts/LockContext';
 import { NotificationProvider } from '@/client/contexts/NotificationContext';
 import { PolkadotApiProvider } from '@/client/contexts/PolkadotApiContext';
-import { QueryProvider } from '@/client/contexts/QueryProvider';
 import { WalletProvider } from '@/client/contexts/WalletContext';
 import { WalletCreationProvider } from '@/client/contexts/WalletCreationContext';
 import MessageService from '@/client/services/MessageService';
+import { queryClient } from '@/client/services/queryClient';
 
 const App = () => {
   useEffect(() => {
@@ -21,8 +23,8 @@ const App = () => {
   }, []);
 
   return (
-    <PolkadotApiProvider>
-      <QueryProvider>
+    <QueryClientProvider client={queryClient}>
+      <PolkadotApiProvider>
         <HashRouter>
           <LockProvider>
             <WalletProvider>
@@ -38,8 +40,8 @@ const App = () => {
             </WalletProvider>
           </LockProvider>
         </HashRouter>
-      </QueryProvider>
-    </PolkadotApiProvider>
+      </PolkadotApiProvider>
+    </QueryClientProvider>
   );
 };
 
