@@ -1,6 +1,6 @@
 import { ChevronRight, CircleCheckBig } from 'lucide-react';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { newApi } from '@/api/api';
 import ConfirmTransaction from '@/client/components/dashboard/transaction/ConfirmTransaction';
@@ -56,24 +56,41 @@ export type TransactionStatus = 'ready' | 'broadcast' | 'inBlock' | 'success' | 
 
 const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) => {
   const { api } = usePolkadotApi();
-  const {
-    dashboardValidator,
-    dashboardValidators,
-    setDashboardValidator,
-    setDashboardValidators,
-    resetDashboardState,
-  } = useDashboard();
+  const { setDashboardValidators, resetDashboardState } = useDashboard();
   const { showNotification } = useNotification();
 
   const { data: dashboardSubnets, isLoading: isLoadingSubnets } = newApi.subnets.getAll();
   const { data: dashboardStakes } = newApi.stakes.getAllStakes(address);
 
   const [selectedSubnetId, setSelectedSubnetId] = useState<number | null>(null);
+  const [selectedValidatorHotkey, setSelectedValidatorHotkey] = useState<string | null>(null);
 
   const dashboardSubnet = useMemo(() => {
     if (!dashboardSubnets || selectedSubnetId === null) return null;
     return dashboardSubnets.find(subnet => subnet.id === selectedSubnetId) || null;
   }, [dashboardSubnets, selectedSubnetId]);
+
+  const { data: dashboardValidators } = newApi.validators.getAllValidators(
+    dashboardSubnet?.id || 0
+  );
+
+  // Query-based dashboardValidator - derived from validators list and selected hotkey
+  const dashboardValidator = useMemo(() => {
+    if (!dashboardValidators || !selectedValidatorHotkey) return null;
+    return (
+      dashboardValidators.find(validator => validator.hotkey === selectedValidatorHotkey) || null
+    );
+  }, [dashboardValidators, selectedValidatorHotkey]);
+
+  // Helper function to replace context setter
+  const setDashboardValidator = (validator: Validator | null) => {
+    setSelectedValidatorHotkey(validator?.hotkey || null);
+  };
+
+  // Clear validator selection when subnet changes
+  useEffect(() => {
+    setSelectedValidatorHotkey(null);
+  }, [selectedSubnetId]);
 
   const { data: dashboardStake } = newApi.stakes.getStakesByValidatorAndSubnet(
     address,
@@ -222,7 +239,7 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
             subnets={dashboardSubnets}
             toSubnet={toSubnet}
             dashboardSubnet={dashboardSubnet}
-            dashboardValidators={dashboardValidators}
+            dashboardValidators={dashboardValidators || null}
             setToSubnet={setToSubnet}
             setDashboardValidators={setDashboardValidators}
             onCancel={handleSubnetCancel}
@@ -438,6 +455,7 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
 
   const handleSubnetCancel = () => {
     setSelectedSubnetId(null);
+    setSelectedValidatorHotkey(null);
     setDashboardValidator(null);
     setDashboardValidators(null);
     setShowSubnetSelection(false);
@@ -445,18 +463,19 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
 
   const handleSubnetConfirm = (subnet: Subnet, validators: Validator[]) => {
     setSelectedSubnetId(subnet.id);
+    setSelectedValidatorHotkey(null);
     setDashboardValidator(null);
     setDashboardValidators(validators);
     setShowSubnetSelection(false);
   };
 
   const handleValidatorCancel = () => {
-    setDashboardValidator(null);
+    setSelectedValidatorHotkey(null);
     setShowValidatorSelection(false);
   };
 
   const handleValidatorConfirm = (validator: Validator) => {
-    setDashboardValidator(validator);
+    setSelectedValidatorHotkey(validator.hotkey);
     setShowValidatorSelection(false);
   };
 
@@ -474,7 +493,7 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
           subnets={dashboardSubnets}
           toSubnet={toSubnet}
           dashboardSubnet={dashboardSubnet}
-          dashboardValidators={dashboardValidators}
+          dashboardValidators={dashboardValidators || null}
           setToSubnet={setToSubnet}
           setDashboardValidators={setDashboardValidators}
           onCancel={handleSubnetCancel}
