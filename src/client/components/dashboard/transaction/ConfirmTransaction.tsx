@@ -2,6 +2,7 @@ import taoxyz from '@public/assets/taoxyz.svg';
 
 import { useEffect, useState } from 'react';
 
+import { newApi } from '@/api/api';
 import SlippageDisplay from '@/client/components/common/SlippageDisplay';
 import type {
   TransactionParams,
@@ -15,11 +16,17 @@ import { usePolkadotApi } from '@/client/contexts/PolkadotApiContext';
 import { useWallet } from '@/client/contexts/WalletContext';
 import KeyringService from '@/client/services/KeyringService';
 import MessageService from '@/client/services/MessageService';
+import type { Stake, Subnet, Validator } from '@/types/client';
 import { NotificationType } from '@/types/client';
 import { formatNumber, raoToTao } from '@/utils/utils';
 
 interface ConfirmTransactionProps {
   params: TransactionParams | TransferTaoParams;
+  dashboardSubnet: Subnet | null;
+  dashboardSubnets: Subnet[] | null;
+  dashboardValidator: Validator | null;
+  dashboardStake: Stake | null;
+  dashboardStakes: Stake[] | null;
   submitTransaction: (
     params: TransactionParams | TransferTaoParams,
     onStatusChange: (status: string) => void
@@ -27,13 +34,20 @@ interface ConfirmTransactionProps {
   onCancel: () => void;
 }
 
-const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTransactionProps) => {
+const ConfirmTransaction = ({
+  params,
+  dashboardSubnet,
+  dashboardSubnets,
+  dashboardValidator,
+  dashboardStake,
+  submitTransaction,
+  onCancel,
+}: ConfirmTransactionProps) => {
   const { setIsLocked } = useLock();
   const { showNotification } = useNotification();
   const { currentAddress } = useWallet();
   const { api } = usePolkadotApi();
-  const { dashboardSubnet, dashboardValidator, dashboardState, dashboardStake, dashboardStakes } =
-    useDashboard();
+  const { dashboardState } = useDashboard();
   const [password, setPassword] = useState('');
   const [passwordSelected, setPasswordSelected] = useState(false);
   const [status, setStatus] = useState<TransactionStatus | null>(null);
@@ -119,19 +133,18 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
     }
   };
 
+  const { data: stakes } = newApi.stakes.getAllStakes(currentAddress || '');
+
   const fetchUpdatedStake = async () => {
     if (!api || !currentAddress || !dashboardValidator) return;
 
     // If moving to a pre-existing stake
-    const existingStake = dashboardStakes?.find(
+    const existingStake = stakes?.find(
       s => s.hotkey === dashboardValidator.hotkey && s.netuid === dashboardSubnet?.id
     );
 
     try {
-      const [stakes, balance] = await Promise.all([
-        api.getStake(currentAddress),
-        api.getBalance(currentAddress),
-      ]);
+      const [balance] = await Promise.all([api.getBalance(currentAddress)]);
       if (stakes) {
         const stake = stakes.find(
           s => s.hotkey === dashboardValidator.hotkey && s.netuid === dashboardSubnet?.id
@@ -235,7 +248,11 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
               </p>
             </div>
           </div>
-          <SlippageDisplay amount={params.amount} />
+          <SlippageDisplay
+            amount={params.amount}
+            dashboardSubnet={dashboardSubnet}
+            dashboardSubnets={dashboardSubnets}
+          />
           {status === 'success' && (
             <div className="flex justify-between p-3">
               <p className="text-mf-edge-300 text-sm font-medium">Actual Total</p>

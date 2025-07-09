@@ -6,12 +6,10 @@ import KeyringService from '@/client/services/KeyringService';
 import type {
   BittensorMetagraph,
   BittensorSubnet,
-  Stake,
-  Subnet,
   SubstrateAccount,
-  Validator,
   ValidatorIdentity,
-} from '@/types/client';
+} from '@/types/api';
+import type { Stake, Subnet, Validator } from '@/types/client';
 
 class PolkadotApi {
   private api!: ApiPromise;
@@ -29,14 +27,14 @@ class PolkadotApi {
 
   private async initialize(): Promise<void> {
     console.log('[Client] Initializing API');
-    const provider = new WsProvider(this.endpoints.main);
+    const provider = new WsProvider(this.endpoints.test);
     try {
       if (this.api?.isConnected) {
         await this.api.disconnect();
       }
 
       this.api = await ApiPromise.create({ provider });
-      console.log(`[Client] Connected to Endpoint: ${this.endpoints.main}`);
+      console.log(`[Client] Connected to Endpoint: ${this.endpoints.test}`);
     } catch (error) {
       console.error('Error in initialize:', error);
       throw error;
