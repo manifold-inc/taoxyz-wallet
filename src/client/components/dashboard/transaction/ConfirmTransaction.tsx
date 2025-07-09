@@ -19,6 +19,7 @@ import MessageService from '@/client/services/MessageService';
 import type { Stake, Subnet, Validator } from '@/types/client';
 import { NotificationType } from '@/types/client';
 import { formatNumber, raoToTao } from '@/utils/utils';
+import { newApi } from '@/api/api';
 
 interface ConfirmTransactionProps {
   params: TransactionParams | TransferTaoParams;
@@ -133,12 +134,7 @@ const ConfirmTransaction = ({
     }
   };
 
-  const { data: stakes } = useQuery({
-    queryKey: ['stakes', currentAddress],
-    queryFn: () => api?.getStake(currentAddress ?? ''),
-    enabled: !!api && !!currentAddress,
-    refetchInterval: 10000,
-  });
+  const { data: stakes } = newApi.stakes.getAllStakes(currentAddress || '');
 
   const fetchUpdatedStake = async () => {
     if (!api || !currentAddress || !dashboardValidator) return;

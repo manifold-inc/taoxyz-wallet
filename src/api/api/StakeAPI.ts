@@ -11,9 +11,9 @@ export const createStakeAPI = (getApi: () => Promise<ApiPromise>) => ({
       queryFn: async () => {
         const api = await getApi();
         const result = await api.call.stakeInfoRuntimeApi.getStakeInfoForColdkey(address);
-        const stakes = result.toJSON() as unknown;
+        const stakes = result.toJSON() as unknown as Stake[];
         if (!Array.isArray(stakes)) return [];
-        return stakes as Stake[];
+        return stakes;
       },
       enabled: !!address,
     });
@@ -25,10 +25,9 @@ export const createStakeAPI = (getApi: () => Promise<ApiPromise>) => ({
       queryFn: async () => {
         const api = await getApi();
         const result = await api.call.stakeInfoRuntimeApi.getStakeInfoForColdkey(address);
-        const stakes = result.toJSON() as unknown;
+        const stakes = result.toJSON() as unknown as Stake[];
         if (!Array.isArray(stakes)) return null;
-        const allStakes = stakes as Stake[];
-        return allStakes.find(stake => stake.hotkey === hotkey) || null;
+        return stakes.find(stake => stake.hotkey === hotkey) || null;
       },
       enabled: !!address && !!hotkey,
     });
@@ -40,10 +39,9 @@ export const createStakeAPI = (getApi: () => Promise<ApiPromise>) => ({
       queryFn: async () => {
         const api = await getApi();
         const result = await api.call.stakeInfoRuntimeApi.getStakeInfoForColdkey(address);
-        const stakes = result.toJSON() as unknown;
+        const stakes = result.toJSON() as unknown as Stake[];
         if (!Array.isArray(stakes)) return [];
-        const allStakes = stakes as Stake[];
-        return allStakes.filter(stake => stake.netuid === subnetId);
+        return stakes.filter(stake => stake.netuid === subnetId);
       },
       enabled: !!address && typeof subnetId === 'number',
     });
@@ -55,11 +53,10 @@ export const createStakeAPI = (getApi: () => Promise<ApiPromise>) => ({
       queryFn: async () => {
         const api = await getApi();
         const result = await api.call.stakeInfoRuntimeApi.getStakeInfoForColdkey(address);
-        const stakes = result.toJSON() as unknown;
+        const stakes = result.toJSON() as unknown as Stake[];
         if (!Array.isArray(stakes)) return null;
-        const allStakes = stakes as Stake[];
         return (
-          allStakes.find(stake => stake.hotkey === hotkey && stake.netuid === subnetId) || null
+          stakes.find(stake => stake.hotkey === hotkey && stake.netuid === subnetId) || null
         );
       },
       enabled: !!address && !!hotkey && typeof subnetId === 'number',

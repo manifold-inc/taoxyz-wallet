@@ -64,7 +64,6 @@ const Header = () => {
         type: NotificationType.Error,
         message: 'Failed to Fetch TAO Price',
       });
-      throw error;
     }
   };
 
