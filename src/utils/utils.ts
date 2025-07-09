@@ -1,5 +1,17 @@
 import type { Slippage } from '@/types/client';
 
+export const calculateSubnetPrice = (netuid: number, taoIn: number, alphaIn: number): number => {
+  if (netuid === 0) {
+    return 1;
+  }
+
+  if (taoIn && alphaIn && alphaIn > 0) {
+    return Number((taoIn / alphaIn).toFixed(4));
+  }
+
+  return 0;
+};
+
 export const generateId = (): number => {
   return Math.floor(Math.random() * 1000000);
 };

@@ -2,8 +2,7 @@ import { ApiPromise, WsProvider } from '@polkadot/api';
 
 import { createBalanceAPI } from '@/api/api/BalanceAPI';
 import { createStakeAPI } from '@/api/api/StakeAPI';
-
-import { createSubnetsAPI } from './api/SubnetsAPI';
+import { createSubnetsAPI } from '@/api/api/SubnetsAPI';
 
 const ENDPOINTS = {
   main: 'wss://entrypoint-finney.opentensor.ai:443',
