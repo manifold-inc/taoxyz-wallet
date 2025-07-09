@@ -50,22 +50,20 @@ export const createSubnetsAPI = (getApi: () => Promise<ApiPromise>) => ({
       queryFn: async () => {
         const api = await getApi();
         const result = await api.call.subnetInfoRuntimeApi.getDynamicInfo(subnetId);
-        const btSubnet = result.toJSON() as unknown;
-        if (!btSubnet || typeof btSubnet !== 'object') return null;
-        const subnetName = (btSubnet as unknown as BittensorSubnet).subnetIdentity?.subnetName
-          ? String.fromCharCode(...(btSubnet as unknown as BittensorSubnet).subnetName)
-          : `Subnet ${(btSubnet as unknown as BittensorSubnet).netuid}`;
-        const price = calculateSubnetPrice(
-          (btSubnet as unknown as BittensorSubnet).netuid,
-          (btSubnet as unknown as BittensorSubnet).taoIn,
-          (btSubnet as unknown as BittensorSubnet).alphaIn
-        );
-        const tokenSymbol = (btSubnet as unknown as BittensorSubnet).tokenSymbol
-          ? String.fromCharCode(...(btSubnet as unknown as BittensorSubnet).tokenSymbol)
+        const btSubnet = result.toJSON() as unknown as BittensorSubnet;
+        if (!btSubnet) throw new Error('Subnet not found');
+
+        const subnetName = btSubnet.subnetIdentity.subnetName
+          ? String.fromCharCode(...btSubnet.subnetName)
+          : `Subnet ${btSubnet.netuid}`;
+        const price = calculateSubnetPrice(btSubnet.netuid, btSubnet.taoIn, btSubnet.alphaIn);
+        const tokenSymbol = btSubnet.tokenSymbol
+          ? String.fromCharCode(...btSubnet.tokenSymbol)
           : 'TAO';
+
         return {
-          ...(btSubnet as unknown as BittensorSubnet),
-          id: (btSubnet as unknown as BittensorSubnet).netuid,
+          ...btSubnet,
+          id: btSubnet.netuid,
           name: subnetName,
           price: price,
           tokenSymbol: tokenSymbol,
