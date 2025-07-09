@@ -40,7 +40,7 @@ const TransactionForm = ({
   const { resetDashboardState, dashboardState, dashboardValidator } = useDashboard();
 
   const { currentAddress } = useWallet();
-  const { data: data, status } = newApi.balance.getFree(currentAddress || '');
+  const { data: data } = newApi.balance.getFree(currentAddress || '');
   const freeRao = data ?? BigInt(0);
 
   const { data: dashboardStake } = newApi.stakes.getStakesByValidatorAndSubnet(
@@ -91,11 +91,9 @@ const TransactionForm = ({
       case DashboardState.CREATE_STAKE:
       case DashboardState.ADD_STAKE:
       case DashboardState.TRANSFER:
-        // Free balance is managed by React Query
         break;
       case DashboardState.MOVE_STAKE:
       case DashboardState.REMOVE_STAKE:
-        // Is needed when stake is selected
         if (dashboardStake === null) return;
         break;
       default:

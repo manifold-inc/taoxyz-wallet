@@ -1,8 +1,8 @@
 import taoxyz from '@public/assets/taoxyz.svg';
-import { useQuery } from '@tanstack/react-query';
 
 import { useEffect, useState } from 'react';
 
+import { newApi } from '@/api/api';
 import SlippageDisplay from '@/client/components/common/SlippageDisplay';
 import type {
   TransactionParams,
@@ -19,7 +19,6 @@ import MessageService from '@/client/services/MessageService';
 import type { Stake, Subnet, Validator } from '@/types/client';
 import { NotificationType } from '@/types/client';
 import { formatNumber, raoToTao } from '@/utils/utils';
-import { newApi } from '@/api/api';
 
 interface ConfirmTransactionProps {
   params: TransactionParams | TransferTaoParams;

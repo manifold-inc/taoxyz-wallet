@@ -55,9 +55,7 @@ export const createStakeAPI = (getApi: () => Promise<ApiPromise>) => ({
         const result = await api.call.stakeInfoRuntimeApi.getStakeInfoForColdkey(address);
         const stakes = result.toJSON() as unknown as Stake[];
         if (!Array.isArray(stakes)) return null;
-        return (
-          stakes.find(stake => stake.hotkey === hotkey && stake.netuid === subnetId) || null
-        );
+        return stakes.find(stake => stake.hotkey === hotkey && stake.netuid === subnetId) || null;
       },
       enabled: !!address && !!hotkey && typeof subnetId === 'number',
     });
