@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ApiPromise } from '@polkadot/api';
 
 import type { BittensorSubnet } from '@/types/client';
+import { calculateSubnetPrice } from '@/utils/utils';
 
 export const createSubnetsAPI = (getApi: () => Promise<ApiPromise>) => ({
   getAll: () => {
@@ -25,12 +26,7 @@ export const createSubnetsAPI = (getApi: () => Promise<ApiPromise>) => ({
                   )
                 )
               : `Subnet ${btSubnet.netuid}`;
-            const price =
-              btSubnet.netuid === 0
-                ? 1
-                : btSubnet.taoIn && btSubnet.alphaIn && btSubnet.alphaIn > 0
-                  ? Number((btSubnet.taoIn / btSubnet.alphaIn).toFixed(4))
-                  : 0;
+            const price = calculateSubnetPrice(btSubnet.netuid, btSubnet.taoIn, btSubnet.alphaIn);
             const tokenSymbol = btSubnet.tokenSymbol
               ? String.fromCharCode(...btSubnet.tokenSymbol)
               : 'TAO';
@@ -59,19 +55,11 @@ export const createSubnetsAPI = (getApi: () => Promise<ApiPromise>) => ({
         const subnetName = (btSubnet as unknown as BittensorSubnet).subnetIdentity?.subnetName
           ? String.fromCharCode(...(btSubnet as unknown as BittensorSubnet).subnetName)
           : `Subnet ${(btSubnet as unknown as BittensorSubnet).netuid}`;
-        const price =
-          (btSubnet as unknown as BittensorSubnet).netuid === 0
-            ? 1
-            : (btSubnet as unknown as BittensorSubnet).taoIn &&
-                (btSubnet as unknown as BittensorSubnet).alphaIn &&
-                (btSubnet as unknown as BittensorSubnet).alphaIn > 0
-              ? Number(
-                  (
-                    (btSubnet as unknown as BittensorSubnet).taoIn /
-                    (btSubnet as unknown as BittensorSubnet).alphaIn
-                  ).toFixed(4)
-                )
-              : 0;
+        const price = calculateSubnetPrice(
+          (btSubnet as unknown as BittensorSubnet).netuid,
+          (btSubnet as unknown as BittensorSubnet).taoIn,
+          (btSubnet as unknown as BittensorSubnet).alphaIn
+        );
         const tokenSymbol = (btSubnet as unknown as BittensorSubnet).tokenSymbol
           ? String.fromCharCode(...(btSubnet as unknown as BittensorSubnet).tokenSymbol)
           : 'TAO';
