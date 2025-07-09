@@ -46,8 +46,8 @@ const TransactionForm = ({
   } = useDashboard();
 
   const { currentAddress } = useWallet();
-  const { data: fRao, status } = newApi.balance.getFree(currentAddress || '');
-  const freeRao = fRao ?? BigInt(0);
+  const { data: data, status } = newApi.balance.getFree(currentAddress || '');
+  const freeRao = data ?? BigInt(0);
 
   if (status === 'success') {
     console.log('freeRao', freeRao);
