@@ -1,30 +1,37 @@
 import { Download, Plus } from 'lucide-react';
 
+import { useMemo } from 'react';
+
 import { newApi } from '@/api/api';
 import ExpandedStake from '@/client/components/dashboard/portfolio/ExpandedStake';
 import StakeOverview from '@/client/components/dashboard/portfolio/StakeOverview';
 import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
 import { useNotification } from '@/client/contexts/NotificationContext';
 import { usePolkadotApi } from '@/client/contexts/PolkadotApiContext';
+import { useWallet } from '@/client/contexts/WalletContext';
 import { NotificationType } from '@/types/client';
 import type { Stake, Subnet, Validator } from '@/types/client';
 
-const PortfolioOverview = () => {
+interface PortfolioOverviewProps {
+  selectedStakeKey: string | null;
+  onStakeSelect: (stakeKey: string | null) => void;
+}
+
+const PortfolioOverview = ({ selectedStakeKey, onStakeSelect }: PortfolioOverviewProps) => {
   const { showNotification } = useNotification();
   const { api } = usePolkadotApi();
-  const {
-    setDashboardState,
-    // setDashboardSubnet,
-    setDashboardValidator,
-    setDashboardValidators,
-    setDashboardStake,
-    resetDashboardState,
-    dashboardStake,
-    // dashboardSubnet,
-    dashboardStakes: stakes,
-  } = useDashboard();
+  const { currentAddress } = useWallet();
+  const { setDashboardState, setDashboardValidator, setDashboardValidators, resetDashboardState } =
+    useDashboard();
 
   const { data: subnets, isLoading: isLoadingSubnets } = newApi.subnets.getAll();
+  const { data: stakes } = newApi.stakes.getAllStakes(currentAddress || '');
+
+  // Derive the selected stake from stakes data and selectedStakeKey
+  const dashboardStake = useMemo(() => {
+    if (!stakes || !selectedStakeKey) return null;
+    return stakes.find(stake => `${stake.hotkey}-${stake.netuid}` === selectedStakeKey) || null;
+  }, [stakes, selectedStakeKey]);
 
   // Derive the selected subnet from the selected stake and subnets data
   const selectedSubnet =
@@ -57,13 +64,15 @@ const PortfolioOverview = () => {
   const handleStakeSelect = (stake: Stake): void => {
     const subnet = subnets?.find(subnet => subnet.id === stake.netuid);
     if (subnet) {
-      setDashboardStake(stake);
+      // setDashboardStake(stake);
+      onStakeSelect(`${stake.hotkey}-${stake.netuid}`);
     } else {
       showNotification({
         message: 'Failed to Fetch Subnet',
         type: NotificationType.Error,
       });
-      setDashboardStake(null);
+      // setDashboardStake(null);
+      onStakeSelect(null);
     }
   };
 
@@ -113,7 +122,7 @@ const PortfolioOverview = () => {
           stake={dashboardStake}
           subnet={selectedSubnet}
           onClose={() => {
-            setDashboardStake(null);
+            onStakeSelect(null);
             setDashboardValidator(null);
             setDashboardValidators(null);
           }}

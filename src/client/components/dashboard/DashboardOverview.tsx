@@ -15,24 +15,26 @@ import { formatNumber, raoToTao, taoToRao } from '@/utils/utils';
 
 interface DashboardOverviewProps {
   taoPrice: number | null;
+  selectedStakeKey: string | null;
 }
 
-const DashboardOverview = ({ taoPrice }: DashboardOverviewProps) => {
+const DashboardOverview = ({ taoPrice, selectedStakeKey }: DashboardOverviewProps) => {
   const { currentAddress } = useWallet();
   const { showNotification } = useNotification();
-  const {
-    dashboardState,
-    setDashboardState,
-    setDashboardTotalBalance,
-    resetDashboardState,
-    dashboardStakes: stakes,
-    dashboardStake,
-  } = useDashboard();
+  const { dashboardState, setDashboardState, setDashboardTotalBalance, resetDashboardState } =
+    useDashboard();
 
   const { data: dashboardFreeBalance } = newApi.balance.getFree(currentAddress || '');
   const { data: subnets, isLoading: isLoadingSubnets } = newApi.subnets.getAll();
   const [showUSD, setShowUSD] = useState(false);
   const freeTao = raoToTao(dashboardFreeBalance ?? BigInt(0));
+
+  const { data: stakes } = newApi.stakes.getAllStakes(currentAddress || '');
+
+  const dashboardStake = useMemo(() => {
+    if (!stakes || !selectedStakeKey) return null;
+    return stakes.find(stake => `${stake.hotkey}-${stake.netuid}` === selectedStakeKey) || null;
+  }, [stakes, selectedStakeKey]);
 
   // Function to get the balance to display based on selected stake
   const getAvailableBalance = () => {
@@ -70,7 +72,7 @@ const DashboardOverview = ({ taoPrice }: DashboardOverviewProps) => {
 
   // resonable memo because this is a potenially costly function
   const calculatedTotalTao = useMemo((): number | null => {
-    if (freeTao === null || !subnets || stakes === null || isLoadingSubnets) return null;
+    if (freeTao === null || !subnets || !stakes || isLoadingSubnets) return null;
 
     let total = freeTao;
     for (const stake of stakes) {

@@ -59,8 +59,6 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
   const {
     dashboardValidator,
     dashboardValidators,
-    dashboardStake,
-    dashboardStakes,
     setDashboardValidator,
     setDashboardValidators,
     resetDashboardState,
@@ -68,6 +66,7 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
   const { showNotification } = useNotification();
 
   const { data: dashboardSubnets, isLoading: isLoadingSubnets } = newApi.subnets.getAll();
+  const { data: dashboardStakes } = newApi.stakes.getAllStakes(address);
 
   const [selectedSubnetId, setSelectedSubnetId] = useState<number | null>(null);
 
@@ -75,6 +74,12 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
     if (!dashboardSubnets || selectedSubnetId === null) return null;
     return dashboardSubnets.find(subnet => subnet.id === selectedSubnetId) || null;
   }, [dashboardSubnets, selectedSubnetId]);
+
+  const { data: dashboardStake } = newApi.stakes.getStakesByValidatorAndSubnet(
+    address,
+    dashboardValidator?.hotkey || '',
+    dashboardSubnet?.id || 0
+  );
 
   const [amountState, setAmountState] = useState<AmountState>({
     amount: '',
@@ -489,8 +494,8 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
           dashboardSubnet={dashboardSubnet}
           dashboardSubnets={dashboardSubnets || null}
           dashboardValidator={dashboardValidator}
-          dashboardStake={dashboardStake}
-          dashboardStakes={dashboardStakes}
+          dashboardStake={dashboardStake || null}
+          dashboardStakes={dashboardStakes || null}
           submitTransaction={submitTransaction}
           onCancel={handleTransactionConfirmationCancel}
         />

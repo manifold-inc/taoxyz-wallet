@@ -1,7 +1,8 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
 
-import { createBalanceAPI } from './api/BalanceAPI';
-import { createSubnetsAPI } from './api/SubnetsAPI';
+import { createBalanceAPI } from '@/api/api/BalanceAPI';
+import { createStakeAPI } from '@/api/api/StakeAPI';
+import { createSubnetsAPI } from '@/api/api/SubnetsAPI';
 
 const ENDPOINTS = {
   main: 'wss://entrypoint-finney.opentensor.ai:443',
@@ -15,6 +16,7 @@ class ApiManager {
 
   public balance = createBalanceAPI(() => this.getApi());
   public subnets = createSubnetsAPI(() => this.getApi());
+  public stakes = createStakeAPI(() => this.getApi());
 
   public static getInstance(): ApiManager {
     if (!ApiManager.instance) {
