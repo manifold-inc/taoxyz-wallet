@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { ApiPromise } from '@polkadot/api';
 
-import type { BittensorSubnet } from '@/types/client';
+import type { BittensorSubnet } from '@/types/api';
 import { calculateSubnetPrice } from '@/utils/utils';
 
 export const createSubnetsAPI = (getApi: () => Promise<ApiPromise>) => ({

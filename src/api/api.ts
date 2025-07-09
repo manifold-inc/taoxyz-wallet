@@ -1,7 +1,6 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
 
-import { createBalanceAPI } from '@/api/api/BalanceAPI';
-
+import { createBalanceAPI } from './api/BalanceAPI';
 import { createSubnetsAPI } from './api/SubnetsAPI';
 
 const ENDPOINTS = {
