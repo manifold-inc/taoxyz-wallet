@@ -60,11 +60,12 @@ const Header = () => {
       setPriceChange24h(data.priceChange24h);
       return data.currentPrice;
     } catch (error) {
+      console.error('Error fetching TAO price:', error);
       showNotification({
         type: NotificationType.Error,
         message: 'Failed to Fetch TAO Price',
       });
-      throw error;
+      return 0;
     }
   };
 

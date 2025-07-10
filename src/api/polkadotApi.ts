@@ -6,12 +6,10 @@ import KeyringService from '@/client/services/KeyringService';
 import type {
   BittensorMetagraph,
   BittensorSubnet,
-  Stake,
-  Subnet,
   SubstrateAccount,
-  Validator,
   ValidatorIdentity,
-} from '@/types/client';
+} from '@/types/api';
+import type { Stake, Subnet, Validator } from '@/types/client';
 
 class PolkadotApi {
   private api!: ApiPromise;

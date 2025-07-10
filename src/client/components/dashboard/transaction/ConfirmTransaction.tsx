@@ -1,8 +1,8 @@
 import taoxyz from '@public/assets/taoxyz.svg';
-import { useQuery } from '@tanstack/react-query';
 
 import { useEffect, useState } from 'react';
 
+import { newApi } from '@/api/api';
 import SlippageDisplay from '@/client/components/common/SlippageDisplay';
 import type {
   TransactionParams,
@@ -133,12 +133,7 @@ const ConfirmTransaction = ({
     }
   };
 
-  const { data: stakes } = useQuery({
-    queryKey: ['stakes', currentAddress],
-    queryFn: () => api?.getStake(currentAddress ?? ''),
-    enabled: !!api && !!currentAddress,
-    refetchInterval: 10000,
-  });
+  const { data: stakes } = newApi.stakes.getAllStakes(currentAddress || '');
 
   const fetchUpdatedStake = async () => {
     if (!api || !currentAddress || !dashboardValidator) return;

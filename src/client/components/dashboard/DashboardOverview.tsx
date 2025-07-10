@@ -38,17 +38,23 @@ const DashboardOverview = ({ taoPrice, selectedStakeKey }: DashboardOverviewProp
 
   // Function to get the balance to display based on selected stake
   const getAvailableBalance = () => {
-    if (dashboardStake && subnets) {
-      // When a stake is selected, show that stake's balance
+    if (dashboardStake && subnets && stakes) {
       const selectedSubnet = subnets.find(subnet => subnet.id === dashboardStake.netuid);
       if (selectedSubnet) {
-        const stakeInTao = raoToTao(dashboardStake.stake);
-        const stakeValueInTao = stakeInTao * selectedSubnet.price;
+        const totalStakedInSubnet = stakes
+          .filter(stake => stake.netuid === dashboardStake.netuid)
+          .reduce((sum, stake) => sum + raoToTao(BigInt(stake.stake)), 0);
+
+        const currentValidatorStake = raoToTao(dashboardStake.stake);
+
+        const totalSubnetValueInTao = totalStakedInSubnet * selectedSubnet.price;
+        const currentValidatorValueInTao = currentValidatorStake * selectedSubnet.price;
+
         return {
-          totalTao: stakeValueInTao,
-          freeTao: stakeInTao,
-          totalInUSD: stakeValueInTao * (taoPrice ?? 0),
-          freeInUSD: stakeInTao * (taoPrice ?? 0),
+          totalTao: totalSubnetValueInTao,
+          freeTao: currentValidatorValueInTao,
+          totalInUSD: totalSubnetValueInTao * (taoPrice ?? 0),
+          freeInUSD: currentValidatorValueInTao * (taoPrice ?? 0),
           isStakeView: true,
         };
       }
@@ -127,7 +133,7 @@ const DashboardOverview = ({ taoPrice, selectedStakeKey }: DashboardOverviewProp
                 </p>
               </div>
               <div className="text-mf-edge-500 font-medium text-xs pl-5 -mt-1">
-                {balances.isStakeView ? 'Stake Value' : 'Total Balance'}
+                {balances.isStakeView ? 'Total Staked in Subnet' : 'Total Balance'}
               </div>
             </div>
 
@@ -145,7 +151,7 @@ const DashboardOverview = ({ taoPrice, selectedStakeKey }: DashboardOverviewProp
                 </p>
               </div>
               <div className="text-mf-sybil-500 font-medium text-xs pl-5 -mt-1">
-                {balances.isStakeView ? 'Stake Amount' : 'Free Balance'}
+                {balances.isStakeView ? 'Current Validator Stake' : 'Free Balance'}
               </div>
             </div>
           </div>
