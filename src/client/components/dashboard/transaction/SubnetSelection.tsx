@@ -5,6 +5,8 @@ import { useState } from 'react';
 import { newApi } from '@/api/api';
 import Skeleton from '@/client/components/common/Skeleton';
 import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
+import { useNotification } from '@/client/contexts/NotificationContext';
+import { NotificationType } from '@/types/client';
 import type { Subnet, Validator } from '@/types/client';
 
 interface SubnetSelectionProps {
@@ -29,6 +31,7 @@ const SubnetSelection = ({
   onConfirm,
 }: SubnetSelectionProps) => {
   const { dashboardState } = useDashboard();
+  const { showNotification } = useNotification();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSubnet, setSelectedSubnet] = useState<Subnet | null>(() => {
     if (dashboardState === DashboardState.MOVE_STAKE) {
@@ -37,9 +40,16 @@ const SubnetSelection = ({
     return dashboardSubnet;
   });
 
-  // Use React Query to fetch validators for the selected subnet
   const { data: validators, isLoading: isLoadingValidators } = newApi.validators.getAllValidators(
-    selectedSubnet?.id ?? -1
+    selectedSubnet?.id,
+    {
+      onError: () => {
+        showNotification({
+          type: NotificationType.Error,
+          message: 'Failed to Fetch Validators',
+        });
+      },
+    }
   );
 
   const filteredSubnets = subnets.filter(subnet => {

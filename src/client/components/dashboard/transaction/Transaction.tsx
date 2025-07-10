@@ -1,6 +1,6 @@
 import { ChevronRight, CircleCheckBig } from 'lucide-react';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { newApi } from '@/api/api';
 import ConfirmTransaction from '@/client/components/dashboard/transaction/ConfirmTransaction';
@@ -71,7 +71,15 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
   }, [dashboardSubnets, selectedSubnetId]);
 
   const { data: dashboardValidators } = newApi.validators.getAllValidators(
-    dashboardSubnet?.id ?? -1
+    dashboardSubnet?.id ?? -1,
+    {
+      onError: () => {
+        showNotification({
+          type: NotificationType.Error,
+          message: 'Failed to Fetch Validators',
+        });
+      },
+    }
   );
 
   // Query-based dashboardValidator - derived from validators list and selected hotkey
@@ -81,11 +89,6 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
       dashboardValidators.find(validator => validator.hotkey === selectedValidatorHotkey) || null
     );
   }, [dashboardValidators, selectedValidatorHotkey]);
-
-  // Clear validator selection when subnet changes
-  useEffect(() => {
-    setSelectedValidatorHotkey(null);
-  }, [selectedSubnetId]);
 
   const { data: dashboardStake } = newApi.stakes.getStakesByValidatorAndSubnet(
     address,
@@ -447,8 +450,6 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
   };
 
   const handleSubnetCancel = () => {
-    setSelectedSubnetId(null);
-    setSelectedValidatorHotkey(null);
     setShowSubnetSelection(false);
   };
 
