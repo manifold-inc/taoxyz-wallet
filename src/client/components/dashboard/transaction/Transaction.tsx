@@ -56,24 +56,39 @@ export type TransactionStatus = 'ready' | 'broadcast' | 'inBlock' | 'success' | 
 
 const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) => {
   const { api } = usePolkadotApi();
-  const {
-    dashboardValidator,
-    dashboardValidators,
-    setDashboardValidator,
-    setDashboardValidators,
-    resetDashboardState,
-  } = useDashboard();
+  const { resetDashboardState } = useDashboard();
   const { showNotification } = useNotification();
 
   const { data: dashboardSubnets, isLoading: isLoadingSubnets } = newApi.subnets.getAll();
   const { data: dashboardStakes } = newApi.stakes.getAllStakes(address);
 
   const [selectedSubnetId, setSelectedSubnetId] = useState<number | null>(null);
+  const [selectedValidatorHotkey, setSelectedValidatorHotkey] = useState<string | null>(null);
 
   const dashboardSubnet = useMemo(() => {
     if (!dashboardSubnets || selectedSubnetId === null) return null;
     return dashboardSubnets.find(subnet => subnet.id === selectedSubnetId) || null;
   }, [dashboardSubnets, selectedSubnetId]);
+
+  const { data: dashboardValidators } = newApi.validators.getAllValidators(
+    dashboardSubnet?.id ?? -1,
+    {
+      onError: () => {
+        showNotification({
+          type: NotificationType.Error,
+          message: 'Failed to Fetch Validators',
+        });
+      },
+    }
+  );
+
+  // Query-based dashboardValidator - derived from validators list and selected hotkey
+  const dashboardValidator = useMemo(() => {
+    if (!dashboardValidators || !selectedValidatorHotkey) return null;
+    return (
+      dashboardValidators.find(validator => validator.hotkey === selectedValidatorHotkey) || null
+    );
+  }, [dashboardValidators, selectedValidatorHotkey]);
 
   const { data: dashboardStake } = newApi.stakes.getStakesByValidatorAndSubnet(
     address,
@@ -222,9 +237,7 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
             subnets={dashboardSubnets}
             toSubnet={toSubnet}
             dashboardSubnet={dashboardSubnet}
-            dashboardValidators={dashboardValidators}
             setToSubnet={setToSubnet}
-            setDashboardValidators={setDashboardValidators}
             onCancel={handleSubnetCancel}
             onConfirm={handleSubnetConfirm}
           />
@@ -437,26 +450,22 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
   };
 
   const handleSubnetCancel = () => {
-    setSelectedSubnetId(null);
-    setDashboardValidator(null);
-    setDashboardValidators(null);
     setShowSubnetSelection(false);
   };
 
-  const handleSubnetConfirm = (subnet: Subnet, validators: Validator[]) => {
+  const handleSubnetConfirm = (subnet: Subnet, _validators: Validator[]) => {
     setSelectedSubnetId(subnet.id);
-    setDashboardValidator(null);
-    setDashboardValidators(validators);
+    setSelectedValidatorHotkey(null);
     setShowSubnetSelection(false);
   };
 
   const handleValidatorCancel = () => {
-    setDashboardValidator(null);
+    setSelectedValidatorHotkey(null);
     setShowValidatorSelection(false);
   };
 
   const handleValidatorConfirm = (validator: Validator) => {
-    setDashboardValidator(validator);
+    setSelectedValidatorHotkey(validator.hotkey);
     setShowValidatorSelection(false);
   };
 
@@ -474,9 +483,7 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
           subnets={dashboardSubnets}
           toSubnet={toSubnet}
           dashboardSubnet={dashboardSubnet}
-          dashboardValidators={dashboardValidators}
           setToSubnet={setToSubnet}
-          setDashboardValidators={setDashboardValidators}
           onCancel={handleSubnetCancel}
           onConfirm={handleSubnetConfirm}
         />
@@ -506,6 +513,7 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
           slippage={slippage}
           dashboardSubnet={dashboardSubnet}
           dashboardSubnets={dashboardSubnets || null}
+          dashboardValidator={dashboardValidator}
           setAmountState={setAmountState}
           setToAddress={setToAddress}
           setSlippage={setSlippage}
