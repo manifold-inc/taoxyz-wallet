@@ -27,6 +27,8 @@ export const createBalanceAPI = (getApi: () => Promise<ApiPromise>) => ({
         return BigInt(totalBalance);
       },
       enabled: !!address,
+      refetchInterval: 5000,
+      staleTime: 0,
     });
   },
 
@@ -40,6 +42,8 @@ export const createBalanceAPI = (getApi: () => Promise<ApiPromise>) => ({
         return BigInt(account.data.free);
       },
       enabled: !!address,
+      refetchInterval: 5000,
+      staleTime: 0,
     });
   },
 });

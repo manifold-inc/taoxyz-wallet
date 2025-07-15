@@ -7,7 +7,7 @@ import SlippageDisplay from '@/client/components/common/SlippageDisplay';
 import type { AmountState } from '@/client/components/dashboard/transaction/Transaction';
 import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
 import { useWallet } from '@/client/contexts/WalletContext';
-import type { Subnet } from '@/types/client';
+import type { Subnet, Validator } from '@/types/client';
 import { raoToTao, taoToRao } from '@/utils/utils';
 
 interface TransactionFormProps {
@@ -16,6 +16,7 @@ interface TransactionFormProps {
   slippage: string;
   dashboardSubnet: Subnet | null;
   dashboardSubnets: Subnet[] | null;
+  dashboardValidator: Validator | null;
   setAmountState: (amountState: AmountState) => void;
   setToAddress: (toAddress: string) => void;
   setSlippage: (slippage: string) => void;
@@ -30,6 +31,7 @@ const TransactionForm = ({
   slippage,
   dashboardSubnet,
   dashboardSubnets,
+  dashboardValidator,
   setAmountState,
   setToAddress,
   setSlippage,
@@ -37,7 +39,7 @@ const TransactionForm = ({
   renderSubnetSelection,
   renderValidatorSelection,
 }: TransactionFormProps) => {
-  const { resetDashboardState, dashboardState, dashboardValidator } = useDashboard();
+  const { resetDashboardState, dashboardState } = useDashboard();
 
   const { currentAddress } = useWallet();
   const { data: data } = newApi.balance.getFree(currentAddress || '');

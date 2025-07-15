@@ -2,20 +2,18 @@ import { motion } from 'framer-motion';
 
 import { useState } from 'react';
 
+import { newApi } from '@/api/api';
 import Skeleton from '@/client/components/common/Skeleton';
 import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
 import { useNotification } from '@/client/contexts/NotificationContext';
-import { usePolkadotApi } from '@/client/contexts/PolkadotApiContext';
-import type { Subnet, Validator } from '@/types/client';
 import { NotificationType } from '@/types/client';
+import type { Subnet, Validator } from '@/types/client';
 
 interface SubnetSelectionProps {
   subnets: Subnet[];
   toSubnet: Subnet | null;
   dashboardSubnet: Subnet | null;
-  dashboardValidators: Validator[] | null;
   setToSubnet: (subnet: Subnet) => void;
-  setDashboardValidators: (validators: Validator[] | null) => void;
   onCancel: () => void;
   onConfirm: (subnet: Subnet, validators: Validator[]) => void;
 }
@@ -28,17 +26,13 @@ const SubnetSelection = ({
   subnets,
   toSubnet,
   dashboardSubnet,
-  dashboardValidators,
   setToSubnet,
-  setDashboardValidators,
   onCancel,
   onConfirm,
 }: SubnetSelectionProps) => {
-  const { api } = usePolkadotApi();
-  const { showNotification } = useNotification();
   const { dashboardState } = useDashboard();
+  const { showNotification } = useNotification();
   const [searchQuery, setSearchQuery] = useState('');
-  const [isLoadingValidators, setIsLoadingValidators] = useState(false);
   const [selectedSubnet, setSelectedSubnet] = useState<Subnet | null>(() => {
     if (dashboardState === DashboardState.MOVE_STAKE) {
       return toSubnet;
@@ -46,23 +40,17 @@ const SubnetSelection = ({
     return dashboardSubnet;
   });
 
-  const getValidators = async (subnetId: number) => {
-    if (!api) return;
-    try {
-      setIsLoadingValidators(true);
-      const validators = await api.getValidators(subnetId);
-      if (validators === null) {
+  const { data: validators, isLoading: isLoadingValidators } = newApi.validators.getAllValidators(
+    selectedSubnet?.id,
+    {
+      onError: () => {
         showNotification({
           type: NotificationType.Error,
           message: 'Failed to Fetch Validators',
         });
-        return;
-      }
-      setDashboardValidators(validators);
-    } finally {
-      setIsLoadingValidators(false);
+      },
     }
-  };
+  );
 
   const filteredSubnets = subnets.filter(subnet => {
     const query = searchQuery.toLowerCase();
@@ -73,15 +61,14 @@ const SubnetSelection = ({
 
   const handleSubnetSelect = (subnet: Subnet) => {
     setSelectedSubnet(subnet);
-    getValidators(subnet.id);
   };
 
   const handleConfirm = () => {
-    if (!selectedSubnet || !dashboardValidators) return;
+    if (!selectedSubnet || !validators) return;
     if (dashboardState === DashboardState.MOVE_STAKE) {
       setToSubnet(selectedSubnet);
     }
-    onConfirm(selectedSubnet, dashboardValidators);
+    onConfirm(selectedSubnet, validators);
   };
 
   return (
@@ -146,7 +133,7 @@ const SubnetSelection = ({
                   (isLoadingValidators ? (
                     <ValidatorSkeleton />
                   ) : (
-                    <p className="text-mf-edge-500 text-sm">{dashboardValidators?.length ?? 0}</p>
+                    <p className="text-mf-edge-500 text-sm">{validators?.length ?? 0}</p>
                   ))}
               </div>
             </button>
@@ -164,11 +151,7 @@ const SubnetSelection = ({
                 <button
                   onClick={handleConfirm}
                   className="rounded-md text-center cursor-pointer w-1/2 py-1.5 bg-mf-sybil-opacity border border-mf-sybil-opacity hover:opacity-50 text-mf-sybil-500 gap-1 disabled:disabled-button disabled:cursor-not-allowed"
-                  disabled={
-                    selectedSubnet === null ||
-                    dashboardValidators === null ||
-                    dashboardValidators.length === 0
-                  }
+                  disabled={selectedSubnet === null || !validators || validators.length === 0}
                 >
                   Confirm
                 </button>
