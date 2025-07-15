@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 
-import PolkadotApi from '../api/polkadotApi';
+import PolkadotApi from '@/api/polkadotApi';
 
 interface ApiContext {
   api: PolkadotApi | null;

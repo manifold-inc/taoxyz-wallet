@@ -1,7 +1,8 @@
 import { ChevronRight, CircleCheckBig } from 'lucide-react';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
+import { newApi } from '@/api/api';
 import ConfirmTransaction from '@/client/components/dashboard/transaction/ConfirmTransaction';
 import SubnetSelection from '@/client/components/dashboard/transaction/SubnetSelection';
 import TransactionForm from '@/client/components/dashboard/transaction/TransactionForm';
@@ -55,18 +56,45 @@ export type TransactionStatus = 'ready' | 'broadcast' | 'inBlock' | 'success' | 
 
 const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) => {
   const { api } = usePolkadotApi();
-  const {
-    dashboardSubnet,
-    dashboardSubnets,
-    dashboardValidator,
-    dashboardValidators,
-    dashboardStake,
-    setDashboardSubnet,
-    setDashboardValidator,
-    setDashboardValidators,
-    resetDashboardState,
-  } = useDashboard();
+  const { resetDashboardState } = useDashboard();
   const { showNotification } = useNotification();
+
+  const { data: dashboardSubnets, isLoading: isLoadingSubnets } = newApi.subnets.getAll();
+  const { data: dashboardStakes } = newApi.stakes.getAllStakes(address);
+
+  const [selectedSubnetId, setSelectedSubnetId] = useState<number | null>(null);
+  const [selectedValidatorHotkey, setSelectedValidatorHotkey] = useState<string | null>(null);
+
+  const dashboardSubnet = useMemo(() => {
+    if (!dashboardSubnets || selectedSubnetId === null) return null;
+    return dashboardSubnets.find(subnet => subnet.id === selectedSubnetId) || null;
+  }, [dashboardSubnets, selectedSubnetId]);
+
+  const { data: dashboardValidators } = newApi.validators.getAllValidators(
+    dashboardSubnet?.id ?? -1,
+    {
+      onError: () => {
+        showNotification({
+          type: NotificationType.Error,
+          message: 'Failed to Fetch Validators',
+        });
+      },
+    }
+  );
+
+  // Query-based dashboardValidator - derived from validators list and selected hotkey
+  const dashboardValidator = useMemo(() => {
+    if (!dashboardValidators || !selectedValidatorHotkey) return null;
+    return (
+      dashboardValidators.find(validator => validator.hotkey === selectedValidatorHotkey) || null
+    );
+  }, [dashboardValidators, selectedValidatorHotkey]);
+
+  const { data: dashboardStake } = newApi.stakes.getStakesByValidatorAndSubnet(
+    address,
+    dashboardValidator?.hotkey || '',
+    dashboardSubnet?.id || 0
+  );
 
   const [amountState, setAmountState] = useState<AmountState>({
     amount: '',
@@ -202,12 +230,13 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
   };
 
   const renderSubnetSelection = () => {
-    if (showSubnetSelection && dashboardSubnets) {
+    if (showSubnetSelection && dashboardSubnets && !isLoadingSubnets) {
       return (
         <div className="w-full">
           <SubnetSelection
             subnets={dashboardSubnets}
             toSubnet={toSubnet}
+            dashboardSubnet={dashboardSubnet}
             setToSubnet={setToSubnet}
             onCancel={handleSubnetCancel}
             onConfirm={handleSubnetConfirm}
@@ -421,26 +450,22 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
   };
 
   const handleSubnetCancel = () => {
-    setDashboardSubnet(null);
-    setDashboardValidator(null);
-    setDashboardValidators(null);
     setShowSubnetSelection(false);
   };
 
-  const handleSubnetConfirm = (subnet: Subnet, validators: Validator[]) => {
-    setDashboardSubnet(subnet);
-    setDashboardValidator(null);
-    setDashboardValidators(validators);
+  const handleSubnetConfirm = (subnet: Subnet, _validators: Validator[]) => {
+    setSelectedSubnetId(subnet.id);
+    setSelectedValidatorHotkey(null);
     setShowSubnetSelection(false);
   };
 
   const handleValidatorCancel = () => {
-    setDashboardValidator(null);
+    setSelectedValidatorHotkey(null);
     setShowValidatorSelection(false);
   };
 
   const handleValidatorConfirm = (validator: Validator) => {
-    setDashboardValidator(validator);
+    setSelectedValidatorHotkey(validator.hotkey);
     setShowValidatorSelection(false);
   };
 
@@ -453,10 +478,11 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
 
   return (
     <>
-      {showSubnetSelection && dashboardSubnets ? (
+      {showSubnetSelection && dashboardSubnets && !isLoadingSubnets ? (
         <SubnetSelection
           subnets={dashboardSubnets}
           toSubnet={toSubnet}
+          dashboardSubnet={dashboardSubnet}
           setToSubnet={setToSubnet}
           onCancel={handleSubnetCancel}
           onConfirm={handleSubnetConfirm}
@@ -472,6 +498,11 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
       ) : showTransactionConfirmation && transactionParams ? (
         <ConfirmTransaction
           params={transactionParams}
+          dashboardSubnet={dashboardSubnet}
+          dashboardSubnets={dashboardSubnets || null}
+          dashboardValidator={dashboardValidator}
+          dashboardStake={dashboardStake || null}
+          dashboardStakes={dashboardStakes || null}
           submitTransaction={submitTransaction}
           onCancel={handleTransactionConfirmationCancel}
         />
@@ -480,6 +511,9 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
           amountState={amountState}
           toAddress={toAddress}
           slippage={slippage}
+          dashboardSubnet={dashboardSubnet}
+          dashboardSubnets={dashboardSubnets || null}
+          dashboardValidator={dashboardValidator}
           setAmountState={setAmountState}
           setToAddress={setToAddress}
           setSlippage={setSlippage}
