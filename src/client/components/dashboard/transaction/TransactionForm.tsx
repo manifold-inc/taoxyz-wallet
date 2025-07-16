@@ -259,7 +259,6 @@ const TransactionForm = ({
   };
 
   const handleCancel = () => {
-    // React Query manages balance state automatically
     resetDashboardState();
   };
 
