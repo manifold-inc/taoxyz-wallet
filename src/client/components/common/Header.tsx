@@ -1,4 +1,5 @@
 import taoxyz from '@public/assets/taoxyz.svg';
+import { useQuery } from '@tanstack/react-query';
 import { ChevronDown, ChevronUp, Plus, WalletCards, X } from 'lucide-react';
 
 import { useEffect, useRef, useState } from 'react';
@@ -23,12 +24,11 @@ const Header = () => {
   const [wallets, setWallets] = useState<KeyringPair[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
   const [walletToDelete, setWalletToDelete] = useState<KeyringPair | null>(null);
-  const [taoPrice, setTaoPrice] = useState<number | null>(null);
   const [priceChange24h, setPriceChange24h] = useState<number | null>(null);
   const [showPrice, setShowPrice] = useState(false);
   const listenerRef = useRef<HTMLDivElement>(null);
   const { showNotification } = useNotification();
-  const prevAddressRef = useRef<string | null>(null);
+  // const prevAddressRef = useRef<string | null>(null);
 
   useEffect(() => {
     getWallet();
@@ -52,25 +52,28 @@ const Header = () => {
     };
   }, []);
 
-  const fetchTaoPrice = async (): Promise<void> => {
+  const fetchTaoPrice = async (): Promise<number> => {
     try {
       const response = await fetch(`https://tao.xyz/api/price`);
       const data = (await response.json()) as TaoPriceResponse;
-      setTaoPrice(data.currentPrice);
+      // setTaoPrice(data.currentPrice);
       setPriceChange24h(data.priceChange24h);
-      await chrome.storage.local.set({
-        tao_price_cache: {
-          taoPrice: data.currentPrice,
-          priceChange24h: data.priceChange24h,
-        },
-      });
-    } catch {
+      return data.currentPrice;
+    } catch (error) {
+      console.error('Error fetching TAO price:', error);
       showNotification({
         type: NotificationType.Error,
         message: 'Failed to Fetch TAO Price',
       });
+      return 0;
     }
   };
+
+  const { data: taoPrice } = useQuery({
+    queryKey: ['taoPrice'],
+    queryFn: fetchTaoPrice,
+    refetchInterval: 1000,
+  });
 
   const clearSavedTransactions = async (): Promise<void> => {
     await chrome.storage.local.remove('storeMoveStakeTransaction');
@@ -116,10 +119,6 @@ const Header = () => {
     await clearSavedTransactions();
     setWalletToDelete(null);
   };
-
-  if (currentAddress && currentAddress !== prevAddressRef.current) {
-    fetchTaoPrice();
-  }
 
   return (
     <>
