@@ -1,7 +1,5 @@
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
-import { useState } from 'react';
-
 interface StakeChartProps {
   data: PriceResponse[] | null;
 }
@@ -64,9 +62,6 @@ const SkeletonChart = () => {
 };
 
 const StakeChart = ({ data }: StakeChartProps) => {
-  const [priceData, setPriceData] = useState<ChartDataPoint[]>([]);
-  const [isInitialized, setIsInitialized] = useState(false);
-
   const addTimestamps = (data: PriceResponse[]): ChartDataPoint[] => {
     const now = new Date();
     const sevenDaysAgo = new Date(now);
@@ -74,12 +69,13 @@ const StakeChart = ({ data }: StakeChartProps) => {
 
     const timeInterval = (now.getTime() - sevenDaysAgo.getTime()) / data.length;
 
-    // Filter every other data point to render smoother
+    // Take only every 3rd data point to reduce rendering overhead
     return [...data]
       .reverse()
-      .filter((_, index) => index % 2 === 0)
+      .filter((_, index) => index % 3 === 0)
+      .slice(0, 20)
       .map((point, index) => {
-        const pointTime = new Date(sevenDaysAgo.getTime() + timeInterval * index * 2);
+        const pointTime = new Date(sevenDaysAgo.getTime() + timeInterval * index * 3);
         return {
           ...point,
           timestamp: pointTime.toLocaleString('en-US', {
@@ -109,23 +105,11 @@ const StakeChart = ({ data }: StakeChartProps) => {
     return [Math.max(0, minPrice - padding), maxPrice + padding];
   };
 
-  const init = async (d: PriceResponse[]) => {
-    const dataWithTimestamps = addTimestamps(d);
-    setPriceData(dataWithTimestamps);
-  };
-
-  if (!isInitialized && data && data.length > 0) {
-    setIsInitialized(true);
-    void init(data);
-  }
-
-  if (!data) {
+  if (!data || data.length === 0) {
     return <SkeletonChart />;
   }
 
-  if (!priceData.length) {
-    return null;
-  }
+  const priceData = addTimestamps(data);
 
   return (
     <ResponsiveContainer width="100%" height="100%">

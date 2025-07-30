@@ -1,7 +1,6 @@
 import { ChevronUp, Copy } from 'lucide-react';
 
-import { useState } from 'react';
-
+import { newApi } from '@/api/api';
 import StakeChart from '@/client/components/dashboard/portfolio/StakeChart';
 import { useNotification } from '@/client/contexts/NotificationContext';
 import { NotificationType } from '@/types/client';
@@ -17,15 +16,6 @@ interface ExpandedStakeProps {
   onMoveStake: () => void;
 }
 
-interface ApiResponse {
-  data: PriceResponse[];
-}
-
-interface PriceResponse {
-  netuid: number;
-  price: string;
-}
-
 const ExpandedStake = ({
   stake,
   subnet,
@@ -35,47 +25,10 @@ const ExpandedStake = ({
   onMoveStake,
 }: ExpandedStakeProps) => {
   const { showNotification } = useNotification();
-  const [priceData, setPriceData] = useState<PriceResponse[] | null>(null);
-  const [isInitialized, setIsInitialized] = useState(false);
 
-  const fetchSubnetPrice = async () => {
-    void chrome.storage.local.get([`price_data_cache_sn${stake.netuid}`], r => {
-      if (r[`price_data_cache_sn${stake.netuid}`]) {
-        setPriceData(r[`price_data_cache_sn${stake.netuid}`]);
-      }
-    });
-    try {
-      const response = await fetch('https://tao.xyz/api/subnets/price', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          allSubnets: false,
-          netuid: stake.netuid,
-        }),
-      });
+  const { data: priceData, isLoading } = newApi.subnetPrice.getPriceHistory(stake.netuid);
 
-      const data: ApiResponse = await response.json();
-      const convertedData = data.data.map(price => {
-        const converted = {
-          netuid: price.netuid,
-          price:
-            Number(price.price) < 1
-              ? price.price
-              : raoToTao(BigInt(Number(price.price))).toString(),
-        };
-        return converted;
-      });
-      setPriceData(convertedData);
-      void chrome.storage.local.set({ [`price_data_cache_sn${stake.netuid}`]: convertedData });
-    } catch {
-      showNotification({
-        type: NotificationType.Error,
-        message: 'Failed to Fetch Subnet Price History',
-      });
-    }
-  };
+  const showSkeleton = isLoading && !priceData;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(stake.hotkey);
@@ -84,15 +37,6 @@ const ExpandedStake = ({
       message: 'Validator Hotkey Copied',
     });
   };
-
-  const init = async () => {
-    await fetchSubnetPrice();
-  };
-
-  if (!isInitialized) {
-    void init();
-    setIsInitialized(true);
-  }
 
   return (
     <div className="w-full">
@@ -118,7 +62,7 @@ const ExpandedStake = ({
         {/* Chart */}
         <div className="h-32 border-b border-mf-ash-300">
           <div className="px-3 h-full">
-            <StakeChart data={priceData} />
+            <StakeChart data={showSkeleton ? null : priceData || null} />
           </div>
         </div>
 
@@ -141,38 +85,30 @@ const ExpandedStake = ({
                 {formatNumber(raoToTao(stake.stake)).toFixed(2)}α
               </span>
             </div>
-
-            {/* Price */}
-            <div className="rounded-full flex items-center bg-mf-sybil-opacity px-2 py-0.5">
-              <span className="text-mf-sybil-500 mr-1">Price</span>
-              <span className="text-mf-edge-500">
-                {subnet.price ? formatNumber(subnet.price) : '-'}τ
-              </span>
-            </div>
           </div>
         </div>
-      </div>
 
-      {/* Action Buttons */}
-      <div className="flex gap-2 pt-2">
-        <button
-          className="cursor-pointer w-1/3 py-1.5 bg-mf-sybil-opacity rounded-sm text-mf-sybil-500 border border-mf-sybil-opacity hover:opacity-50"
-          onClick={onAddStake}
-        >
-          Add
-        </button>
-        <button
-          onClick={onRemoveStake}
-          className="cursor-pointer w-1/3 py-1.5 bg-mf-red-opacity rounded-sm text-mf-red-500 border border-mf-red-opacity hover:opacity-50"
-        >
-          Remove
-        </button>
-        <button
-          onClick={onMoveStake}
-          className="cursor-pointer w-1/3 py-1.5 bg-mf-safety-opacity rounded-sm text-mf-safety-500 border border-mf-safety-opacity hover:opacity-50"
-        >
-          Move
-        </button>
+        {/* Action Buttons */}
+        <div className="flex gap-2 pt-2">
+          <button
+            className="cursor-pointer w-1/3 py-1.5 bg-mf-sybil-opacity rounded-sm text-mf-sybil-500 border border-mf-sybil-opacity hover:opacity-50"
+            onClick={onAddStake}
+          >
+            Add
+          </button>
+          <button
+            onClick={onRemoveStake}
+            className="cursor-pointer w-1/3 py-1.5 bg-mf-red-opacity rounded-sm text-mf-red-500 border border-mf-red-opacity hover:opacity-50"
+          >
+            Remove
+          </button>
+          <button
+            onClick={onMoveStake}
+            className="cursor-pointer w-1/3 py-1.5 bg-mf-safety-opacity rounded-sm text-mf-safety-500 border border-mf-safety-opacity hover:opacity-50"
+          >
+            Move
+          </button>
+        </div>
       </div>
     </div>
   );

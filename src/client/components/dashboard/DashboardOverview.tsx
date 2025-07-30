@@ -4,14 +4,14 @@ import SilverDollar from '@public/assets/silver-dollar.svg';
 import SilverTao from '@public/assets/silver-tao.svg';
 import { Copy } from 'lucide-react';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { newApi } from '@/api/api';
 import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
 import { useNotification } from '@/client/contexts/NotificationContext';
 import { useWallet } from '@/client/contexts/WalletContext';
 import { NotificationType } from '@/types/client';
-import { formatNumber, raoToTao, taoToRao } from '@/utils/utils';
+import { formatNumber, raoToTao } from '@/utils/utils';
 
 interface DashboardOverviewProps {
   taoPrice: number | null;
@@ -21,8 +21,7 @@ interface DashboardOverviewProps {
 const DashboardOverview = ({ taoPrice, selectedStakeKey }: DashboardOverviewProps) => {
   const { currentAddress } = useWallet();
   const { showNotification } = useNotification();
-  const { dashboardState, setDashboardState, setDashboardTotalBalance, resetDashboardState } =
-    useDashboard();
+  const { dashboardState, setDashboardState, resetDashboardState } = useDashboard();
 
   const { data: dashboardFreeBalance } = newApi.balance.getFree(currentAddress || '');
   const { data: subnets, isLoading: isLoadingSubnets } = newApi.subnets.getAll();
@@ -100,14 +99,6 @@ const DashboardOverview = ({ taoPrice, selectedStakeKey }: DashboardOverviewProp
   const handleToggleUnit = (): void => {
     setShowUSD(prev => !prev);
   };
-
-  // This *should* be done when we get the data back from the fetch call, but
-  // oh well
-  useEffect(() => {
-    if (calculatedTotalTao) {
-      setDashboardTotalBalance(taoToRao(calculatedTotalTao));
-    }
-  }, [calculatedTotalTao]);
 
   return (
     <>
