@@ -1,33 +1,23 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
+import { newApi } from '@/api/api';
 import Header from '@/client/components/common/Header';
 import DashboardOverview from '@/client/components/dashboard/DashboardOverview';
 import PortfolioOverview from '@/client/components/dashboard/portfolio/PortfolioOverview';
 import Transaction from '@/client/components/dashboard/transaction/Transaction';
 import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
-import { useNotification } from '@/client/contexts/NotificationContext';
 import { usePolkadotApi } from '@/client/contexts/PolkadotApiContext';
 import { useWallet } from '@/client/contexts/WalletContext';
-import { NotificationType } from '@/types/client';
-
-const API_URL = 'https://tao.xyz/api/price';
-
-export interface TaoPriceResponse {
-  currentPrice: number;
-  price24hAgo: number;
-  priceChange24h: number;
-}
 
 export const Dashboard = () => {
-  const { showNotification } = useNotification();
   const { api } = usePolkadotApi();
   const { dashboardState } = useDashboard();
   const { currentAddress } = useWallet();
 
-  const [taoPrice, setTaoPrice] = useState<number | null>(null);
   const prevAddressRef = useRef<string | null>(null);
-
   const [selectedStakeKey, setSelectedStakeKey] = useState<string | null>(null);
+
+  const { data: taoPriceData } = newApi.taoPrice.getPrice();
 
   const fetchData = async (address: string, forceRefresh = false): Promise<void> => {
     if (!api || !address || (!forceRefresh && address === prevAddressRef.current)) return;
@@ -36,36 +26,8 @@ export const Dashboard = () => {
     // The cache update is handled automatically by React Query
   };
 
-  const fetchTaoPrice = async (): Promise<void> => {
-    try {
-      const response = await fetch(`${API_URL}`);
-      const data = (await response.json()) as TaoPriceResponse;
-      setTaoPrice(data.currentPrice);
-      await chrome.storage.local.set({
-        tao_price_cache: {
-          taoPrice: data.currentPrice,
-          priceChange24h: data.priceChange24h,
-        },
-      });
-    } catch {
-      showNotification({
-        type: NotificationType.Error,
-        message: 'Failed to Fetch TAO Price',
-      });
-    }
-  };
-
-  useEffect(() => {
-    chrome.storage.local.get(['tao_price_cache'], r => {
-      if (r.tao_price_cache) {
-        setTaoPrice(r.tao_price_cache.taoPrice);
-      }
-    });
-  }, []);
-
   if (api && currentAddress && currentAddress !== prevAddressRef.current) {
     void fetchData(currentAddress);
-    void fetchTaoPrice();
   }
 
   return (
@@ -76,7 +38,10 @@ export const Dashboard = () => {
       {/* Modular Overview */}
       <div className="border-b border-mf-ash-300 w-full">
         <div className="w-full px-5 py-3">
-          <DashboardOverview taoPrice={taoPrice} selectedStakeKey={selectedStakeKey} />
+          <DashboardOverview
+            taoPrice={taoPriceData?.currentPrice ?? null}
+            selectedStakeKey={selectedStakeKey}
+          />
         </div>
       </div>
 

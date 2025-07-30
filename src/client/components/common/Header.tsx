@@ -1,5 +1,4 @@
 import taoxyz from '@public/assets/taoxyz.svg';
-import { useQuery } from '@tanstack/react-query';
 import { ChevronDown, ChevronUp, Plus, WalletCards, X } from 'lucide-react';
 
 import { useEffect, useRef, useState } from 'react';
@@ -7,9 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 import type { KeyringPair } from '@polkadot/keyring/types';
 
-import { useNotification } from '@/client/contexts/NotificationContext';
-import type { TaoPriceResponse } from '@/client/pages/Dashboard';
-import { NotificationType } from '@/types/client';
+import { newApi } from '@/api/api';
 
 import { useLock } from '../../contexts/LockContext';
 import { useWallet } from '../../contexts/WalletContext';
@@ -24,11 +21,8 @@ const Header = () => {
   const [wallets, setWallets] = useState<KeyringPair[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
   const [walletToDelete, setWalletToDelete] = useState<KeyringPair | null>(null);
-  const [priceChange24h, setPriceChange24h] = useState<number | null>(null);
   const [showPrice, setShowPrice] = useState(false);
   const listenerRef = useRef<HTMLDivElement>(null);
-  const { showNotification } = useNotification();
-  // const prevAddressRef = useRef<string | null>(null);
 
   useEffect(() => {
     getWallet();
@@ -52,28 +46,9 @@ const Header = () => {
     };
   }, []);
 
-  const fetchTaoPrice = async (): Promise<number> => {
-    try {
-      const response = await fetch(`https://tao.xyz/api/price`);
-      const data = (await response.json()) as TaoPriceResponse;
-      // setTaoPrice(data.currentPrice);
-      setPriceChange24h(data.priceChange24h);
-      return data.currentPrice;
-    } catch (error) {
-      console.error('Error fetching TAO price:', error);
-      showNotification({
-        type: NotificationType.Error,
-        message: 'Failed to Fetch TAO Price',
-      });
-      return 0;
-    }
-  };
-
-  const { data: taoPrice } = useQuery({
-    queryKey: ['taoPrice'],
-    queryFn: fetchTaoPrice,
-    refetchInterval: 1000,
-  });
+  const { data: taoPriceData } = newApi.taoPrice.getPrice();
+  const taoPrice = taoPriceData?.currentPrice;
+  const priceChange24h = taoPriceData?.priceChange24h;
 
   const clearSavedTransactions = async (): Promise<void> => {
     await chrome.storage.local.remove('storeMoveStakeTransaction');
