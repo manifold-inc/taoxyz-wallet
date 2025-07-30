@@ -1,7 +1,9 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChevronRight, CircleCheckBig } from 'lucide-react';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
+import { newApi } from '@/api/api';
 import ConfirmTransaction from '@/client/components/dashboard/transaction/ConfirmTransaction';
 import SubnetSelection from '@/client/components/dashboard/transaction/SubnetSelection';
 import TransactionForm from '@/client/components/dashboard/transaction/TransactionForm';
@@ -10,7 +12,7 @@ import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext
 import { useNotification } from '@/client/contexts/NotificationContext';
 import { usePolkadotApi } from '@/client/contexts/PolkadotApiContext';
 import { NotificationType } from '@/types/client';
-import type { Subnet, Validator } from '@/types/client';
+import type { Stake, Subnet, Validator } from '@/types/client';
 import { taoToRao } from '@/utils/utils';
 
 export interface TransactionParams {
@@ -53,130 +55,142 @@ export interface AmountState {
 
 export type TransactionStatus = 'ready' | 'broadcast' | 'inBlock' | 'success' | 'failed';
 
-const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) => {
+const useTransactionSetup = (address: string, dashboardState: DashboardState) => {
   const { api } = usePolkadotApi();
-  const {
-    dashboardSubnet,
-    dashboardSubnets,
-    dashboardValidator,
-    dashboardValidators,
-    dashboardStake,
-    setDashboardSubnet,
-    setDashboardValidator,
-    setDashboardValidators,
-    resetDashboardState,
-  } = useDashboard();
   const { showNotification } = useNotification();
 
-  const [amountState, setAmountState] = useState<AmountState>({
-    amount: '',
-    amountInRao: null,
+  return useMutation({
+    mutationFn: async ({
+      amountState,
+      dashboardValidator,
+      dashboardSubnet,
+      dashboardStake,
+      toValidator,
+      toSubnet,
+      toAddress,
+      slippage,
+    }: {
+      amountState: AmountState;
+      dashboardValidator: Validator | null;
+      dashboardSubnet: Subnet | null;
+      dashboardStake: Stake | null;
+      toValidator: Validator | null;
+      toSubnet: Subnet | null;
+      toAddress: string;
+      slippage: string;
+    }) => {
+      if (!api || amountState.amountInRao === null) {
+        throw new Error('Invalid transaction parameters');
+      }
+
+      const calculateLimitPrice = (subnet: Subnet, slippage: string): bigint => {
+        const slippageValue = Number(slippage) / 100;
+        if (
+          dashboardState === DashboardState.CREATE_STAKE ||
+          dashboardState === DashboardState.ADD_STAKE
+        ) {
+          return taoToRao(subnet.price * (1 + slippageValue));
+        } else if (dashboardState === DashboardState.REMOVE_STAKE) {
+          return taoToRao(subnet.price * (1 - slippageValue));
+        }
+        return taoToRao(subnet.price);
+      };
+
+      let params: TransactionParams;
+
+      switch (dashboardState) {
+        case DashboardState.CREATE_STAKE:
+          if (!dashboardValidator || !dashboardSubnet) {
+            throw new Error('Validator and subnet must be selected');
+          }
+          params = {
+            address,
+            subnetId: dashboardSubnet.id,
+            validatorHotkey: dashboardValidator.hotkey,
+            amount: amountState.amount,
+            amountInRao: BigInt(amountState.amountInRao),
+            limitPrice: calculateLimitPrice(dashboardSubnet, slippage),
+          } as StakeParams;
+          break;
+
+        case DashboardState.ADD_STAKE:
+        case DashboardState.REMOVE_STAKE:
+          if (!dashboardStake || !dashboardSubnet) {
+            throw new Error('Existing stake required for this operation');
+          }
+          params = {
+            address,
+            subnetId: dashboardSubnet.id,
+            validatorHotkey: dashboardStake.hotkey,
+            amount: amountState.amount,
+            amountInRao: BigInt(amountState.amountInRao),
+            limitPrice: calculateLimitPrice(dashboardSubnet, slippage),
+          } as StakeParams;
+          break;
+
+        case DashboardState.MOVE_STAKE:
+          if (!dashboardStake || !toValidator || !toSubnet) {
+            throw new Error('Source stake and destination must be selected');
+          }
+          params = {
+            address,
+            fromSubnetId: dashboardStake.netuid,
+            fromHotkey: dashboardStake.hotkey,
+            toSubnetId: toSubnet.id,
+            toHotkey: toValidator.hotkey,
+            amount: amountState.amount,
+            amountInRao: BigInt(amountState.amountInRao),
+          } as MoveStakeParams;
+          break;
+
+        case DashboardState.TRANSFER:
+          if (!toAddress) {
+            throw new Error('Recipient address is required');
+          }
+          params = {
+            fromAddress: address,
+            toAddress,
+            amount: amountState.amount,
+            amountInRao: BigInt(amountState.amountInRao),
+          } as TransferTaoParams;
+          break;
+
+        default:
+          throw new Error('Invalid transaction state');
+      }
+
+      return params;
+    },
+    onSuccess: () => {
+      showNotification({
+        type: NotificationType.Success,
+        message: 'Transaction parameters validated successfully',
+      });
+    },
+    onError: (error: Error) => {
+      showNotification({
+        type: NotificationType.Error,
+        message: error.message,
+      });
+    },
   });
-  // Slippage defaults to 0.5%
-  const [slippage, setSlippage] = useState<string>('0.5');
-  const [toAddress, setToAddress] = useState<string>('');
-  const [toSubnet, setToSubnet] = useState<Subnet | null>(null);
-  const [toValidator, setToValidator] = useState<Validator | null>(null);
-  const [showSubnetSelection, setShowSubnetSelection] = useState(false);
-  const [showValidatorSelection, setShowValidatorSelection] = useState(false);
-  const [showTransactionConfirmation, setShowTransactionConfirmation] = useState(false);
-  const [transactionParams, setTransactionParams] = useState<TransactionParams | null>(null);
+};
 
-  const calculateLimitPrice = (subnet: Subnet, slippage: string): bigint => {
-    const priceInRao = taoToRao(subnet.price);
-    const slippageValue = Number(slippage) / 100;
+const useTransactionSubmission = (dashboardState: DashboardState) => {
+  const { api } = usePolkadotApi();
+  const { showNotification } = useNotification();
+  const queryClient = useQueryClient();
 
-    if (
-      dashboardState === DashboardState.CREATE_STAKE ||
-      dashboardState === DashboardState.ADD_STAKE
-    ) {
-      const priceLimit = taoToRao(subnet.price * (1 + slippageValue));
-      return priceLimit;
-    } else if (dashboardState === DashboardState.REMOVE_STAKE) {
-      const priceLimit = taoToRao(subnet.price * (1 - slippageValue));
-      return priceLimit;
-    }
-    return priceInRao;
-  };
+  return useMutation({
+    mutationFn: async ({
+      params,
+      onStatusChange,
+    }: {
+      params: TransactionParams;
+      onStatusChange: (status: string) => void;
+    }) => {
+      if (!api) throw new Error('API not available');
 
-  /**
-   * Create {address, subnetId, validatorHotkey, amountInRao}
-   * Add {address, subnetId, validatorHotkey, amountInRao}
-   *  Requires existing stake
-   * Remove {address, subnetId, validatorHotkey, amountInRao}
-   *  Requires existing stake
-   * Move {address, fromHotkey, toHotkey, fromSubnetId, toSubnetId, amountInRao}
-   *  Requires existing stake
-   * Transfer {address, amountInRao}
-   */
-  const handleSetupTransaction = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!api) return;
-    if (amountState.amountInRao === null) return;
-
-    let params: TransactionParams;
-    let limitPrice: bigint;
-    switch (dashboardState) {
-      case DashboardState.CREATE_STAKE:
-        if (!dashboardValidator || !dashboardSubnet) return;
-        limitPrice = calculateLimitPrice(dashboardSubnet, slippage);
-        params = {
-          address,
-          subnetId: dashboardSubnet.id,
-          validatorHotkey: dashboardValidator.hotkey,
-          amount: amountState.amount,
-          // amountState.amountInRao is a number for some reason
-          amountInRao: BigInt(amountState.amountInRao),
-          limitPrice,
-        } as StakeParams;
-        break;
-      case DashboardState.ADD_STAKE:
-      case DashboardState.REMOVE_STAKE:
-        if (!dashboardStake || !dashboardSubnet) return;
-        limitPrice = calculateLimitPrice(dashboardSubnet, slippage);
-        params = {
-          address,
-          subnetId: dashboardSubnet.id,
-          validatorHotkey: dashboardStake.hotkey,
-          amount: amountState.amount,
-          amountInRao: BigInt(amountState.amountInRao),
-          limitPrice,
-        } as StakeParams;
-        break;
-      case DashboardState.MOVE_STAKE:
-        if (!dashboardStake || !toValidator || !toSubnet) return;
-        params = {
-          address,
-          fromSubnetId: dashboardStake.netuid,
-          fromHotkey: dashboardStake.hotkey,
-          toSubnetId: toSubnet.id,
-          toHotkey: toValidator.hotkey,
-          amount: amountState.amount,
-          amountInRao: BigInt(amountState.amountInRao),
-        } as MoveStakeParams;
-        break;
-      case DashboardState.TRANSFER:
-        if (toAddress === '') return;
-        params = {
-          fromAddress: address,
-          toAddress,
-          amount: amountState.amount,
-          amountInRao: BigInt(amountState.amountInRao),
-        } as TransferTaoParams;
-        break;
-      default:
-        return;
-    }
-    setTransactionParams(params);
-    setShowTransactionConfirmation(true);
-  };
-
-  const submitTransaction = async (
-    params: TransactionParams,
-    onStatusChange: (status: string) => void
-  ) => {
-    if (!api) return;
-    try {
       switch (dashboardState) {
         case DashboardState.CREATE_STAKE:
         case DashboardState.ADD_STAKE:
@@ -191,23 +205,126 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
         case DashboardState.TRANSFER:
           await api.transfer(params as TransferTaoParams, onStatusChange);
           break;
+        default:
+          throw new Error('Invalid transaction type');
       }
-    } catch {
-      onStatusChange('failed');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['stakes'] });
+      queryClient.invalidateQueries({ queryKey: ['balance'] });
+      queryClient.invalidateQueries({ queryKey: ['validators'] });
+
       showNotification({
-        message: 'Transaction Failed',
-        type: NotificationType.Error,
+        type: NotificationType.Success,
+        message: 'Transaction submitted successfully',
       });
+    },
+    onError: (error: Error) => {
+      showNotification({
+        type: NotificationType.Error,
+        message: error.message || 'Transaction failed',
+      });
+    },
+  });
+};
+
+const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) => {
+  const { resetDashboardState } = useDashboard();
+  const { showNotification } = useNotification();
+
+  const transactionSetupMutation = useTransactionSetup(address, dashboardState);
+  const transactionSubmissionMutation = useTransactionSubmission(dashboardState);
+
+  const { data: dashboardSubnets, isLoading: isLoadingSubnets } = newApi.subnets.getAll();
+  const { data: dashboardStakes } = newApi.stakes.getAllStakes(address);
+
+  const [selectedSubnetId, setSelectedSubnetId] = useState<number | null>(null);
+  const [selectedValidatorHotkey, setSelectedValidatorHotkey] = useState<string | null>(null);
+  const [amountState, setAmountState] = useState<AmountState>({
+    amount: '',
+    amountInRao: null,
+  });
+  const [slippage, setSlippage] = useState<string>('0.5');
+  const [toAddress, setToAddress] = useState<string>('');
+  const [toSubnet, setToSubnet] = useState<Subnet | null>(null);
+  const [toValidator, setToValidator] = useState<Validator | null>(null);
+
+  const [showSubnetSelection, setShowSubnetSelection] = useState(false);
+  const [showValidatorSelection, setShowValidatorSelection] = useState(false);
+  const [showTransactionConfirmation, setShowTransactionConfirmation] = useState(false);
+  const [transactionParams, setTransactionParams] = useState<TransactionParams | null>(null);
+
+  const dashboardSubnet = useMemo(() => {
+    if (!dashboardSubnets || selectedSubnetId === null) return null;
+    return dashboardSubnets.find(subnet => subnet.id === selectedSubnetId) || null;
+  }, [dashboardSubnets, selectedSubnetId]);
+
+  const { data: dashboardValidators } = newApi.validators.getAllValidators(
+    dashboardSubnet?.id ?? -1,
+    {
+      onError: () => {
+        showNotification({
+          type: NotificationType.Error,
+          message: 'Failed to Fetch Validators',
+        });
+      },
     }
+  );
+
+  const dashboardValidator = useMemo(() => {
+    if (!dashboardValidators || !selectedValidatorHotkey) return null;
+    return (
+      dashboardValidators.find(validator => validator.hotkey === selectedValidatorHotkey) || null
+    );
+  }, [dashboardValidators, selectedValidatorHotkey]);
+
+  const { data: dashboardStake } = newApi.stakes.getStakesByValidatorAndSubnet(
+    address,
+    dashboardValidator?.hotkey || '',
+    dashboardSubnet?.id || 0
+  );
+
+  const handleSetupTransaction = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    transactionSetupMutation.mutate(
+      {
+        amountState,
+        dashboardValidator,
+        dashboardSubnet,
+        dashboardStake: dashboardStake || null,
+        toValidator,
+        toSubnet,
+        toAddress,
+        slippage,
+      },
+      {
+        onSuccess: params => {
+          setTransactionParams(params);
+          setShowTransactionConfirmation(true);
+        },
+      }
+    );
+  };
+
+  const submitTransaction = async (
+    params: TransactionParams,
+    onStatusChange: (status: string) => void
+  ) => {
+    return transactionSubmissionMutation.mutateAsync({
+      params,
+      onStatusChange,
+    });
   };
 
   const renderSubnetSelection = () => {
-    if (showSubnetSelection && dashboardSubnets) {
+    if (showSubnetSelection && dashboardSubnets && !isLoadingSubnets) {
       return (
         <div className="w-full">
           <SubnetSelection
             subnets={dashboardSubnets}
             toSubnet={toSubnet}
+            dashboardSubnet={dashboardSubnet}
             setToSubnet={setToSubnet}
             onCancel={handleSubnetCancel}
             onConfirm={handleSubnetConfirm}
@@ -410,6 +527,16 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
     );
   };
 
+  const handleTransactionConfirmationCancel = () => {
+    resetDashboardState();
+    onRefresh();
+    setTransactionParams(null);
+    setShowTransactionConfirmation(false);
+
+    transactionSetupMutation.reset();
+    transactionSubmissionMutation.reset();
+  };
+
   const handleSubnetSelection = (e: React.FormEvent) => {
     e.preventDefault();
     setShowSubnetSelection(true);
@@ -420,43 +547,30 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
     setShowValidatorSelection(true);
   };
 
-  const handleSubnetCancel = () => {
-    setDashboardSubnet(null);
-    setDashboardValidator(null);
-    setDashboardValidators(null);
-    setShowSubnetSelection(false);
-  };
-
-  const handleSubnetConfirm = (subnet: Subnet, validators: Validator[]) => {
-    setDashboardSubnet(subnet);
-    setDashboardValidator(null);
-    setDashboardValidators(validators);
+  const handleSubnetCancel = () => setShowSubnetSelection(false);
+  const handleSubnetConfirm = (subnet: Subnet, _validators: Validator[]) => {
+    setSelectedSubnetId(subnet.id);
+    setSelectedValidatorHotkey(null);
     setShowSubnetSelection(false);
   };
 
   const handleValidatorCancel = () => {
-    setDashboardValidator(null);
+    setSelectedValidatorHotkey(null);
     setShowValidatorSelection(false);
   };
 
   const handleValidatorConfirm = (validator: Validator) => {
-    setDashboardValidator(validator);
+    setSelectedValidatorHotkey(validator.hotkey);
     setShowValidatorSelection(false);
-  };
-
-  const handleTransactionConfirmationCancel = () => {
-    resetDashboardState();
-    onRefresh();
-    setTransactionParams(null);
-    setShowTransactionConfirmation(false);
   };
 
   return (
     <>
-      {showSubnetSelection && dashboardSubnets ? (
+      {showSubnetSelection && dashboardSubnets && !isLoadingSubnets ? (
         <SubnetSelection
           subnets={dashboardSubnets}
           toSubnet={toSubnet}
+          dashboardSubnet={dashboardSubnet}
           setToSubnet={setToSubnet}
           onCancel={handleSubnetCancel}
           onConfirm={handleSubnetConfirm}
@@ -472,6 +586,11 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
       ) : showTransactionConfirmation && transactionParams ? (
         <ConfirmTransaction
           params={transactionParams}
+          dashboardSubnet={dashboardSubnet}
+          dashboardSubnets={dashboardSubnets || null}
+          dashboardValidator={dashboardValidator}
+          dashboardStake={dashboardStake || null}
+          dashboardStakes={dashboardStakes || null}
           submitTransaction={submitTransaction}
           onCancel={handleTransactionConfirmationCancel}
         />
@@ -480,6 +599,9 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
           amountState={amountState}
           toAddress={toAddress}
           slippage={slippage}
+          dashboardSubnet={dashboardSubnet}
+          dashboardSubnets={dashboardSubnets || null}
+          dashboardValidator={dashboardValidator}
           setAmountState={setAmountState}
           setToAddress={setToAddress}
           setSlippage={setSlippage}

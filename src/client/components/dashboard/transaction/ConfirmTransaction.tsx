@@ -1,7 +1,9 @@
 import taoxyz from '@public/assets/taoxyz.svg';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { useEffect, useState } from 'react';
 
+import { newApi } from '@/api/api';
 import SlippageDisplay from '@/client/components/common/SlippageDisplay';
 import type {
   TransactionParams,
@@ -15,11 +17,17 @@ import { usePolkadotApi } from '@/client/contexts/PolkadotApiContext';
 import { useWallet } from '@/client/contexts/WalletContext';
 import KeyringService from '@/client/services/KeyringService';
 import MessageService from '@/client/services/MessageService';
+import type { Stake, Subnet, Validator } from '@/types/client';
 import { NotificationType } from '@/types/client';
 import { formatNumber, raoToTao } from '@/utils/utils';
 
 interface ConfirmTransactionProps {
   params: TransactionParams | TransferTaoParams;
+  dashboardSubnet: Subnet | null;
+  dashboardSubnets: Subnet[] | null;
+  dashboardValidator: Validator | null;
+  dashboardStake: Stake | null;
+  dashboardStakes: Stake[] | null;
   submitTransaction: (
     params: TransactionParams | TransferTaoParams,
     onStatusChange: (status: string) => void
@@ -27,66 +35,44 @@ interface ConfirmTransactionProps {
   onCancel: () => void;
 }
 
-const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTransactionProps) => {
+const useTransactionMutation = (
+  params: TransactionParams | TransferTaoParams,
+  submitTransaction: (
+    params: TransactionParams | TransferTaoParams,
+    onStatusChange: (status: string) => void
+  ) => Promise<void>,
+  setStatus: (status: TransactionStatus | null) => void
+) => {
   const { setIsLocked } = useLock();
   const { showNotification } = useNotification();
   const { currentAddress } = useWallet();
-  const { api } = usePolkadotApi();
-  const { dashboardSubnet, dashboardValidator, dashboardState, dashboardStake, dashboardStakes } =
-    useDashboard();
-  const [password, setPassword] = useState('');
-  const [passwordSelected, setPasswordSelected] = useState(false);
-  const [status, setStatus] = useState<TransactionStatus | null>(null);
-  const [actualTotal, setActualTotal] = useState<bigint | null>(null);
-  const [initialBalance, setInitialBalance] = useState<bigint | null>(null);
+  const queryClient = useQueryClient();
 
-  const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    setPassword(event.target.value);
-  };
+  return useMutation({
+    mutationFn: async (password: string) => {
+      if (!currentAddress) {
+        throw new Error('Wallet Not Found');
+      }
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
-    event.preventDefault();
-    if (password.length < 8) return;
-    if (!currentAddress) {
-      showNotification({
-        type: NotificationType.Error,
-        message: 'Wallet Not Found',
-      });
-      return;
-    }
+      // Unlock wallet first
+      try {
+        const isUnlocked = KeyringService.unlockWallet(currentAddress, password);
+        if (!isUnlocked) {
+          throw new Error('Failed to Unlock Wallet');
+        }
 
-    try {
-      const isUnlocked = KeyringService.unlockWallet(currentAddress, password);
-      if (isUnlocked) {
         await setIsLocked(false);
         await MessageService.sendStartLockTimer();
-        handleTransactionSubmit();
-      } else {
-        showNotification({
-          type: NotificationType.Error,
-          message: 'Failed to Unlock Wallet',
-        });
+      } catch (error) {
+        if (
+          error instanceof Error &&
+          error.message === 'Unable to decode using the supplied passphrase'
+        ) {
+          throw new Error('Invalid Password');
+        }
+        throw new Error('Failed to Unlock Wallet');
       }
-    } catch (error) {
-      if (
-        error instanceof Error &&
-        error.message === 'Unable to decode using the supplied passphrase'
-      ) {
-        showNotification({
-          type: NotificationType.Error,
-          message: 'Invalid Password',
-        });
-      } else {
-        showNotification({
-          type: NotificationType.Error,
-          message: 'Failed to Unlock Wallet',
-        });
-      }
-    }
-  };
 
-  const handleTransactionSubmit = async () => {
-    try {
       const onStatusChange = (newStatus: string) => {
         switch (newStatus) {
           case 'ready':
@@ -110,28 +96,73 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
       };
 
       await submitTransaction(params, onStatusChange);
-    } catch {
+    },
+    onSuccess: () => {
+      // Invalidate and refetch relevant queries after successful transaction
+      queryClient.invalidateQueries({ queryKey: ['stakes'] });
+      queryClient.invalidateQueries({ queryKey: ['balance'] });
+      queryClient.invalidateQueries({ queryKey: ['validators'] });
+
+      showNotification({
+        type: NotificationType.Success,
+        message: 'Transaction Submitted Successfully',
+      });
+    },
+    onError: (error: Error) => {
       setStatus('failed');
       showNotification({
         type: NotificationType.Error,
-        message: 'Failed to Submit Transaction',
+        message: error.message,
       });
-    }
+    },
+  });
+};
+
+const ConfirmTransaction = ({
+  params,
+  dashboardSubnet,
+  dashboardSubnets,
+  dashboardValidator,
+  dashboardStake,
+  submitTransaction,
+  onCancel,
+}: ConfirmTransactionProps) => {
+  const { api } = usePolkadotApi();
+  const { dashboardState } = useDashboard();
+
+  const [password, setPassword] = useState('');
+  const [passwordSelected, setPasswordSelected] = useState(false);
+  const [status, setStatus] = useState<TransactionStatus | null>(null);
+  const [actualTotal, setActualTotal] = useState<bigint | null>(null);
+  const [initialBalance, setInitialBalance] = useState<bigint | null>(null);
+
+  // Use the custom transaction mutation hook
+  const transactionMutation = useTransactionMutation(params, submitTransaction, setStatus);
+  const { currentAddress } = useWallet();
+
+  const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    setPassword(event.target.value);
   };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
+    event.preventDefault();
+    if (password.length < 8) return;
+
+    transactionMutation.mutate(password);
+  };
+
+  const { data: stakes } = newApi.stakes.getAllStakes(currentAddress || '');
 
   const fetchUpdatedStake = async () => {
     if (!api || !currentAddress || !dashboardValidator) return;
 
     // If moving to a pre-existing stake
-    const existingStake = dashboardStakes?.find(
+    const existingStake = stakes?.find(
       s => s.hotkey === dashboardValidator.hotkey && s.netuid === dashboardSubnet?.id
     );
 
     try {
-      const [stakes, balance] = await Promise.all([
-        api.getStake(currentAddress),
-        api.getBalance(currentAddress),
-      ]);
+      const [balance] = await Promise.all([api.getBalance(currentAddress)]);
       if (stakes) {
         const stake = stakes.find(
           s => s.hotkey === dashboardValidator.hotkey && s.netuid === dashboardSubnet?.id
@@ -235,7 +266,11 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
               </p>
             </div>
           </div>
-          <SlippageDisplay amount={params.amount} />
+          <SlippageDisplay
+            amount={params.amount}
+            dashboardSubnet={dashboardSubnet}
+            dashboardSubnets={dashboardSubnets}
+          />
           {status === 'success' && (
             <div className="flex justify-between p-3">
               <p className="text-mf-edge-300 text-sm font-medium">Actual Total</p>
@@ -276,15 +311,17 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
   };
 
   const renderContent = () => {
+    // Show loading state while mutation is pending or during early transaction phases
+    if (transactionMutation.isPending || status === 'ready' || status === 'broadcast') {
+      return (
+        <div className="flex flex-col justify-center items-center gap-4 px-5">
+          <div className="w-8 h-8 border-4 border-mf-sybil-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-mf-edge-500 text-lg">Submitting Transaction...</p>
+        </div>
+      );
+    }
+
     switch (status) {
-      case 'ready':
-      case 'broadcast':
-        return (
-          <div className="flex flex-col justify-center items-center gap-4 px-5">
-            <div className="w-8 h-8 border-4 border-mf-sybil-500 border-t-transparent rounded-full animate-spin" />
-            <p className="text-mf-edge-500 text-lg">Submitting Transaction...</p>
-          </div>
-        );
       case 'inBlock':
         return (
           <div className="flex flex-col items-center justify-center gap-4 px-5 pt-12">
@@ -424,10 +461,10 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
                 </button>
                 <button
                   type="submit"
-                  disabled={password.length < 8}
+                  disabled={password.length < 8 || transactionMutation.isPending}
                   className="w-1/2 rounded-full cursor-pointer text-sm text-mf-sybil-500 bg-mf-sybil-opacity px-6 py-1.5 disabled:bg-mf-ash-500 disabled:text-mf-edge-700 disabled:cursor-not-allowed hover:opacity-50"
                 >
-                  <span>Submit</span>
+                  <span>{transactionMutation.isPending ? 'Submitting...' : 'Submit'}</span>
                 </button>
               </div>
             </form>

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
+import Header from '@/client/components/common/Header';
 import DashboardOverview from '@/client/components/dashboard/DashboardOverview';
 import PortfolioOverview from '@/client/components/dashboard/portfolio/PortfolioOverview';
 import Transaction from '@/client/components/dashboard/transaction/Transaction';
@@ -8,8 +9,6 @@ import { useNotification } from '@/client/contexts/NotificationContext';
 import { usePolkadotApi } from '@/client/contexts/PolkadotApiContext';
 import { useWallet } from '@/client/contexts/WalletContext';
 import { NotificationType } from '@/types/client';
-
-import Header from '../components/common/Header';
 
 const API_URL = 'https://tao.xyz/api/price';
 
@@ -22,56 +21,19 @@ export interface TaoPriceResponse {
 export const Dashboard = () => {
   const { showNotification } = useNotification();
   const { api } = usePolkadotApi();
-  const { dashboardState, setDashboardFreeBalance, setDashboardSubnets, setDashboardStakes } =
-    useDashboard();
+  const { dashboardState } = useDashboard();
   const { currentAddress } = useWallet();
 
   const [taoPrice, setTaoPrice] = useState<number | null>(null);
   const prevAddressRef = useRef<string | null>(null);
 
+  const [selectedStakeKey, setSelectedStakeKey] = useState<string | null>(null);
+
   const fetchData = async (address: string, forceRefresh = false): Promise<void> => {
     if (!api || !address || (!forceRefresh && address === prevAddressRef.current)) return;
     prevAddressRef.current = address;
-    const [subnets, freeTao, _stakes] = await Promise.all([
-      api.getSubnets(),
-      api.getBalance(address),
-      api.getStake(address),
-    ]);
-
-    if (subnets === null) {
-      showNotification({
-        type: NotificationType.Error,
-        message: 'Failed to Fetch Subnets',
-      });
-      return;
-    }
-
-    if (freeTao === null) {
-      showNotification({
-        type: NotificationType.Error,
-        message: 'Failed to Fetch Free TAO',
-      });
-      return;
-    }
-
-    if (_stakes === null) {
-      showNotification({
-        type: NotificationType.Error,
-        message: 'Failed to Fetch Stakes',
-      });
-      return;
-    }
-
-    setDashboardSubnets(subnets);
-    setDashboardFreeBalance(freeTao);
-    setDashboardStakes(_stakes);
-    await chrome.storage.local.set({
-      wallet_cache: {
-        subnets,
-        freeTao,
-        _stakes,
-      },
-    });
+    // Data is now fetched via React Query, so we just need to trigger refetch
+    // The cache update is handled automatically by React Query
   };
 
   const fetchTaoPrice = async (): Promise<void> => {
@@ -94,14 +56,9 @@ export const Dashboard = () => {
   };
 
   useEffect(() => {
-    chrome.storage.local.get(['tao_price_cache', 'wallet_cache'], r => {
+    chrome.storage.local.get(['tao_price_cache'], r => {
       if (r.tao_price_cache) {
         setTaoPrice(r.tao_price_cache.taoPrice);
-      }
-      if (r.wallet_cache) {
-        setDashboardSubnets(r.wallet_cache.subnets);
-        setDashboardFreeBalance(r.wallet_cache.freeTao);
-        setDashboardStakes(r.wallet_cache._stakes);
       }
     });
   }, []);
@@ -119,13 +76,18 @@ export const Dashboard = () => {
       {/* Modular Overview */}
       <div className="border-b border-mf-ash-300 w-full">
         <div className="w-full px-5 py-3">
-          <DashboardOverview taoPrice={taoPrice} />
+          <DashboardOverview taoPrice={taoPrice} selectedStakeKey={selectedStakeKey} />
         </div>
       </div>
 
       {/* Modular Section */}
       <div className="w-full px-5 py-3">
-        {dashboardState === DashboardState.OVERVIEW && currentAddress && <PortfolioOverview />}
+        {dashboardState === DashboardState.OVERVIEW && currentAddress && (
+          <PortfolioOverview
+            selectedStakeKey={selectedStakeKey}
+            onStakeSelect={setSelectedStakeKey}
+          />
+        )}
 
         {dashboardState !== DashboardState.OVERVIEW && currentAddress && (
           <Transaction

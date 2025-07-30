@@ -17,9 +17,9 @@ const StakeOverview = ({ stake, subnet, onClick }: StakeOverviewProps) => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1">
           <p className="font-semibold text-mf-edge-500 text-sm truncate max-w-[16ch]">
-            {subnet.name}
+            {subnet?.name || 'Unknown Subnet'}
           </p>
-          <span className="font-semibold text-mf-edge-700 text-sm">SN{subnet.id}</span>
+          <span className="font-semibold text-mf-edge-700 text-sm">SN{subnet?.id || '?'}</span>
         </div>
         <span className="text-mf-edge-500 text-sm">{stake.netuid === 0 ? 'τ' : 'α'}</span>
       </div>

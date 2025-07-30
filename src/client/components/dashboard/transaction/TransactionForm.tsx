@@ -2,15 +2,21 @@ import { motion } from 'framer-motion';
 
 import { useEffect } from 'react';
 
+import { newApi } from '@/api/api';
 import SlippageDisplay from '@/client/components/common/SlippageDisplay';
 import type { AmountState } from '@/client/components/dashboard/transaction/Transaction';
 import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
+import { useWallet } from '@/client/contexts/WalletContext';
+import type { Subnet, Validator } from '@/types/client';
 import { raoToTao, taoToRao } from '@/utils/utils';
 
 interface TransactionFormProps {
   amountState: AmountState;
   toAddress: string;
   slippage: string;
+  dashboardSubnet: Subnet | null;
+  dashboardSubnets: Subnet[] | null;
+  dashboardValidator: Validator | null;
   setAmountState: (amountState: AmountState) => void;
   setToAddress: (toAddress: string) => void;
   setSlippage: (slippage: string) => void;
@@ -23,6 +29,9 @@ const TransactionForm = ({
   amountState,
   toAddress,
   slippage,
+  dashboardSubnet,
+  dashboardSubnets,
+  dashboardValidator,
   setAmountState,
   setToAddress,
   setSlippage,
@@ -30,15 +39,17 @@ const TransactionForm = ({
   renderSubnetSelection,
   renderValidatorSelection,
 }: TransactionFormProps) => {
-  const {
-    resetDashboardState,
-    dashboardSubnet,
-    dashboardStake,
-    dashboardFreeBalance,
-    dashboardState,
-    dashboardValidator,
-    setDashboardFreeBalance,
-  } = useDashboard();
+  const { resetDashboardState, dashboardState } = useDashboard();
+
+  const { currentAddress } = useWallet();
+  const { data: data } = newApi.balance.getFree(currentAddress || '');
+  const freeRao = data ?? BigInt(0);
+
+  const { data: dashboardStake } = newApi.stakes.getStakesByValidatorAndSubnet(
+    currentAddress || '',
+    dashboardValidator?.hotkey || '',
+    dashboardSubnet?.id || 0
+  );
 
   const handleSlippageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -82,14 +93,10 @@ const TransactionForm = ({
       case DashboardState.CREATE_STAKE:
       case DashboardState.ADD_STAKE:
       case DashboardState.TRANSFER:
-        // Free balance for tao is set when dashboard does api call - only for explicitness
-        setDashboardFreeBalance(dashboardFreeBalance);
         break;
       case DashboardState.MOVE_STAKE:
       case DashboardState.REMOVE_STAKE:
-        // Is needed when stake is selected
         if (dashboardStake === null) return;
-        setDashboardFreeBalance(dashboardStake.stake);
         break;
       default:
         break;
@@ -116,13 +123,13 @@ const TransactionForm = ({
       case DashboardState.CREATE_STAKE:
       case DashboardState.ADD_STAKE:
       case DashboardState.TRANSFER:
-        if (dashboardFreeBalance === null) return;
-        amount = raoToTao(dashboardFreeBalance).toString();
-        amountInRao = dashboardFreeBalance;
+        if (freeRao === null) return;
+        amount = raoToTao(freeRao).toString();
+        amountInRao = freeRao;
         break;
       case DashboardState.REMOVE_STAKE:
       case DashboardState.MOVE_STAKE:
-        if (dashboardStake === null) return;
+        if (!dashboardStake) return;
         amount = raoToTao(dashboardStake.stake).toString();
         amountInRao = dashboardStake.stake;
         break;
@@ -142,19 +149,19 @@ const TransactionForm = ({
     switch (dashboardState) {
       case DashboardState.CREATE_STAKE:
       case DashboardState.TRANSFER:
-        if (dashboardFreeBalance === null) return false;
-        if (amountInRao > dashboardFreeBalance) return false;
+        if (freeRao === null) return false;
+        if (amountInRao > freeRao) return false;
         return true;
 
       case DashboardState.ADD_STAKE:
         if (dashboardStake === null) return false;
-        if (dashboardFreeBalance === null) return false;
-        if (amountInRao > dashboardFreeBalance) return false;
+        if (freeRao === null) return false;
+        if (amountInRao > freeRao) return false;
         return true;
 
       case DashboardState.REMOVE_STAKE:
       case DashboardState.MOVE_STAKE:
-        if (dashboardStake === null) return false;
+        if (!dashboardStake) return false;
         if (amountInRao > dashboardStake.stake) return false;
         return true;
 
@@ -215,22 +222,44 @@ const TransactionForm = ({
     if (
       (dashboardState === DashboardState.CREATE_STAKE ||
         dashboardState === DashboardState.TRANSFER) &&
-      dashboardFreeBalance === null
+      freeRao === null
     ) {
       return;
     }
 
     switch (dashboardState) {
       case DashboardState.CREATE_STAKE:
-        return <SlippageDisplay amount={amountState.amount} />;
+        return (
+          <SlippageDisplay
+            amount={amountState.amount}
+            dashboardSubnet={dashboardSubnet}
+            dashboardSubnets={dashboardSubnets}
+          />
+        );
       case DashboardState.ADD_STAKE:
       case DashboardState.REMOVE_STAKE:
-        return <SlippageDisplay amount={amountState.amount} />;
+        return (
+          <SlippageDisplay
+            amount={amountState.amount}
+            dashboardSubnet={dashboardSubnet}
+            dashboardSubnets={dashboardSubnets}
+          />
+        );
       case DashboardState.MOVE_STAKE:
-        return <SlippageDisplay amount={amountState.amount} />;
+        return (
+          <SlippageDisplay
+            amount={amountState.amount}
+            dashboardSubnet={dashboardSubnet}
+            dashboardSubnets={dashboardSubnets}
+          />
+        );
       default:
         return null;
     }
+  };
+
+  const handleCancel = () => {
+    resetDashboardState();
   };
 
   useEffect(() => {
@@ -281,7 +310,7 @@ const TransactionForm = ({
         <div className="w-full flex gap-2 items-center justify-center">
           <button
             type="button"
-            onClick={() => resetDashboardState()}
+            onClick={handleCancel}
             className="rounded-md text-center cursor-pointer w-1/2 py-1.5 bg-mf-red-opacity border border-mf-red-opacity text-mf-red-500 gap-1 disabled:cursor-not-allowed hover:opacity-50"
           >
             Cancel

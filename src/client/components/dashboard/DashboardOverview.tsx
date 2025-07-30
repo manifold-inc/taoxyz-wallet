@@ -6,52 +6,87 @@ import { Copy } from 'lucide-react';
 
 import { useEffect, useMemo, useState } from 'react';
 
+import { newApi } from '@/api/api';
 import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
 import { useNotification } from '@/client/contexts/NotificationContext';
 import { useWallet } from '@/client/contexts/WalletContext';
-import { NotificationType, type Subnet } from '@/types/client';
+import { NotificationType } from '@/types/client';
 import { formatNumber, raoToTao, taoToRao } from '@/utils/utils';
 
 interface DashboardOverviewProps {
   taoPrice: number | null;
+  selectedStakeKey: string | null;
 }
 
-const DashboardOverview = ({ taoPrice }: DashboardOverviewProps) => {
+const DashboardOverview = ({ taoPrice, selectedStakeKey }: DashboardOverviewProps) => {
   const { currentAddress } = useWallet();
   const { showNotification } = useNotification();
-  const {
-    dashboardState,
-    setDashboardState,
-    setDashboardTotalBalance,
-    resetDashboardState,
-    dashboardStakes: stakes,
-    dashboardSubnets: subnets,
-    dashboardFreeBalance,
-  } = useDashboard();
+  const { dashboardState, setDashboardState, setDashboardTotalBalance, resetDashboardState } =
+    useDashboard();
+
+  const { data: dashboardFreeBalance } = newApi.balance.getFree(currentAddress || '');
+  const { data: subnets, isLoading: isLoadingSubnets } = newApi.subnets.getAll();
   const [showUSD, setShowUSD] = useState(false);
   const freeTao = raoToTao(dashboardFreeBalance ?? BigInt(0));
 
+  const { data: stakes } = newApi.stakes.getAllStakes(currentAddress || '');
+
+  const dashboardStake = useMemo(() => {
+    if (!stakes || !selectedStakeKey) return null;
+    return stakes.find(stake => `${stake.hotkey}-${stake.netuid}` === selectedStakeKey) || null;
+  }, [stakes, selectedStakeKey]);
+
+  // Function to get the balance to display based on selected stake
+  const getAvailableBalance = () => {
+    if (dashboardStake && subnets && stakes) {
+      const selectedSubnet = subnets.find(subnet => subnet.id === dashboardStake.netuid);
+      if (selectedSubnet) {
+        const totalStakedInSubnet = stakes
+          .filter(stake => stake.netuid === dashboardStake.netuid)
+          .reduce((sum, stake) => sum + raoToTao(BigInt(stake.stake)), 0);
+
+        const currentValidatorStake = raoToTao(dashboardStake.stake);
+
+        const totalSubnetValueInTao = totalStakedInSubnet * selectedSubnet.price;
+        const currentValidatorValueInTao = currentValidatorStake * selectedSubnet.price;
+
+        return {
+          totalTao: totalSubnetValueInTao,
+          freeTao: currentValidatorValueInTao,
+          totalInUSD: totalSubnetValueInTao * (taoPrice ?? 0),
+          freeInUSD: currentValidatorValueInTao * (taoPrice ?? 0),
+          isStakeView: true,
+        };
+      }
+    }
+
+    // Default: show wallet totals
+    return {
+      totalTao: calculatedTotalTao,
+      freeTao,
+      totalInUSD: (calculatedTotalTao ?? 0) * (taoPrice ?? 0),
+      freeInUSD: (freeTao ?? 0) * (taoPrice ?? 0),
+      isStakeView: false,
+    };
+  };
+
   // resonable memo because this is a potenially costly function
   const calculatedTotalTao = useMemo((): number | null => {
-    if (freeTao === null || subnets === null || stakes === null) return null;
+    if (freeTao === null || !subnets || !stakes || isLoadingSubnets) return null;
 
     let total = freeTao;
     for (const stake of stakes) {
-      const subnet = subnets.find(subnet => subnet.id === stake.netuid) as Subnet;
+      const subnet = subnets.find(subnet => subnet.id === stake.netuid);
       if (subnet) {
         total += raoToTao(BigInt(stake.stake)) * subnet.price;
       }
     }
 
     return total;
-  }, [stakes, subnets, freeTao]);
+  }, [stakes, subnets, freeTao, isLoadingSubnets]);
 
-  // not costly
-  const balances = {
-    totalTao: calculatedTotalTao,
-    totalInUSD: (calculatedTotalTao ?? 0) * (taoPrice ?? 0),
-    freeInUSD: (freeTao ?? 0) * (taoPrice ?? 0),
-  };
+  // Get the appropriate balance to display
+  const balances = getAvailableBalance();
 
   const handleCopy = async (): Promise<void> => {
     if (!currentAddress) return;
@@ -97,7 +132,9 @@ const DashboardOverview = ({ taoPrice }: DashboardOverviewProps) => {
                     : formatNumber(balances?.totalTao ?? 0)}
                 </p>
               </div>
-              <div className="text-mf-edge-500 font-medium text-xs pl-5 -mt-1">Total Balance</div>
+              <div className="text-mf-edge-500 font-medium text-xs pl-5 -mt-1">
+                {balances.isStakeView ? 'Total Staked in Subnet' : 'Total Balance'}
+              </div>
             </div>
 
             <div className="flex flex-col items-start justify-center">
@@ -110,10 +147,12 @@ const DashboardOverview = ({ taoPrice }: DashboardOverviewProps) => {
                 <p className="text-mf-sybil-500 font-semibold text-3xl">
                   {showUSD
                     ? `${formatNumber(balances?.freeInUSD ?? 0).toFixed(2)}`
-                    : formatNumber(freeTao ?? 0)}
+                    : formatNumber(balances?.freeTao ?? 0)}
                 </p>
               </div>
-              <div className="text-mf-sybil-500 font-medium text-xs pl-5 -mt-1">Free Balance</div>
+              <div className="text-mf-sybil-500 font-medium text-xs pl-5 -mt-1">
+                {balances.isStakeView ? 'Current Validator Stake' : 'Free Balance'}
+              </div>
             </div>
           </div>
 
