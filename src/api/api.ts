@@ -2,6 +2,7 @@ import { ApiPromise, WsProvider } from '@polkadot/api';
 
 import { createBalanceAPI } from '@/api/api/BalanceAPI';
 import { createStakeAPI } from '@/api/api/StakeAPI';
+import { createSubnetPriceAPI } from '@/api/api/SubnetPriceAPI';
 import { createTaoPriceAPI } from '@/api/api/TaoPriceAPI';
 import { createValidatorsAPI } from '@/api/api/ValidatorsAPI';
 
@@ -22,6 +23,7 @@ class ApiManager {
   public stakes = createStakeAPI(() => this.getApi());
   public validators = createValidatorsAPI(() => this.getApi());
   public taoPrice = createTaoPriceAPI();
+  public subnetPrice = createSubnetPriceAPI();
 
   public static getInstance(): ApiManager {
     if (!ApiManager.instance) {
