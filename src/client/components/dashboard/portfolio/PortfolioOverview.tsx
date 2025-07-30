@@ -7,10 +7,9 @@ import ExpandedStake from '@/client/components/dashboard/portfolio/ExpandedStake
 import StakeOverview from '@/client/components/dashboard/portfolio/StakeOverview';
 import { DashboardState, useDashboard } from '@/client/contexts/DashboardContext';
 import { useNotification } from '@/client/contexts/NotificationContext';
-import { usePolkadotApi } from '@/client/contexts/PolkadotApiContext';
 import { useWallet } from '@/client/contexts/WalletContext';
 import { NotificationType } from '@/types/client';
-import type { Stake, Subnet, Validator } from '@/types/client';
+import type { Stake } from '@/types/client';
 
 interface PortfolioOverviewProps {
   selectedStakeKey: string | null;
@@ -19,10 +18,8 @@ interface PortfolioOverviewProps {
 
 const PortfolioOverview = ({ selectedStakeKey, onStakeSelect }: PortfolioOverviewProps) => {
   const { showNotification } = useNotification();
-  const { api } = usePolkadotApi();
   const { currentAddress } = useWallet();
-  const { setDashboardState, setDashboardValidator, setDashboardValidators, resetDashboardState } =
-    useDashboard();
+  const { setDashboardState, resetDashboardState } = useDashboard();
 
   const { data: subnets, isLoading: isLoadingSubnets } = newApi.subnets.getAll();
   const { data: stakes } = newApi.stakes.getAllStakes(currentAddress || '');
@@ -36,30 +33,6 @@ const PortfolioOverview = ({ selectedStakeKey, onStakeSelect }: PortfolioOvervie
   // Derive the selected subnet from the selected stake and subnets data
   const selectedSubnet =
     dashboardStake && subnets ? subnets.find(subnet => subnet.id === dashboardStake.netuid) : null;
-
-  const getValidator = async (subnet: Subnet, hotkey: string): Promise<Validator | null> => {
-    const result = await api?.getValidators(subnet.id);
-    if (!result) {
-      showNotification({
-        message: 'Failed to Fetch Validators',
-        type: NotificationType.Error,
-      });
-      return null;
-    }
-    return result.find(validator => validator.hotkey === hotkey) || null;
-  };
-
-  const getValidators = async (subnet: Subnet): Promise<Validator[] | null> => {
-    const result = await api?.getValidators(subnet.id);
-    if (!result) {
-      showNotification({
-        message: 'Failed to Fetch Validators',
-        type: NotificationType.Error,
-      });
-      return null;
-    }
-    return result;
-  };
 
   const handleStakeSelect = (stake: Stake): void => {
     const subnet = subnets?.find(subnet => subnet.id === stake.netuid);
@@ -79,40 +52,16 @@ const PortfolioOverview = ({ selectedStakeKey, onStakeSelect }: PortfolioOvervie
   const handleAddStake = async (): Promise<void> => {
     if (!selectedSubnet) return;
     setDashboardState(DashboardState.ADD_STAKE);
-    const [validator, validators] = await Promise.all([
-      getValidator(selectedSubnet, dashboardStake?.hotkey as string),
-      getValidators(selectedSubnet),
-    ]);
-    if (validator === null) return;
-    if (validators === null) return;
-    setDashboardValidator(validator);
-    setDashboardValidators(validators);
   };
 
   const handleMoveStake = async (): Promise<void> => {
     if (!selectedSubnet) return;
     setDashboardState(DashboardState.MOVE_STAKE);
-    const [validator, validators] = await Promise.all([
-      getValidator(selectedSubnet, dashboardStake?.hotkey as string),
-      getValidators(selectedSubnet),
-    ]);
-    if (validator === null) return;
-    if (validators === null) return;
-    setDashboardValidator(validator);
-    setDashboardValidators(validators);
   };
 
   const handleRemoveStake = async (): Promise<void> => {
     if (!selectedSubnet) return;
     setDashboardState(DashboardState.REMOVE_STAKE);
-    const [validator, validators] = await Promise.all([
-      getValidator(selectedSubnet, dashboardStake?.hotkey as string),
-      getValidators(selectedSubnet),
-    ]);
-    if (validator === null) return;
-    if (validators === null) return;
-    setDashboardValidator(validator);
-    setDashboardValidators(validators);
   };
 
   return (
@@ -123,8 +72,6 @@ const PortfolioOverview = ({ selectedStakeKey, onStakeSelect }: PortfolioOvervie
           subnet={selectedSubnet}
           onClose={() => {
             onStakeSelect(null);
-            setDashboardValidator(null);
-            setDashboardValidators(null);
           }}
           onAddStake={handleAddStake}
           onRemoveStake={handleRemoveStake}

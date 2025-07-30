@@ -13,12 +13,7 @@ export const Dashboard = () => {
   const { currentAddress } = useWallet();
   const [selectedStakeKey, setSelectedStakeKey] = useState<string | null>(null);
 
-  const { data: balance, isLoading: isLoadingBalance } = newApi.balance.getTotal(currentAddress || '');
-  const { data: stakes, isLoading: isLoadingStakes } = newApi.stakes.getAllStakes(currentAddress || '');
-  const { data: taoPrice, isLoading: isLoadingTaoPrice } = newApi.taoPrice.getPrice();
-  const { data: subnets, isLoading: isLoadingSubnets } = newApi.subnets.getAll();
-
-  const isLoading = isLoadingBalance || isLoadingStakes || isLoadingTaoPrice || isLoadingSubnets;
+  const { data: taoPrice } = newApi.taoPrice.getPrice();
 
   return (
     <div className="flex flex-col items-center w-full h-full pt-4 bg-mf-night-500">
@@ -45,11 +40,7 @@ export const Dashboard = () => {
         )}
 
         {dashboardState !== DashboardState.OVERVIEW && currentAddress && (
-          <Transaction
-            address={currentAddress}
-            dashboardState={dashboardState}
-            onRefresh={() => {}}
-          />
+          <Transaction address={currentAddress} dashboardState={dashboardState} />
         )}
       </div>
     </div>
