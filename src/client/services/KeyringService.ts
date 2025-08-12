@@ -26,9 +26,11 @@ export const KeyringService = {
         name,
         websitePermissions: {} as Permissions,
       } as KeyringPair$Meta);
+      
       if (!result.pair) return new Error('Failed to Add Wallet');
+      
       return result.pair;
-    } catch {
+    } catch (error) {
       return new Error('Failed to Add Wallet');
     }
   },
@@ -37,9 +39,13 @@ export const KeyringService = {
     const wallet = this.getWallet(address);
     if (wallet instanceof Error) return false;
 
-    wallet.unlock(password);
-    if (wallet.isLocked) return false;
-    return true;
+    try {
+      wallet.unlock(password);
+      if (wallet.isLocked) return false;
+      return true;
+    } catch (error) {
+      return false;
+    }
   },
 
   createMnemonic(): string {
@@ -85,6 +91,7 @@ export const KeyringService = {
   ): Promise<`0x${string}` | Error> {
     const wallet = await this.getWallet(address);
     if (wallet instanceof Error) return new Error(wallet.message);
+    
     try {
       this.unlockWallet(address, password);
       if (wallet.isLocked) return new Error('Wallet is Locked');
@@ -96,7 +103,7 @@ export const KeyringService = {
 
       const { signature } = extrinsicPayload.sign(wallet);
       return signature;
-    } catch {
+    } catch (error) {
       return new Error('Failed to Sign Transaction');
     }
   },
