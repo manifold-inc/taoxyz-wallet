@@ -56,54 +56,27 @@ const ConfirmTransaction = ({ params, submitTransaction, onCancel }: ConfirmTran
     }
 
     try {
-      console.log('🚀 [ConfirmTransaction] Starting unlock process...');
-      console.warn('⚠️ [ConfirmTransaction] About to call KeyringService.unlockWallet');
-
       const isUnlocked = KeyringService.unlockWallet(currentAddress, password);
-      console.log('✅ [ConfirmTransaction] KeyringService.unlockWallet returned:', isUnlocked);
-
       if (isUnlocked) {
-        console.log('🎉 [ConfirmTransaction] Wallet unlocked, proceeding with transaction...');
-
-        console.log('🔓 [ConfirmTransaction] Setting isLocked to false...');
         await setIsLocked(false);
-        console.log('✅ [ConfirmTransaction] isLocked set successfully');
-
-        console.log('⏰ [ConfirmTransaction] Sending start lock timer...');
         await MessageService.sendStartLockTimer();
-        console.log('✅ [ConfirmTransaction] Lock timer started successfully');
-
-        console.log('📝 [ConfirmTransaction] Calling handleTransactionSubmit...');
         handleTransactionSubmit();
       } else {
-        console.log('❌ [ConfirmTransaction] Unlock failed, showing error notification');
         showNotification({
           type: NotificationType.Error,
           message: 'Failed to Unlock Wallet',
         });
       }
     } catch (error) {
-      console.error('💥 [ConfirmTransaction] EXCEPTION CAUGHT in unlock process:', error);
-      console.error('💥 [ConfirmTransaction] Error type:', typeof error);
-      console.error(
-        '💥 [ConfirmTransaction] Error message:',
-        error instanceof Error ? error.message : String(error)
-      );
-
-      // Also show an alert to make sure we see the error
-      alert(`Transaction unlock error: ${error instanceof Error ? error.message : String(error)}`);
-
       if (
         error instanceof Error &&
         error.message === 'Unable to decode using the supplied passphrase'
       ) {
-        console.log('🔑 [ConfirmTransaction] Showing "Invalid Password" notification');
         showNotification({
           type: NotificationType.Error,
           message: 'Invalid Password',
         });
       } else {
-        console.log('❌ [ConfirmTransaction] Showing generic unlock failure notification');
         showNotification({
           type: NotificationType.Error,
           message: 'Failed to Unlock Wallet',

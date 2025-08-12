@@ -19,27 +19,9 @@ const MessageService = {
   },
 
   async sendStartLockTimer() {
-    try {
-      console.log('⏰ [MessageService] Sending START_LOCK_TIMER message...');
-
-      // Check if background script is available
-      if (!chrome.runtime?.id) {
-        console.error('❌ [MessageService] Extension runtime not available');
-        throw new Error('Extension runtime not available');
-      }
-      console.log('✅ [MessageService] Extension runtime available, id:', chrome.runtime.id);
-
-      const message = {
-        type: MESSAGE_TYPES.START_LOCK_TIMER,
-      };
-      console.log('📤 [MessageService] Sending message:', message);
-
-      await chrome.runtime.sendMessage(message);
-      console.log('✅ [MessageService] START_LOCK_TIMER message sent successfully');
-    } catch (error) {
-      console.error('💥 [MessageService] Failed to send START_LOCK_TIMER:', error);
-      throw error;
-    }
+    await chrome.runtime.sendMessage({
+      type: MESSAGE_TYPES.START_LOCK_TIMER,
+    });
   },
 
   async sendClearLockTimer() {

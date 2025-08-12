@@ -38,55 +38,27 @@ const LockScreen = ({ isLocked }: LockScreenProps) => {
     }
 
     try {
-      console.log('🚀 [LockScreen] Starting unlock process...');
-      console.warn('⚠️ [LockScreen] About to call KeyringService.unlockWallet');
-
       const isUnlocked = KeyringService.unlockWallet(currentAddress, password);
-      console.log('✅ [LockScreen] KeyringService.unlockWallet returned:', isUnlocked);
-
       if (isUnlocked) {
-        console.log('🎉 [LockScreen] Wallet unlocked, clearing password...');
         setPassword('');
-
-        console.log('🔓 [LockScreen] Setting isLocked to false...');
         await setIsLocked(false);
-        console.log('✅ [LockScreen] isLocked set successfully');
-
-        console.log('⏰ [LockScreen] Sending start lock timer...');
         await MessageService.sendStartLockTimer();
-        console.log('✅ [LockScreen] Lock timer started successfully');
       } else {
-        console.log('❌ [LockScreen] Unlock failed, showing error notification');
         showNotification({
           type: NotificationType.Error,
           message: 'Failed to Unlock Wallet',
         });
       }
     } catch (error) {
-      console.error('💥 [LockScreen] EXCEPTION CAUGHT in handleUnlock:', error);
-      console.error('💥 [LockScreen] Error type:', typeof error);
-      console.error(
-        '💥 [LockScreen] Error message:',
-        error instanceof Error ? error.message : String(error)
-      );
-
-      // Also show an alert to make sure we see the error
-      alert(`Unlock error: ${error instanceof Error ? error.message : String(error)}`);
-
       if (
         error instanceof Error &&
-        (error.message === 'Unable to decode using the supplied passphrase' ||
-          error.message.includes('passphrase') ||
-          error.message.includes('password') ||
-          error.message.includes('decode'))
+        error.message === 'Unable to decode using the supplied passphrase'
       ) {
-        console.log('🔑 [LockScreen] Showing "Invalid Password" notification');
         showNotification({
           type: NotificationType.Error,
           message: 'Invalid Password',
         });
       } else {
-        console.log('❌ [LockScreen] Showing generic unlock failure notification');
         showNotification({
           type: NotificationType.Error,
           message: 'Failed to Unlock Wallet',
@@ -139,23 +111,6 @@ const LockScreen = ({ isLocked }: LockScreenProps) => {
               className="rounded-full cursor-pointer border-sm text-sm text-mf-sybil-500 bg-mf-sybil-opacity border border-mf-sybil-opacity px-6 py-1 hover:opacity-50 disabled:disabled-button disabled:cursor-not-allowed"
             >
               <span>Unlock</span>
-            </button>
-
-            {/* Debug button - remove in production */}
-            <button
-              type="button"
-              onClick={() => {
-                if (currentAddress) {
-                  console.log('=== DEBUGGING UNLOCK ISSUE ===');
-                  KeyringService.debugWallet(currentAddress);
-                  const testResult = KeyringService.testUnlock(currentAddress, password);
-                  console.log('Test unlock result:', testResult);
-                  testResult.details.forEach(detail => console.log(detail));
-                }
-              }}
-              className="mt-2 text-xs text-mf-edge-500 hover:text-mf-edge-300 cursor-pointer"
-            >
-              Debug Unlock (Check Console)
             </button>
           </div>
         </form>
