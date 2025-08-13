@@ -5,6 +5,10 @@
 - web-ext https://github.com/mozilla/web-ext
 - bun https://bun.sh/docs/installation
 
+## Build Environment:
+
+Macos ARM (M4 pro max)
+
 To install bun
 
 ```
