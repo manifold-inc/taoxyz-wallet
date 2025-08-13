@@ -5,17 +5,24 @@
 - web-ext https://github.com/mozilla/web-ext
 - bun https://bun.sh/docs/installation
 
+To install bun
+
+```
+curl -fsSL https://bun.sh/install | bash -s bun-v1.2.18
+```
+
 To install node dependencies:
 
+## Build
+
 ```bash
-bun install
+bun i
 ```
 
 To compile:
 
 ```
 bun run build
-bun run build:firefox
 ```
 
 Dist will be in `./dists/firefox_zip`
