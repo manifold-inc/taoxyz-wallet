@@ -22,15 +22,15 @@ export const KeyringService = {
 
   async addWallet(mnemonic: string, name: string, password: string): Promise<KeyringPair | Error> {
     try {
-      const result = await keyring.addUri(mnemonic, password, {
+      const result = keyring.addUri(mnemonic, password, {
         name,
         websitePermissions: {} as Permissions,
       } as KeyringPair$Meta);
-      
+
       if (!result.pair) return new Error('Failed to Add Wallet');
-      
+
       return result.pair;
-    } catch (error) {
+    } catch {
       return new Error('Failed to Add Wallet');
     }
   },
@@ -43,7 +43,7 @@ export const KeyringService = {
       wallet.unlock(password);
       if (wallet.isLocked) return false;
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   },
@@ -89,9 +89,9 @@ export const KeyringService = {
     payload: SignerPayloadJSON,
     password: string
   ): Promise<`0x${string}` | Error> {
-    const wallet = await this.getWallet(address);
+    const wallet = this.getWallet(address);
     if (wallet instanceof Error) return new Error(wallet.message);
-    
+
     try {
       this.unlockWallet(address, password);
       if (wallet.isLocked) return new Error('Wallet is Locked');
@@ -103,13 +103,13 @@ export const KeyringService = {
 
       const { signature } = extrinsicPayload.sign(wallet);
       return signature;
-    } catch (error) {
+    } catch {
       return new Error('Failed to Sign Transaction');
     }
   },
 
   async getPermissions(address: string): Promise<Permissions | Error> {
-    const wallet = await this.getWallet(address);
+    const wallet = this.getWallet(address);
     if (wallet instanceof Error) return new Error(wallet.message);
     return (wallet.meta.websitePermissions as Permissions) || {};
   },
@@ -120,7 +120,7 @@ export const KeyringService = {
     allowAccess: boolean,
     removeWebsite = false
   ): Promise<boolean | Error> {
-    const wallet = await this.getWallet(address);
+    const wallet = this.getWallet(address);
     if (wallet instanceof Error) return new Error(wallet.message);
 
     try {
