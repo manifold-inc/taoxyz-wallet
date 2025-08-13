@@ -74,14 +74,17 @@ const Sign = () => {
         if (signature instanceof Error) {
           // Show more specific error messages based on the actual error
           let errorMessage = 'Failed to Sign Message';
-          if (signature.message.includes('ExtrinsicV5') || signature.message.includes('signing support')) {
+          if (
+            signature.message.includes('ExtrinsicV5') ||
+            signature.message.includes('signing support')
+          ) {
             errorMessage = 'Unsupported Transaction Format';
           } else if (signature.message.includes('Wallet is Locked')) {
             errorMessage = 'Invalid Password';
           } else if (signature.message.includes('Failed to Sign')) {
             errorMessage = 'Signing Failed';
           }
-          
+
           showNotification({
             type: NotificationType.Error,
             message: errorMessage,
