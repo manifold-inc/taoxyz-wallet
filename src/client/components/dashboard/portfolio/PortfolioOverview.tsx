@@ -10,6 +10,7 @@ import { useNotification } from '@/client/contexts/NotificationContext';
 import { useWallet } from '@/client/contexts/WalletContext';
 import { NotificationType } from '@/types/client';
 import type { Stake } from '@/types/client';
+import type { Validator } from '@/types/client';
 
 interface PortfolioOverviewProps {
   selectedStakeKey: string | null;
@@ -50,18 +51,51 @@ const PortfolioOverview = ({ selectedStakeKey, onStakeSelect }: PortfolioOvervie
   };
 
   const handleAddStake = async (): Promise<void> => {
-    if (!selectedSubnet) return;
-    setDashboardState(DashboardState.ADD_STAKE);
+    if (!selectedSubnet || !dashboardStake) return;
+
+    const validator: Validator = {
+      hotkey: dashboardStake.hotkey,
+      coldkey: dashboardStake.coldkey,
+      name: dashboardStake.hotkey.slice(0, 6) + '...' + dashboardStake.hotkey.slice(-6),
+      index: 0,
+    };
+
+    setDashboardState(DashboardState.ADD_STAKE, {
+      subnet: selectedSubnet,
+      validator: validator,
+    });
   };
 
   const handleMoveStake = async (): Promise<void> => {
-    if (!selectedSubnet) return;
-    setDashboardState(DashboardState.MOVE_STAKE);
+    if (!selectedSubnet || !dashboardStake) return;
+
+    const validator: Validator = {
+      hotkey: dashboardStake.hotkey,
+      coldkey: dashboardStake.coldkey,
+      name: dashboardStake.hotkey.slice(0, 6) + '...' + dashboardStake.hotkey.slice(-6),
+      index: 0,
+    };
+
+    setDashboardState(DashboardState.MOVE_STAKE, {
+      subnet: selectedSubnet,
+      validator: validator,
+    });
   };
 
   const handleRemoveStake = async (): Promise<void> => {
-    if (!selectedSubnet) return;
-    setDashboardState(DashboardState.REMOVE_STAKE);
+    if (!selectedSubnet || !dashboardStake) return;
+
+    const validator: Validator = {
+      hotkey: dashboardStake.hotkey,
+      coldkey: dashboardStake.coldkey,
+      name: dashboardStake.hotkey.slice(0, 6) + '...' + dashboardStake.hotkey.slice(-6),
+      index: 0,
+    };
+
+    setDashboardState(DashboardState.REMOVE_STAKE, {
+      subnet: selectedSubnet,
+      validator: validator,
+    });
   };
 
   return (

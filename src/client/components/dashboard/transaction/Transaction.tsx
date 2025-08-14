@@ -128,20 +128,28 @@ const useTransactionSetup = (address: string, dashboardState: DashboardState) =>
           } as StakeParams;
           break;
 
-        case DashboardState.MOVE_STAKE:
-          if (!dashboardStake || !toValidator || !toSubnet) {
+        case DashboardState.MOVE_STAKE: {
+          if (!dashboardValidator || !toValidator || !toSubnet) {
             throw new Error('Source stake and destination must be selected');
+          }
+          // TODO: This logic is buggy
+          const sourceSubnetId = dashboardStake?.netuid || dashboardSubnet?.id;
+          if (!sourceSubnetId) {
+            console.log('dashboardStake', dashboardStake?.netuid);
+            console.log('dashboardSubnet', dashboardSubnet?.id);
+            throw new Error('Source subnet not found');
           }
           params = {
             address,
-            fromSubnetId: dashboardStake.netuid,
-            fromHotkey: dashboardStake.hotkey,
+            fromSubnetId: sourceSubnetId,
+            fromHotkey: dashboardValidator.hotkey,
             toSubnetId: toSubnet.id,
             toHotkey: toValidator.hotkey,
             amount: amountState.amount,
             amountInRao: BigInt(amountState.amountInRao),
           } as MoveStakeParams;
           break;
+        }
 
         case DashboardState.TRANSFER:
           if (!toAddress) {
@@ -229,7 +237,7 @@ const useTransactionSubmission = (dashboardState: DashboardState) => {
 };
 
 const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) => {
-  const { resetDashboardState } = useDashboard();
+  const { resetDashboardState, preselectedData } = useDashboard();
   const { showNotification } = useNotification();
 
   const transactionSetupMutation = useTransactionSetup(address, dashboardState);
@@ -238,8 +246,14 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
   const { data: dashboardSubnets, isLoading: isLoadingSubnets } = newApi.subnets.getAll();
   const { data: dashboardStakes } = newApi.stakes.getAllStakes(address);
 
-  const [selectedSubnetId, setSelectedSubnetId] = useState<number | null>(null);
-  const [selectedValidatorHotkey, setSelectedValidatorHotkey] = useState<string | null>(null);
+  const [selectedSubnetId, setSelectedSubnetId] = useState<number | null>(() => {
+    // Initialize with preselected subnet if available
+    return preselectedData.subnet?.id ?? null;
+  });
+  const [selectedValidatorHotkey, setSelectedValidatorHotkey] = useState<string | null>(() => {
+    // Initialize with preselected validator if available
+    return preselectedData.validator?.hotkey ?? null;
+  });
   const [amountState, setAmountState] = useState<AmountState>({
     amount: '',
     amountInRao: null,
@@ -349,16 +363,47 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
 
     // Show "Select Subnet" and allow changes
     if (dashboardState === DashboardState.MOVE_STAKE) {
-      if (toSubnet) {
+      // For MOVE_STAKE, we need to show both source and destination
+      // Source subnet is preselected and should be displayed as read-only
+      if (dashboardSubnet) {
         return (
-          <button
-            type="button"
-            className="w-full p-2 bg-mf-night-400 rounded-md cursor-pointer flex items-center justify-between"
-            onClick={handleSubnetSelection}
-          >
-            <p className="text-mf-edge-700 text-sm font-medium">{toSubnet.name}</p>
-            <ChevronRight className="w-4 h-4 text-mf-edge-500" />
-          </button>
+          <div className="w-full flex flex-col gap-2">
+            {/* Source Subnet (read-only) */}
+            <div className="w-full p-2 bg-mf-night-400 rounded-md flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-mf-edge-700 text-xs">From:</span>
+                <p className="text-mf-edge-700 text-sm font-medium">{dashboardSubnet.name}</p>
+              </div>
+              <CircleCheckBig className="w-4 h-4 text-mf-sybil-500" />
+            </div>
+
+            {/* Destination Subnet (selectable) */}
+            {toSubnet ? (
+              <button
+                type="button"
+                className="w-full p-2 bg-mf-night-400 rounded-md cursor-pointer flex items-center justify-between"
+                onClick={handleSubnetSelection}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-mf-edge-700 text-xs">To:</span>
+                  <p className="text-mf-edge-700 text-sm font-medium">{toSubnet.name}</p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-mf-edge-500" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="w-full p-2 bg-mf-night-400 rounded-md cursor-pointer flex items-center justify-between"
+                onClick={handleSubnetSelection}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-mf-edge-700 text-xs">To:</span>
+                  <p className="text-mf-edge-700 text-sm font-medium">Select Subnet</p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-mf-edge-500" />
+              </button>
+            )}
+          </div>
         );
       }
       return (
@@ -450,23 +495,61 @@ const Transaction = ({ address, dashboardState, onRefresh }: TransactionProps) =
 
     // Show "Select Validator" and allow changes
     if (dashboardState === DashboardState.MOVE_STAKE) {
-      if (toValidator) {
+      // For MOVE_STAKE, we need to show both source and destination
+      // Source validator is preselected and should be displayed as read-only
+      if (dashboardValidator) {
         return (
-          <button
-            type="button"
-            className="w-full p-2 bg-mf-night-400 rounded-md cursor-pointer flex items-center justify-between"
-            onClick={handleValidatorSelection}
-          >
-            <div className="flex gap-1">
-              <p className="text-mf-edge-500 font-medium truncate max-w-[16ch]">
-                {toValidator.name || 'Validator'}
-              </p>
-              <span className="text-mf-edge-700 font-medium">
-                {toValidator.hotkey.slice(0, 6)}...{toValidator.hotkey.slice(-6)}
-              </span>
+          <div className="w-full flex flex-col gap-2">
+            {/* Source Validator (read-only) */}
+            <div className="w-full p-2 bg-mf-night-400 rounded-md flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-mf-edge-700 text-xs">From:</span>
+                <div className="flex gap-1">
+                  <p className="text-mf-edge-500 font-medium truncate max-w-[16ch]">
+                    {dashboardValidator.name || 'Validator'}
+                  </p>
+                  <span className="text-mf-edge-700 font-medium">
+                    {dashboardValidator.hotkey.slice(0, 6)}...{dashboardValidator.hotkey.slice(-6)}
+                  </span>
+                </div>
+              </div>
+              <CircleCheckBig className="w-4 h-4 text-mf-sybil-500" />
             </div>
-            <ChevronRight className="w-4 h-4 text-mf-edge-500" />
-          </button>
+
+            {/* Destination Validator (selectable) */}
+            {toValidator ? (
+              <button
+                type="button"
+                className="w-full p-2 bg-mf-night-400 rounded-md cursor-pointer flex items-center justify-between"
+                onClick={handleValidatorSelection}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-mf-edge-700 text-xs">To:</span>
+                  <div className="flex gap-1">
+                    <p className="text-mf-edge-500 font-medium truncate max-w-[16ch]">
+                      {toValidator.name || 'Validator'}
+                    </p>
+                    <span className="text-mf-edge-700 font-medium">
+                      {toValidator.hotkey.slice(0, 6)}...{toValidator.hotkey.slice(-6)}
+                    </span>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-mf-edge-500" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="w-full p-2 bg-mf-night-400 rounded-md cursor-pointer flex items-center justify-between"
+                onClick={handleValidatorSelection}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-mf-edge-700 text-xs">To:</span>
+                  <p className="text-mf-edge-700 text-sm font-medium">Select Validator</p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-mf-edge-500" />
+              </button>
+            )}
+          </div>
         );
       }
       return (
